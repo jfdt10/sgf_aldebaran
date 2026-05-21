@@ -449,12 +449,21 @@ export class FilaService {
 
     if (!guicheInfo) throw new NotFoundException('Guiche nao encontrado!');
 
+    const configPrioridade = await this.prisma.configuracao.findFirst({
+      where: { chave: 'prioridadeAutomatica', filial_id: guicheInfo.filial_id }
+    });
+    
+    let orderByOpts: any = [{ dataCriacao: 'asc' }];
+    if (configPrioridade?.valor !== 'false') {
+      orderByOpts = [{ prioridade: 'desc' }, { dataCriacao: 'asc' }];
+    }
+
     const proxima = await this.prisma.senha.findFirst({
       where: {
         status: 'AGUARDANDO',
         filial_id: guicheInfo.filial_id,
       },
-      orderBy: [{ prioridade: 'desc' }, { id: 'asc' }],
+      orderBy: orderByOpts,
     });
 
     if (!proxima) throw new NotFoundException('Fila vazia nesta filial!');
@@ -592,10 +601,24 @@ export class FilaService {
   }
 
   async naoCompareceu(senhaId: number) {
-    return await this.prisma.senha.update({
-      where: { id: senhaId },
-      data: { status: 'CANCELADO' },
+    const senha = await this.prisma.senha.findUnique({ where: { id: senhaId } });
+    if (!senha) throw new NotFoundException('Senha não encontrada!');
+
+    const config = await this.prisma.configuracao.findFirst({
+      where: { chave: 'redirecionarAusentes', filial_id: senha.filial_id }
     });
+
+    if (config?.valor === 'true') {
+      return await this.prisma.senha.update({
+        where: { id: senhaId },
+        data: { status: 'AGUARDANDO', dataCriacao: new Date() },
+      });
+    } else {
+      return await this.prisma.senha.update({
+        where: { id: senhaId },
+        data: { status: 'CANCELADO' },
+      });
+    }
   }
 
   async listarProximas(guicheId: number) {

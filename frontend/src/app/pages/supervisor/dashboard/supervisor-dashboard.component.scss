@@ -301,6 +301,7 @@ $yellow-light-text: #ca8a04;
   background: white; 
   border-radius: 16px; 
   width: 90%; max-width: 800px; /* Modal mais largo para melhor aproveitamento de tela */
+  max-height: 80vh; /* Limita a altura a 80% da viewport */
   overflow: hidden; 
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -334,6 +335,9 @@ $yellow-light-text: #ca8a04;
   .modal-body {
     padding: 24px;
     background: white;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0; /* Necessário para flex overflow */
     form { display: flex; flex-direction: column; gap: 20px; }
   }
 

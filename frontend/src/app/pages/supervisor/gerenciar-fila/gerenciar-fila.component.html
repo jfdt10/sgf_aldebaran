@@ -40,6 +40,13 @@
 
     <!-- Fila de Espera -->
     <div class="tab-body" *ngIf="currentTab === 'espera'">
+      <div class="queue-list-header">
+        <span class="queue-count">{{ filaEspera.length }} senha(s) na fila</span>
+        <button class="btn-zerar-fila" (click)="abrirModalZerarFila()" [disabled]="filaEspera.length === 0">
+          <lucide-icon [img]="icons.trash" size="15"></lucide-icon>
+          Zerar Fila
+        </button>
+      </div>
       <div class="queue-list">
         <div class="queue-card" *ngFor="let item of filaEspera" [ngClass]="item.prioridade">
 
@@ -61,7 +68,7 @@
           <div class="time-col">
             <div class="time-box" [class.alert]="item.tempoEspera > 30">
               <lucide-icon [img]="icons.clock" size="16"></lucide-icon>
-              <span>{{ item.tempoEspera }} min aguardando</span>
+              <span>{{ formatarTempoEspera(item.tempoEspera) }} aguardando</span>
               <lucide-icon *ngIf="item.tempoEspera > 30" [img]="icons.alert" size="16"></lucide-icon>
             </div>
           </div>
@@ -71,6 +78,13 @@
             <button class="btn-call" (click)="chamar(item)">Chamar Agora</button>
           </div>
 
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-queue-state" *ngIf="filaEspera.length === 0">
+          <lucide-icon [img]="icons.check" size="40"></lucide-icon>
+          <h4>Fila vazia</h4>
+          <p>Não há senhas aguardando atendimento no momento.</p>
         </div>
       </div>
     </div>
@@ -265,16 +279,7 @@
               <input type="number" formControlName="limiteAtendimentos">
             </div>
           </div>
-          <hr class="light-divider">
-          <div class="setting-row">
-            <div class="setting-info">
-              <h4>Visor de Tempo Médio</h4>
-              <p>Zerar o histórico do cálculo exibido no dashboard.</p>
-            </div>
-            <button type="button" class="btn-outline-red" (click)="resetarTempoMedio()">
-              Resetar Visor
-            </button>
-          </div>
+
         </div>
 
         <div class="settings-group mt-32">
@@ -484,6 +489,73 @@
         <button class="btn-solid-gray" (click)="fecharModalCancelar()">Voltar</button>
         <button class="btn-solid-red" (click)="confirmarCancelamento()">Confirmar Cancelamento</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal: Zerar Fila -->
+  <div class="modal-overlay" *ngIf="showZerarFilaModal" (click)="!zerarFilaLoading && fecharModalZerarFila()">
+    <div class="modal-content modal-danger" (click)="$event.stopPropagation()">
+
+      <!-- Estado inicial: confirmação -->
+      <ng-container *ngIf="!zerarFilaResultado">
+        <div class="modal-header">
+          <h2 class="danger-title">
+            <lucide-icon [img]="icons.trash" size="20"></lucide-icon>
+            Zerar Fila
+          </h2>
+          <button class="close-btn" (click)="fecharModalZerarFila()" [disabled]="zerarFilaLoading">
+            <lucide-icon [img]="icons.x" size="20"></lucide-icon>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="danger-warning-box">
+            <lucide-icon [img]="icons.alert" size="28" class="warning-icon"></lucide-icon>
+            <div class="warning-text">
+              <strong>Ação irreversível!</strong>
+              <p>Todas as senhas em <strong>AGUARDANDO</strong> serão removidas permanentemente.
+                Senhas provenientes de agendamentos <strong>não</strong> serão afetadas.</p>
+            </div>
+          </div>
+          <p class="confirm-question">Deseja realmente zerar a fila de <strong>{{ selectedFilialNome }}</strong>?</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-solid-gray" (click)="fecharModalZerarFila()" [disabled]="zerarFilaLoading">Cancelar</button>
+          <button class="btn-solid-red" (click)="confirmarZerarFila()" [disabled]="zerarFilaLoading">
+            <span *ngIf="!zerarFilaLoading">Sim, Zerar Fila</span>
+            <span *ngIf="zerarFilaLoading">Zerando...</span>
+          </button>
+        </div>
+      </ng-container>
+
+      <!-- Estado resultado: sucesso -->
+      <ng-container *ngIf="zerarFilaResultado?.sucesso">
+        <div class="modal-body result-state">
+          <div class="result-icon success-icon">
+            <lucide-icon [img]="icons.check" size="40"></lucide-icon>
+          </div>
+          <h3>Fila Zerada!</h3>
+          <p>{{ zerarFilaResultado!.mensagem }}</p>
+        </div>
+        <div class="modal-footer" style="justify-content: center;">
+          <button class="btn-solid-blue" (click)="fecharModalZerarFila()">OK, Entendi</button>
+        </div>
+      </ng-container>
+
+      <!-- Estado resultado: erro -->
+      <ng-container *ngIf="zerarFilaResultado && !zerarFilaResultado.sucesso">
+        <div class="modal-body result-state">
+          <div class="result-icon error-icon">
+            <lucide-icon [img]="icons.alert" size="40"></lucide-icon>
+          </div>
+          <h3>Ocorreu um erro</h3>
+          <p>{{ zerarFilaResultado!.mensagem }}</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-solid-gray" (click)="fecharModalZerarFila()">Fechar</button>
+          <button class="btn-solid-red" (click)="confirmarZerarFila()">Tentar Novamente</button>
+        </div>
+      </ng-container>
+
     </div>
   </div>
 

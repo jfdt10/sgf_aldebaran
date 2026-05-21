@@ -192,7 +192,14 @@ export class SupervisorDashboardComponent implements OnInit {
 
         // Update Lists
         this.agendamentos = res.agendamentos;
-        this.atendimentosList = res.atendimentos;
+        this.atendimentosList = res.atendimentos.map((a: any) => {
+          if (a.dataCriacao) {
+            const diffMs = new Date().getTime() - new Date(a.dataCriacao).getTime();
+            const totalMinutes = Math.floor(diffMs / 60000);
+            a.tempoEspera = this.formatWaitTime(totalMinutes);
+          }
+          return a;
+        });
 
         this.showAlertBanner = res.kpis.alertaSla;
         
@@ -351,9 +358,8 @@ export class SupervisorDashboardComponent implements OnInit {
     this.atendimentosList.forEach(a => {
       if (a.dataCriacao && (a.status === 'Aguardando' || a.status === 'Em Atendimento')) {
         const diffMs = now - new Date(a.dataCriacao).getTime();
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffSecs = Math.floor((diffMs % 60000) / 1000);
-        const formatado = `${diffMins.toString().padStart(2, '0')}:${diffSecs.toString().padStart(2, '0')}`;
+        const totalMinutes = Math.floor(diffMs / 60000);
+        const formatado = this.formatWaitTime(totalMinutes);
         
         if (a.tempoEspera !== formatado) {
           a.tempoEspera = formatado;
@@ -365,5 +371,19 @@ export class SupervisorDashboardComponent implements OnInit {
     if (needsUpdate) {
       this.cdr.detectChanges();
     }
+  }
+
+  private formatWaitTime(totalMinutes: number): string {
+    if (totalMinutes < 60) {
+      return `${totalMinutes} min`;
+    }
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    if (hours < 24) {
+      return `${hours}h ${mins.toString().padStart(2, '0')}min`;
+    }
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+    return `${days}d ${remainingHours}h`;
   }
 }

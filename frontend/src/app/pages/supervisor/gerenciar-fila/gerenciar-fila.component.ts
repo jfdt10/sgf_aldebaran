@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { LucideAngularModule, Search, Clock, User, AlertCircle, ArrowUpCircle, CheckCircle, Users, ArrowLeft, Plus, X, Mail, MoreVertical } from 'lucide-angular';
+import { LucideAngularModule, Search, Clock, User, AlertCircle, ArrowUpCircle, CheckCircle, Users, ArrowLeft, Plus, X, Mail, MoreVertical, Trash2 } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
 import { GuicheService } from '../../../services/guiche.service';
@@ -16,7 +16,7 @@ import { environment } from '../../../../environments/environment';
   styleUrls: ['./gerenciar-fila.component.scss']
 })
 export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
-  icons = { search: Search, clock: Clock, user: User, alert: AlertCircle, up: ArrowUpCircle, check: CheckCircle, users: Users, arrowLeft: ArrowLeft, plus: Plus, x: X, mail: Mail, moreVertical: MoreVertical };
+  icons = { search: Search, clock: Clock, user: User, alert: AlertCircle, up: ArrowUpCircle, check: CheckCircle, users: Users, arrowLeft: ArrowLeft, plus: Plus, x: X, mail: Mail, moreVertical: MoreVertical, trash: Trash2 };
   currentTab = 'espera';
 
   configForm!: FormGroup;
@@ -35,6 +35,10 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
 
   showCancelModal = false;
   itemParaCancelar: any = null;
+
+  showZerarFilaModal = false;
+  zerarFilaLoading = false;
+  zerarFilaResultado: { sucesso: boolean; mensagem: string } | null = null;
 
   baias = [
     { numero: 1, status: 'ocupada', statusLabel: 'Ocupada', operador: 'João Santos', ticket: 'RP044', placa: 'GHI-9012', progresso: 65, tempoOcupado: 12, tempoOcupadoFormatado: '12:00', atrasado: false, startTime: new Date().getTime() - 12 * 60 * 1000 },
@@ -90,6 +94,7 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
       this.atualizarNomeFilial();
       this.guicheService.carregarGuichesDaApi(id || undefined);
       this.carregarFilaEspera();
+      this.carregarConfiguracoes();
     });
 
     // Buscar estatística de tempo médio do dia e atualizar constantemente
@@ -159,6 +164,29 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
     });
   }
 
+  carregarConfiguracoes() {
+    const token = localStorage.getItem('token') || '';
+    const filialParam = this.selectedFilialId ? `?filialId=${this.selectedFilialId}` : '';
+    this.http.get<any[]>(`${this.apiUrl}/configuracoes/lista${filialParam}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
+      next: (configs) => {
+        const configMap: Record<string, string> = {};
+        configs.forEach((c: any) => configMap[c.chave] = c.valor);
+        
+        this.configForm.patchValue({
+          tempoTolerancia: configMap['tempoTolerancia'] ? parseInt(configMap['tempoTolerancia'], 10) : 15,
+          limiteAtendimentos: configMap['limiteAtendimentosDia'] ? parseInt(configMap['limiteAtendimentosDia'], 10) : 200,
+          prioridadePcdIdoso: configMap['prioridadeAutomatica'] !== 'false',
+          redirecionarAusentes: configMap['redirecionarAusentes'] === 'true'
+        });
+        
+        this.guicheService.tempoTolerancia = this.configForm.value.tempoTolerancia;
+      },
+      error: (err) => console.error('Erro ao carregar configurações:', err)
+    });
+  }
+
   carregarDadosTempoMedio() {
     const token = localStorage.getItem('token') || '';
     const filialParam = this.selectedFilialId ? `&filialId=${this.selectedFilialId}` : '';
@@ -166,7 +194,9 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (dados: any) => {
-        this.tempoMedioAtendimentoGeral = dados.tempoMedioAtendimento || 0;
+        // O endpoint retorna { kpis: { mediaAtendimentoMinutos: X } }
+        const rawMinutos = dados?.kpis?.mediaAtendimentoMinutos || 0;
+        this.tempoMedioAtendimentoGeral = Math.round(rawMinutos);
         this.cdr.detectChanges();
       }
     });
@@ -207,6 +237,46 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
     this.showCancelModal = false;
   }
 
+  // --- Zerar Fila ---
+  abrirModalZerarFila() {
+    this.zerarFilaResultado = null;
+    this.showZerarFilaModal = true;
+  }
+
+  fecharModalZerarFila() {
+    this.showZerarFilaModal = false;
+    this.zerarFilaLoading = false;
+    this.zerarFilaResultado = null;
+  }
+
+  confirmarZerarFila() {
+    this.zerarFilaLoading = true;
+    this.zerarFilaResultado = null;
+    const token = localStorage.getItem('token') || '';
+    const body = this.selectedFilialId ? { filialId: this.selectedFilialId } : {};
+    this.http.post<{ message: string; removidas: number }>(
+      `${this.apiUrl}/fila/zerar`,
+      body,
+      { headers: { Authorization: `Bearer ${token}` } }
+    ).subscribe({
+      next: (res) => {
+        this.zerarFilaLoading = false;
+        this.zerarFilaResultado = {
+          sucesso: true,
+          mensagem: `${res.message}. ${res.removidas} senha(s) removida(s).`
+        };
+        this.carregarFilaEspera();
+      },
+      error: (err) => {
+        this.zerarFilaLoading = false;
+        this.zerarFilaResultado = {
+          sucesso: false,
+          mensagem: err.error?.message || 'Erro ao zerar a fila. Tente novamente.'
+        };
+      }
+    });
+  }
+
   confirmarCancelamento() {
     if (!this.itemParaCancelar) return;
 
@@ -240,16 +310,34 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
 
   salvarConfiguracoes() {
     if (this.configForm.valid) {
-      this.guicheService.tempoTolerancia = this.configForm.value.tempoTolerancia;
+      const formValue = this.configForm.value;
+      
+      const configs = [
+        { chave: 'tempoTolerancia', valor: formValue.tempoTolerancia.toString() },
+        { chave: 'limiteAtendimentosDia', valor: formValue.limiteAtendimentos.toString() },
+        { chave: 'prioridadeAutomatica', valor: formValue.prioridadePcdIdoso.toString() },
+        { chave: 'redirecionarAusentes', valor: formValue.redirecionarAusentes.toString() }
+      ];
+
+      const token = localStorage.getItem('token') || '';
+      const filialParam = this.selectedFilialId ? `?filialId=${this.selectedFilialId}` : '';
+      
+      this.http.post(`${this.apiUrl}/configuracoes/bulk${filialParam}`, { configs }, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).subscribe({
+        next: () => {
+          this.guicheService.tempoTolerancia = formValue.tempoTolerancia;
+          this.showSuccessModal = true;
+        },
+        error: (err) => {
+          console.error('Erro ao salvar configurações:', err);
+          alert('Erro ao salvar configurações.');
+        }
+      });
     }
-    this.showSuccessModal = true;
   }
 
-  resetarTempoMedio() {
-    if (confirm('Tem certeza que deseja zerar o histórico de tempo médio? O dashboard recomeçará o cálculo do zero.')) {
-      this.guicheService.resetarHistoricoTempoMedio();
-    }
-  }
+
 
   fecharSuccessModal() {
     this.showSuccessModal = false;
@@ -406,6 +494,20 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
         alert('Erro ao cadastrar operador: ' + (err.error?.message || 'Erro desconhecido'));
       }
     });
+  }
+
+  formatarTempoEspera(minutos: number): string {
+    if (minutos < 60) {
+      return `${minutos} min`;
+    }
+    const hours = Math.floor(minutos / 60);
+    const mins = minutos % 60;
+    if (hours < 24) {
+      return `${hours}h ${mins.toString().padStart(2, '0')}min`;
+    }
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+    return `${days}d ${remainingHours}h`;
   }
 
   get guichesAtivos(): number {

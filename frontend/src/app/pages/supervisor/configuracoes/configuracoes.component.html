@@ -25,7 +25,7 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <main class="config-main">
 
-      <form [formGroup]="configForm" *ngIf="currentTab === 'geral'" class="tab-content">
+      <form [formGroup]="configForm" *ngIf="currentTab === 'geral'" class="tab-content config-form-container">
 
         <div class="header-section">
           <h2>Configurações Gerais</h2>
@@ -124,7 +124,7 @@
       </form>
 
       <!-- REGRAS DA FILA -->
-      <form [formGroup]="configForm" *ngIf="currentTab === 'regras'" class="tab-content">
+      <form [formGroup]="configForm" *ngIf="currentTab === 'regras'" class="tab-content config-form-container">
         <div class="header-section">
           <h2>Regras da Fila</h2>
           <p>Defina limites de tempo e prioridades de atendimento.</p>
@@ -179,7 +179,7 @@
       </form>
 
       <!-- NOTIFICAÇÕES -->
-      <form [formGroup]="configForm" *ngIf="currentTab === 'notificacoes'" class="tab-content">
+      <form [formGroup]="configForm" *ngIf="currentTab === 'notificacoes'" class="tab-content config-form-container">
         <div class="header-section">
           <h2>Notificações</h2>
           <p>Gerencie como a filial e os clientes recebem avisos.</p>
@@ -216,7 +216,7 @@
       </form>
 
       <!-- GESTÃO DE USUÁRIOS -->
-      <div *ngIf="currentTab === 'usuarios'" class="tab-content">
+      <div *ngIf="currentTab === 'usuarios'" class="tab-content config-form-container">
         <div class="users-header">
           <div class="header-section">
             <h2>Gestão de Usuários</h2>

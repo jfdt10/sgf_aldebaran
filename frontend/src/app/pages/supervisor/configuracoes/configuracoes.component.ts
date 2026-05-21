@@ -114,6 +114,9 @@ export class SupervisorConfiguracoesComponent implements OnInit {
           if (c.chave === 'SONS_ALERTA_CATEGORIAS') {
             try { this.categoriasSom = JSON.parse(c.valor); } catch (e) {}
           }
+          if (c.chave === 'REDIRECIONAR_AUSENTES') patch.redirecionarAusentes = c.valor === 'true';
+          if (c.chave === 'NOTIFICAR_EMAIL') patch.notificarEmail = c.valor === 'true';
+          if (c.chave === 'NOTIFICAR_WHATSAPP') patch.notificarWhatsapp = c.valor === 'true';
         });
 
         // Carregar categorias (servicos)
@@ -172,15 +175,30 @@ export class SupervisorConfiguracoesComponent implements OnInit {
         { chave: 'TEMPO_TOLERANCIA', valor: String(vals.tempoTolerancia) },
         { chave: 'LIMITE_ATENDIMENTOS', valor: String(vals.limiteAtendimentos) },
         { chave: 'PRIORIDADE_AUTOMATICA', valor: String(vals.prioridadePcdIdoso) },
+        { chave: 'REDIRECIONAR_AUSENTES', valor: String(vals.redirecionarAusentes) },
         { chave: 'FUSO_HORARIO', valor: vals.fusoHorario },
         { chave: 'MODO_ESCURO', valor: String(vals.modoEscuro) },
         { chave: 'SONS_ALERTA', valor: String(vals.sonsAlerta) },
         { chave: 'SONS_ALERTA_CATEGORIAS', valor: JSON.stringify(this.categoriasSom) },
-        { chave: 'IMPRESSAO_AUTOMATICA', valor: String(vals.impressaoAutomatica) }
+        { chave: 'IMPRESSAO_AUTOMATICA', valor: String(vals.impressaoAutomatica) },
+        { chave: 'NOTIFICAR_EMAIL', valor: String(vals.notificarEmail) },
+        { chave: 'NOTIFICAR_WHATSAPP', valor: String(vals.notificarWhatsapp) }
       ]
     };
 
     const token = localStorage.getItem('token') || '';
+
+    if (this.selectedFilialId && vals.nomeFilial) {
+      this.http.patch(`${environment.apiUrl}/filiais/${this.selectedFilialId}`, { nome: vals.nomeFilial }, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).subscribe({
+        next: () => {
+          this.filialService.fetchFiliais().subscribe();
+        },
+        error: (err) => console.error('Erro ao atualizar nome da filial', err)
+      });
+    }
+
     this.http.post(`${environment.apiUrl}/configuracoes/bulk?filialId=${this.selectedFilialId}`, { configs: payload.configs }, {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
