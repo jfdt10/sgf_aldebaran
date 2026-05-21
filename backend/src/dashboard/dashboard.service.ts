@@ -752,6 +752,15 @@ export class DashboardService {
   async getFilaEspera(filialId?: string) {
     const fid = filialId && !isNaN(+filialId) ? +filialId : undefined;
 
+    const configPrioridade = await this.prisma.configuracao.findFirst({
+      where: { chave: 'prioridadeAutomatica', filial_id: fid || null }
+    });
+    
+    let orderByOpts: any = [{ dataCriacao: 'asc' }];
+    if (configPrioridade?.valor !== 'false') {
+      orderByOpts = [{ prioridade: 'desc' }, { dataCriacao: 'asc' }];
+    }
+
     const fila = await this.prisma.senha.findMany({
       where: {
         status: 'AGUARDANDO',
@@ -761,7 +770,7 @@ export class DashboardService {
         servico: true,
         agendamento: true,
       },
-      orderBy: [{ prioridade: 'desc' }, { dataCriacao: 'asc' }],
+      orderBy: orderByOpts,
     });
 
     return fila.map((s) => {

@@ -500,12 +500,21 @@ export class FilaService {
       return this.rechamarSenhaAtual(guicheId, guicheInfo.numero?.toString());
     }
 
+    const configPrioridade = await this.prisma.configuracao.findFirst({
+      where: { chave: 'prioridadeAutomatica', filial_id: guicheInfo.filial_id }
+    });
+    
+    let orderByOpts: any = [{ dataCriacao: 'asc' }];
+    if (configPrioridade?.valor !== 'false') {
+      orderByOpts = [{ prioridade: 'desc' }, { dataCriacao: 'asc' }];
+    }
+
     const proxima = await this.prisma.senha.findFirst({
       where: {
         status: 'AGUARDANDO',
         filial_id: guicheInfo.filial_id,
       },
-      orderBy: [{ prioridade: 'desc' }, { id: 'asc' }],
+      orderBy: orderByOpts,
     });
 
     if (!proxima) throw new NotFoundException('Fila vazia nesta filial!');
@@ -713,15 +722,31 @@ export class FilaService {
   }
 
   async naoCompareceu(senhaId: number) {
-    const senha = await this.prisma.senha.update({
+    const senha = await this.prisma.senha.findUnique({ where: { id: senhaId } });
+    if (!senha) throw new NotFoundException('Senha não encontrada!');
+
+    const config = await this.prisma.configuracao.findFirst({
+      where: { chave: 'redirecionarAusentes', filial_id: senha.filial_id }
+    });
+
+    if (config?.valor === 'true') {
+      const atualizada = await this.prisma.senha.update({
+        where: { id: senhaId },
+        data: { status: 'AGUARDANDO', dataCriacao: new Date() },
+      });
+      this.notificacaoGateway.broadcastRefresh();
+      return atualizada;
+    }
+
+    const senhaAtualizada = await this.prisma.senha.update({
       where: { id: senhaId },
       data: { status: 'CANCELADO' },
       include: { agendamento: true, servico: true },
     });
 
-    if (senha.agendamento_id) {
+    if (senhaAtualizada.agendamento_id) {
       await this.prisma.agendamento.update({
-        where: { id: senha.agendamento_id },
+        where: { id: senhaAtualizada.agendamento_id },
         data: { status: 'NAO_COMPARECEU' },
       });
     }
@@ -729,15 +754,15 @@ export class FilaService {
     await this.encerrarAtendimentoAbertoPorSenha(senhaId);
     this.notificacaoGateway.broadcastRefresh();
 
-    await this.notificarClientePorDocumento(senha.agendamento?.documento, {
+    await this.notificarClientePorDocumento(senhaAtualizada.agendamento?.documento, {
       titulo: 'Não comparecimento registrado',
-      mensagem: `Sua senha ${senha.numeroDisplay} foi encerrada por não comparecimento.`,
+      mensagem: `Sua senha ${senhaAtualizada.numeroDisplay} foi encerrada por não comparecimento.`,
       icon: 'xCircle',
       iconClass: 'gray-icon',
       rota: '/client/meus-agendamentos',
     });
 
-    return senha;
+    return senhaAtualizada;
   }
 
   async listarProximas(guicheId: number) {

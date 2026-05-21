@@ -193,7 +193,6 @@ export class GuicheService {
     });
   }
 
-  private historicoTemposSegundos: number[] = [];
   private _tempoTolerancia: number = 15; // in minutos
   private timer: any;
 
@@ -334,66 +333,4 @@ export class GuicheService {
     return this.guichesSubject.value.filter(g => g.status !== 'vazio' && g.status !== 'manutencao').length;
   }
 
-  // --- Real-time metrics for Dashboard ---
-
-  /**
-   * Retorna a soma total de segundos da sessão atual (histórico + guichês ocupados).
-   * Usado para enviar ao backend como "dados ao vivo" no filtro "Hoje".
-   */
-  get somaSegundosVivo(): number {
-    const ocupados = this.getGuiches().filter(g => g.status === 'ocupado' && g.tempoOcupadoSegundos !== undefined);
-    let soma = this.historicoTemposSegundos.reduce((a, b) => a + b, 0);
-    ocupados.forEach(g => { soma += g.tempoOcupadoSegundos; });
-    return soma;
-  }
-
-  /**
-   * Retorna a quantidade de atendimentos da sessão atual (histórico + guichês ocupados).
-   */
-  get qtdVivo(): number {
-    const ocupados = this.getGuiches().filter(g => g.status === 'ocupado' && g.tempoOcupadoSegundos !== undefined);
-    return this.historicoTemposSegundos.length + ocupados.length;
-  }
-
-  /**
-   * Tempo médio formatado em tempo real — fonte do card no Dashboard.
-   */
-  get tempoMedioGlobalFormatado(): string {
-    const somaTotal = this.somaSegundosVivo;
-    const qtd = this.qtdVivo;
-
-    if (qtd === 0) return '0 min';
-
-    const mediaSegundos = Math.floor(somaTotal / qtd);
-    const mediaMinutos = Math.floor(mediaSegundos / 60);
-    const restoSegundos = mediaSegundos % 60;
-
-    if (mediaMinutos === 0) {
-      return `${restoSegundos} seg`;
-    }
-    return `${mediaMinutos}m ${restoSegundos}s`;
-  }
-
-  /**
-   * Salva snapshot no banco de dados e zera o histórico local.
-   * Chamado ao pressionar "Resetar Visor".
-   */
-  resetarHistoricoTempoMedio(filialId?: number): void {
-    const soma = this.historicoTemposSegundos.reduce((a, b) => a + b, 0);
-    const qtd = this.historicoTemposSegundos.length;
-
-    if (qtd > 0) {
-      // Persiste snapshot no banco antes de limpar
-      this.http.post(
-        `${this.dashboardApiUrl}/snapshots`,
-        { somaTotalSegundos: soma, quantidade: qtd, filialId },
-        { headers: this.authHeaders() }
-      ).subscribe({
-        next: () => console.log('[GuicheService] Snapshot de tempo médio salvo no banco.'),
-        error: (err) => console.error('[GuicheService] Erro ao salvar snapshot:', err)
-      });
-    }
-
-    this.historicoTemposSegundos = [];
-  }
 }

@@ -25,7 +25,7 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <main class="config-main">
 
-      <form [formGroup]="configForm" *ngIf="currentTab === 'geral'" class="tab-content">
+      <form [formGroup]="configForm" *ngIf="currentTab === 'geral'" class="tab-content config-form-container">
 
         <div class="header-section">
           <h2>Configurações Gerais</h2>
@@ -124,7 +124,7 @@
       </form>
 
       <!-- REGRAS DA FILA -->
-      <form [formGroup]="configForm" *ngIf="currentTab === 'regras'" class="tab-content">
+      <form [formGroup]="configForm" *ngIf="currentTab === 'regras'" class="tab-content config-form-container">
         <div class="header-section">
           <h2>Regras da Fila</h2>
           <p>Defina limites de tempo e prioridades de atendimento.</p>
@@ -179,7 +179,7 @@
       </form>
 
       <!-- NOTIFICAÇÕES -->
-      <form [formGroup]="configForm" *ngIf="currentTab === 'notificacoes'" class="tab-content">
+      <form [formGroup]="configForm" *ngIf="currentTab === 'notificacoes'" class="tab-content config-form-container">
         <div class="header-section">
           <h2>Notificações</h2>
           <p>Gerencie como a filial e os clientes recebem avisos.</p>
@@ -216,7 +216,7 @@
       </form>
 
       <!-- GESTÃO DE USUÁRIOS -->
-      <div *ngIf="currentTab === 'usuarios'" class="tab-content">
+      <div *ngIf="currentTab === 'usuarios'" class="tab-content config-form-container">
         <div class="users-header">
           <div class="header-section">
             <h2>Gestão de Usuários</h2>
@@ -230,15 +230,15 @@
         <div class="users-controls">
           <div class="search-box">
             <lucide-icon [img]="icons.search" size="18" class="text-sec"></lucide-icon>
-            <input type="text" placeholder="Buscar por nome ou e-mail...">
+            <input type="text" placeholder="Buscar por nome, login ou e-mail..." [(ngModel)]="filtroUsuario" (input)="aplicarFiltros()">
           </div>
 
           <div class="filter-box custom-select">
-            <select>
-              <option>Todos os Perfis</option>
-              <option>Admin</option>
-              <option>Supervisor</option>
-              <option>Operador</option>
+            <select [(ngModel)]="perfilFiltro" (change)="aplicarFiltros()">
+              <option value="">Todos os Perfis</option>
+              <option value="ADMIN">Administrador</option>
+              <option value="SUPERVISOR">Supervisor</option>
+              <option value="OPERADOR">Operador</option>
             </select>
           </div>
         </div>
@@ -248,33 +248,36 @@
             <thead>
               <tr>
                 <th>NOME / E-MAIL</th>
+                <th>LOGIN</th>
                 <th>PERFIL</th>
                 <th>STATUS</th>
                 <th class="text-right">AÇÕES</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let u of usuariosMock">
+              <tr *ngFor="let u of filteredUsuarios">
                 <td>
                   <div class="user-cell">
-                    <div class="user-avatar">{{ u.nome.charAt(0) }}</div>
+                    <div class="user-avatar">{{ u.nome?.charAt(0) || '-' }}</div>
                     <div class="user-info">
                       <span class="user-name">{{ u.nome }}</span>
                       <span class="user-email">{{ u.email }}</span>
                     </div>
                   </div>
                 </td>
+                <td>{{ u.login }}</td>
                 <td><span class="badge badge-role">{{ u.perfil }}</span></td>
                 <td>
-                  <span class="badge" [ngClass]="u.status === 'Ativo' ? 'badge-green' : 'badge-gray'">{{ u.status
-                    }}</span>
+                  <span class="badge" [ngClass]="u.ativo ? 'badge-green' : 'badge-gray'">{{ u.ativo ? 'Ativo' : 'Inativo' }}</span>
                 </td>
                 <td class="text-right">
-                  <button class="action-btn text-blue" title="Editar"><lucide-icon [img]="icons.edit"
-                      size="16"></lucide-icon></button>
-                  <button class="action-btn text-red" title="Excluir"><lucide-icon [img]="icons.trash"
-                      size="16"></lucide-icon></button>
+                  <button class="action-btn text-blue" title="Editar" (click)="abrirModalUsuario(u)"><lucide-icon [img]="icons.edit" size="16"></lucide-icon></button>
+                  <button class="action-btn text-teal" title="Ativar/Inativar" (click)="alternarStatus(u.id, u.ativo)"><lucide-icon [img]="icons.check" size="16"></lucide-icon></button>
+                  <button class="action-btn text-red" title="Excluir" (click)="excluirUsuario(u.id, u.nome)"><lucide-icon [img]="icons.trash" size="16"></lucide-icon></button>
                 </td>
+              </tr>
+              <tr *ngIf="filteredUsuarios.length === 0">
+                <td colspan="5" class="empty-row">Nenhum usuário encontrado.</td>
               </tr>
             </tbody>
           </table>
@@ -288,6 +291,29 @@
             <button class="btn-page" disabled>Próxima</button>
           </div>
         </div>
+      </div>
+
+      <!-- LEGAL -->
+      <div *ngIf="currentTab === 'legal'" class="tab-content config-form-container">
+        <div class="header-section">
+          <h2>Legal</h2>
+          <p>Consulte os documentos legais do sistema administrativo.</p>
+        </div>
+        <hr class="divider">
+
+        <app-settings-section-card title="Legal" eyebrow="Documentos">
+          <app-settings-link-item
+            title="Termos de Uso"
+            description="Consulte os termos e condições de uso do sistema"
+            (itemClick)="openLegalDocument('terms')"
+          ></app-settings-link-item>
+
+          <app-settings-link-item
+            title="Política de Privacidade"
+            description="Entenda como seus dados são coletados, utilizados e protegidos pelo sistema"
+            (itemClick)="openLegalDocument('privacy')"
+          ></app-settings-link-item>
+        </app-settings-section-card>
       </div>
 
       <!-- MODAL NOVO USUARIO -->
@@ -322,10 +348,10 @@
                   <label>Perfil de Acesso</label>
                   <div class="select-wrapper">
                     <select formControlName="perfil">
-                      <option value="" disabled selected>Selecione um perfil...</option>
-                      <option value="Admin">Administrador</option>
-                      <option value="Supervisor">Supervisor</option>
-                      <option value="Operador">Operador (Guichê)</option>
+                      <option value="" disabled>Selecione um perfil...</option>
+                      <option value="ADMIN">Administrador</option>
+                      <option value="SUPERVISOR">Supervisor</option>
+                      <option value="OPERADOR">Operador (Guichê)</option>
                     </select>
                   </div>
                 </div>
@@ -341,7 +367,7 @@
 
           <div class="modal-footer-gradient">
             <button class="btn-ghost" (click)="fecharModalUsuario()">Cancelar</button>
-            <button class="btn-solid-blue" (click)="criarUsuario()">Criar Usuário</button>
+            <button class="btn-solid-blue" (click)="salvarUsuario()">{{ isEditingUsuario ? 'Salvar Alterações' : 'Criar Usuário' }}</button>
           </div>
         </div>
       </div>
