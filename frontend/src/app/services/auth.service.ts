@@ -11,6 +11,7 @@ export interface AuthenticatedUser {
   cnpj?: string | null;
   tipo?: string | null;
   perfil?: string | null;
+  filial_id?: number | null;
 }
 
 @Injectable({
@@ -20,7 +21,7 @@ export class AuthService {
   private readonly baseUrl = 'http://localhost:3000';
   private apiUrl = `${this.baseUrl}/auth`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   login(credenciais: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, credenciais);

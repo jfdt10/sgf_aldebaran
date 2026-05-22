@@ -24,6 +24,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   filiais: any[] = [];
   selectedFilialId: number | null = null;
   selectedFilialName: string = '';
+  isRestricted = false;
+  usuarioLogado: any = null;
 
   private intervalId: any;
 
@@ -41,6 +43,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
+    const salvo = localStorage.getItem('usuario_sgf');
+    if (salvo) {
+      this.usuarioLogado = JSON.parse(salvo);
+      if (this.usuarioLogado.filial_id) {
+        this.selectedFilialId = Number(this.usuarioLogado.filial_id);
+        this.isRestricted = true;
+      }
+    }
     this.carregarFiliais();
     this.fetchData();
     this.intervalId = setInterval(() => this.fetchData(), 15000);
@@ -49,15 +59,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
   carregarFiliais() {
     this.api.get<any[]>('/filiais').subscribe({
       next: (res) => {
-        this.filiais = res.filter(f => f.ativo);
-        this.updateSelectedFilialName(); // Call after filiais are loaded
+        if (this.isRestricted) {
+          this.filiais = res.filter(f => f.ativo && f.id === this.selectedFilialId);
+        } else {
+          this.filiais = res.filter(f => f.ativo);
+        }
+        this.updateSelectedFilialName();
       },
       error: (err) => console.error('Erro ao carregar filiais:', err)
     });
   }
 
   updateSelectedFilialName() {
-    const filial = this.filiais.find(f => f.id === this.selectedFilialId);
+    const filial = this.filiais.find((f: any) => f.id === this.selectedFilialId);
     this.selectedFilialName = filial ? filial.nome : 'Todas as Unidades';
   }
 

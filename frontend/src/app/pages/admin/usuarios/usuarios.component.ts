@@ -25,6 +25,8 @@ export class UsuariosComponent implements OnInit {
     loading = false;
     selectedFilialId: number | null = null;
     filiais: any[] = [];
+    isRestricted = false;
+    usuarioLogado: any = null;
 
     // Modal state
     showModal = false;
@@ -56,9 +58,20 @@ export class UsuariosComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
+        const salvo = localStorage.getItem('usuario_sgf');
+        if (salvo) {
+            this.usuarioLogado = JSON.parse(salvo);
+            if (this.usuarioLogado.filial_id) {
+                this.isRestricted = true;
+                this.selectedFilialId = Number(this.usuarioLogado.filial_id);
+            }
+        }
+
         this.route.queryParamMap.subscribe(params => {
-            const fid = params.get('filialId');
-            this.selectedFilialId = fid ? Number(fid) : null;
+            if (!this.isRestricted) {
+                const fid = params.get('filialId');
+                this.selectedFilialId = fid ? Number(fid) : null;
+            }
             this.carregarUsuarios();
         });
         this.carregarFiliais();
@@ -66,7 +79,14 @@ export class UsuariosComponent implements OnInit {
 
     carregarFiliais() {
         this.api.get<any[]>(`/filiais`).subscribe({
-            next: (data) => this.filiais = data.filter(f => f.ativo),
+            next: (data) => {
+                const ativas = data.filter(f => f.ativo);
+                if (this.isRestricted) {
+                    this.filiais = ativas.filter(f => f.id === this.selectedFilialId);
+                } else {
+                    this.filiais = ativas;
+                }
+            },
             error: (err) => console.error('Erro ao carregar filiais', err)
         });
     }

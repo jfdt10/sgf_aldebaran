@@ -82,8 +82,8 @@
 
             <div class="form-group">
                 <label>Filial *</label>
-                <select [(ngModel)]="form.filial_id">
-                    <option [ngValue]="null" disabled selected>Selecione a Filial</option>
+                <select [(ngModel)]="form.filial_id" [disabled]="isRestricted">
+                    <option *ngIf="!isRestricted" [ngValue]="null" disabled selected>Selecione a Filial</option>
                     <option *ngFor="let fil of filiais" [ngValue]="fil.id">{{ fil.nome }}</option>
                 </select>
             </div>

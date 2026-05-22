@@ -26,14 +26,17 @@ model atendimento {
   guiche              Int
   inicioAtendimento   DateTime  @default(now()) @db.Timestamp(6)
   fimAtendimento      DateTime? @db.Timestamp(6)
+  transferidoEm       DateTime? @db.Timestamp(6)
   notaAvaliacao       Int?
   senha_id            Int?
   justificativaDemora String?   @db.VarChar(500)
   motivoDemora        String?   @db.VarChar(100)
   operadorId          Int?
+  operadorOrigemId    Int?
   senha               senha?    @relation(fields: [senha_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_5a06e5ba080d56c2f08596fdae1")
   guiche_rel          guiche    @relation("AtendimentoGuiche", fields: [guiche], references: [id])
   operador            usuario?  @relation("AtendimentoOperador", fields: [operadorId], references: [id])
+  operadorOrigem      usuario?  @relation("AtendimentoOperadorOrigem", fields: [operadorOrigemId], references: [id])
 }
 
 model clientes {
@@ -50,6 +53,7 @@ model clientes {
   deletedAt DateTime? @db.Timestamp(6)
   filial_id Int?
   filial    filial?   @relation(fields: [filial_id], references: [id])
+  senhas    senha[]
 }
 
 model senha {
@@ -62,12 +66,16 @@ model senha {
   agendamento_id Int?
   filial_id      Int?
   prioridade     Int           @default(0)
-  tipoOrigem     String?       @db.VarChar(20)
-  qtdeGarrafoes  Int?          @default(0)
-  atendimento    atendimento[]
-  servico        servico       @relation(fields: [servico_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_5c96ad536fb91e74faedac3a1eb")
-  agendamento    agendamento?  @relation(fields: [agendamento_id], references: [id])
-  filial         filial?       @relation(fields: [filial_id], references: [id])
+  tipoOrigem       String?       @db.VarChar(20)
+  qtdeGarrafoes    Int?          @default(0)
+  nomeCliente      String?       @db.VarChar
+  documentoCliente String?       @db.VarChar
+  cliente_id       String?       @db.Uuid
+  atendimento      atendimento[]
+  servico          servico       @relation(fields: [servico_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_5c96ad536fb91e74faedac3a1eb")
+  agendamento      agendamento?  @relation(fields: [agendamento_id], references: [id])
+  filial           filial?       @relation(fields: [filial_id], references: [id])
+  cliente          clientes?     @relation(fields: [cliente_id], references: [id])
 }
 
 model servico {
@@ -137,6 +145,7 @@ model usuario {
   filial_id              Int?
   fotoPerfil             String?           @db.VarChar(500)
   atendimentosRealizados atendimento[]     @relation("AtendimentoOperador")
+  atendimentosOrigem     atendimento[]     @relation("AtendimentoOperadorOrigem")
   guicheAtual            guiche?           @relation("OperadorGuicheAtual")
   logs_auditoria         log_auditoria[]
   notificacoes           notificacao[]

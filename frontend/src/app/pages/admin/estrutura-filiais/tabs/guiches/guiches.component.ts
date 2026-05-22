@@ -18,6 +18,8 @@ export class GuichesComponent implements OnInit {
   filiaisAgrupadas: any[] = [];
   loading = false;
   selectedFilialId: number | null = null;
+  isRestricted = false;
+  usuarioLogado: any = null;
 
   // Modais State
   showModal = false;
@@ -47,10 +49,21 @@ export class GuichesComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    const salvo = localStorage.getItem('usuario_sgf');
+    if (salvo) {
+      this.usuarioLogado = JSON.parse(salvo);
+      if (this.usuarioLogado.filial_id) {
+        this.isRestricted = true;
+        this.selectedFilialId = Number(this.usuarioLogado.filial_id);
+      }
+    }
+
     // Escuta mudanças de queryParams em toda a rota (inclusive no pai)
     this.route.queryParamMap.subscribe(params => {
-      const fid = params.get('filialId');
-      this.selectedFilialId = fid ? Number(fid) : null;
+      if (!this.isRestricted) {
+        const fid = params.get('filialId');
+        this.selectedFilialId = fid ? Number(fid) : null;
+      }
       this.carregarDados();
     });
   }
@@ -60,7 +73,12 @@ export class GuichesComponent implements OnInit {
     // Fetch both filiais and guichês
     this.api.get<any[]>('/filiais').subscribe({
       next: (filiais) => {
-        this.filiais = filiais;
+        const ativas = filiais.filter(f => f.ativo);
+        if (this.isRestricted) {
+          this.filiais = ativas.filter(f => f.id === this.selectedFilialId);
+        } else {
+          this.filiais = ativas;
+        }
         const filialQuery = this.selectedFilialId ? `?filialId=${this.selectedFilialId}` : '';
         this.api.get<any[]>(`/guiches${filialQuery}`).subscribe({
           next: (guiches) => {

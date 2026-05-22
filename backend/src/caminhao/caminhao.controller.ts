@@ -18,6 +18,7 @@ import { CaminhaoService } from './caminhao.service';
 import { Prisma } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { LogService } from '../log/log.service';
+import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
 @Controller('caminhoes')
 @UseGuards(JwtAuthGuard)
@@ -29,15 +30,15 @@ export class CaminhaoController {
   @Post()
   async create(
     @Body() createCaminhaoDto: Prisma.caminhaoCreateInput,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     try {
-      const res = await this.caminhaoService.create(createCaminhaoDto);
+      const res = await this.caminhaoService.create(createCaminhaoDto, req.user.filial_id);
       const userId = req.user?.userId ?? req.user?.id;
       await this.logService.logAction(
         'Criação',
         `Criou caminhão placa ${res.placa}`,
-        userId,
+        req.user.userId,
         'Caminhão',
         'Sucesso',
         res.filial_id ?? undefined,
@@ -54,19 +55,19 @@ export class CaminhaoController {
   @Post('operacional')
   async createOperacional(
     @Body() createCaminhaoDto: Prisma.caminhaoCreateInput,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     // RN02 — Cadastro Operacional Simplificado: Operador e Supervisor não vinculam motoristas.
     if (createCaminhaoDto.motorista) {
       delete createCaminhaoDto.motorista;
     }
     try {
-      const res = await this.caminhaoService.create(createCaminhaoDto);
+      const res = await this.caminhaoService.create(createCaminhaoDto, req.user.filial_id);
       const userId = req.user?.userId ?? req.user?.id;
       await this.logService.logAction(
         'Criação',
         `Criou caminhão (operacional) placa ${res.placa}`,
-        userId,
+        req.user.userId,
         'Caminhão',
         'Sucesso',
         res.filial_id ?? undefined,
@@ -81,8 +82,8 @@ export class CaminhaoController {
   }
 
   @Get()
-  findAll(@Query('q') q?: string, @Query('filialId') filialId?: string) {
-    return this.caminhaoService.findAll(q, filialId ? +filialId : undefined);
+  findAll(@Query('q') q?: string, @Query('filialId') filialId?: string, @Request() req?: AuthenticatedRequest) {
+    return this.caminhaoService.findAll(q, filialId ? +filialId : undefined, req?.user?.filial_id);
   }
 
   @Get('check')
@@ -91,18 +92,18 @@ export class CaminhaoController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.caminhaoService.findOne(id);
+  findOne(@Param('id', ParseIntPipe) id: number, @Request() req: AuthenticatedRequest) {
+    return this.caminhaoService.findOne(id, req.user.filial_id);
   }
 
   @Put(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCaminhaoDto: Prisma.caminhaoUpdateInput,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
-    const res = await this.caminhaoService.update(id, updateCaminhaoDto);
-    const userId = req.user?.userId ?? req.user?.id;
+    const res = await this.caminhaoService.update(id, updateCaminhaoDto, req.user.filial_id);
+    const userId = req.user.userId;
     await this.logService.logAction(
       'Atualização',
       `Atualizou caminhão placa ${res.placa}`,
@@ -118,10 +119,10 @@ export class CaminhaoController {
   async vincularMotorista(
     @Param('id', ParseIntPipe) id: number,
     @Body('motoristaId') motoristaId: number | null,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     const res = await this.caminhaoService.vincularMotorista(id, motoristaId);
-    const userId = req.user?.userId ?? req.user?.id;
+    const userId = req.user.userId;
     const acao = motoristaId ? 'Vinculação' : 'Desvinculação';
     await this.logService.logAction(
       acao,
@@ -135,9 +136,9 @@ export class CaminhaoController {
   }
 
   @Patch(':id/status')
-  async toggleStatus(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
-    const res = await this.caminhaoService.toggleStatus(id);
-    const userId = req.user?.userId ?? req.user?.id;
+  async toggleStatus(@Param('id', ParseIntPipe) id: number, @Request() req: AuthenticatedRequest) {
+    const res = await this.caminhaoService.toggleStatus(id, req.user.filial_id);
+    const userId = req.user.userId;
     const acao = res.status === 'ATIVO' ? 'Ativação' : 'Inativação';
     await this.logService.logAction(
       acao,
@@ -151,9 +152,9 @@ export class CaminhaoController {
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
-    const res = await this.caminhaoService.softDelete(id);
-    const userId = req.user?.userId ?? req.user?.id;
+  async remove(@Param('id', ParseIntPipe) id: number, @Request() req: AuthenticatedRequest) {
+    const res = await this.caminhaoService.softDelete(id, req.user.filial_id);
+    const userId = req.user.userId;
     await this.logService.logAction(
       'Exclusão',
       `Excluiu caminhão placa ${res.placa}`,

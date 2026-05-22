@@ -54,7 +54,7 @@ export class ClientService {
         cpf: data.cpf || null,
         cnpj: data.cnpj || null,
         telefone: data.telefone || null,
-        filial_id: data.filial_id ? +data.filial_id : null,
+        filial_id: null,
       },
       select: {
         id: true,
@@ -119,7 +119,7 @@ export class ClientService {
         cpf: data.cpf || null,
         cnpj: data.cnpj || null,
         telefone: data.telefone || null,
-        filial_id: data.filial_id ? +data.filial_id : null,
+        filial_id: null,
       },
       select: {
         id: true,
@@ -144,18 +144,50 @@ export class ClientService {
 
   // Listar todos (sem expor senhas)
   async findAll(filialId?: number, busca?: string) {
+    if (busca) {
+      const buscaTrim = busca.trim();
+      const digitsOnly = buscaTrim.replace(/\D/g, '');
+      const sqlBusca = `%${buscaTrim}%`;
+      const sqlDigits = digitsOnly ? `%${digitsOnly}%` : null;
+
+      let query;
+      if (sqlDigits && digitsOnly.length >= 3) {
+        query = this.prisma.$queryRawUnsafe<any[]>(
+          `SELECT id, nome, email, tipo, cpf, cnpj, telefone, "createdAt", "deletedAt", "filial_id"
+           FROM clientes
+           WHERE "deletedAt" IS NULL
+             AND (
+               unaccent(nome) ILIKE unaccent($1)
+               OR unaccent(email) ILIKE unaccent($1)
+               OR cpf ILIKE $2
+               OR cnpj ILIKE $2
+               OR telefone ILIKE $2
+             )`,
+          sqlBusca,
+          sqlDigits
+        );
+      } else {
+        query = this.prisma.$queryRawUnsafe<any[]>(
+          `SELECT id, nome, email, tipo, cpf, cnpj, telefone, "createdAt", "deletedAt", "filial_id"
+           FROM clientes
+           WHERE "deletedAt" IS NULL
+             AND (
+               unaccent(nome) ILIKE unaccent($1)
+               OR unaccent(email) ILIKE unaccent($1)
+             )`,
+          sqlBusca
+        );
+      }
+      return await query;
+    }
+
     return await this.prisma.clientes.findMany({
       where: {
-        ...(busca ? { OR: [{ nome: { contains: busca, mode: 'insensitive' as any } }, { cpf: { contains: busca } }, { cnpj: { contains: busca } }, { telefone: { contains: busca } }] } : {}),
         deletedAt: null,
         ...(filialId
           ? {
-            AND: [
-              {
-                OR: [{ filial_id: filialId }, { filial_id: null }],
-              },
-            ],
-          }
+              OR: [{ filial_id: filialId }, { filial_id: null }],
+            }
           : {}),
       },
       select: {

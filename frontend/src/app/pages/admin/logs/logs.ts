@@ -27,6 +27,8 @@ export class Logs implements OnInit {
   filiais: any[] = [];
   selectedFilialId: number | null = null;
   selectedFilialName: string = '';
+  isRestricted = false;
+  usuarioLogado: any = null;
 
   filters = {
     search: '',
@@ -64,6 +66,14 @@ export class Logs implements OnInit {
   }
 
   ngOnInit() {
+    const salvo = localStorage.getItem('usuario_sgf');
+    if (salvo) {
+      this.usuarioLogado = JSON.parse(salvo);
+      if (this.usuarioLogado.filial_id) {
+        this.selectedFilialId = Number(this.usuarioLogado.filial_id);
+        this.isRestricted = true;
+      }
+    }
     this.carregarFiliais();
     this.carregar();
   }
@@ -71,14 +81,19 @@ export class Logs implements OnInit {
   carregarFiliais() {
     this.api.get<any[]>('/filiais').subscribe({
       next: (res) => {
-        this.filiais = res.filter(f => f.ativo);
+        if (this.isRestricted) {
+          this.filiais = res.filter(f => f.ativo && f.id === this.selectedFilialId);
+        } else {
+          this.filiais = res.filter(f => f.ativo);
+        }
+        this.onFilialChange();
       },
       error: (err) => console.error('Erro ao carregar filiais:', err)
     });
   }
 
   onFilialChange() {
-    const filial = this.filiais.find(f => f.id === this.selectedFilialId);
+    const filial = this.filiais.find((f: any) => f.id === this.selectedFilialId);
     this.selectedFilialName = filial ? filial.nome : 'Todas as Unidades';
     this.page = 1;
     this.carregar();

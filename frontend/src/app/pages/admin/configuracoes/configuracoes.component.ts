@@ -82,6 +82,8 @@ export class ConfiguracoesComponent implements OnInit, OnDestroy {
   mostrarSucesso = false;
   filiais: any[] = [];
   selectedFilialId: number | null = null;
+  isRestricted = false;
+  usuarioLogado: any = null;
   private subs = new Subscription();
 
   constructor(
@@ -93,11 +95,22 @@ export class ConfiguracoesComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    // Escuta mudanças de filial via URL (Query Params)
+    const salvo = localStorage.getItem('usuario_sgf');
+    if (salvo) {
+      this.usuarioLogado = JSON.parse(salvo);
+      if (this.usuarioLogado.filial_id) {
+        this.selectedFilialId = Number(this.usuarioLogado.filial_id);
+        this.isRestricted = true;
+      }
+    }
+
+    // Escuta mudanças de filial via URL (Query Params) se não for restrito
     this.subs.add(
       this.route.queryParamMap.subscribe(params => {
-        const fid = params.get('filialId');
-        this.selectedFilialId = fid ? Number(fid) : null;
+        if (!this.isRestricted) {
+          const fid = params.get('filialId');
+          this.selectedFilialId = fid ? Number(fid) : null;
+        }
         this.carregar();
       })
     );
@@ -105,7 +118,11 @@ export class ConfiguracoesComponent implements OnInit, OnDestroy {
     // Carrega lista de filiais do serviço compartilhado
     this.subs.add(
       this.filialService.getFiliais().subscribe(data => {
-        this.filiais = data;
+        if (this.isRestricted) {
+          this.filiais = data.filter(f => f.id === this.selectedFilialId);
+        } else {
+          this.filiais = data;
+        }
         this.cd.detectChanges();
       })
     );
@@ -128,7 +145,7 @@ export class ConfiguracoesComponent implements OnInit, OnDestroy {
 
     // Sugestão automática do nome da unidade baseada na filial selecionada
     if (this.selectedFilialId) {
-      const filialObj = this.filiais.find(f => f.id === this.selectedFilialId);
+      const filialObj = this.filiais.find((f: any) => f.id === this.selectedFilialId);
       if (filialObj && (!this.form.UNIDADE_NOME || this.form.UNIDADE_NOME.trim() === '')) {
         this.form.UNIDADE_NOME = filialObj.nome;
       }

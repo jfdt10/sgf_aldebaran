@@ -18,7 +18,7 @@ export class FilaService {
     private notificacaoService: NotificacaoService,
     private notificacaoGateway: NotificacaoGateway,
     private agendamentoService: AgendamentoService,
-  ) {}
+  ) { }
 
   // Totem ticket generation logic
   async solicitarSenhaTotem(
@@ -534,7 +534,7 @@ export class FilaService {
     const senhaAtualizada = await this.prisma.senha.update({
       where: { id: proxima.id },
       data: { status: 'CHAMADO' },
-      include: { agendamento: true, servico: true },
+      include: { agendamento: true, servico: true, cliente: true },
     });
 
     await this.prisma.atendimento.create({
@@ -542,7 +542,12 @@ export class FilaService {
         guiche: guicheId,
         senha_id: proxima.id,
         // Registra o operador responsável no momento em que o cliente é chamado
-        ...(guicheInfo.operadorAtualId ? { operadorId: guicheInfo.operadorAtualId } : {}),
+        ...(guicheInfo.operadorAtualId
+          ? {
+            operadorId: guicheInfo.operadorAtualId,
+            operadorOrigemId: guicheInfo.operadorAtualId,
+          }
+          : {}),
       },
     });
 
@@ -633,14 +638,19 @@ export class FilaService {
     const senhaAtualizada = await this.prisma.senha.update({
       where: { id: senhaId },
       data: { status: 'CHAMADO' },
-      include: { agendamento: true, servico: true },
+      include: { agendamento: true, servico: true, cliente: true },
     });
 
     await this.prisma.atendimento.create({
       data: {
         guiche: guicheId,
         senha_id: senhaId,
-        ...(guicheInfo.operadorAtualId ? { operadorId: guicheInfo.operadorAtualId } : {}),
+        ...(guicheInfo.operadorAtualId
+          ? {
+            operadorId: guicheInfo.operadorAtualId,
+            operadorOrigemId: guicheInfo.operadorAtualId,
+          }
+          : {}),
       },
     });
 
@@ -693,6 +703,23 @@ export class FilaService {
     return senha;
   }
 
+  async vincularCliente(senhaId: number, nome: string, documento?: string, clienteId?: string) {
+    const senha = await this.prisma.senha.findUnique({
+      where: { id: senhaId }
+    });
+
+    if (!senha) throw new NotFoundException('Senha não encontrada');
+
+    return this.prisma.senha.update({
+      where: { id: senhaId },
+      data: {
+        nomeCliente: nome,
+        documentoCliente: documento,
+        cliente_id: clienteId || null
+      },
+    });
+  }
+
   async naoCompareceu(senhaId: number) {
     const senha = await this.prisma.senha.update({
       where: { id: senhaId },
@@ -712,6 +739,175 @@ export class FilaService {
     return senha;
   }
 
+  async transferirAtendimento(
+    senhaId: number,
+    guicheDestinoId: number | null,
+    retornarFila: boolean,
+    authUser?: AuthenticatedUser,
+  ) {
+    if (!authUser?.userId) {
+      throw new BadRequestException('Operador invalido para transferencia.');
+    }
+
+    const atendimento = await this.prisma.atendimento.findFirst({
+      where: { senha_id: senhaId, fimAtendimento: null },
+      orderBy: { id: 'desc' },
+      include: {
+        senha: true,
+        guiche_rel: true,
+      },
+    });
+
+    if (!atendimento || !atendimento.senha) {
+      throw new NotFoundException('Atendimento nao encontrado para esta senha.');
+    }
+
+    if (atendimento.senha.status !== 'CHAMADO') {
+      throw new BadRequestException('Transferencia permitida apenas antes de iniciar o atendimento.');
+    }
+
+    const operadorAtualId =
+      atendimento.operadorId || atendimento.guiche_rel?.operadorAtualId || null;
+
+    if (operadorAtualId && operadorAtualId !== authUser.userId) {
+      throw new BadRequestException('Somente o operador atual pode transferir este atendimento.');
+    }
+
+    if (retornarFila) {
+      await this.prisma.$transaction([
+        this.prisma.senha.update({
+          where: { id: senhaId },
+          data: { status: 'AGUARDANDO' },
+        }),
+        this.prisma.atendimento.update({
+          where: { id: atendimento.id },
+          data: { fimAtendimento: new Date(), transferidoEm: new Date() },
+        }),
+        this.prisma.guiche.update({
+          where: { id: atendimento.guiche },
+          data: { atendimentoAtualCodigo: null },
+        }),
+      ]);
+
+      this.notificacaoGateway.broadcastRefresh();
+      return { status: 'AGUARDANDO' };
+    }
+
+    if (!guicheDestinoId) {
+      throw new BadRequestException('Guiche de destino obrigatorio.');
+    }
+
+    const guicheDestino = await this.prisma.guiche.findUnique({
+      where: { id: guicheDestinoId },
+    });
+
+    if (!guicheDestino) {
+      throw new NotFoundException('Guiche de destino nao encontrado.');
+    }
+
+    if (!guicheDestino.operadorAtualId) {
+      throw new BadRequestException('Guiche de destino sem operador logado.');
+    }
+
+    const destinoOcupado = await this.prisma.atendimento.findFirst({
+      where: {
+        guiche: guicheDestinoId,
+        fimAtendimento: null,
+        senha: { status: { in: ['CHAMADO', 'EM_ATENDIMENTO'] } },
+      },
+    });
+
+    if (destinoOcupado) {
+      throw new BadRequestException('Guiche de destino ja possui atendimento ativo.');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.atendimento.update({
+        where: { id: atendimento.id },
+        data: {
+          guiche: guicheDestinoId,
+          operadorId: guicheDestino.operadorAtualId,
+          operadorOrigemId: atendimento.operadorOrigemId || authUser.userId,
+          transferidoEm: new Date(),
+        },
+      }),
+      this.prisma.guiche.update({
+        where: { id: atendimento.guiche },
+        data: { atendimentoAtualCodigo: null },
+      }),
+      this.prisma.guiche.update({
+        where: { id: guicheDestinoId },
+        data: { atendimentoAtualCodigo: atendimento.senha.numeroDisplay },
+      }),
+    ]);
+
+    this.notificacaoGateway.broadcastRefresh();
+
+    return {
+      status: 'TRANSFERIDO',
+      guicheDestinoId,
+    };
+  }
+
+  async listarAtendimentosOperador(
+    operadorId: number,
+    filialId?: number,
+  ) {
+    const where: any = {
+      OR: [
+        { operadorOrigemId: operadorId },
+        { operadorOrigemId: null, operadorId: operadorId },
+      ],
+    };
+    if (filialId) {
+      where.guiche_rel = { filial_id: filialId };
+    }
+
+    const atendimentos = await this.prisma.atendimento.findMany({
+      where,
+      orderBy: { inicioAtendimento: 'desc' },
+      include: {
+        senha: { include: { servico: true, agendamento: true } },
+        guiche_rel: true,
+        operador: { select: { id: true, nome: true, login: true } },
+      },
+    });
+
+    return atendimentos.map((a) => {
+      const statusRaw = (a.senha?.status || '').toUpperCase();
+      const foiTransferido = Boolean(a.transferidoEm);
+
+      let status = statusRaw || 'DESCONHECIDO';
+      if (statusRaw === 'CANCELADO') status = 'Cancelado';
+      else if (statusRaw === 'FINALIZADO') status = 'Finalizado';
+      else if (foiTransferido) status = 'Transferido';
+      else if (statusRaw === 'EM_ATENDIMENTO') status = 'Em Atendimento';
+      else if (statusRaw === 'CHAMADO') status = 'Chamado';
+
+      const inicio = a.inicioAtendimento ? new Date(a.inicioAtendimento).getTime() : null;
+      const criacao = a.senha?.dataCriacao ? new Date(a.senha.dataCriacao).getTime() : null;
+      const diffMin = inicio && criacao ? Math.max(0, Math.floor((inicio - criacao) / 60000)) : 0;
+
+      return {
+        id: a.id,
+        senhaId: a.senha?.id || null,
+        ticket: a.senha?.numeroDisplay || 'S/N',
+        cliente: a.senha?.agendamento?.nomeCliente || 'Geral/Totem',
+        documento: a.senha?.agendamento?.documento || null,
+        categoria: a.senha?.servico?.nome || 'Geral',
+        operador: a.operador?.nome || '-',
+        operadorLogin: a.operador?.login || null,
+        guiche: a.guiche_rel?.numero || null,
+        tempoEspera: `${diffMin} min`,
+        tempoEsperaMin: diffMin,
+        status,
+        statusRaw,
+        inicioAtendimento: a.inicioAtendimento,
+        fimAtendimento: a.fimAtendimento,
+      };
+    });
+  }
+
   async listarProximas(guicheId: number) {
     const guicheInfo = await this.prisma.guiche.findUnique({
       where: { id: guicheId },
@@ -727,6 +923,37 @@ export class FilaService {
       take: 5,
       include: { servico: true, agendamento: true },
     });
+  }
+
+  async buscarAtendimentoAtual(guicheId: number) {
+    const atendimentoAtual = await this.prisma.atendimento.findFirst({
+      where: {
+        guiche: guicheId,
+        fimAtendimento: null,
+      },
+      orderBy: { id: 'desc' },
+      include: {
+        senha: {
+          include: { servico: true, agendamento: true, cliente: true },
+        },
+      },
+    });
+
+    if (!atendimentoAtual?.senha) return null;
+
+    return {
+      id: atendimentoAtual.senha.id,
+      numeroDisplay: atendimentoAtual.senha.numeroDisplay,
+      status: atendimentoAtual.senha.status,
+      dataCriacao: atendimentoAtual.senha.dataCriacao,
+      qtdeGarrafoes: atendimentoAtual.senha.qtdeGarrafoes,
+      servico: atendimentoAtual.senha.servico,
+      cliente: atendimentoAtual.senha.cliente,
+      nomeCliente: atendimentoAtual.senha.nomeCliente,
+      documentoCliente: atendimentoAtual.senha.documentoCliente,
+      agendamento: atendimentoAtual.senha.agendamento,
+      inicioAtendimento: atendimentoAtual.inicioAtendimento,
+    };
   }
 
   async listarPainel(filialId?: number) {

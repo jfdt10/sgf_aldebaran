@@ -9,7 +9,9 @@ export class ServicoService {
     private notificacaoService: NotificacaoService,
   ) {}
 
-  async create(createServicoDto: any) {
+  async create(createServicoDto: any, requestingUserFilialId?: number) {
+    const filial_id = requestingUserFilialId ?? (createServicoDto.filial_id ? +createServicoDto.filial_id : null);
+    
     const servico = await this.prisma.servico.create({
       data: {
         nome: createServicoDto.nome,
@@ -20,7 +22,7 @@ export class ServicoService {
         tipo: createServicoDto.tipo,
         cor: createServicoDto.cor,
         prioridadePeso: createServicoDto.prioridadePeso || 1,
-        filial_id: createServicoDto.filial_id ? +createServicoDto.filial_id : null,
+        filial_id,
         ativo:
           createServicoDto.ativo !== undefined ? createServicoDto.ativo : true,
       },
@@ -37,7 +39,9 @@ export class ServicoService {
     return servico;
   }
 
-  findAll(filialId?: number, tipo?: string, includeInactive: boolean = false) {
+  findAll(filialId?: number, tipo?: string, includeInactive: boolean = false, requestingUserFilialId?: number) {
+    const finalFilialId = requestingUserFilialId ?? filialId;
+    
     const where: any = {
       deletadoEm: null,
     };
@@ -46,12 +50,8 @@ export class ServicoService {
       where.ativo = true;
     }
 
-    // Filtro de Filial: Própria ou Global
-    if (filialId) {
-      where.OR = [
-        { filial_id: filialId },
-        { filial_id: null }
-      ];
+    if (finalFilialId) {
+      where.filial_id = finalFilialId;
     }
 
     // Filtro de Tipo: Se informado, traz o tipo específico OU os sem tipo (Geral)
@@ -86,14 +86,15 @@ export class ServicoService {
 
 
 
-  async findOne(id: number) {
+  async findOne(id: number, requestingUserFilialId?: number) {
     const s = await this.prisma.servico.findUnique({ where: { id } });
-    if (!s || s.deletadoEm)
+    if (!s || s.deletadoEm || (requestingUserFilialId && s.filial_id !== requestingUserFilialId))
       throw new NotFoundException('Serviço não encontrado');
     return s;
   }
 
-  async update(id: number, updateServicoDto: any) {
+  async update(id: number, updateServicoDto: any, requestingUserFilialId?: number) {
+    await this.findOne(id, requestingUserFilialId);
     // Sanitize data to avoid updating immutable or relation fields
     const {
       id: _,
@@ -106,7 +107,9 @@ export class ServicoService {
 
     const dataToUpdate: any = { ...cleanData };
 
-    if (cleanData.filial_id !== undefined) {
+    if (requestingUserFilialId !== undefined) {
+      dataToUpdate.filial_id = requestingUserFilialId;
+    } else if (cleanData.filial_id !== undefined) {
       dataToUpdate.filial_id = cleanData.filial_id ? +cleanData.filial_id : null;
     }
 
@@ -126,7 +129,9 @@ export class ServicoService {
     return servico;
   }
 
-  remove(id: number) {
+  async remove(id: number, requestingUserFilialId?: number) {
+    await this.findOne(id, requestingUserFilialId);
+    
     return this.prisma.servico.update({
       where: { id },
       data: { deletadoEm: new Date() },

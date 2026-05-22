@@ -10,13 +10,15 @@ export class ConfiguracaoService {
   ) {}
 
   // Busca todas as configurações e mapeia num objeto { chave: valor } pro frontend (LEGADO)
-  async findAll(filialId?: any) {
-    const fId =
+  async findAll(filialId?: any, requestingUserFilialId?: number) {
+    const finalFilialId = requestingUserFilialId ?? (
       filialId && filialId !== 'null' && filialId !== 'undefined'
         ? Number(filialId)
-        : null;
+        : null
+    );
+    
     const list = await this.prisma.configuracao.findMany({
-      where: { filial_id: fId },
+      where: { filial_id: finalFilialId },
     });
     const configMap: Record<string, string> = {};
     for (const item of list) {
@@ -26,17 +28,23 @@ export class ConfiguracaoService {
   }
 
   // Busca lista bruta de configurações
-  async findAllList(filialId?: any) {
-    const fId =
+  async findAllList(filialId?: any, requestingUserFilialId?: number) {
+    const finalFilialId = requestingUserFilialId ?? (
       filialId && filialId !== 'null' && filialId !== 'undefined'
         ? Number(filialId)
-        : null;
+        : null
+    );
+
+    const where: any = {};
+    if (finalFilialId) {
+      where.filial_id = finalFilialId;
+    } else {
+      where.OR = [{ filial_id: null }];
+    }
 
     const allConfigs = await this.prisma.configuracao.findMany({
-      where: {
-        OR: [{ filial_id: fId }, { filial_id: null }],
-      },
-      orderBy: { filial_id: 'desc' }, // Filiais (não-null) vêm primeiro
+      where,
+      orderBy: { filial_id: 'desc' },
     });
 
     // De-duplicar preferendo a versão da filial
@@ -57,11 +65,13 @@ export class ConfiguracaoService {
   async updateBulk(
     configs: { chave: string; valor: string }[],
     filialId?: any,
+    requestingUserFilialId?: number,
   ) {
-    const fId =
+    const fId = requestingUserFilialId ?? (
       filialId && filialId !== 'null' && filialId !== 'undefined'
         ? Number(filialId)
-        : null;
+        : null
+    );
 
     console.log(
       `[CONFIG] Salvando bulk para filial: ${fId}, total itens: ${configs.length}`,

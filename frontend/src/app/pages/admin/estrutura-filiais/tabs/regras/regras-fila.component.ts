@@ -23,6 +23,8 @@ export class RegrasFilaComponent implements OnInit {
   };
 
   selectedFilialId: number | null = null;
+  isRestricted = false;
+  usuarioLogado: any = null;
 
   loading = false;
   showSuccessModal = false;
@@ -50,9 +52,20 @@ export class RegrasFilaComponent implements OnInit {
   }
 
   ngOnInit() {
+    const salvo = localStorage.getItem('usuario_sgf');
+    if (salvo) {
+      this.usuarioLogado = JSON.parse(salvo);
+      if (this.usuarioLogado.filial_id) {
+        this.isRestricted = true;
+        this.selectedFilialId = Number(this.usuarioLogado.filial_id);
+      }
+    }
+
     this.route.queryParamMap.subscribe(params => {
-      const fid = params.get('filialId');
-      this.selectedFilialId = fid ? Number(fid) : null;
+      if (!this.isRestricted) {
+        const fid = params.get('filialId');
+        this.selectedFilialId = fid ? Number(fid) : null;
+      }
       this.carregarDados();
     });
   }

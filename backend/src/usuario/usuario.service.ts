@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -15,7 +16,7 @@ export class UsuarioService {
     private notificacaoService: NotificacaoService,
   ) {}
 
-  async criar(dados: any) {
+  async criar(dados: any, requestingUserFilialId?: number) {
     const { login, senha, nome, email, perfil } = dados;
 
     const existe = await this.prisma.usuario.findFirst({
@@ -36,7 +37,7 @@ export class UsuarioService {
         email,
         perfil: perfil || 'OPERADOR',
         ativo: dados.ativo ?? true,
-        filial_id: dados.filial_id ? +dados.filial_id : null,
+        filial_id: requestingUserFilialId ?? (dados.filial_id ? +dados.filial_id : null),
       },
       select: {
         id: true,
@@ -86,11 +87,13 @@ export class UsuarioService {
     };
   }
 
-  async findAll(filialId?: number) {
+  async findAll(filialId?: number, requestingUserFilialId?: number) {
+    const finalFilialId = requestingUserFilialId ?? filialId;
+    
     return await this.prisma.usuario.findMany({
       where: {
         deletadoEm: null,
-        filial_id: filialId ? filialId : undefined,
+        filial_id: finalFilialId ? finalFilialId : undefined,
       },
       select: {
         id: true,
@@ -107,7 +110,7 @@ export class UsuarioService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, requestingUserFilialId?: number) {
     const usuario = await this.prisma.usuario.findUnique({
       where: { id },
       select: {
@@ -123,12 +126,14 @@ export class UsuarioService {
       },
     });
 
-    if (!usuario) throw new NotFoundException('Usuário não encontrado');
+    if (!usuario || (requestingUserFilialId && usuario.filial_id !== requestingUserFilialId)) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
     return usuario;
   }
 
-  async update(id: number, dados: any) {
-    await this.findOne(id); // Check existence
+  async update(id: number, dados: any, requestingUserFilialId?: number) {
+    await this.findOne(id, requestingUserFilialId); // Check existence and permission
 
     const { login, email } = dados;
 
@@ -154,7 +159,7 @@ export class UsuarioService {
         login: dados.login,
         perfil: dados.perfil,
         ativo: dados.ativo,
-        filial_id: dados.filial_id ? +dados.filial_id : null,
+        filial_id: requestingUserFilialId ?? (dados.filial_id ? +dados.filial_id : null),
         atualizadoEm: new Date(),
       },
       select: {
@@ -179,8 +184,8 @@ export class UsuarioService {
     return usuario;
   }
 
-  async toggleStatus(id: number) {
-    const usuario = await this.findOne(id);
+  async toggleStatus(id: number, requestingUserFilialId?: number) {
+    const usuario = await this.findOne(id, requestingUserFilialId);
     return await this.prisma.usuario.update({
       where: { id },
       data: { ativo: !usuario.ativo, atualizadoEm: new Date() },
@@ -188,8 +193,8 @@ export class UsuarioService {
     });
   }
 
-  async resetPassword(id: number, novaSenha: string) {
-    await this.findOne(id);
+  async resetPassword(id: number, novaSenha: string, requestingUserFilialId?: number) {
+    await this.findOne(id, requestingUserFilialId);
     const senhaHash = await bcrypt.hash(novaSenha, 12);
 
     return await this.prisma.usuario.update({
@@ -208,8 +213,8 @@ export class UsuarioService {
     });
   }
 
-  async softDelete(id: number) {
-    await this.findOne(id);
+  async softDelete(id: number, requestingUserFilialId?: number) {
+    await this.findOne(id, requestingUserFilialId);
     return await this.prisma.usuario.update({
       where: { id },
       data: { 

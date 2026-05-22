@@ -50,6 +50,11 @@ export class AdminLayoutComponent implements OnInit {
     return this.notificacoes.filter(n => !n.lida);
   }
 
+  isFilialRestrita(): boolean {
+    const role = (this.usuario?.perfil || this.usuario?.tipo || '').toString().toUpperCase();
+    return Boolean(this.usuario?.filial_id) && (role === 'ADMIN' || role === 'SUPERVISOR');
+  }
+
   readonly icons: Record<string, any> = {
     dashboard: LayoutDashboard,
     ticket: Ticket,
@@ -318,16 +323,22 @@ export class AdminLayoutComponent implements OnInit {
     this.loadingFiliais = true;
     this.filialService.getFiliais().subscribe({
       next: (data: Filial[]) => {
-        this.filiais = data;
+        if (this.isFilialRestrita()) {
+          this.filiais = data.filter(f => f.id === this.usuario.filial_id);
+          this.filialService.setSelectedFilial(this.usuario.filial_id);
+          this.selectedFilialId = this.usuario.filial_id;
+        } else {
+          this.filiais = data;
+        }
         this.loadingFiliais = false;
 
         const currentId = this.filialService.getSelectedFilialId();
 
-        if (this.userRole === 'SUPERVISOR' && !currentId && this.usuario?.filial_id) {
+        if (!this.isFilialRestrita() && this.userRole === 'SUPERVISOR' && !currentId && this.usuario?.filial_id) {
           this.filialService.setSelectedFilial(this.usuario.filial_id);
           this.selectedFilialId = this.usuario.filial_id;
         } else {
-          this.selectedFilialId = currentId;
+          this.selectedFilialId = this.isFilialRestrita() ? this.usuario.filial_id : currentId;
         }
       },
       error: (err) => {
@@ -338,6 +349,11 @@ export class AdminLayoutComponent implements OnInit {
   }
 
   onFilialChange() {
+    if (this.isFilialRestrita() && this.selectedFilialId !== this.usuario?.filial_id) {
+      this.selectedFilialId = this.usuario?.filial_id ?? null;
+      this.filialService.setSelectedFilial(this.selectedFilialId);
+      return;
+    }
     console.log('Filial alterada para ID:', this.selectedFilialId);
     this.filialService.setSelectedFilial(this.selectedFilialId);
     this.carregarContadores();

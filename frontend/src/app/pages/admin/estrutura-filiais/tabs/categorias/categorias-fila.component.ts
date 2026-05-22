@@ -24,6 +24,8 @@ export class CategoriasFilaComponent implements OnInit {
   
   filiais: any[] = [];
   selectedFilialId: number | null = null;
+  isRestricted = false;
+  usuarioLogado: any = null;
 
   // Modal Form (Categoria)
   formCategoria: any = {
@@ -51,9 +53,20 @@ export class CategoriasFilaComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    const salvo = localStorage.getItem('usuario_sgf');
+    if (salvo) {
+      this.usuarioLogado = JSON.parse(salvo);
+      if (this.usuarioLogado.filial_id) {
+        this.isRestricted = true;
+        this.selectedFilialId = Number(this.usuarioLogado.filial_id);
+      }
+    }
+
     this.route.queryParamMap.subscribe(params => {
-      const fid = params.get('filialId');
-      this.selectedFilialId = fid ? Number(fid) : null;
+      if (!this.isRestricted) {
+        const fid = params.get('filialId');
+        this.selectedFilialId = fid ? Number(fid) : null;
+      }
       this.carregarCategorias();
     });
     this.carregarFiliais();
@@ -61,7 +74,14 @@ export class CategoriasFilaComponent implements OnInit {
 
   carregarFiliais() {
     this.api.get<any[]>('/filiais').subscribe({
-      next: (res) => this.filiais = res.filter(f => f.ativo),
+      next: (res) => {
+        const ativas = res.filter(f => f.ativo);
+        if (this.isRestricted) {
+          this.filiais = ativas.filter(f => f.id === this.selectedFilialId);
+        } else {
+          this.filiais = ativas;
+        }
+      },
       error: (err) => console.error('Erro ao carregar filiais:', err)
     });
   }

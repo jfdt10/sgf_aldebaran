@@ -18,6 +18,8 @@ export class CadastrosGerais implements OnInit {
   filiais: any[] = [];
   selectedFilialId: number | null = null;
   selectedFilialName: string = '';
+  isRestricted = false;
+  usuarioLogado: any = null;
 
   readonly icons = { 
     users: Users, 
@@ -48,12 +50,21 @@ export class CadastrosGerais implements OnInit {
   }
 
   ngOnInit(): void {
+    const salvo = localStorage.getItem('usuario_sgf');
+    if (salvo) {
+      this.usuarioLogado = JSON.parse(salvo);
+      if (this.usuarioLogado.filial_id) {
+        this.selectedFilialId = Number(this.usuarioLogado.filial_id);
+        this.isRestricted = true;
+      }
+    }
+
     this.updateCurrentTab(this.router.url);
     this.carregarFiliais();
     
-    // Pegar filial dos query params no carregamento inicial
+    // Pegar filial dos query params no carregamento inicial se não for restrito
     this.route.queryParams.subscribe(params => {
-      if (params['filialId']) {
+      if (!this.isRestricted && params['filialId']) {
         this.selectedFilialId = +params['filialId'];
         this.updateSelectedFilialName();
       }
@@ -63,7 +74,11 @@ export class CadastrosGerais implements OnInit {
   carregarFiliais() {
     this.api.get<any[]>('/filiais').subscribe({
       next: (res) => {
-        this.filiais = res.filter(f => f.ativo);
+        if (this.isRestricted) {
+          this.filiais = res.filter(f => f.ativo && f.id === this.selectedFilialId);
+        } else {
+          this.filiais = res.filter(f => f.ativo);
+        }
         this.updateSelectedFilialName();
       },
       error: (err) => console.error('Erro ao carregar filiais:', err)
@@ -80,7 +95,7 @@ export class CadastrosGerais implements OnInit {
   }
 
   updateSelectedFilialName() {
-    const filial = this.filiais.find(f => f.id === this.selectedFilialId);
+    const filial = this.filiais.find((f: any) => f.id === this.selectedFilialId);
     this.selectedFilialName = filial ? filial.nome : 'Todas as Unidades';
   }
 

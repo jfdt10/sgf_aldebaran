@@ -20,6 +20,7 @@ import { extname } from 'path';
 import { UsuarioService } from './usuario.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { LogService } from '../log/log.service';
+import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
 @Controller('usuarios')
 export class UsuarioController {
@@ -36,13 +37,12 @@ export class UsuarioController {
   // Endpoints protegidos por JWT
   @UseGuards(JwtAuthGuard)
   @Post()
-  async criarUsuario(@Body() body: any, @Request() req: any) {
-    const res = await this.usuarioService.criar(body);
-    const userId = req.user?.userId ?? req.user?.id;
+  async criarUsuario(@Body() body: any, @Request() req: AuthenticatedRequest) {
+    const res = await this.usuarioService.criar(body, req.user.filial_id);
     await this.logService.logAction(
       'Criação',
       `Criou usuário: ${res.nome}`,
-      userId,
+      req.user.userId,
       'Usuário',
       'Sucesso',
       res.filial_id ?? undefined,
@@ -52,14 +52,17 @@ export class UsuarioController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll(@Query('filialId') filialId?: string) {
-    return this.usuarioService.findAll(filialId ? +filialId : undefined);
+  findAll(@Query('filialId') filialId?: string, @Request() req?: AuthenticatedRequest) {
+    return this.usuarioService.findAll(
+      filialId ? +filialId : undefined,
+      req?.user?.filial_id,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.usuarioService.findOne(id);
+  findOne(@Param('id', ParseIntPipe) id: number, @Request() req: AuthenticatedRequest) {
+    return this.usuarioService.findOne(id, req.user.filial_id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -67,10 +70,10 @@ export class UsuarioController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: any,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
-    const res = await this.usuarioService.update(id, body);
-    const userId = req.user?.userId ?? req.user?.id;
+    const res = await this.usuarioService.update(id, body, req.user.filial_id);
+    const userId = req.user.userId;
     await this.logService.logAction(
       'Atualização',
       `Atualizou usuário: ${res.nome}`,
@@ -84,9 +87,9 @@ export class UsuarioController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id/status')
-  async toggleStatus(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
-    const res = await this.usuarioService.toggleStatus(id);
-    const userId = req.user?.userId ?? req.user?.id;
+  async toggleStatus(@Param('id', ParseIntPipe) id: number, @Request() req: AuthenticatedRequest) {
+    const res = await this.usuarioService.toggleStatus(id, req.user.filial_id);
+    const userId = req.user.userId;
     const acao = res.ativo ? 'Ativação' : 'Inativação';
     await this.logService.logAction(
       acao,
@@ -102,10 +105,10 @@ export class UsuarioController {
   resetPassword(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { senha: string },
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
-    return this.usuarioService.resetPassword(id, body.senha).then(async (res) => {
-      const userId = req.user?.userId ?? req.user?.id;
+    return this.usuarioService.resetPassword(id, body.senha, req.user.filial_id).then(async (res) => {
+      const userId = req.user.userId;
       await this.logService.logAction(
         'Reset de Senha',
         `Resetou senha do usuário: ${res.nome}`,
@@ -151,9 +154,9 @@ export class UsuarioController {
   
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
-    const res = await this.usuarioService.softDelete(id);
-    const userId = req.user?.userId ?? req.user?.id;
+  async remove(@Param('id', ParseIntPipe) id: number, @Request() req: AuthenticatedRequest) {
+    const res = await this.usuarioService.softDelete(id, req.user.filial_id);
+    const userId = req.user.userId;
     const nome = res?.nome ? res.nome : `ID ${id}`;
     await this.logService.logAction(
       'Exclusão',

@@ -100,11 +100,10 @@
                 </select>
             </div>
 
-            <!-- Filial Selection (Mandatory) -->
             <div class="form-row-premium mt-4">
                 <label>Filial Vinculada <span class="required-mark">*</span></label>
-                <select [(ngModel)]="formCategoria.filial_id">
-                   <option [ngValue]="null">Todas as Unidades (Global)</option>
+                <select [(ngModel)]="formCategoria.filial_id" [disabled]="isRestricted">
+                   <option *ngIf="!isRestricted" [ngValue]="null">Todas as Unidades (Global)</option>
                    <option *ngFor="let f of filiais" [ngValue]="f.id">
                         {{ f.nome }}
                    </option>

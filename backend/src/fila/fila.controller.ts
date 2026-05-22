@@ -16,7 +16,7 @@ import { FilaService } from './fila.service';
 
 @Controller('fila')
 export class FilaController {
-  constructor(private readonly filaService: FilaService) {}
+  constructor(private readonly filaService: FilaService) { }
 
   // Totem
   @Post('totem/senha')
@@ -146,6 +146,24 @@ export class FilaController {
     return this.filaService.listarProximas(guicheId);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('operador/atual')
+  async buscarAtendimentoAtual(@Request() req: any) {
+    const guicheId = Number(req.headers['x-guiche-id']);
+    if (!guicheId) return null;
+    return this.filaService.buscarAtendimentoAtual(guicheId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('operador/atendimentos')
+  listarAtendimentosOperador(
+    @Request() req: AuthenticatedRequest,
+    @Query('filialId') filialId?: string,
+  ) {
+    const fid = filialId ? +filialId : req.user.filial_id;
+    return this.filaService.listarAtendimentosOperador(req.user.userId, fid);
+  }
+
   @Post('iniciar_atendimento')
   iniciarAtendimento(@Body() body: { senhaId: number }) {
     return this.filaService.iniciarAtendimento(body.senhaId);
@@ -156,9 +174,33 @@ export class FilaController {
     return this.filaService.finalizarAtendimento(body.senhaId);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Patch('senha/:id/cliente')
+  vincularCliente(
+    @Param('id') id: string,
+    @Body() body: { nome: string; documento?: string; clienteId?: string },
+  ) {
+    return this.filaService.vincularCliente(+id, body.nome, body.documento, body.clienteId);
+  }
+
   @Post('nao_compareceu')
   naoCompareceu(@Body() body: { senhaId: number }) {
     return this.filaService.naoCompareceu(body.senhaId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('transferir')
+  transferirAtendimento(
+    @Request() req: AuthenticatedRequest,
+    @Body()
+    body: { senhaId: number; guicheDestinoId?: number; retornarFila?: boolean },
+  ) {
+    return this.filaService.transferirAtendimento(
+      body.senhaId,
+      body.guicheDestinoId ?? null,
+      !!body.retornarFila,
+      req.user,
+    );
   }
 
   @Get('painel')
