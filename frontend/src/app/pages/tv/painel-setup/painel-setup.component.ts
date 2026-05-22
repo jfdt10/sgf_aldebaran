@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
 import { PainelConfigService } from '../../../services/painel-config.service';
+import { AuthService } from '../../../services/auth.service';
 import { LucideAngularModule, Monitor, Check, ArrowRight } from 'lucide-angular';
 
 @Component({
@@ -27,9 +28,10 @@ export class PainelSetupComponent implements OnInit {
   constructor(
     private api: ApiService,
     private configService: PainelConfigService,
+    private authService: AuthService,
     private router: Router,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.carregarFiliais();
@@ -40,7 +42,17 @@ export class PainelSetupComponent implements OnInit {
     this.loading = true;
     this.api.get<any[]>('/filiais/public/list').subscribe({
       next: (res) => {
-        this.filiais = res;
+        const user = this.authService.getCurrentUser();
+        const role = (user?.perfil || user?.tipo || '').toString().toUpperCase();
+        const filialId = user?.filial_id ?? null;
+
+        this.filiais = role === 'ADMIN' && filialId
+          ? res.filter((f) => f.id === filialId)
+          : res;
+
+        if (role === 'ADMIN' && filialId) {
+          this.selectedFilialId = filialId;
+        }
         this.loading = false;
         this.cdr.detectChanges();
       },

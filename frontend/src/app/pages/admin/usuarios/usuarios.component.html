@@ -148,8 +148,8 @@
                 <!-- Filial Selection (Mandatory) -->
                 <div class="form-group">
                     <label>Filial de Atuação *</label>
-                    <select [(ngModel)]="usuarioForm.filial_id" [disabled]="!!selectedFilialId && !isEditing">
-                        <option [ngValue]="null">Geral (Todas as Unidades / Sem Filial)</option>
+                    <select [(ngModel)]="usuarioForm.filial_id" [disabled]="isRestricted">
+                        <option *ngIf="!isRestricted" [ngValue]="null">Geral (Todas as Unidades / Sem Filial)</option>
                         <option *ngFor="let fil of filiais" [ngValue]="fil.id">{{ fil.nome }}</option>
                     </select>
                 </div>

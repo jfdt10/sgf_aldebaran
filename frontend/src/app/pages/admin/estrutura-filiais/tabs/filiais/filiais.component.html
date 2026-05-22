@@ -4,7 +4,7 @@
             <h2>Filiais Cadastradas</h2>
             <p>Gerencie as unidades e pontos de atendimento</p>
         </div>
-        <button class="btn-primary" (click)="abrirModal()">
+        <button class="btn-primary" (click)="abrirModal()" *ngIf="!isRestricted">
             <lucide-icon [img]="icons.plus" size="18"></lucide-icon>
             Nova Filial
         </button>
@@ -76,7 +76,7 @@
                         <button class="btn-action toggle" [class.active]="!f.ativo" (click)="toggleStatus(f)">
                             <lucide-icon [img]="icons.power" size="18"></lucide-icon>
                         </button>
-                        <button class="btn-action delete" (click)="excluirFilial(f.id)">
+                        <button class="btn-action delete" (click)="excluirFilial(f.id)" *ngIf="!isRestricted">
                             <lucide-icon [img]="icons.trash" size="18"></lucide-icon>
                         </button>
                     </div>

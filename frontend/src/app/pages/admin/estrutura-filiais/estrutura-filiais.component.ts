@@ -17,6 +17,8 @@ export class EstruturaFiliaisComponent implements OnInit {
   filiais: any[] = [];
   selectedFilialId: number | null = null;
   loading = false;
+  isRestricted = false;
+  usuarioLogado: any = null;
 
   readonly icons = { 
     building: Building2, 
@@ -49,14 +51,25 @@ export class EstruturaFiliaisComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const salvo = localStorage.getItem('usuario_sgf');
+    if (salvo) {
+      this.usuarioLogado = JSON.parse(salvo);
+      if (this.usuarioLogado.filial_id) {
+        this.selectedFilialId = Number(this.usuarioLogado.filial_id);
+        this.isRestricted = true;
+      }
+    }
+
     this.updateCurrentTab(this.router.url);
     this.carregarFiliais();
     
-    // Inicializar filial selecionada a partir da URL se existir
-    const urlTree = this.router.parseUrl(this.router.url);
-    const fid = urlTree.queryParams['filialId'];
-    if (fid) {
-      this.selectedFilialId = Number(fid);
+    // Inicializar filial selecionada a partir da URL se existir e não for restrito
+    if (!this.isRestricted) {
+      const urlTree = this.router.parseUrl(this.router.url);
+      const fid = urlTree.queryParams['filialId'];
+      if (fid) {
+        this.selectedFilialId = Number(fid);
+      }
     }
   }
 
@@ -64,7 +77,11 @@ export class EstruturaFiliaisComponent implements OnInit {
     this.loading = true;
     this.api.get<any[]>('/filiais').subscribe({
       next: (res: any[]) => {
-        this.filiais = res.filter((f: any) => f.ativo);
+        if (this.isRestricted) {
+          this.filiais = res.filter((f: any) => f.ativo && f.id === this.selectedFilialId);
+        } else {
+          this.filiais = res.filter((f: any) => f.ativo);
+        }
         this.loading = false;
       },
       error: (err: any) => {

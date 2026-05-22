@@ -133,7 +133,7 @@
                 <div class="filial-glass-selector" [class.loading]="loadingFiliais">
                   <lucide-icon [img]="icons['building']" size="16"></lucide-icon>
                   <select [(ngModel)]="selectedFilialId" (change)="onFilialChange()">
-                    <option [ngValue]="null">Todas as Filiais</option>
+                    <option *ngIf="!isFilialRestrita()" [ngValue]="null">Todas as Filiais</option>
                     <option *ngFor="let f of filiais" [ngValue]="f.id">{{ f.nome }}</option>
                   </select>
                   <lucide-icon [img]="icons['chevronDown']" size="14" class="arrow"></lucide-icon>

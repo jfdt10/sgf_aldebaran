@@ -14,9 +14,9 @@ export class CaminhaoService {
     private readonly notificacaoService: NotificacaoService,
   ) {}
 
-  async create(data: Prisma.caminhaoCreateInput) {
+  async create(data: Prisma.caminhaoCreateInput, requestingUserFilialId?: number) {
     const { id, ...createData } = data as any;
-    if (createData.filial_id) createData.filial_id = Number(createData.filial_id);
+    createData.filial_id = requestingUserFilialId ?? (createData.filial_id ? Number(createData.filial_id) : null);
     if (createData.motorista_id) createData.motorista_id = Number(createData.motorista_id);
 
     const existingPlaca = await this.prisma.caminhao.findUnique({
@@ -42,10 +42,12 @@ export class CaminhaoService {
     return caminhao;
   }
 
-  async findAll(query?: string, filialId?: number) {
+  async findAll(query?: string, filialId?: number, requestingUserFilialId?: number) {
+    const finalFilialId = requestingUserFilialId ?? filialId;
+    
     const where: Prisma.caminhaoWhereInput = {
       deletadoEm: null,
-      filial_id: filialId ? filialId : undefined,
+      filial_id: finalFilialId ? finalFilialId : undefined,
     };
 
     if (query) {
@@ -63,9 +65,14 @@ export class CaminhaoService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, requestingUserFilialId?: number) {
+    const where: Prisma.caminhaoWhereInput = { id, deletadoEm: null };
+    if (requestingUserFilialId) {
+      where.filial_id = requestingUserFilialId;
+    }
+
     const caminhao = await this.prisma.caminhao.findFirst({
-      where: { id, deletadoEm: null },
+      where,
       include: { motorista: true },
     });
     if (!caminhao) {
@@ -74,8 +81,8 @@ export class CaminhaoService {
     return caminhao;
   }
 
-  async update(id: number, data: Prisma.caminhaoUpdateInput) {
-    await this.findOne(id);
+  async update(id: number, data: Prisma.caminhaoUpdateInput, requestingUserFilialId?: number) {
+    await this.findOne(id, requestingUserFilialId);
 
     // Sanitize data
     const {
@@ -85,7 +92,11 @@ export class CaminhaoService {
       deletadoEm,
       ...updateData
     } = data as any;
-    if (updateData.filial_id) updateData.filial_id = Number(updateData.filial_id);
+    if (requestingUserFilialId !== undefined) {
+      updateData.filial_id = requestingUserFilialId;
+    } else if (updateData.filial_id) {
+      updateData.filial_id = Number(updateData.filial_id);
+    }
     if (updateData.motorista_id) updateData.motorista_id = Number(updateData.motorista_id);
 
     if (updateData.placa) {
@@ -122,8 +133,8 @@ export class CaminhaoService {
     };
   }
 
-  async softDelete(id: number) {
-    await this.findOne(id);
+  async softDelete(id: number, requestingUserFilialId?: number) {
+    await this.findOne(id, requestingUserFilialId);
     return this.prisma.caminhao.update({
       where: { id },
       data: {
@@ -133,8 +144,8 @@ export class CaminhaoService {
     });
   }
 
-  async toggleStatus(id: number) {
-    const caminhao = await this.findOne(id);
+  async toggleStatus(id: number, requestingUserFilialId?: number) {
+    const caminhao = await this.findOne(id, requestingUserFilialId);
     const novoStatus = caminhao.status === 'ATIVO' ? 'INATIVO' : 'ATIVO';
 
     return this.prisma.caminhao.update({

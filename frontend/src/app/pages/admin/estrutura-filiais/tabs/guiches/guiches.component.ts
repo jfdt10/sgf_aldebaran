@@ -21,6 +21,8 @@ export class GuichesComponent implements OnInit {
   saving = false;
   errorMessage = '';
   selectedFilialId: number | null = null;
+  isRestricted = false;
+  usuarioLogado: any = null;
 
   showModal = false;
   editando = false;
@@ -48,9 +50,21 @@ export class GuichesComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    const salvo = localStorage.getItem('usuario_sgf');
+    if (salvo) {
+      this.usuarioLogado = JSON.parse(salvo);
+      if (this.usuarioLogado.filial_id) {
+        this.isRestricted = true;
+        this.selectedFilialId = Number(this.usuarioLogado.filial_id);
+      }
+    }
+
+    // Escuta mudanças de queryParams em toda a rota (inclusive no pai)
     this.route.queryParamMap.subscribe(params => {
-      const fid = params.get('filialId');
-      this.selectedFilialId = fid ? Number(fid) : null;
+      if (!this.isRestricted) {
+        const fid = params.get('filialId');
+        this.selectedFilialId = fid ? Number(fid) : null;
+      }
       this.carregarDados();
     });
   }
@@ -59,12 +73,11 @@ export class GuichesComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
+    const queryParams = this.selectedFilialId ? { filialId: this.selectedFilialId } : undefined;
+
     forkJoin({
       filiais: this.api.get<any[]>('/filiais'),
-      guiches: this.api.get<any[]>(
-        '/guiches/admin/lista',
-        this.selectedFilialId ? { filialId: this.selectedFilialId } : undefined,
-      ),
+      guiches: this.api.get<any[]>('/guiches/admin/lista', queryParams),
     }).pipe(
       finalize(() => {
         this.loading = false;
@@ -72,7 +85,12 @@ export class GuichesComponent implements OnInit {
       }),
     ).subscribe({
       next: ({ filiais, guiches }) => {
-        this.filiais = filiais || [];
+        const ativas = (filiais || []).filter(f => f.ativo);
+        if (this.isRestricted) {
+          this.filiais = ativas.filter(f => f.id === this.selectedFilialId);
+        } else {
+          this.filiais = ativas;
+        }
         this.guichesRaw = guiches || [];
         this.agruparGuiches();
       },
@@ -141,10 +159,12 @@ export class GuichesComponent implements OnInit {
     const valorCanonico = String(this.form.nome).replace(/^Guich[êe]\s*/i, '').trim();
 
     const payload = {
-      ...this.form,
+      id: this.form.id,
       ativo: this.form.status === 'Ativo',
+      status: this.form.status,
       nome: valorCanonico,
-      numero: valorCanonico
+      numero: valorCanonico,
+      filial_id: this.form.filial_id
     };
 
     const request = this.editando

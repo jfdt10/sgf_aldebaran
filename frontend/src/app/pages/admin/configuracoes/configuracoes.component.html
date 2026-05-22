@@ -4,8 +4,8 @@
     <div class="filial-selector-wrapper">
       <lucide-icon [img]="icons.building" size="18" class="text-blue"></lucide-icon>
       <label for="filialSelect">Filial atual:</label>
-      <select id="filialSelect" [(ngModel)]="selectedFilialId" (change)="onFilialChange()" class="filial-select">
-        <option [ngValue]="null">Configurações Gerais (Global)</option>
+      <select id="filialSelect" [(ngModel)]="selectedFilialId" (change)="onFilialChange()" class="filial-select" [disabled]="isRestricted">
+        <option *ngIf="!isRestricted" [ngValue]="null">Configurações Gerais (Global)</option>
         <option *ngFor="let f of filiais" [ngValue]="f.id">{{ f.nome }}</option>
       </select>
     </div>

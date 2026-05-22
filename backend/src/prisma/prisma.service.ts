@@ -27,6 +27,11 @@ export class PrismaService
 
   async onModuleInit() {
     await this.$connect();
+    try {
+      await this.$executeRawUnsafe('CREATE EXTENSION IF NOT EXISTS unaccent;');
+    } catch (e) {
+      console.warn('Could not ensure unaccent extension is installed:', e);
+    }
   }
 
   async onModuleDestroy() {

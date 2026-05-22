@@ -14,6 +14,9 @@ import { LucideAngularModule, Plus, Edit2, Trash2, Power, X, Search, Building2, 
 export class FiliaisComponent implements OnInit {
   filiais: any[] = [];
   loading = false;
+  isRestricted = false;
+  usuarioLogado: any = null;
+  selectedFilialId: number | null = null;
   
   // Modais State
   showModal = false;
@@ -46,13 +49,25 @@ export class FiliaisComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    const salvo = localStorage.getItem('usuario_sgf');
+    if (salvo) {
+      this.usuarioLogado = JSON.parse(salvo);
+      if (this.usuarioLogado.filial_id) {
+        this.isRestricted = true;
+        this.selectedFilialId = Number(this.usuarioLogado.filial_id);
+      }
+    }
     this.carregarFiliais();
   }
 
   carregarFiliais() {
     this.api.get<any[]>('/filiais').subscribe({
       next: (data) => {
-        this.filiais = data;
+        if (this.isRestricted) {
+          this.filiais = data.filter(f => f.id === this.selectedFilialId);
+        } else {
+          this.filiais = data;
+        }
         this.cdr.detectChanges();
       },
       error: (err) => console.error(err)

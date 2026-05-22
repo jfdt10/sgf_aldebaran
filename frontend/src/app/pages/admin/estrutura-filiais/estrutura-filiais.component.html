@@ -10,8 +10,8 @@
                     </div>
                 </div>
                 <div class="selector-action">
-                    <select [(ngModel)]="selectedFilialId" (change)="onFilialChange()" class="filial-select-modern">
-                        <option [ngValue]="null">🌍 Todas as Unidades (Global)</option>
+                    <select [(ngModel)]="selectedFilialId" (change)="onFilialChange()" class="filial-select-modern" [disabled]="isRestricted">
+                        <option *ngIf="!isRestricted" [ngValue]="null">🌍 Todas as Unidades (Global)</option>
                         <option *ngFor="let f of filiais" [ngValue]="f.id">
                             🏢 {{ f.nome }}
                         </option>

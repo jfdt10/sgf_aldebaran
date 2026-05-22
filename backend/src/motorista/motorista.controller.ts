@@ -18,6 +18,7 @@ import { MotoristaService } from './motorista.service';
 import { Prisma } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { LogService } from '../log/log.service';
+import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
 @Controller('motoristas')
 @UseGuards(JwtAuthGuard)
@@ -30,15 +31,14 @@ export class MotoristaController {
   @Post()
   async create(
     @Body() createMotoristaDto: Prisma.motoristaCreateInput,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     try {
-      const res = await this.motoristaService.create(createMotoristaDto);
-      const userId = req.user?.userId ?? req.user?.id;
+      const res = await this.motoristaService.create(createMotoristaDto, req.user.filial_id);
       await this.logService.logAction(
         'Criação',
         `Criou motorista: ${res.nome}`,
-        userId,
+        req.user.userId,
         'Motorista',
         'Sucesso',
         res.filial_id ?? undefined,
@@ -53,8 +53,8 @@ export class MotoristaController {
   }
 
   @Get()
-  findAll(@Query('q') q?: string, @Query('filialId') filialId?: string) {
-    return this.motoristaService.findAll(q, filialId ? +filialId : undefined);
+  findAll(@Query('q') q?: string, @Query('filialId') filialId?: string, @Request() req?: AuthenticatedRequest) {
+    return this.motoristaService.findAll(q, filialId ? +filialId : undefined, req?.user?.filial_id);
   }
 
   @Get('check')
@@ -63,18 +63,18 @@ export class MotoristaController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.motoristaService.findOne(id);
+  findOne(@Param('id', ParseIntPipe) id: number, @Request() req: AuthenticatedRequest) {
+    return this.motoristaService.findOne(id, req.user.filial_id);
   }
 
   @Put(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateMotoristaDto: Prisma.motoristaUpdateInput,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
-    const res = await this.motoristaService.update(id, updateMotoristaDto);
-    const userId = req.user?.userId ?? req.user?.id;
+    const res = await this.motoristaService.update(id, updateMotoristaDto, req.user.filial_id);
+    const userId = req.user.userId;
     await this.logService.logAction(
       'Atualização',
       `Atualizou motorista: ${res.nome}`,
@@ -87,9 +87,9 @@ export class MotoristaController {
   }
 
   @Patch(':id/status')
-  async toggleStatus(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
-    const res = await this.motoristaService.toggleStatus(id);
-    const userId = req.user?.userId ?? req.user?.id;
+  async toggleStatus(@Param('id', ParseIntPipe) id: number, @Request() req: AuthenticatedRequest) {
+    const res = await this.motoristaService.toggleStatus(id, req.user.filial_id);
+    const userId = req.user.userId;
     const acao = res.ativo ? 'Ativação' : 'Inativação';
     await this.logService.logAction(
       acao,
@@ -103,9 +103,9 @@ export class MotoristaController {
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
-    const res = await this.motoristaService.softDelete(id);
-    const userId = req.user?.userId ?? req.user?.id;
+  async remove(@Param('id', ParseIntPipe) id: number, @Request() req: AuthenticatedRequest) {
+    const res = await this.motoristaService.softDelete(id, req.user.filial_id);
+    const userId = req.user.userId;
     await this.logService.logAction(
       'Exclusão',
       `Excluiu motorista: ${res.nome}`,

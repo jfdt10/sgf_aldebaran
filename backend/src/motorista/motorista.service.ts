@@ -14,9 +14,9 @@ export class MotoristaService {
     private readonly notificacaoService: NotificacaoService,
   ) {}
 
-  async create(data: Prisma.motoristaCreateInput) {
+  async create(data: Prisma.motoristaCreateInput, requestingUserFilialId?: number) {
     const { id, ...createData } = data as any;
-    if (createData.filial_id) createData.filial_id = Number(createData.filial_id);
+    createData.filial_id = requestingUserFilialId ?? (createData.filial_id ? Number(createData.filial_id) : null);
 
     const existingCpf = await this.prisma.motorista.findUnique({
       where: { cpf: createData.cpf },
@@ -47,10 +47,12 @@ export class MotoristaService {
     return motorista;
   }
 
-  async findAll(query?: string, filialId?: number) {
+  async findAll(query?: string, filialId?: number, requestingUserFilialId?: number) {
+    const finalFilialId = requestingUserFilialId ?? filialId;
+    
     const where: Prisma.motoristaWhereInput = {
       deletadoEm: null,
-      filial_id: filialId ? filialId : undefined,
+      filial_id: finalFilialId ? finalFilialId : undefined,
     };
 
     if (query) {
@@ -67,9 +69,14 @@ export class MotoristaService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, requestingUserFilialId?: number) {
+    const where: Prisma.motoristaWhereInput = { id, deletadoEm: null };
+    if (requestingUserFilialId) {
+      where.filial_id = requestingUserFilialId;
+    }
+    
     const motorista = await this.prisma.motorista.findFirst({
-      where: { id, deletadoEm: null },
+      where,
     });
     if (!motorista) {
       throw new NotFoundException('Motorista não encontrado');
@@ -77,8 +84,8 @@ export class MotoristaService {
     return motorista;
   }
 
-  async update(id: number, data: Prisma.motoristaUpdateInput) {
-    await this.findOne(id); // Ensure it exists and is not logically deleted
+  async update(id: number, data: Prisma.motoristaUpdateInput, requestingUserFilialId?: number) {
+    await this.findOne(id, requestingUserFilialId); // Ensure it exists and is not logically deleted
 
     // Sanitize data
     const {
@@ -88,7 +95,11 @@ export class MotoristaService {
       deletadoEm,
       ...updateData
     } = data as any;
-    if (updateData.filial_id) updateData.filial_id = Number(updateData.filial_id);
+    if (requestingUserFilialId !== undefined) {
+      updateData.filial_id = requestingUserFilialId;
+    } else if (updateData.filial_id) {
+      updateData.filial_id = Number(updateData.filial_id);
+    }
 
     // RN03: Imutabilidade de chave. Ensure CPF isn't being modified
     if (updateData.cpf) {
@@ -129,8 +140,8 @@ export class MotoristaService {
     };
   }
 
-  async softDelete(id: number) {
-    await this.findOne(id);
+  async softDelete(id: number, requestingUserFilialId?: number) {
+    await this.findOne(id, requestingUserFilialId);
     return this.prisma.motorista.update({
       where: { id },
       data: {
@@ -140,8 +151,8 @@ export class MotoristaService {
     });
   }
 
-  async toggleStatus(id: number) {
-    const motorista = await this.findOne(id);
+  async toggleStatus(id: number, requestingUserFilialId?: number) {
+    const motorista = await this.findOne(id, requestingUserFilialId);
     return this.prisma.motorista.update({
       where: { id },
       data: { ativo: !motorista.ativo },

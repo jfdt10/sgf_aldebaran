@@ -38,9 +38,9 @@ export class GuicheService {
     return data;
   }
 
-  async create(data: any) {
+  async create(data: any, requestingUserFilialId?: number) {
     data = this.normalizarDadosGuiche(data);
-    const filialId = data.filial_id ? +data.filial_id : null;
+    const filialId = requestingUserFilialId ?? (data.filial_id ? +data.filial_id : null);
 
     // `numero` é único por filial no schema; valida considerando filial_id.
     const guicheExistente = await this.prisma.guiche.findFirst({
@@ -97,11 +97,14 @@ export class GuicheService {
     return guiche;
   }
 
-  async findAll(filialId?: number) {
+  async findAll(filialId?: number, requestingUserFilialId?: number) {
+    const finalFilialId = requestingUserFilialId ?? filialId;
+    
     return await this.prisma.guiche.findMany({
       where: {
         deletadoEm: null,
-        filial: filialId ? { id: filialId, ativo: true } : { ativo: true },
+        filial_id: finalFilialId ? finalFilialId : undefined,
+        filial: { ativo: true },
       },
       include: {
         filial: true,
@@ -155,22 +158,32 @@ export class GuicheService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, requestingUserFilialId?: number) {
     const g = await this.prisma.guiche.findUnique({
       where: { id },
       include: { filial: true },
     });
-    if (!g || g.deletadoEm)
+    if (!g || g.deletadoEm || (requestingUserFilialId && g.filial_id !== requestingUserFilialId))
       throw new NotFoundException('Guichê não encontrado');
     return g;
   }
 
-  async update(id: number, data: any) {
-    const { id: _, filial, criadoEm, deletadoEm, ...updateDataRaw } = data;
-    const updateData = this.normalizarDadosGuiche(updateDataRaw);
+  async update(id: number, data: any, requestingUserFilialId?: number) {
+    await this.findOne(id, requestingUserFilialId);
+    // Pegar apenas os dados permitidos para update
+    const updateDataRaw: any = {};
+    if (data.numero !== undefined) updateDataRaw.numero = data.numero;
+    if (data.nome !== undefined) updateDataRaw.nome = data.nome;
+    if (data.descricao !== undefined) updateDataRaw.descricao = data.descricao;
+    if (data.status !== undefined) updateDataRaw.status = data.status;
+    if (data.ativo !== undefined) updateDataRaw.ativo = data.ativo;
+    if (requestingUserFilialId !== undefined) {
+      updateDataRaw.filial_id = requestingUserFilialId;
+    } else if (data.filial_id !== undefined) {
+      updateDataRaw.filial_id = +data.filial_id;
+    }
 
-    // Ensure filial_id is numeric if provided
-    if (updateData.filial_id) updateData.filial_id = +updateData.filial_id;
+    const updateData = this.normalizarDadosGuiche(updateDataRaw);
 
     const guiche = await this.prisma.guiche.update({
       where: { id },
@@ -192,7 +205,9 @@ export class GuicheService {
     return guiche;
   }
 
-  async remove(id: number) {
+  async remove(id: number, requestingUserFilialId?: number) {
+    await this.findOne(id, requestingUserFilialId);
+    
     return await this.prisma.guiche.update({
       where: { id },
       data: { deletadoEm: new Date(), ativo: false, atualizadoEm: new Date() },
