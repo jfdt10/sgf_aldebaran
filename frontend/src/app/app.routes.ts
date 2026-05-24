@@ -215,6 +215,20 @@ export const routes: Routes = [
           ).then((m) => m.SupervisorConfiguracoesComponent),
       },
       {
+        path: 'configuracoes/termos-de-uso',
+        loadComponent: () =>
+          import('./pages/client/configuracoes/legal/termos-de-uso.component').then(
+            (m) => m.TermosDeUsoComponent,
+          ),
+      },
+      {
+        path: 'configuracoes/politica-de-privacidade',
+        loadComponent: () =>
+          import(
+            './pages/client/configuracoes/legal/politica-privacidade.component'
+          ).then((m) => m.PoliticaPrivacidadeComponent),
+      },
+      {
         path: 'meu-perfil',
         loadComponent: () =>
           import('./pages/supervisor/perfil/perfil.component').then(

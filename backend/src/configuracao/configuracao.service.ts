@@ -94,10 +94,23 @@ export class ConfiguracaoService {
       }
     }
 
+    let filialNome = 'Geral';
+    if (fId) {
+      const filial = await this.prisma.filial.findUnique({
+        where: { id: fId },
+        select: { nome: true },
+      });
+      if (filial) {
+        filialNome = filial.nome;
+      } else {
+        filialNome = `Filial ${fId}`;
+      }
+    }
+
     // Notificação de alteração de configurações do sistema
     await this.notificacaoService.criar({
       titulo: 'Configurações Atualizadas',
-      mensagem: `As configurações do sistema (${fId ? 'Filial ' + fId : 'Geral'}) foram salvas.`,
+      mensagem: `As configurações do sistema (${filialNome}) foram salvas.`,
       icon: 'settings',
       rota: '/admin/configuracoes',
     });

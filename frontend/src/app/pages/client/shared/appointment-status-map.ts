@@ -110,10 +110,14 @@ export function getAppointmentStatusInfo(
 
   if (
     normalized === 'CONFIRMADO' &&
-    appointmentStart &&
-    isInsideCheckinWindow(appointmentStart, now)
+    appointmentStart
   ) {
-    return appointmentStatusMap.AGUARDANDO_CHECKIN;
+    if (isInsideCheckinWindow(appointmentStart, now)) {
+      return appointmentStatusMap.AGUARDANDO_CHECKIN;
+    }
+    if (now.getTime() > appointmentStart.getTime() + 15 * 60 * 1000) {
+      return appointmentStatusMap.EXPIRADO;
+    }
   }
 
   return appointmentStatusMap[normalized];
@@ -193,7 +197,8 @@ export function canManageAppointmentStatus(
 function isInsideCheckinWindow(appointmentStart: Date, now: Date): boolean {
   const startMs = appointmentStart.getTime();
   const nowMs = now.getTime();
-  const windowStartMs = startMs - 2 * 60 * 60 * 1000;
+  const windowStartMs = startMs - 10 * 60 * 1000;
+  const windowEndMs = startMs + 15 * 60 * 1000;
 
-  return nowMs >= windowStartMs && nowMs <= startMs;
+  return nowMs >= windowStartMs && nowMs <= windowEndMs;
 }

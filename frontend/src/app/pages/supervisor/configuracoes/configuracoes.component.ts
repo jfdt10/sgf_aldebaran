@@ -74,6 +74,7 @@ export class SupervisorConfiguracoesComponent implements OnInit {
       limiteAtendimentos: [50],
       prioridadePcdIdoso: [true],
       redirecionarAusentes: [false],
+      eficienciaMinima: [90],
 
       // Notificações
       notificarEmail: [true],
@@ -115,14 +116,15 @@ export class SupervisorConfiguracoesComponent implements OnInit {
       next: (configs) => {
         const patch: any = {};
         configs.forEach(c => {
-          if (c.chave === 'TEMPO_TOLERANCIA') patch.tempoTolerancia = parseInt(c.valor, 10);
-          if (c.chave === 'LIMITE_ATENDIMENTOS') patch.limiteAtendimentos = parseInt(c.valor, 10);
-          if (c.chave === 'PRIORIDADE_AUTOMATICA') patch.prioridadePcdIdoso = c.valor === 'true';
+          if (c.chave === 'tempoTolerancia' || c.chave === 'TEMPO_TOLERANCIA') patch.tempoTolerancia = parseInt(c.valor, 10);
+          if (c.chave === 'limiteAtendimentosDia' || c.chave === 'LIMITE_ATENDIMENTOS') patch.limiteAtendimentos = parseInt(c.valor, 10);
+          if (c.chave === 'prioridadeAutomatica' || c.chave === 'PRIORIDADE_AUTOMATICA') patch.prioridadePcdIdoso = c.valor === 'true';
           if (c.chave === 'SONS_ALERTA') patch.sonsAlerta = c.valor === 'true';
           if (c.chave === 'SONS_ALERTA_CATEGORIAS') {
             try { this.categoriasSom = JSON.parse(c.valor); } catch (e) {}
           }
-          if (c.chave === 'REDIRECIONAR_AUSENTES') patch.redirecionarAusentes = c.valor === 'true';
+          if (c.chave === 'redirecionarAusentes' || c.chave === 'REDIRECIONAR_AUSENTES') patch.redirecionarAusentes = c.valor === 'true';
+          if (c.chave === 'eficienciaMinima' || c.chave === 'EFICIENCIA_MINIMA') patch.eficienciaMinima = parseInt(c.valor, 10);
           if (c.chave === 'NOTIFICAR_EMAIL') patch.notificarEmail = c.valor === 'true';
           if (c.chave === 'NOTIFICAR_WHATSAPP') patch.notificarWhatsapp = c.valor === 'true';
         });
@@ -166,8 +168,8 @@ export class SupervisorConfiguracoesComponent implements OnInit {
   openLegalDocument(type: 'terms' | 'privacy'): void {
     const route =
       type === 'terms'
-        ? '/client/configuracoes/termos-de-uso'
-        : '/client/configuracoes/politica-de-privacidade';
+        ? '/supervisor/configuracoes/termos-de-uso'
+        : '/supervisor/configuracoes/politica-de-privacidade';
 
     this.router.navigate([route]);
   }
@@ -189,10 +191,11 @@ export class SupervisorConfiguracoesComponent implements OnInit {
     const payload = {
       filial_id: this.selectedFilialId,
       configs: [
-        { chave: 'TEMPO_TOLERANCIA', valor: String(vals.tempoTolerancia) },
-        { chave: 'LIMITE_ATENDIMENTOS', valor: String(vals.limiteAtendimentos) },
-        { chave: 'PRIORIDADE_AUTOMATICA', valor: String(vals.prioridadePcdIdoso) },
-        { chave: 'REDIRECIONAR_AUSENTES', valor: String(vals.redirecionarAusentes) },
+        { chave: 'tempoTolerancia', valor: String(vals.tempoTolerancia) },
+        { chave: 'limiteAtendimentosDia', valor: String(vals.limiteAtendimentos) },
+        { chave: 'prioridadeAutomatica', valor: String(vals.prioridadePcdIdoso) },
+        { chave: 'redirecionarAusentes', valor: String(vals.redirecionarAusentes) },
+        { chave: 'eficienciaMinima', valor: String(vals.eficienciaMinima || 90) },
         { chave: 'FUSO_HORARIO', valor: vals.fusoHorario },
         { chave: 'MODO_ESCURO', valor: String(vals.modoEscuro) },
         { chave: 'SONS_ALERTA', valor: String(vals.sonsAlerta) },
@@ -317,7 +320,7 @@ export class SupervisorConfiguracoesComponent implements OnInit {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (usuarios) => {
-        this.usuarios = usuarios;
+        this.usuarios = usuarios.filter((u: any) => u.perfil !== 'ADMIN');
         this.aplicarFiltros();
       },
       error: (err) => {

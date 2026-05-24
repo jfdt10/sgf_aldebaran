@@ -1,28 +1,37 @@
 import { Component, HostListener, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, ActivatedRoute } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import {
   LucideAngularModule, AlertTriangle, ChevronRight, TrendingUp,
   Clock, Activity, Users, Truck, UserPlus, User, Settings, BarChart2,
   Bell, History, Calendar, X, CheckCircle, FileText, ChevronDown, LogOut,
-  Hash, Building, Package, Key, Lock, Phone, Mail, Eye, AlertCircle
+  Hash, Building, Package, Key, Lock, Phone, Mail, Eye, AlertCircle, RotateCcw
 } from 'lucide-angular';
 import { GuicheService } from '../../../services/guiche.service';
 import { DashboardService } from '../../../services/dashboard.service';
 import { FilialService } from '../../../services/filial.service';
+import { ApiService } from '../../../services/api.service';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-supervisor-dashboard',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ReactiveFormsModule],
+  imports: [CommonModule, LucideAngularModule, ReactiveFormsModule, FormsModule, RouterLink],
   templateUrl: './supervisor-dashboard.component.html',
   styleUrls: ['./supervisor-dashboard.component.scss']
 })
 export class SupervisorDashboardComponent implements OnInit {
+  selectedDate: string = new Date().toISOString().split('T')[0];
+  selectedDateAgendamentos: string = new Date().toISOString().split('T')[0];
+  selectedDateAtendimentos: string = new Date().toISOString().split('T')[0];
+  
+  agendamentoParaCheckin: any = null;
+  agendamentoParaCancelar: any = null;
+  agendamentoParaResgatar: any = null;
+
   // Ícones
   readonly icons: any = {
     alert: AlertTriangle, right: ChevronRight, trendingUp: TrendingUp,
@@ -32,7 +41,7 @@ export class SupervisorDashboardComponent implements OnInit {
     history: History, calendar: Calendar, x: X, check: CheckCircle, fileText: FileText,
     chevronDown: ChevronDown, logOut: LogOut,
     hash: Hash, building: Building, package: Package, key: Key, lock: Lock, phone: Phone, mail: Mail,
-    eye: Eye, alertCircle: AlertCircle
+    eye: Eye, alertCircle: AlertCircle, rotateCcw: RotateCcw
   };
 
   visaoGeral = [
@@ -79,6 +88,7 @@ export class SupervisorDashboardComponent implements OnInit {
     private dashboardService: DashboardService,
     private filialService: FilialService,
     private http: HttpClient,
+    private api: ApiService,
     private cdr: ChangeDetectorRef
   ) {
     this.justificativaForm = this.fb.group({
@@ -192,10 +202,15 @@ export class SupervisorDashboardComponent implements OnInit {
 
   onFilialChange() {
     this.loadData();
+    if (this.activeModal === 'agendamentos') {
+      this.carregarAgendamentos();
+    } else if (this.activeModal === 'atendimentos') {
+      this.carregarAtendimentos();
+    }
   }
 
   loadData() {
-    this.dashboardService.getSupervisorOverview(this.selectedFilialId || undefined).subscribe({
+    this.dashboardService.getSupervisorOverview(this.selectedFilialId || undefined, this.selectedDate).subscribe({
       next: (res) => {
         // Update KPIs
         this.visaoGeral[0].valor = res.kpis.totalHoje;
@@ -203,16 +218,20 @@ export class SupervisorDashboardComponent implements OnInit {
         this.visaoGeral[2].valor = res.kpis.totalHoje; // Usando totalHoje em vez de atendimentosDiarios
         this.visaoGeral[3].valor = res.kpis.filaAtual;
 
-        // Update Lists
-        this.agendamentos = res.agendamentos;
-        this.atendimentosList = res.atendimentos.map((a: any) => {
-          if (a.dataCriacao) {
-            const diffMs = new Date().getTime() - new Date(a.dataCriacao).getTime();
-            const totalMinutes = Math.floor(diffMs / 60000);
-            a.tempoEspera = this.formatWaitTime(totalMinutes);
-          }
-          return a;
-        });
+        // Update Lists only if they are not being filtered locally
+        if (this.activeModal !== 'agendamentos') {
+          this.agendamentos = res.agendamentos;
+        }
+        if (this.activeModal !== 'atendimentos') {
+          this.atendimentosList = res.atendimentos.map((a: any) => {
+            if (a.dataCriacao) {
+              const diffMs = new Date().getTime() - new Date(a.dataCriacao).getTime();
+              const totalMinutes = Math.floor(diffMs / 60000);
+              a.tempoEspera = this.formatWaitTime(totalMinutes);
+            }
+            return a;
+          });
+        }
 
         this.showAlertBanner = res.kpis.alertaSla;
         
@@ -226,7 +245,14 @@ export class SupervisorDashboardComponent implements OnInit {
   }
 
   abrirModal(id: string) {
-    this.activeModal = id; // truck, operator, client
+    this.activeModal = id; // truck, operator, client, agendamentos, atendimentos
+    if (id === 'agendamentos') {
+      this.selectedDateAgendamentos = new Date().toISOString().split('T')[0];
+      this.carregarAgendamentos();
+    } else if (id === 'atendimentos') {
+      this.selectedDateAtendimentos = new Date().toISOString().split('T')[0];
+      this.carregarAtendimentos();
+    }
   }
 
   fecharModal() {
@@ -235,6 +261,127 @@ export class SupervisorDashboardComponent implements OnInit {
     this.caminhaoForm.reset({ tipoPessoa: 'Fisica', funcao: 'Operador' });
     this.operadorForm.reset({ tipoPessoa: 'Fisica', funcao: 'Operador' });
     this.clienteForm.reset({ tipoPessoa: 'Fisica', funcao: 'Operador' });
+    this.agendamentoParaCheckin = null;
+    this.agendamentoParaCancelar = null;
+    this.agendamentoParaResgatar = null;
+  }
+
+  onDateChangeAgendamentos() {
+    this.carregarAgendamentos();
+  }
+
+  onDateChangeAtendimentos() {
+    this.carregarAtendimentos();
+  }
+
+  carregarAgendamentos() {
+    const filialId = this.selectedFilialId || undefined;
+    this.dashboardService.getSupervisorOverview(filialId, this.selectedDateAgendamentos).subscribe({
+      next: (res) => {
+        this.agendamentos = res.agendamentos;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Erro ao carregar agendamentos:', err)
+    });
+  }
+
+  carregarAtendimentos() {
+    this.api.get<any[]>('/fila/supervisor/atendimentos', {
+      filialId: this.selectedFilialId,
+      data: this.selectedDateAtendimentos
+    }).subscribe({
+      next: (res) => {
+        this.atendimentosList = res;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Erro ao carregar atendimentos:', err)
+    });
+  }
+
+  abrirModalCheckin(agenda: any) {
+    this.agendamentoParaCheckin = agenda;
+    this.cdr.detectChanges();
+  }
+
+  fecharModalCheckin() {
+    this.agendamentoParaCheckin = null;
+    this.cdr.detectChanges();
+  }
+
+  confirmarCheckinOperador(tipo: string) {
+    if (!this.agendamentoParaCheckin) return;
+    
+    const filialId = this.selectedFilialId ? +this.selectedFilialId : undefined;
+    const payload = {
+      codigo: this.agendamentoParaCheckin.codigo,
+      filialId: filialId,
+      tipo: tipo,
+      ignorarRegras: true
+    };
+
+    this.api.post<any>('/fila/checkin/validar', payload).subscribe({
+      next: () => {
+        this.fecharModalCheckin();
+        this.carregarAgendamentos();
+        this.loadData();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        alert(err?.error?.message || 'Erro ao realizar check-in.');
+      }
+    });
+  }
+
+  abrirModalCancelar(agenda: any) {
+    this.agendamentoParaCancelar = agenda;
+    this.cdr.detectChanges();
+  }
+
+  fecharModalCancelar() {
+    this.agendamentoParaCancelar = null;
+    this.cdr.detectChanges();
+  }
+
+  confirmarCancelarAgendamento() {
+    if (!this.agendamentoParaCancelar) return;
+    
+    this.api.delete<any>(`/fila/agendamento/${this.agendamentoParaCancelar.id}`).subscribe({
+      next: () => {
+        this.fecharModalCancelar();
+        this.carregarAgendamentos();
+        this.loadData();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        alert(err?.error?.message || 'Erro ao cancelar agendamento.');
+      }
+    });
+  }
+
+  abrirModalResgatar(agenda: any) {
+    this.agendamentoParaResgatar = agenda;
+    this.cdr.detectChanges();
+  }
+
+  fecharModalResgatar() {
+    this.agendamentoParaResgatar = null;
+    this.cdr.detectChanges();
+  }
+
+  confirmarResgatarAgendamento() {
+    if (!this.agendamentoParaResgatar) return;
+
+    this.api.post<any>(`/fila/agendamento/${this.agendamentoParaResgatar.id}/resgatar`, {}).subscribe({
+      next: () => {
+        this.fecharModalResgatar();
+        this.carregarAgendamentos();
+        this.loadData();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        alert(err?.error?.message || 'Erro ao resgatar agendamento.');
+      }
+    });
   }
 
   salvarCadastro() {

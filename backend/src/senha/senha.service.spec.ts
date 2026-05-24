@@ -21,7 +21,7 @@ describe('SenhaService', () => {
     prisma.senha.count.mockResolvedValue(44);
     prisma.senha.create.mockResolvedValue({
       id: 10,
-      numeroDisplay: 'C-RPA045',
+      numeroDisplay: 'C-RP-A-045',
       status: 'AGUARDANDO',
       dataCriacao,
       servico_id: 2,
@@ -50,7 +50,7 @@ describe('SenhaService', () => {
     expect(prisma.senha.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          numeroDisplay: 'C-RPA045',
+          numeroDisplay: 'C-RP-A-045',
           tipoOrigem: 'AGENDAMENTO',
           agendamento: { connect: { id: 7 } },
           filial: { connect: { id: 1 } },
@@ -58,7 +58,7 @@ describe('SenhaService', () => {
         }),
       }),
     );
-    expect(result.numeroDisplay).toBe('C-RPA045');
+    expect(result.numeroDisplay).toBe('C-RP-A-045');
   });
 
   it('usa configuracao global e deriva codigo pelo nome quando prefixo e sigla estao vazios', async () => {
@@ -70,7 +70,7 @@ describe('SenhaService', () => {
     prisma.senha.count.mockResolvedValue(0);
     prisma.senha.create.mockResolvedValue({
       id: 11,
-      numeroDisplay: 'C-CAEM001',
+      numeroDisplay: 'C-CA-EM-001',
       status: 'AGUARDANDO',
       dataCriacao,
       servico_id: 6,
@@ -92,11 +92,11 @@ describe('SenhaService', () => {
     expect(prisma.senha.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          numeroDisplay: 'C-CAEM001',
+          numeroDisplay: 'C-CA-EM-001',
           qtdeGarrafoes: 4,
         }),
       }),
     );
-    expect(result.numeroDisplay).toBe('C-CAEM001');
+    expect(result.numeroDisplay).toBe('C-CA-EM-001');
   });
 });

@@ -602,6 +602,55 @@ $bg-page: #f8f9fa; /* Fundo cinza claro */
     text-align: center;
   }
 
+  .ticket-type-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 14px;
+
+    .selector-label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+
+    .selector-options {
+      display: flex;
+      gap: 12px;
+
+      .option-btn {
+        flex: 1;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        outline: none;
+
+        &:hover {
+          background: #f1f5f9;
+          border-color: #cbd5e1;
+        }
+
+        &.active {
+          background: #0099BD;
+          border-color: #0099BD;
+          color: white;
+          box-shadow: 0 4px 10px rgba(0, 153, 189, 0.2);
+        }
+      }
+    }
+  }
+
   .btn-checkin,
   .btn-keep {
     width: 100%;
@@ -618,8 +667,11 @@ $bg-page: #f8f9fa; /* Fundo cinza claro */
     box-shadow: 0 8px 16px rgba(0, 153, 189, 0.2);
 
     &:disabled {
+      background: #e2e8f0;
+      color: #94a3b8;
+      box-shadow: none;
+      cursor: not-allowed;
       opacity: 0.7;
-      cursor: wait;
     }
 
     &:hover:not(:disabled) {
@@ -645,6 +697,46 @@ $bg-page: #f8f9fa; /* Fundo cinza claro */
 
     &:active {
       transform: scale(0.98);
+    }
+  }
+
+  /* --- CHECKIN UX ALERTS (PREMIUM) --- */
+  .checkin-ux-alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 16px;
+    border: 1px solid transparent;
+
+    lucide-icon {
+      display: flex;
+      flex-shrink: 0;
+    }
+
+    &.too-early {
+      background: #fef9c3;
+      border-color: #fef08a;
+      color: #854d0e;
+      lucide-icon { color: #ca8a04; }
+    }
+
+    &.ready {
+      background: #ecfdf5;
+      border-color: #bbf7d0;
+      color: #166534;
+      lucide-icon { color: #16a34a; }
+    }
+
+    &.expired {
+      background: #fee2e2;
+      border-color: #fecaca;
+      color: #991b1b;
+      lucide-icon { color: #dc2626; }
     }
   }
 }

@@ -14,6 +14,7 @@ type GerarSenhaAgendamentoParams = {
   filialId?: number | null;
   agendamentoId: number;
   qtdeGarrafoes?: number | null;
+  tipo?: string;
 };
 
 @Injectable()
@@ -61,7 +62,11 @@ export class SenhaService {
       params.servico.nome,
     );
     const sequencial = (count + 1).toString().padStart(3, '0');
-    const numeroDisplay = `C-${codigoCategoria}${modificador}${sequencial}`;
+    
+    const isPreferencial = params.tipo === 'Preferencial' || params.tipo === 'PREFERENCIAL';
+    const prefixoTipo = isPreferencial ? 'P' : 'C';
+    const modPart = modificador ? `-${modificador}-` : '';
+    const numeroDisplay = `${prefixoTipo}-${codigoCategoria}${modPart}${sequencial}`;
     const qtdeGarrafoes = Math.max(
       0,
       Number(params.qtdeGarrafoes ?? 0) || 0,
@@ -71,7 +76,7 @@ export class SenhaService {
       data: {
         numeroDisplay,
         status: 'AGUARDANDO',
-        tipo: 'Convencional',
+        tipo: isPreferencial ? 'Preferencial' : 'Convencional',
         tipoOrigem: 'AGENDAMENTO',
         prioridade: (params.servico.prioridadePeso || 0) + bonus,
         servico: { connect: { id: params.servico.id } },

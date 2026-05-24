@@ -14,6 +14,7 @@ import { AgendamentoResponseDto } from './dto/agendamento-response.dto';
 import { AgendamentoVoucherResponseDto } from './dto/agendamento-voucher-response.dto';
 import { ClienteRegrasService } from './cliente-regras.service';
 import { AgendamentoFiltroStatus, AGENDAMENTO_STATUS_ATIVOS, AGENDAMENTO_STATUS_FINAIS, AgendamentoStatus } from './enums/agendamento-status.enum';
+import { ReagendarAgendamentoDto } from './dto/reagendar-agendamento.dto';
 import { buildAgendamentoDate, toAgendamentoResponse } from './mappers/agendamento-response.mapper';
 
 type ClienteAutenticado = {
@@ -175,6 +176,7 @@ export class AgendamentoService {
   async realizarCheckinCliente(
     clienteId: string,
     agendamentoId: number,
+    tipo?: string,
   ): Promise<CheckinResponseDto> {
     const cliente = await this.buscarClienteAutenticado(clienteId);
     const agendamento = await this.prisma.agendamento.findUnique({
@@ -231,6 +233,7 @@ export class AgendamentoService {
 
     const ticket = await this.criarSenhaDeCheckin(
       agendamento as AgendamentoCheckinSource,
+      tipo,
     );
 
     const atualizado = await this.prisma.agendamento.update({
@@ -356,14 +359,117 @@ export class AgendamentoService {
     };
   }
 
+  async reagendarMeuAgendamento(
+    clienteId: string,
+    agendamentoId: number,
+    dto: ReagendarAgendamentoDto,
+  ): Promise<any> {
+    const cliente = await this.buscarClienteAutenticado(clienteId);
+    const agendamento = await this.prisma.agendamento.findUnique({
+      where: { id: agendamentoId },
+      include: {
+        servico: {
+          select: { nome: true },
+        },
+        filial: {
+          select: { nome: true },
+        },
+      },
+    });
+
+    if (!agendamento) {
+      throw new NotFoundException('Agendamento não encontrado');
+    }
+
+    if (!this.isAgendamentoDoCliente(agendamento, cliente)) {
+      throw new ForbiddenException(
+        'Você não tem permissão para acessar este agendamento',
+      );
+    }
+
+    const agora = new Date();
+    const inicio = buildAgendamentoDate(agendamento.data, agendamento.hora);
+    const possuiCheckIn = this.isCheckinRealizado(agendamento.status);
+
+    if (possuiCheckIn) {
+      throw new BadRequestException(
+        'Agendamento com check-in realizado não pode ser reagendado',
+      );
+    }
+
+    if (
+      AGENDAMENTO_STATUS_FINAIS.has(agendamento.status) ||
+      inicio.getTime() <= agora.getTime()
+    ) {
+      throw new BadRequestException(
+        'Agendamento já finalizado não pode ser reagendado',
+      );
+    }
+
+    const diffMs = inicio.getTime() - agora.getTime();
+    if (
+      diffMs <
+      AgendamentoService.ANTECEDENCIA_CANCELAMENTO_MINUTOS * 60 * 1000
+    ) {
+      throw new BadRequestException(
+        'Reagendamentos só são permitidos com 30 minutos de antecedência',
+      );
+    }
+
+    // Valida se o novo horário de agendamento é válido para o cliente
+    await this.clienteRegrasService.validarAgendamentoCliente({
+      data: dto.data,
+      hora: dto.hora,
+      filialId: agendamento.filial_id,
+      now: agora,
+    });
+
+    const atualizado = await this.prisma.agendamento.update({
+      where: { id: agendamento.id },
+      data: {
+        data: dto.data,
+        hora: dto.hora,
+        status: AgendamentoStatus.CONFIRMADO, // Caso estivesse em outro status ativo (ex: PENDENTE)
+      },
+      include: {
+        servico: {
+          select: { nome: true },
+        },
+        filial: {
+          select: { nome: true },
+        },
+      },
+    });
+
+    const response = toAgendamentoResponse(atualizado, { now: agora });
+    response.podeCancelar = this.podeCancelar(atualizado, agora);
+    response.podeReagendar = this.podeReagendar(atualizado, agora);
+
+    await this.notificacaoService.criar({
+      titulo: 'Agendamento reagendado',
+      mensagem: `Seu agendamento de ${response.categoriaNome} foi reagendado para ${response.data} às ${response.horaInicio}.`,
+      icon: 'calendar',
+      iconClass: 'blue-icon',
+      rota: '/client/meus-agendamentos',
+      cliente_id: cliente.id,
+    });
+
+    return {
+      message: 'Agendamento reagendado com sucesso',
+      agendamento: response,
+    };
+  }
+
   private async criarSenhaDeCheckin(
     agendamento: AgendamentoCheckinSource,
+    tipo?: string,
   ): Promise<CheckinTicketDto> {
     const ticket = await this.senhaService.gerarSenhaCliente({
       servico: agendamento.servico,
       filialId: agendamento.filial_id,
       agendamentoId: agendamento.id,
       qtdeGarrafoes: agendamento.qtdeGarrafoes,
+      tipo,
     });
     if (!ticket) {
       throw new BadRequestException('Não foi possível gerar a senha do check-in');

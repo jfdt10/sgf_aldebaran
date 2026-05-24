@@ -1,22 +1,24 @@
 <div class="fila-page">
-  <div class="page-header">
-    <div class="title-section">
-      <div class="breadcrumb-nav">
-        <a routerLink="/supervisor/dashboard" class="btn-voltar">
-          <lucide-icon [img]="icons.arrowLeft" size="16"></lucide-icon>
-          Voltar ao Dashboard
-        </a>
-      </div>
-      <h1>Gerenciamento de Fila - {{ selectedFilialNome || 'Carregando...' }}</h1>
-      <div class="statistics-bar">
-        <span class="stat-pill"><lucide-icon [img]="icons.users" size="14"></lucide-icon> {{ filaEspera.length }} na
-          fila</span>
-        <span class="stat-pill"><lucide-icon [img]="icons.clock" size="14"></lucide-icon> {{ tempoMedioAtendimentoGeral }} min média</span>
+  <div class="page-header white-header">
+    <div class="header-left">
+      <button class="back-btn" routerLink="/supervisor/dashboard">
+        <lucide-icon [img]="icons.arrowLeft" size="20"></lucide-icon>
+      </button>
+      <div class="header-titles">
+        <h1>Gerenciamento de Fila</h1>
+        <span class="header-subtitle">{{ selectedFilialNome || 'Carregando...' }}</span>
       </div>
     </div>
-    <div class="search-wrapper">
-      <lucide-icon [img]="icons.search" size="18" class="search-icon"></lucide-icon>
-      <input type="text" placeholder="Buscar por placa, ticket...">
+    
+    <div class="header-right">
+      <div class="statistics-bar">
+        <span class="stat-pill"><lucide-icon [img]="icons.users" size="14"></lucide-icon> {{ filaEspera.length }} na fila</span>
+        <span class="stat-pill"><lucide-icon [img]="icons.clock" size="14"></lucide-icon> {{ tempoMedioAtendimentoGeral }} min média</span>
+      </div>
+      <div class="search-wrapper">
+        <lucide-icon [img]="icons.search" size="18" class="search-icon"></lucide-icon>
+        <input type="text" placeholder="Buscar por placa, ticket..." [(ngModel)]="filtroFila" (input)="aplicarFiltroFila()">
+      </div>
     </div>
   </div>
 
@@ -41,14 +43,14 @@
     <!-- Fila de Espera -->
     <div class="tab-body" *ngIf="currentTab === 'espera'">
       <div class="queue-list-header">
-        <span class="queue-count">{{ filaEspera.length }} senha(s) na fila</span>
+        <span class="queue-count">{{ filteredFilaEspera.length }} senha(s) na fila</span>
         <button class="btn-zerar-fila" (click)="abrirModalZerarFila()" [disabled]="filaEspera.length === 0">
           <lucide-icon [img]="icons.trash" size="15"></lucide-icon>
           Zerar Fila
         </button>
       </div>
       <div class="queue-list">
-        <div class="queue-card" *ngFor="let item of filaEspera" [ngClass]="item.prioridade">
+        <div class="queue-card" *ngFor="let item of filteredFilaEspera" [ngClass]="item.prioridade">
 
           <div class="ticket-col">
             <span class="ticket-number">{{ item.ticket }}</span>
@@ -81,7 +83,7 @@
         </div>
 
         <!-- Empty state -->
-        <div class="empty-queue-state" *ngIf="filaEspera.length === 0">
+        <div class="empty-queue-state" *ngIf="filteredFilaEspera.length === 0">
           <lucide-icon [img]="icons.check" size="40"></lucide-icon>
           <h4>Fila vazia</h4>
           <p>Não há senhas aguardando atendimento no momento.</p>
@@ -157,7 +159,7 @@
     <!-- Status dos Guichês -->
     <div class="tab-body" *ngIf="currentTab === 'guiche'">
       <div class="guiches-grid">
-        <div class="guiche-card" *ngFor="let guiche of guiches" [ngClass]="guiche.status">
+        <div class="guiche-card" *ngFor="let guiche of filteredGuiches" [ngClass]="guiche.status">
           <div class="card-header">
             <h3>{{ formatarTituloGuiche(guiche.numero) }}</h3>
             <div class="header-right">
@@ -168,7 +170,7 @@
                   <lucide-icon [img]="icons.moreVertical" size="18"></lucide-icon>
                 </button>
 
-                <div class="context-menu-dropdown" *ngIf="contextMenuGuicheNumero === guiche.numero">
+                <div class="context-menu-dropdown" *ngIf="contextMenuGuicheId === guiche.id">
                   <ng-container *ngIf="guiche.status === 'disponivel'">
                     <button class="context-menu-item" type="button"
                       (click)="openRemoveOperatorConfirmation(guiche, $event)">
@@ -278,8 +280,15 @@
               <label>Limite Atendimentos/Dia</label>
               <input type="number" formControlName="limiteAtendimentos">
             </div>
+            <div class="form-field mix-width">
+              <label>Meta de Eficiência Mínima: <strong class="text-teal" style="color: #0ea5e9;">{{ configForm.get('eficienciaMinima')?.value || 90 }}%</strong></label>
+              <div class="slider-container" style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+                <span style="font-size: 0.8rem; color: #64748b;">50%</span>
+                <input type="range" min="50" max="100" step="5" formControlName="eficienciaMinima" style="flex: 1; accent-color: #0ea5e9; cursor: pointer; height: 6px; border-radius: 4px;">
+                <span style="font-size: 0.8rem; color: #64748b;">100%</span>
+              </div>
+            </div>
           </div>
-
         </div>
 
         <div class="settings-group mt-32">

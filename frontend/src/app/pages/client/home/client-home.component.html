@@ -172,10 +172,46 @@
           </div>
         </div>
 
+        <!-- Mensagens de UX Progressiva de Check-in -->
+        <div class="checkin-ux-alert too-early" *ngIf="!voucher.checkinRealizado && !ticket && checkinStatus === 'too-early'">
+          <lucide-icon [img]="icons.clock" size="18"></lucide-icon>
+          <span>Seu check-in será liberado em <strong>{{ minutosParaLiberar }}</strong>.</span>
+        </div>
+
+        <div class="checkin-ux-alert ready" *ngIf="!voucher.checkinRealizado && !ticket && checkinStatus === 'ready'">
+          <lucide-icon [img]="icons.success" size="18"></lucide-icon>
+          <span>Seu horário está próximo! <strong>Check-in liberado</strong>.</span>
+        </div>
+
+        <div class="checkin-ux-alert expired" *ngIf="!voucher.checkinRealizado && !ticket && checkinStatus === 'expired'">
+          <lucide-icon [img]="icons.help" size="18"></lucide-icon>
+          <span>Prazo para check-in expirado (limite de 15 minutos após o horário agendado).</span>
+        </div>
+
+        <div class="ticket-type-selector" *ngIf="!voucher.checkinRealizado && !ticket">
+          <span class="selector-label">Tipo de Atendimento:</span>
+          <div class="selector-options">
+            <button 
+              type="button" 
+              class="option-btn" 
+              [class.active]="tipoAtendimento === 'Convencional'"
+              (click)="setTipoAtendimento('Convencional')">
+              Convencional
+            </button>
+            <button 
+              type="button" 
+              class="option-btn" 
+              [class.active]="tipoAtendimento === 'Preferencial'"
+              (click)="setTipoAtendimento('Preferencial')">
+              Preferencial
+            </button>
+          </div>
+        </div>
+
         <button
           class="btn-checkin"
           *ngIf="!voucher.checkinRealizado && !ticket"
-          [disabled]="checkinLoading"
+          [disabled]="checkinLoading || checkinStatus !== 'ready'"
           (click)="confirmarCheckin()">
           {{ checkinLoading ? 'Confirmando...' : 'Confirmar check-in' }}
         </button>

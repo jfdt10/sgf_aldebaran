@@ -12,4 +12,6 @@ export class AgendamentoResponseDto {
   senhaStatus?: string | null;
   posicao?: number | null;
   estimativa?: number | null;
+  filialId?: number | null;
+  servicoId?: number;
 }

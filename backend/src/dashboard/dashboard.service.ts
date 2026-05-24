@@ -329,20 +329,24 @@ export class DashboardService {
 
 
 
-  async getSupervisorOverview(filialId?: string) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayStr = today.toISOString().split('T')[0];
+  async getSupervisorOverview(filialId?: string, dateStr?: string) {
+    const targetDate = dateStr ? new Date(`${dateStr}T12:00:00`) : new Date();
+    const startOfTarget = new Date(targetDate);
+    startOfTarget.setHours(0, 0, 0, 0);
 
+    const endOfTarget = new Date(targetDate);
+    endOfTarget.setHours(23, 59, 59, 999);
+
+    const targetDateStr = startOfTarget.toISOString().split('T')[0];
     const fid = filialId && !isNaN(+filialId) ? +filialId : undefined;
 
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-
-    // Mesma lógica do endpoint /relatorios?periodo=dia
+    // Atendimentos no dia de referência
     const todosAtendimentos = await this.prisma.atendimento.findMany({
       where: {
-        inicioAtendimento: { gte: startOfToday },
+        inicioAtendimento: {
+          gte: startOfTarget,
+          lte: endOfTarget,
+        },
         ...(fid ? { guiche_rel: { filial_id: fid } } : {}),
       } as any,
       include: {
@@ -369,6 +373,10 @@ export class DashboardService {
     const filaAtual = await this.prisma.senha.count({
       where: {
         status: 'AGUARDANDO',
+        dataCriacao: {
+          gte: startOfTarget,
+          lte: endOfTarget,
+        },
         ...(fid ? { filial_id: fid } : {}),
       },
     });
@@ -383,17 +391,20 @@ export class DashboardService {
 
     const agendamentos = await this.prisma.agendamento.findMany({
       where: {
-        data: todayStr,
-        status: { not: 'CANCELADO' },
+        data: targetDateStr,
         ...(fid ? { filial_id: fid } : {}),
       },
-      include: { servico: true, filial: true },
+      include: { servico: true, filial: true, senha: true },
       orderBy: { hora: 'asc' },
     });
 
     const atendimentosQueue = await this.prisma.senha.findMany({
       where: {
         status: { in: ['AGUARDANDO', 'CHAMADO'] },
+        dataCriacao: {
+          gte: startOfTarget,
+          lte: endOfTarget,
+        },
         ...(fid ? { filial_id: fid } : {}),
       },
       include: {
@@ -433,13 +444,18 @@ export class DashboardService {
         filaAtual: filaAtual.toString(),
         alertaSla: tAtendMin > metaEspera || atendimentosQueue.some(s => Math.floor((new Date().getTime() - s.dataCriacao.getTime()) / 60000) > metaEspera),
       },
-      agendamentos: agendamentos.map((a) => ({
-        id: a.id,
-        senha: a.codigo || 'S/N',
-        cliente: a.nomeCliente || 'Não informado',
-        horario: a.hora,
-        status: a.status,
-      })),
+      agendamentos: agendamentos.map((a) => {
+        // Map the generated ticket display number if checked in, else fallback to a.codigo
+        const activeTicket = a.senha && a.senha.length > 0 ? a.senha[a.senha.length - 1] : null;
+        return {
+          id: a.id,
+          senha: activeTicket ? activeTicket.numeroDisplay : (a.codigo || 'S/N'),
+          codigo: a.codigo || 'S/N',
+          cliente: a.nomeCliente || 'Não informado',
+          horario: a.hora,
+          status: a.status,
+        };
+      }),
       atendimentos: atendimentosQueue.map((s) => {
         const atend =
           s.atendimento && s.atendimento.length > 0 ? s.atendimento[0] : null;
@@ -482,6 +498,15 @@ export class DashboardService {
         operadorId: true,
         inicioAtendimento: true,
         fimAtendimento: true,
+        senha: {
+          select: {
+            servico: {
+              select: {
+                metaAtendimento: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -530,7 +555,8 @@ export class DashboardService {
       if (dur >= 0 && dur < 300) {
         m.totalCompletados++;
         m.somaMinutos += dur;
-        if (mediaGeralMinutos === 0 || dur <= mediaGeralMinutos) m.abaixoDaMedia++;
+        const limiteSla = a.senha?.servico?.metaAtendimento || 15;
+        if (dur <= limiteSla) m.abaixoDaMedia++;
       }
     }
 
@@ -587,6 +613,15 @@ export class DashboardService {
         inicioAtendimento: true,
         fimAtendimento: true,
         guiche_rel: { select: { operadorAtualId: true } },
+        senha: {
+          select: {
+            servico: {
+              select: {
+                metaAtendimento: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -644,7 +679,8 @@ export class DashboardService {
       if (dur >= 0 && dur < 300) {
         m.totalCompletados++;
         m.somaMinutos += dur;
-        if (mediaGeralMinutos === 0 || dur <= mediaGeralMinutos) m.abaixoDaMedia++;
+        const limiteSla = (atend as any).senha?.servico?.metaAtendimento || 15;
+        if (dur <= limiteSla) m.abaixoDaMedia++;
       }
     }
 

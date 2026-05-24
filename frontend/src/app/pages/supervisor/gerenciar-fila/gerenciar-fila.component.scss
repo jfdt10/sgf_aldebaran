@@ -17,41 +17,48 @@ $cyan-dark: #0891b2;
   min-height: 100vh;
 }
 
-.page-header {
+.page-header.white-header {
   background: transparent;
   padding: 0 0 24px 0;
-  border-bottom: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: none;
+  color: $text-main;
 
-  .title-section {
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .back-btn { 
+    width: 36px; height: 36px; border-radius: 50%; border: 1px solid $border; background: white;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: $text-main; transition: 0.2s;
+    &:hover { background: #f3f4f6; }
+  }
+  .header-titles {
+    display: flex; flex-direction: column;
+    h1 { margin: 0; font-size: 1.4rem; font-weight: 800; color: $text-main; }
+    .header-subtitle { font-size: 0.95rem; color: $text-sec; }
+  }
+
+  .header-right { 
+    display: flex; 
+    align-items: center; 
+    gap: 16px; 
+  }
+
+  .statistics-bar {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    gap: 12px;
 
-    h1 {
-      margin: 0;
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: $text-main;
-    }
-
-    .statistics-bar {
+    .stat-pill {
       display: flex;
-      gap: 12px;
-
-      .stat-pill {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        background: $blue-light;
-        color: $blue-dark;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-      }
+      align-items: center;
+      gap: 6px;
+      background: $blue-light;
+      color: $blue-dark;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
     }
   }
 

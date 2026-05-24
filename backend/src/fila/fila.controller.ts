@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
+import { ValidarCheckinDto } from './dto/validar-checkin.dto';
 import { FilaService } from './fila.service';
 
 @Controller('fila')
@@ -40,8 +41,8 @@ export class FilaController {
   }
 
   @Post('checkin/validar')
-  validarCheckin(@Body() body: { codigo: string; filialId?: number }) {
-    return this.filaService.validarCheckin(body.codigo, body.filialId);
+  validarCheckin(@Body() body: ValidarCheckinDto) {
+    return this.filaService.validarCheckin(body.codigo, body.filialId, body.tipo, body.ignorarRegras);
   }
 
   @Get('dashboard-stats')
@@ -53,10 +54,12 @@ export class FilaController {
   getHorarios(
     @Query('data') data: string,
     @Query('filialId') filialId?: string,
+    @Query('servicoId') servicoId?: string,
   ) {
     return this.filaService.horariosDisponiveis(
       data,
       filialId ? +filialId : undefined,
+      servicoId ? +servicoId : undefined,
     );
   }
 
@@ -89,6 +92,14 @@ export class FilaController {
     @Param('id') id: string,
   ) {
     return this.filaService.excluirAgendamento(+id, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('agendamento/:id/resgatar')
+  resgatarAgendamento(
+    @Param('id') id: string,
+  ) {
+    return this.filaService.resgatarAgendamento(+id);
   }
 
   @Post('servicos')
@@ -162,6 +173,17 @@ export class FilaController {
   ) {
     const fid = filialId ? +filialId : req.user.filial_id;
     return this.filaService.listarAtendimentosOperador(req.user.userId, fid);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('supervisor/atendimentos')
+  listarAtendimentosSupervisor(
+    @Request() req: AuthenticatedRequest,
+    @Query('filialId') filialId?: string,
+    @Query('data') data?: string,
+  ) {
+    const fid = filialId ? +filialId : req.user.filial_id;
+    return this.filaService.listarAtendimentosSupervisor(fid, data);
   }
 
   @Post('iniciar_atendimento')

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { LucideAngularModule, Search, Clock, User, AlertCircle, ArrowUpCircle, CheckCircle, Users, ArrowLeft, Plus, X, Mail, MoreVertical, Trash2 } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
-import { ReactiveFormsModule, FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
 import { GuicheService } from '../../../services/guiche.service';
 import { FilialService } from '../../../services/filial.service';
 import { environment } from '../../../../environments/environment';
@@ -11,7 +11,7 @@ import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-supervisor-gerenciar-fila',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterLink, ReactiveFormsModule],
+  imports: [CommonModule, LucideAngularModule, RouterLink, FormsModule, ReactiveFormsModule],
   templateUrl: './gerenciar-fila.component.html',
   styleUrls: ['./gerenciar-fila.component.scss']
 })
@@ -23,7 +23,7 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
   showSuccessModal = false;
   tempoMedioAtendimentoGeral = 0;
 
-  contextMenuGuicheNumero: number | null = null;
+  contextMenuGuicheId: number | null = null;
   showRemoveOperatorConfirmModal = false;
   guicheSelecionadoParaRemocao: any = null;
 
@@ -48,6 +48,9 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
   ];
 
   guiches: any[] = [];
+  filtroFila = '';
+  filteredFilaEspera: any[] = [];
+  filteredGuiches: any[] = [];
   private baiasTimer: any;
 
   showOperadorModal = false;
@@ -87,7 +90,8 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
       tempoTolerancia: new FormControl(this.guicheService.tempoTolerancia),
       limiteAtendimentos: new FormControl(200),
       prioridadePcdIdoso: new FormControl(true),
-      redirecionarAusentes: new FormControl(false)
+      redirecionarAusentes: new FormControl(false),
+      eficienciaMinima: new FormControl(90)
     });
 
     this.operadorForm = this.fb.group({
@@ -123,7 +127,7 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
     // Inscrever aos dados de guichês do serviço
     this.guicheService.guiches$.subscribe((guiches: any[]) => {
       this.guiches = guiches;
-      this.cdr.detectChanges();
+      this.aplicarFiltroFila();
     });
 
     // Timer for baia occupancy countdowns
@@ -170,10 +174,28 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
     }).subscribe({
       next: (dados) => {
         this.filaEspera = dados;
-        this.cdr.detectChanges();
+        this.aplicarFiltroFila();
       },
       error: (err) => console.error('Erro ao carregar fila:', err)
     });
+  }
+
+  aplicarFiltroFila() {
+    const termo = this.filtroFila?.toLowerCase().trim();
+    if (!termo) {
+      this.filteredFilaEspera = this.filaEspera;
+      this.filteredGuiches = this.guiches;
+    } else {
+      this.filteredFilaEspera = this.filaEspera.filter((item: any) => {
+        const combinacao = `${item.ticket} ${item.motorista} ${item.servico}`.toLowerCase();
+        return combinacao.includes(termo);
+      });
+      this.filteredGuiches = this.guiches.filter((g: any) => {
+        const combinacao = `${g.numero} ${g.status} ${g.nomeOperador || ''} ${g.senha || ''} ${g.placa || ''}`.toLowerCase();
+        return combinacao.includes(termo);
+      });
+    }
+    this.cdr.detectChanges();
   }
 
   carregarConfiguracoes() {
@@ -186,11 +208,22 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
         const configMap: Record<string, string> = {};
         configs.forEach((c: any) => configMap[c.chave] = c.valor);
         
+        const getVal = (keyCamel: string, keyUpper: string) => {
+          return configMap[keyCamel] !== undefined ? configMap[keyCamel] : configMap[keyUpper];
+        };
+
+        const valTolerancia = getVal('tempoTolerancia', 'TEMPO_TOLERANCIA');
+        const valLimite = getVal('limiteAtendimentosDia', 'LIMITE_ATENDIMENTOS');
+        const valPrioridade = getVal('prioridadeAutomatica', 'PRIORIDADE_AUTOMATICA');
+        const valRedirecionar = getVal('redirecionarAusentes', 'REDIRECIONAR_AUSENTES');
+        const valEficiencia = getVal('eficienciaMinima', 'EFICIENCIA_MINIMA');
+
         this.configForm.patchValue({
-          tempoTolerancia: configMap['tempoTolerancia'] ? parseInt(configMap['tempoTolerancia'], 10) : 15,
-          limiteAtendimentos: configMap['limiteAtendimentosDia'] ? parseInt(configMap['limiteAtendimentosDia'], 10) : 200,
-          prioridadePcdIdoso: configMap['prioridadeAutomatica'] !== 'false',
-          redirecionarAusentes: configMap['redirecionarAusentes'] === 'true'
+          tempoTolerancia: valTolerancia ? parseInt(valTolerancia, 10) : 15,
+          limiteAtendimentos: valLimite ? parseInt(valLimite, 10) : 200,
+          prioridadePcdIdoso: valPrioridade !== 'false',
+          redirecionarAusentes: valRedirecionar === 'true',
+          eficienciaMinima: valEficiencia ? parseInt(valEficiencia, 10) : 90
         });
         
         this.guicheService.tempoTolerancia = this.configForm.value.tempoTolerancia;
@@ -328,7 +361,8 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
         { chave: 'tempoTolerancia', valor: formValue.tempoTolerancia.toString() },
         { chave: 'limiteAtendimentosDia', valor: formValue.limiteAtendimentos.toString() },
         { chave: 'prioridadeAutomatica', valor: formValue.prioridadePcdIdoso.toString() },
-        { chave: 'redirecionarAusentes', valor: formValue.redirecionarAusentes.toString() }
+        { chave: 'redirecionarAusentes', valor: formValue.redirecionarAusentes.toString() },
+        { chave: 'eficienciaMinima', valor: formValue.eficienciaMinima.toString() }
       ];
 
       const token = localStorage.getItem('token') || '';
@@ -532,11 +566,11 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
 
   toggleContextMenu(guiche: any, event: MouseEvent) {
     event.stopPropagation();
-    this.contextMenuGuicheNumero = this.contextMenuGuicheNumero === guiche.numero ? null : guiche.numero;
+    this.contextMenuGuicheId = this.contextMenuGuicheId === guiche.id ? null : guiche.id;
   }
 
   closeContextMenu() {
-    this.contextMenuGuicheNumero = null;
+    this.contextMenuGuicheId = null;
   }
 
   openRemoveOperatorConfirmation(guiche: any, event: MouseEvent) {

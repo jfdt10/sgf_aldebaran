@@ -56,9 +56,9 @@
               <div class="form-group">
                 <label>Senha Atual</label>
                 <div class="input-with-icon">
-                  <input type="password" formControlName="senhaAtual" placeholder="••••••••">
+                  <input [type]="showSenhaAtual ? 'text' : 'password'" formControlName="senhaAtual" placeholder="••••••••">
                   <lucide-icon [img]="icons.lock" size="16" class="field-icon-left"></lucide-icon>
-                  <lucide-icon [img]="icons.eye" size="16" class="field-icon-action text-sec"></lucide-icon>
+                  <lucide-icon [img]="showSenhaAtual ? icons.eyeOff : icons.eye" size="16" class="field-icon-action text-sec" (click)="showSenhaAtual = !showSenhaAtual" style="cursor: pointer;"></lucide-icon>
                 </div>
               </div>
               <!-- Empty spacer -->
@@ -67,17 +67,17 @@
               <div class="form-group">
                 <label>Nova Senha</label>
                 <div class="input-with-icon">
-                  <input type="password" formControlName="novaSenha" placeholder="••••••••">
+                  <input [type]="showNovaSenha ? 'text' : 'password'" formControlName="novaSenha" placeholder="••••••••">
                   <lucide-icon [img]="icons.lock" size="16" class="field-icon-left"></lucide-icon>
-                  <lucide-icon [img]="icons.eye" size="16" class="field-icon-action text-sec"></lucide-icon>
+                  <lucide-icon [img]="showNovaSenha ? icons.eyeOff : icons.eye" size="16" class="field-icon-action text-sec" (click)="showNovaSenha = !showNovaSenha" style="cursor: pointer;"></lucide-icon>
                 </div>
               </div>
               <div class="form-group">
                 <label>Confirmar Nova Senha</label>
                 <div class="input-with-icon">
-                  <input type="password" formControlName="confirmarSenha" placeholder="••••••••">
+                  <input [type]="showConfirmarSenha ? 'text' : 'password'" formControlName="confirmarSenha" placeholder="••••••••">
                   <lucide-icon [img]="icons.lock" size="16" class="field-icon-left"></lucide-icon>
-                  <lucide-icon [img]="icons.eye" size="16" class="field-icon-action text-sec"></lucide-icon>
+                  <lucide-icon [img]="showConfirmarSenha ? icons.eyeOff : icons.eye" size="16" class="field-icon-action text-sec" (click)="showConfirmarSenha = !showConfirmarSenha" style="cursor: pointer;"></lucide-icon>
                 </div>
               </div>
             </div>

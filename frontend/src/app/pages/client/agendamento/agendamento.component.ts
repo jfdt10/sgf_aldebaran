@@ -19,6 +19,7 @@ export class AgendamentoComponent implements OnInit {
   hoje = new Date();
   erroData: string | null = null;
   erroAgendamento: string | null = null;
+  reagendandoId: number | null = null;
   agendamentoConfirmado: {
     filialNome: string;
     categoriaNome: string;
@@ -91,12 +92,33 @@ export class AgendamentoComponent implements OnInit {
   checkReschedule() {
     const reId = this.route.snapshot.queryParamMap.get('re');
     if (reId) {
-      this.api.get<any[]>('/fila/agendamento').subscribe(data => {
-        const ag = data.find(a => a.id === Number(reId));
-        if (ag) {
-          this.form.filialId = ag.filial_id || this.form.filialId;
-          this.form.servicoId = ag.servico_id || this.form.servicoId;
-          this.cdr.detectChanges();
+      this.api.get<any[]>('/agendamentos', { meus: 'true', status: 'active' }).subscribe({
+        next: (data) => {
+          const ag = (data || []).find(a => a.id === Number(reId));
+          if (ag) {
+            this.reagendandoId = ag.id;
+            this.form.filialId = ag.filialId || this.form.filialId;
+            this.form.servicoId = ag.servicoId || this.form.servicoId;
+            
+            if (ag.data) {
+              const dateParts = ag.data.split('-');
+              if (dateParts.length === 3) {
+                this.anoAtual = Number(dateParts[0]);
+                this.mesAtual = Number(dateParts[1]) - 1; // 0-based
+                this.form.data = Number(dateParts[2]);
+              }
+            }
+            if (ag.horaInicio) {
+              this.form.hora = ag.horaInicio;
+            }
+            
+            this.gerarCalendario();
+            this.carregarConfiguracoes();
+            this.cdr.detectChanges();
+          }
+        },
+        error: (err) => {
+          console.error('Erro ao carregar agendamento para reagendar:', err);
         }
       });
     }
@@ -110,21 +132,33 @@ export class AgendamentoComponent implements OnInit {
       })
     ).subscribe(data => {
       this.filiais = data || [];
-      if (this.filiais.length > 0) {
+      const reId = this.route.snapshot.queryParamMap.get('re');
+      if (!reId && this.filiais.length > 0) {
         this.form.filialId = this.filiais[0].id;
         this.carregarConfiguracoes();
       }
       this.cdr.detectChanges();
     });
+  }
 
-    this.api.get<any[]>('/servicos').pipe(
+  carregarCategorias() {
+    if (!this.form.filialId) return;
+    this.api.get<any[]>(`/servicos?filialId=${this.form.filialId}`).pipe(
       catchError(err => {
-        console.error('Erro ao carregar categorias', err);
+        console.error('Erro ao carregar categorias da filial', err);
         return of([]);
       })
     ).subscribe(data => {
       this.categorias = data || [];
-      if (this.categorias.length > 0) this.form.servicoId = this.categorias[0].id;
+      if (this.categorias.length > 0) {
+        const existe = this.categorias.some(c => c.id === this.form.servicoId);
+        if (!existe) {
+          this.form.servicoId = this.categorias[0].id;
+        }
+      } else {
+        this.form.servicoId = null;
+      }
+      this.atualizarHorarios();
       this.cdr.detectChanges();
     });
   }
@@ -165,7 +199,7 @@ export class AgendamentoComponent implements OnInit {
         this.erroData = null;
       }
 
-      this.atualizarHorarios();
+      this.carregarCategorias();
       this.cdr.detectChanges();
     });
   }
@@ -182,8 +216,9 @@ export class AgendamentoComponent implements OnInit {
 
     const dataObj = new Date(this.anoAtual, this.mesAtual, this.form.data, 12, 0, 0);
     const dataStr = dataObj.toISOString().split('T')[0];
+    const servicoPart = this.form.servicoId ? `&servicoId=${this.form.servicoId}` : '';
 
-    this.api.get<any[]>(`/fila/agendamento/horarios?data=${dataStr}&filialId=${this.form.filialId}`).pipe(
+    this.api.get<any[]>(`/fila/agendamento/horarios?data=${dataStr}&filialId=${this.form.filialId}${servicoPart}`).pipe(
       catchError(err => {
         console.error('Erro ao carregar horários', err);
         return of([]);
@@ -340,6 +375,37 @@ export class AgendamentoComponent implements OnInit {
     const filialSelecionada = this.filiais.find(x => Number(x.id) === Number(this.form.filialId));
     const categoriaSelecionada = this.categorias.find(x => Number(x.id) === Number(this.form.servicoId));
     const quantidade = Math.max(0, Number(this.form.quantidade) || 0);
+
+    if (this.reagendandoId) {
+      const payload = {
+        data: dataFormatada,
+        hora: this.form.hora
+      };
+
+      this.api.patch<any>(`/agendamentos/${this.reagendandoId}/reagendar`, payload).subscribe({
+        next: (res) => {
+          const ag = res.agendamento || res;
+          this.agendamentoConfirmado = {
+            filialNome: ag?.filialNome || this.getFilialNome(),
+            categoriaNome: ag?.categoriaNome || this.getCategoriaNome(),
+            quantidade: quantidade,
+            data: this.form.data,
+            mes: this.mesAtual,
+            ano: this.anoAtual,
+            hora: this.form.hora,
+          };
+          this.showSuccessModal = true;
+          this.reagendandoId = null;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.erroAgendamento =
+            err.error?.message || 'Erro ao reagendar. Tente novamente mais tarde.';
+          this.cdr.detectChanges();
+        }
+      });
+      return;
+    }
 
     // Construct API payload
     const payload = {

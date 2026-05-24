@@ -27,10 +27,13 @@ export class DashboardService {
     return new HttpHeaders().set('Authorization', `Bearer ${token}`);
   }
 
-  getSupervisorOverview(filialId?: number): Observable<SupervisorOverview> {
+  getSupervisorOverview(filialId?: number, data?: string): Observable<SupervisorOverview> {
     let params = new HttpParams();
     if (filialId) {
       params = params.set('filialId', filialId.toString());
+    }
+    if (data) {
+      params = params.set('data', data);
     }
     return this.http.get<SupervisorOverview>(`${this.apiUrl}/supervisor`, {
       headers: this.getHeaders(),

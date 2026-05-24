@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { Router } from '@angular/router';
 import {
     LucideAngularModule, User, Phone, Briefcase, Hash,
-    Play, CheckCircle, XCircle, RotateCcw, AlertTriangle, Users, Clock, Search, Truck, CreditCard, Calendar, LogOut, FileText, Package, Building2, Mail, History, Eye, X, AlertCircle, Lock
+    Play, CheckCircle, XCircle, RotateCcw, AlertTriangle, Users, Clock, Search, Truck, CreditCard, Calendar, LogOut, FileText, Package, Building2, Mail, History, Eye, X, AlertCircle, Lock, ChevronDown
 } from 'lucide-angular';
 import { GuicheService, GuicheOperador } from '../../../services/guiche.service';
 import { AuthService } from '../../../services/auth.service';
@@ -137,6 +137,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
     idiomaAtivo = 'PT';
     filialSelecionada = '';
     filiais: Filial[] = [];
+    hasRestrictedFilial = false;
 
     tempoOciosoText = '00:00';
     ociosoIniciadoEm: number | null = null;
@@ -145,12 +146,12 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
     // Ícones do sistema
     icons = {
         user: User, phone: Phone, briefcase: Briefcase, hash: Hash,
-        play: Play, check: CheckCircle, close: X, recall: RotateCcw,
+        play: Play, check: CheckCircle, close: X, recall: RotateCcw, rotateCcw: RotateCcw,
         alert: AlertTriangle, alertCircle: AlertCircle, users: Users, clock: Clock,
         search: Search, truck: Truck, creditCard: CreditCard,
         calendar: Calendar, logout: LogOut, queue: Users, phoneCall: Phone,
         building: Building2, package: Package, fileText: FileText, mail: Mail,
-        history: History, eye: Eye, x: X, lock: Lock
+        history: History, eye: Eye, x: X, lock: Lock, chevronDown: ChevronDown
     };
 
     // Status de fila
@@ -344,8 +345,10 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
 
                 if (usuarioFilialId) {
                     this.filiais = data.filter((f: any) => f.id === usuarioFilialId);
+                    this.hasRestrictedFilial = true;
                 } else {
                     this.filiais = data;
+                    this.hasRestrictedFilial = false;
                 }
 
                 const savedId = this.filialService.getSelectedFilialId();
@@ -1069,24 +1072,92 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
         });
     }
 
-    confirmarPresencaAgendamento(agenda: any) {
-        this.api.patch<any>(`/agendamentos/${agenda.id}/confirmar`, {}).subscribe({
+    agendamentoParaCheckin: any = null;
+    agendamentoParaCancelar: any = null;
+    agendamentoParaResgatar: any = null;
+
+    abrirModalCheckin(agenda: any) {
+        this.agendamentoParaCheckin = agenda;
+        this.cdr.markForCheck();
+    }
+
+    fecharModalCheckin() {
+        this.agendamentoParaCheckin = null;
+        this.cdr.markForCheck();
+    }
+
+    confirmarCheckinOperador(tipo: string) {
+        if (!this.agendamentoParaCheckin) return;
+        
+        const filialId = this.filialSelecionada ? parseInt(this.filialSelecionada, 10) : undefined;
+        const payload = {
+            codigo: this.agendamentoParaCheckin.codigo,
+            filialId: filialId,
+            tipo: tipo,
+            ignorarRegras: true
+        };
+
+        this.api.post<any>('/fila/checkin/validar', payload).subscribe({
             next: () => {
-                agenda.status = 'CONFIRMADO';
+                this.fecharModalCheckin();
+                this.carregarResumos();
+                this.carregarFila();
                 this.cdr.markForCheck();
             },
-            error: () => { /* silencia erro de endpoint não existente ainda */ }
+            error: (err) => {
+                alert(err?.error?.message || 'Erro ao realizar check-in.');
+            }
         });
     }
 
-    cancelarAgendamento(agenda: any) {
-        if (!confirm(`Cancelar o agendamento ${agenda.senha}?`)) return;
-        this.api.patch<any>(`/agendamentos/${agenda.id}/cancelar`, {}).subscribe({
+    abrirModalCancelar(agenda: any) {
+        this.agendamentoParaCancelar = agenda;
+        this.cdr.markForCheck();
+    }
+
+    fecharModalCancelar() {
+        this.agendamentoParaCancelar = null;
+        this.cdr.markForCheck();
+    }
+
+    confirmarCancelarAgendamento() {
+        if (!this.agendamentoParaCancelar) return;
+        
+        this.api.delete<any>(`/fila/agendamento/${this.agendamentoParaCancelar.id}`).subscribe({
             next: () => {
-                this.agendamentos = this.agendamentos.filter(a => a !== agenda);
+                this.fecharModalCancelar();
+                this.carregarResumos();
                 this.cdr.markForCheck();
             },
-            error: () => { /* silencia erro de endpoint não existente ainda */ }
+            error: (err) => {
+                alert(err?.error?.message || 'Erro ao cancelar agendamento.');
+            }
+        });
+    }
+
+    abrirModalResgatar(agenda: any) {
+        this.agendamentoParaResgatar = agenda;
+        this.cdr.markForCheck();
+    }
+
+    fecharModalResgatar() {
+        this.agendamentoParaResgatar = null;
+        this.cdr.markForCheck();
+    }
+
+    confirmarResgatarAgendamento() {
+        if (!this.agendamentoParaResgatar) return;
+
+        this.api.post<any>(`/fila/agendamento/${this.agendamentoParaResgatar.id}/resgatar`, {}).subscribe({
+            next: () => {
+                this.fecharModalResgatar();
+                this.carregarResumos();
+                this.carregarFila();
+                this.cdr.markForCheck();
+            },
+            error: (err) => {
+                alert(err?.error?.message || 'Erro ao resgatar agendamento.');
+            }
         });
     }
 

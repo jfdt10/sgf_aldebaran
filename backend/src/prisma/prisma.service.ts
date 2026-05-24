@@ -1,3 +1,4 @@
+import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
@@ -7,13 +8,16 @@ export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
+  private pool?: Pool;
+
   constructor() {
     const connectionString = process.env.DATABASE_URL;
     if (!connectionString) {
       throw new Error('DATABASE_URL is not configured');
     }
 
-    const adapter = new PrismaPg({ connectionString });
+    const pool = new Pool({ connectionString });
+    const adapter = new PrismaPg(pool);
 
     super({
       adapter,
@@ -23,6 +27,8 @@ export class PrismaService
           ? ['query', 'info', 'warn', 'error']
           : ['warn', 'error'],
     });
+
+    this.pool = pool;
   }
 
   async onModuleInit() {
@@ -36,5 +42,9 @@ export class PrismaService
 
   async onModuleDestroy() {
     await this.$disconnect();
+    if (this.pool) {
+      await this.pool.end();
+    }
   }
 }
+

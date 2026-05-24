@@ -19,8 +19,11 @@ export class DashboardController {
   }
 
   @Get('supervisor')
-  getSupervisorOverview(@Query('filialId') filialId: string) {
-    return this.dashboardService.getSupervisorOverview(filialId);
+  getSupervisorOverview(
+    @Query('filialId') filialId: string,
+    @Query('data') data?: string,
+  ) {
+    return this.dashboardService.getSupervisorOverview(filialId, data);
   }
 
   @Get('graficos-por-hora')

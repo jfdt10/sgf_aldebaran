@@ -22,7 +22,15 @@ export class LegalDocumentComponent {
 
   constructor(private readonly router: Router) {}
 
+  get eyebrow(): string {
+    return this.router.url.includes('/supervisor') ? 'Portal do Supervisor' : 'Portal do Cliente';
+  }
+
   protected back(): void {
-    this.router.navigate(['/client/configuracoes']);
+    if (this.router.url.includes('/supervisor')) {
+      this.router.navigate(['/supervisor/configuracoes']);
+    } else {
+      this.router.navigate(['/client/configuracoes']);
+    }
   }
 }

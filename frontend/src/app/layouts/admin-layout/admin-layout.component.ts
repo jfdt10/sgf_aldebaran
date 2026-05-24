@@ -242,6 +242,21 @@ export class AdminLayoutComponent implements OnInit {
     } else if (url.includes('/admin/atendimento')) {
       this.activePageTitle = 'Atendimento';
       this.activePageGroup = 'Operacional';
+    } else if (url.includes('/supervisor/dashboard')) {
+      this.activePageTitle = 'Dashboard';
+      this.activePageGroup = '';
+    } else if (url.includes('/supervisor/relatorios')) {
+      this.activePageTitle = 'Relatórios Gerenciais';
+      this.activePageGroup = '';
+    } else if (url.includes('/supervisor/gerenciar-fila')) {
+      this.activePageTitle = 'Gerenciar Fila';
+      this.activePageGroup = '';
+    } else if (url.includes('/supervisor/configuracoes')) {
+      this.activePageTitle = 'Configurações';
+      this.activePageGroup = '';
+    } else if (url.includes('/supervisor/meu-perfil')) {
+      this.activePageTitle = 'Meu Perfil';
+      this.activePageGroup = 'Conta';
     }
 
     this.titleService.setTitle(`Aldebaran - ${this.activePageTitle}`);

@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { TotemConfigService } from './totem-config.service';
+import { Observable, throwError } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 export interface Ticket {
   id?: number;
@@ -74,31 +76,27 @@ export class TotemService {
     });
   }
 
-  validarCheckin(codigo: string) {
+  validarCheckin(codigo: string, tipo: string = 'Convencional'): Observable<any> {
     const codigoNormalizado = this.normalizarCodigoCheckin(codigo);
     if (!codigoNormalizado) {
-      alert('Informe um codigo valido.');
-      return;
+      return throwError(() => new Error('Informe um código válido.'));
     }
 
     const payload = {
       codigo: codigoNormalizado,
-      filialId: this.configService.getFilialId()
+      filialId: this.configService.getFilialId(),
+      tipo: tipo
     };
 
-    return this.http.post<any>(`${this.apiUrl}/checkin/validar`, payload).subscribe({
-      next: (resposta) => {
+    return this.http.post<any>(`${this.apiUrl}/checkin/validar`, payload).pipe(
+      tap((resposta) => {
         if (resposta.valido) {
           this.finalizarProcesso(resposta.ticket, 'Agendamento');
         } else {
-          alert(resposta.mensagem || 'Código inválido.');
+          throw new Error(resposta.mensagem || 'Código inválido.');
         }
-      },
-      error: (erro) => {
-        console.error('Erro Checkin:', erro);
-        alert('Erro ao validar código.');
-      }
-    });
+      })
+    );
   }
 
   private normalizarCodigoCheckin(codigo: string): string {

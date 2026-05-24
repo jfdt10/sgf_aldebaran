@@ -20,7 +20,7 @@ export class ClienteRegrasService {
 
     this.validarDiaAtivo(params.data, configs);
     this.validarHorarioFuncionamento(params.hora, configs);
-    this.validarAntecedenciaMinima(dataHora, now);
+    this.validarAntecedenciaMinima(dataHora, now, configs);
   }
 
   async validarCheckinCliente(params: {
@@ -84,13 +84,21 @@ export class ClienteRegrasService {
     }
   }
 
-  private validarAntecedenciaMinima(dataHora: Date, now: Date): void {
-    const minimoMs =
-      ClienteRegrasService.ANTECEDENCIA_MINIMA_AGENDAMENTO_MINUTOS * 60 * 1000;
+  private validarAntecedenciaMinima(dataHora: Date, now: Date, configs: Record<string, string>): void {
+    const minConfig = configs['TOTEM_ANTECEDENCIA_MINIMA_MINUTOS'];
+    const antecedenciaMinutos = minConfig && !isNaN(Number(minConfig)) ? Number(minConfig) : 120;
+
+    const minimoMs = antecedenciaMinutos * 60 * 1000;
 
     if (dataHora.getTime() < now.getTime() + minimoMs) {
+      if (antecedenciaMinutos === 0) return; // Permite agendamento sem antecedência (imediato)
+
+      const horas = antecedenciaMinutos / 60;
+      const desc = horas % 1 === 0 
+        ? `${horas} ${horas === 1 ? 'hora' : 'horas'}` 
+        : `${antecedenciaMinutos} minutos`;
       throw new BadRequestException(
-        'Agendamentos devem respeitar antecedencia minima de 2 horas.',
+        `Agendamentos devem respeitar antecedencia minima de ${desc}.`,
       );
     }
   }
@@ -99,8 +107,19 @@ export class ClienteRegrasService {
     const inicioMs = dataHora.getTime();
     const nowMs = now.getTime();
 
-    if (inicioMs < nowMs) {
-      throw new BadRequestException('Agendamento expirado nao permite check-in');
+    const dezMinutosAntesMs = inicioMs - 10 * 60 * 1000;
+    const quinzeMinutosDepoisMs = inicioMs + 15 * 60 * 1000;
+
+    if (nowMs < dezMinutosAntesMs) {
+      throw new BadRequestException(
+        'Ainda nao esta no horario permitido para check-in (liberado 10 minutos antes).',
+      );
+    }
+
+    if (nowMs > quinzeMinutosDepoisMs) {
+      throw new BadRequestException(
+        'Prazo para check-in expirado (limite de 15 minutos apos o horario agendado).',
+      );
     }
   }
 

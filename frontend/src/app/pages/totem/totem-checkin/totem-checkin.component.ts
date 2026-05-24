@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -19,10 +19,15 @@ export class TotemCheckinComponent {
 
   // Armazena o código digitado no input
   codigoDigitado: string = '';
+  checkinPreferencial: boolean = false;
+
+  loading: boolean = false;
+  erroMensagem: string | null = null;
 
   constructor(
     private router: Router,
-    private totemService: TotemService
+    private totemService: TotemService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   // --- MODAL DE CÓDIGO ---
@@ -30,21 +35,50 @@ export class TotemCheckinComponent {
   abrirModalCodigo() {
     this.mostrarModalCodigo = true;
     this.codigoDigitado = ''; // Limpa o campo ao abrir
-
-    // Opcional: Dar foco no input automaticamente (requer ViewChild, mas o usuário pode clicar)
+    this.checkinPreferencial = false;
+    this.erroMensagem = null;
+    this.loading = false;
   }
 
   fecharModalCodigo() {
     this.mostrarModalCodigo = false;
+    this.erroMensagem = null;
+    this.loading = false;
   }
 
   confirmarCodigo() {
     const codigoNormalizado = this.codigoDigitado.trim();
-    if (codigoNormalizado.length > 0) {
-      console.log('Código confirmado:', codigoNormalizado);
-      this.totemService.validarCheckin(codigoNormalizado);
-      this.fecharModalCodigo();
+    if (!codigoNormalizado) {
+      this.erroMensagem = 'Informe um código válido.';
+      return;
     }
+    
+    console.log('Código confirmado:', codigoNormalizado);
+    const tipo = this.checkinPreferencial ? 'Preferencial' : 'Convencional';
+    this.loading = true;
+    this.erroMensagem = null;
+    this.cdr.detectChanges();
+
+    this.totemService.validarCheckin(codigoNormalizado, tipo).subscribe({
+      next: (resposta) => {
+        this.loading = false;
+        this.fecharModalCodigo();
+        this.cdr.detectChanges();
+      },
+      error: (erro) => {
+        this.loading = false;
+        console.error('Erro Checkin:', erro);
+        const msg = erro?.error?.message;
+        if (Array.isArray(msg) && msg.length) {
+          this.erroMensagem = msg.join('\n');
+        } else if (typeof msg === 'string' && msg.trim() !== '') {
+          this.erroMensagem = msg;
+        } else {
+          this.erroMensagem = erro?.message || 'Erro ao validar código.';
+        }
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   // --- MODAL DE AJUDA ---

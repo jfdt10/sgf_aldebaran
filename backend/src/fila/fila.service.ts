@@ -98,7 +98,7 @@ export class FilaService {
     return novaSenha;
   }
 
-  async validarCheckin(codigo: string, filialId?: number) {
+  async validarCheckin(codigo: string, filialId?: number, tipo?: string, ignorarRegras?: boolean) {
     const codigoNormalizado = this.normalizarCodigoCheckin(codigo);
     if (!codigoNormalizado)
       throw new BadRequestException('Codigo obrigatorio.');
@@ -125,17 +125,20 @@ export class FilaService {
         ? filialId
         : (agendamento.filial_id ?? null);
 
-    await this.clienteRegrasService.validarCheckinCliente({
-      data: agendamento.data,
-      hora: agendamento.hora,
-      filialId: filialEfetiva,
-    });
+    if (!ignorarRegras) {
+      await this.clienteRegrasService.validarCheckinCliente({
+        data: agendamento.data,
+        hora: agendamento.hora,
+        filialId: filialEfetiva,
+      });
+    }
 
     const senhaGerada = await this.senhaService.gerarSenhaCliente({
       servico: agendamento.servico,
       filialId: filialEfetiva,
       agendamentoId: agendamento.id,
       qtdeGarrafoes: agendamento.qtdeGarrafoes,
+      tipo,
     });
 
     await this.prisma.agendamento.update({
@@ -149,6 +152,8 @@ export class FilaService {
       icon: 'checkCircle',
       rota: '/admin/dashboard',
     });
+
+    this.notificacaoGateway.broadcastRefresh();
 
     return { valido: true, mensagem: 'Sucesso', ticket: senhaGerada };
   }
@@ -196,10 +201,15 @@ export class FilaService {
     return servico;
   }
 
-  async horariosDisponiveis(data: string, filialId?: any) {
+  async horariosDisponiveis(data: string, filialId?: any, servicoId?: any) {
     const fId =
       filialId && filialId !== 'null' && filialId !== 'undefined'
         ? Number(filialId)
+        : null;
+
+    const sId =
+      servicoId && servicoId !== 'null' && servicoId !== 'undefined'
+        ? Number(servicoId)
         : null;
 
     const configs = await this.prisma.configuracao.findMany({
@@ -242,17 +252,25 @@ export class FilaService {
       return [];
     }
 
+    const intervaloStr = getConfig('TOTEM_INTERVALO_MINUTOS', '30');
+    const intervalo = isNaN(Number(intervaloStr)) ? 30 : Number(intervaloStr);
+
     const grade: string[] = [];
     let atual = this.parseTime(inicioStr);
     const fim = this.parseTime(fimStr);
 
     while (atual < fim) {
       grade.push(this.formatTime(atual));
-      atual += 30;
+      atual += intervalo;
     }
 
     const agendados = await this.prisma.agendamento.findMany({
-      where: { data, status: { not: 'CANCELADO' } },
+      where: {
+        data,
+        filial_id: fId,
+        servico_id: sId ? sId : undefined,
+        status: { not: 'CANCELADO' },
+      },
     });
     const horariosOcupados = agendados.map((a) => a.hora);
 
@@ -322,6 +340,7 @@ export class FilaService {
         data: dados.data,
         hora: dados.hora,
         filial_id: fId,
+        servico_id: dados.servico_id ? Number(dados.servico_id) : undefined,
         status: { not: 'CANCELADO' },
       },
     });
@@ -392,17 +411,60 @@ export class FilaService {
 
   async excluirAgendamento(id: number, authUser?: AuthenticatedUser) {
     if (authUser?.tipo === 'CLIENTE') {
-      return this.agendamentoService.cancelarMeuAgendamento(
+      const res = await this.agendamentoService.cancelarMeuAgendamento(
         String(authUser.userId),
         id,
       );
+      this.notificacaoGateway.broadcastRefresh();
+      return res;
     }
 
     await this.buscarAgendamento(id);
-    return await this.prisma.agendamento.update({
+    const result = await this.prisma.agendamento.update({
       where: { id },
       data: { status: 'CANCELADO' },
     });
+    this.notificacaoGateway.broadcastRefresh();
+    return result;
+  }
+
+  async resgatarAgendamento(id: number) {
+    const agendamento = await this.prisma.agendamento.findUnique({
+      where: { id },
+    });
+    if (!agendamento) {
+      throw new NotFoundException('Agendamento não encontrado.');
+    }
+
+    const ticket = await this.prisma.senha.findFirst({
+      where: { agendamento_id: id },
+      orderBy: { dataCriacao: 'desc' },
+    });
+
+    if (!ticket) {
+      throw new BadRequestException('Nenhuma senha encontrada para este agendamento.');
+    }
+
+    // Restaurar a senha para AGUARDANDO e com data/hora atuais
+    await this.prisma.senha.update({
+      where: { id: ticket.id },
+      data: {
+        status: 'AGUARDANDO',
+        dataCriacao: new Date(),
+      },
+    });
+
+    // Atualizar status do agendamento para CHECKIN_REALIZADO
+    const result = await this.prisma.agendamento.update({
+      where: { id },
+      data: {
+        status: 'CHECKIN_REALIZADO',
+      },
+    });
+
+    this.notificacaoGateway.broadcastRefresh();
+
+    return result;
   }
 
   // Queue management and dashboard views
@@ -953,6 +1015,80 @@ export class FilaService {
         guiche: a.guiche_rel?.numero || null,
         tempoEspera: `${diffMin} min`,
         tempoEsperaMin: diffMin,
+        status,
+        statusRaw,
+        inicioAtendimento: a.inicioAtendimento,
+        fimAtendimento: a.fimAtendimento,
+      };
+    });
+  }
+
+  async listarAtendimentosSupervisor(
+    filialId?: number,
+    data?: string,
+  ) {
+    const where: any = {};
+    if (filialId) {
+      where.guiche_rel = { filial_id: filialId };
+    }
+
+    const targetDate = data ? data : new Date().toISOString().split('T')[0];
+    const startOfDay = new Date(`${targetDate}T00:00:00`);
+    const endOfDay = new Date(`${targetDate}T23:59:59.999`);
+    where.inicioAtendimento = {
+      gte: startOfDay,
+      lte: endOfDay,
+    };
+
+    const atendimentos = await this.prisma.atendimento.findMany({
+      where,
+      orderBy: { inicioAtendimento: 'desc' },
+      include: {
+        senha: { include: { servico: true, agendamento: true } },
+        guiche_rel: true,
+        operador: { select: { id: true, nome: true, login: true } },
+      },
+    });
+
+    return atendimentos.map((a) => {
+      const statusRaw = (a.senha?.status || '').toUpperCase();
+      const foiTransferido = Boolean(a.transferidoEm);
+
+      let status = statusRaw || 'DESCONHECIDO';
+      if (statusRaw === 'CANCELADO') status = 'Cancelado';
+      else if (statusRaw === 'FINALIZADO') status = 'Finalizado';
+      else if (foiTransferido) status = 'Transferido';
+      else if (statusRaw === 'EM_ATENDIMENTO') status = 'Em Atendimento';
+      else if (statusRaw === 'CHAMADO') status = 'Chamado';
+
+      const inicio = a.inicioAtendimento ? new Date(a.inicioAtendimento).getTime() : null;
+      const criacao = a.senha?.dataCriacao ? new Date(a.senha.dataCriacao).getTime() : null;
+      const diffMin = inicio && criacao ? Math.max(0, Math.floor((inicio - criacao) / 60000)) : 0;
+
+      const fim = a.fimAtendimento ? new Date(a.fimAtendimento).getTime() : null;
+      const diffAtendMin = inicio && fim ? Math.max(0, Math.floor((fim - inicio) / 60000)) : 0;
+
+      let tempoAtendimentoStr = '-';
+      if (a.fimAtendimento) {
+        tempoAtendimentoStr = `${diffAtendMin} min`;
+      } else if (a.inicioAtendimento) {
+        tempoAtendimentoStr = 'Em andamento';
+      }
+
+      return {
+        id: a.id,
+        senhaId: a.senha?.id || null,
+        ticket: a.senha?.numeroDisplay || 'S/N',
+        cliente: a.senha?.agendamento?.nomeCliente || 'Geral/Totem',
+        documento: a.senha?.agendamento?.documento || null,
+        categoria: a.senha?.servico?.nome || 'Geral',
+        operador: a.operador?.nome || '-',
+        operadorLogin: a.operador?.login || null,
+        guiche: a.guiche_rel?.numero || null,
+        tempoEspera: `${diffMin} min`,
+        tempoEsperaMin: diffMin,
+        tempoAtendimento: tempoAtendimentoStr,
+        tempoAtendimentoMin: diffAtendMin,
         status,
         statusRaw,
         inicioAtendimento: a.inicioAtendimento,

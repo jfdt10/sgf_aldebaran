@@ -6,20 +6,35 @@
     </div>
     
     <div class="header-center">
-      <!-- Filial Selector -->
-      <div class="control-group">
-        <label>Filial</label>
-        <select class="dropdown" [(ngModel)]="filialSelecionada" (change)="onFilialChange()">
-          <option *ngFor="let f of filiais" [value]="f.id">{{ f.nome }}</option>
-        </select>
+      <!-- Filial Selector (Supervisor-style) -->
+      <div class="info-group">
+        <span class="info-label">Filial</span>
+        <div class="filial-glass-selector">
+          <lucide-icon [img]="icons.building" size="16"></lucide-icon>
+          <select id="filial-select-painel" name="filial-select-painel" [(ngModel)]="filialSelecionada" (change)="onFilialChange()">
+            <option *ngIf="!hasRestrictedFilial" value="">Selecione uma filial...</option>
+            <option *ngFor="let f of filiais" [value]="f.id">{{ f.nome }}</option>
+          </select>
+          <lucide-icon [img]="icons.chevronDown" size="14" class="arrow"></lucide-icon>
+        </div>
       </div>
 
       <!-- Language Selector -->
-      <div class="control-group">
-        <label>Language</label>
-        <div class="language-toggle">
-          <button [class.active]="idiomaAtivo === 'PT'" (click)="trocarIdioma('PT')">PT</button>
-          <button [class.active]="idiomaAtivo === 'EN'" (click)="trocarIdioma('EN')">EN</button>
+      <div class="info-group language-selector">
+        <span class="info-label">Language</span>
+        <div class="language-buttons">
+          <button 
+            class="lang-btn" 
+            [class.active]="idiomaAtivo === 'PT'"
+            (click)="trocarIdioma('PT')">
+            PT
+          </button>
+          <button 
+            class="lang-btn" 
+            [class.active]="idiomaAtivo === 'EN'"
+            (click)="trocarIdioma('EN')">
+            EN
+          </button>
         </div>
       </div>
     </div>
@@ -193,6 +208,8 @@
         <div class="search-input-wrapper">
           <img src="assets/Icon (10).svg" class="search-icon" alt="" />
           <input
+            id="search-cadastro-painel"
+            name="search-cadastro-painel"
             type="text"
             placeholder="Consultar Cadastro (CPF, Placa ou Nome)..."
             class="search-input"
@@ -432,38 +449,79 @@
 <div *ngIf="modalAberto === 'detalhes-cliente'" class="modal-overlay">
   <div class="modal-content modal-cadastro">
     <div class="cadastro-header">
-      <h3><lucide-icon [name]="icons.user" style="color: white; width: 24px; height: 24px;"></lucide-icon> Detalhes do Cliente</h3>
-      <button class="btn-close" (click)="fecharModal()" title="Fechar"><lucide-icon [img]="icons.x" size="20"></lucide-icon></button>
+      <h3>
+        <lucide-icon [img]="icons.user" style="color: white; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;"></lucide-icon>
+        Detalhes do Cliente
+      </h3>
+      <button class="close-btn" (click)="fecharModal()" title="Fechar">
+        <lucide-icon [img]="icons.x" style="width: 20px; height: 20px; color: white; display: flex; align-items: center; justify-content: center;"></lucide-icon>
+      </button>
     </div>
     
-    <div class="cadastro-body" style="padding: 20px;">
-      <div *ngIf="clienteDetalhes?.nota" class="alert-box" style="background: #FFF3CD; color: #856404; padding: 10px; border-radius: 4px; margin-bottom: 15px;">
-        {{ clienteDetalhes.nota }}
+    <div class="cadastro-body" style="padding: 24px 32px;">
+      <div *ngIf="clienteDetalhes?.nota" class="alert-box" style="background: #fffbeb; color: #b45309; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #fef3c7; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+        <lucide-icon [img]="icons.alertCircle" style="color: #d97706; width: 20px; height: 20px; flex-shrink: 0;"></lucide-icon>
+        <span>{{ clienteDetalhes.nota }}</span>
       </div>
 
-      <div class="info-group" style="margin-bottom: 15px;">
-        <label style="font-weight: 600; color: #555; display: block; margin-bottom: 5px;">Nome / Razão Social</label>
-        <p style="font-size: 16px; color: #333;">{{ clienteDetalhes?.nome || '-' }}</p>
+      <!-- Avatar e Nome do Perfil -->
+      <div class="cliente-profile-section">
+        <div class="avatar-large">
+          {{ clienteDetalhes?.nome ? (clienteDetalhes.nome.substring(0, 2) | uppercase) : 'CL' }}
+        </div>
+        <h4 class="client-name-title">{{ clienteDetalhes?.nome || 'Cliente sem nome' }}</h4>
+        <span class="client-role-badge">Cliente Cadastrado</span>
       </div>
 
-      <div class="info-group" style="margin-bottom: 15px;">
-        <label style="font-weight: 600; color: #555; display: block; margin-bottom: 5px;">Documento</label>
-        <p style="font-size: 16px; color: #333;">{{ clienteDetalhes?.documento || clienteDetalhes?.cpf || clienteDetalhes?.cnpj || '-' }}</p>
-      </div>
+      <div class="details-grid">
+        <!-- Nome Completo -->
+        <div class="detail-card">
+          <div class="icon-wrapper">
+            <lucide-icon [img]="icons.user" style="width: 18px; height: 18px; display: flex;"></lucide-icon>
+          </div>
+          <div class="card-content">
+            <label>Nome / Razão Social</label>
+            <p>{{ clienteDetalhes?.nome || '-' }}</p>
+          </div>
+        </div>
 
-      <div class="info-group" style="margin-bottom: 15px;">
-        <label style="font-weight: 600; color: #555; display: block; margin-bottom: 5px;">Telefone</label>
-        <p style="font-size: 16px; color: #333;">{{ clienteDetalhes?.telefone || '-' }}</p>
-      </div>
+        <!-- Documento -->
+        <div class="detail-card">
+          <div class="icon-wrapper">
+            <lucide-icon [img]="icons.hash" style="width: 18px; height: 18px; display: flex;"></lucide-icon>
+          </div>
+          <div class="card-content">
+            <label>CPF / CNPJ / Documento</label>
+            <p>{{ clienteDetalhes?.documento || clienteDetalhes?.cpf || clienteDetalhes?.cnpj || '-' }}</p>
+          </div>
+        </div>
 
-      <div class="info-group" style="margin-bottom: 15px;">
-        <label style="font-weight: 600; color: #555; display: block; margin-bottom: 5px;">E-mail</label>
-        <p style="font-size: 16px; color: #333;">{{ clienteDetalhes?.email || '-' }}</p>
+        <!-- Telefone -->
+        <div class="detail-card">
+          <div class="icon-wrapper">
+            <lucide-icon [img]="icons.phone" style="width: 18px; height: 18px; display: flex;"></lucide-icon>
+          </div>
+          <div class="card-content">
+            <label>Telefone</label>
+            <p>{{ clienteDetalhes?.telefone || '-' }}</p>
+          </div>
+        </div>
+
+        <!-- E-mail -->
+        <div class="detail-card">
+          <div class="icon-wrapper">
+            <lucide-icon [img]="icons.mail" style="width: 18px; height: 18px; display: flex;"></lucide-icon>
+          </div>
+          <div class="card-content">
+            <label>E-mail</label>
+            <p>{{ clienteDetalhes?.email || '-' }}</p>
+          </div>
+        </div>
       </div>
     </div>
     
     <div class="cadastro-footer">
-      <button class="btn-cancel" (click)="fecharModal()">Fechar</button>
+      <button class="btn-cancel btn-cadastro-cancel" (click)="fecharModal()">Fechar</button>
     </div>
   </div>
 </div>
@@ -566,7 +624,7 @@
 
 <!-- MODAL: Meus Atendimentos -->
 <div class="modal-overlay" *ngIf="modalAberto === 'atendimentos'">
-  <div class="modal-content redesign-modal">
+  <div class="modal-content operator-modal">
     <div class="modal-header-gradient">
       <div class="modal-title-area">
         <div class="modal-icon-container">
@@ -580,7 +638,7 @@
     </div>
     <div class="modal-body">
       <div class="agendamentos-table-wrapper">
-        <table class="agendamentos-table">
+        <table class="agendamentos-table table-meus-atendimentos">
           <thead>
             <tr>
               <th>Senha</th><th>Cliente</th><th>Categoria</th><th>Operador</th><th>Espera</th><th>Status</th><th>Ações</th>
@@ -611,7 +669,7 @@
 
 <!-- MODAL: Agendamentos -->
 <div class="modal-overlay" *ngIf="modalAberto === 'agendamentos'">
-  <div class="modal-content redesign-modal">
+  <div class="modal-content operator-modal">
     <div class="modal-header-gradient">
       <div class="modal-title-area">
         <div class="modal-icon-container">
@@ -625,7 +683,7 @@
     </div>
     <div class="modal-body">
       <div class="agendamentos-table-wrapper">
-        <table class="agendamentos-table">
+        <table class="agendamentos-table table-agendamentos-dia">
           <thead>
             <tr>
               <th>Senha</th><th>Cliente</th><th>Horário</th><th>Status</th><th>Ações</th>
@@ -634,13 +692,43 @@
           <tbody>
             <tr *ngFor="let agenda of agendamentos">
               <td class="table-senha"><strong>{{ agenda.senha }}</strong></td>
-              <td>{{ agenda.cliente || agenda.transportadora || '-' }}</td>
+              <td>{{ agenda.cliente || '-' }}</td>
               <td>{{ agenda.horario }}</td>
-              <td><span class="status-pill" [ngClass]="agenda.status.toLowerCase()">{{ agenda.status }}</span></td>
+              <td>
+                <span class="status-pill" [ngClass]="{
+                  'pendente': agenda.status === 'PENDENTE',
+                  'confirmado': agenda.status === 'CONFIRMADO',
+                  'checkin-realizado': agenda.status === 'CHECKIN_REALIZADO',
+                  'realizado': agenda.status === 'ATENDIDO',
+                  'nao-compareceu': agenda.status === 'NAO_COMPARECEU',
+                  'cancelado': agenda.status === 'CANCELADO'
+                }">
+                  {{ 
+                    agenda.status === 'ATENDIDO' ? 'Realizado' :
+                    agenda.status === 'PENDENTE' ? 'Pendente' :
+                    agenda.status === 'CONFIRMADO' ? 'Confirmado' :
+                    agenda.status === 'CHECKIN_REALIZADO' ? 'Check-in Realizado' :
+                    agenda.status === 'NAO_COMPARECEU' ? 'Não Compareceu' :
+                    agenda.status === 'CANCELADO' ? 'Cancelado' :
+                    agenda.status
+                  }}
+                </span>
+              </td>
               <td>
                 <div class="actions-cell">
-                  <button class="btn-icon text-green" title="Confirmar presença" (click)="confirmarPresencaAgendamento(agenda)"><lucide-icon [img]="icons.check" size="16"></lucide-icon></button>
-                  <button class="btn-icon text-red" title="Cancelar agendamento" (click)="cancelarAgendamento(agenda)"><lucide-icon [img]="icons.x" size="16"></lucide-icon></button>
+                  <ng-container *ngIf="agenda.status === 'PENDENTE' || agenda.status === 'CONFIRMADO'">
+                    <button class="btn-icon text-green" title="Realizar check-in" (click)="abrirModalCheckin(agenda)">
+                      <lucide-icon [img]="icons.check" size="16"></lucide-icon>
+                    </button>
+                    <button class="btn-icon text-red" title="Cancelar agendamento" (click)="abrirModalCancelar(agenda)">
+                      <lucide-icon [img]="icons.x" size="16"></lucide-icon>
+                    </button>
+                  </ng-container>
+                  <ng-container *ngIf="agenda.status === 'NAO_COMPARECEU'">
+                    <button class="btn-icon text-blue" title="Resgatar agendamento para fila" (click)="abrirModalResgatar(agenda)">
+                      <lucide-icon [img]="icons.rotateCcw" size="16"></lucide-icon>
+                    </button>
+                  </ng-container>
                 </div>
               </td>
             </tr>
@@ -659,7 +747,7 @@
 
 <!-- MODAL: Detalhe do Atendimento -->
 <div class="modal-overlay" *ngIf="atendimentoSelecionado && !showJustificativaModal">
-  <div class="modal-content redesign-modal" style="max-width: 500px;">
+  <div class="modal-content operator-modal" style="max-width: 500px;">
     <div class="modal-header-gradient">
       <div class="modal-title-area">
         <div class="modal-icon-container">
@@ -717,7 +805,7 @@
 
 <!-- MODAL: Justificar Demora -->
 <div class="modal-overlay" *ngIf="showJustificativaModal">
-  <div class="modal-content redesign-modal">
+  <div class="modal-content operator-modal">
     <div class="modal-header-gradient">
       <div class="modal-title-area">
         <div class="modal-icon-container">
@@ -756,8 +844,8 @@
 </div>
 
 <!-- MODAL: Editar Perfil -->
-<div class="modal-overlay" *ngIf="modalAberto === 'editar-perfil'">
-  <div class="modal-content redesign-modal" style="max-width: 500px;">
+<div class="modal-overlay" *ngIf="modalAberto === 'editar-perfil'" (click)="fecharModal()">
+  <div class="modal-content redesign-modal modal-profile-edit" style="max-width: 500px;" (click)="$event.stopPropagation()">
     <div class="modal-header-gradient">
       <div class="modal-title-area">
         <div class="modal-icon-container">
@@ -794,10 +882,8 @@
             <input type="text" name="login" [(ngModel)]="operadorForm.login" placeholder="Nome de usuário para login" required />
           </div>
         </div>
-
-        <div class="senha-divider">
-          <span>Alterar Senha (Opcional)</span>
-        </div>
+      
+   
 
         <div class="form-group full-width">
           <label>Nova Senha</label>
@@ -820,5 +906,75 @@
         <button type="submit" class="btn-solid-blue">Salvar Alterações</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Modal Check-in Operador -->
+<div *ngIf="agendamentoParaCheckin" class="modal-overlay">
+  <div class="modal-content redesign-modal" style="max-width: 450px;">
+    <div class="modal-header-gradient">
+      <div class="modal-title-area">
+        <div class="modal-icon-container">
+          <lucide-icon [img]="icons.check" size="24"></lucide-icon>
+        </div>
+        <h2>Realizar Check-in</h2>
+      </div>
+      <button class="close-btn-ghost" (click)="fecharModalCheckin()">
+        <lucide-icon [img]="icons.close" size="20"></lucide-icon>
+      </button>
+    </div>
+    <div class="modal-body text-center" style="padding: 24px;">
+      <p class="modal-subtitle" style="margin-bottom: 24px; color: #e2e8f0; font-size: 15px;">
+        Selecione o tipo de atendimento para o check-in do agendamento de <br>
+        <strong style="color: #60a5fa; font-size: 16px;">{{ agendamentoParaCheckin.cliente }}</strong>:
+      </p>
+      <div class="tipo-atendimento-options" style="display: flex; gap: 16px; justify-content: center; margin-bottom: 8px;">
+        <button type="button" class="btn-tipo-atendimento convencional" (click)="confirmarCheckinOperador('Convencional')">
+          <lucide-icon [img]="icons.user" size="24" style="margin-bottom: 8px; color: #10b981;"></lucide-icon>
+          <span style="font-weight: 600; font-size: 14px;">Convencional</span>
+        </button>
+        <button type="button" class="btn-tipo-atendimento preferencial" (click)="confirmarCheckinOperador('Preferencial')">
+          <lucide-icon [img]="icons.check" size="24" style="margin-bottom: 8px; color: #f59e0b;"></lucide-icon>
+          <span style="font-weight: 600; font-size: 14px;">Preferencial</span>
+        </button>
+      </div>
+    </div>
+    <div class="modal-footer-gradient">
+      <button type="button" class="btn-ghost w-full" (click)="fecharModalCheckin()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cancelar Agendamento -->
+<div *ngIf="agendamentoParaCancelar" class="modal-overlay">
+  <div class="modal-content modal-nao-compareceu" style="max-width: 400px;">
+    <div class="modal-body">
+      <div>
+        <lucide-icon [img]="icons.close" size="48" style="color: #ef4444; filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.4)); margin-bottom: 16px; display: inline-block;"></lucide-icon>
+      </div>
+      <h3>Cancelar Agendamento?</h3>
+      <p>O agendamento de <span>{{ agendamentoParaCancelar.cliente }}</span> às <span>{{ agendamentoParaCancelar.horario }}</span> será cancelado permanentemente.<br>Essa ação não pode ser desfeita.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-cancel" (click)="fecharModalCancelar()">Voltar</button>
+      <button type="button" class="btn-danger" (click)="confirmarCancelarAgendamento()">Confirmar Cancelamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Resgatar Agendamento -->
+<div *ngIf="agendamentoParaResgatar" class="modal-overlay">
+  <div class="modal-content modal-nao-compareceu" style="max-width: 400px;">
+    <div class="modal-body">
+      <div>
+        <lucide-icon [img]="icons.rotateCcw" size="48" style="color: #3b82f6; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4)); margin-bottom: 16px; display: inline-block;"></lucide-icon>
+      </div>
+      <h3>Resgatar Agendamento?</h3>
+      <p>O agendamento de <span>{{ agendamentoParaResgatar.cliente }}</span> será retornado para a fila de espera como <strong style="color: #3b82f6;">AGUARDANDO</strong>.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-cancel" (click)="fecharModalResgatar()">Voltar</button>
+      <button type="button" class="btn-danger" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);" (click)="confirmarResgatarAgendamento()">Confirmar Resgate</button>
+    </div>
   </div>
 </div>

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
@@ -83,7 +83,10 @@ interface CheckinResponseView {
   templateUrl: './client-home.component.html',
   styleUrls: ['./client-home.component.scss'],
 })
-export class ClientHomeComponent implements OnInit {
+export class ClientHomeComponent implements OnInit, OnDestroy {
+  checkinStatus: 'too-early' | 'ready' | 'expired' = 'too-early';
+  minutosParaLiberar = '';
+  private timerId: any = null;
   usuario = { nome: 'Cliente' };
   hoje = Date.now();
   showCancelModal = false;
@@ -96,6 +99,7 @@ export class ClientHomeComponent implements OnInit {
   cancelError: string | null = null;
   voucher: ClientVoucherView | null = null;
   ticket: CheckinTicketView | null = null;
+  tipoAtendimento: 'Convencional' | 'Preferencial' = 'Convencional';
 
   proximoAgendamento: {
     titulo: string;
@@ -183,6 +187,10 @@ export class ClientHomeComponent implements OnInit {
           statusLabel: statusInfo.label,
         };
         this.voucherLoading = false;
+
+        this.atualizarEstadoCheckin();
+        this.iniciarTimer();
+
         if (voucher.checkinRealizado) {
           this.carregarTicketDoVoucher(voucher.id);
         }
@@ -203,6 +211,68 @@ export class ClientHomeComponent implements OnInit {
     this.checkinSuccess = null;
     this.voucher = null;
     this.ticket = null;
+    this.pararTimer();
+  }
+
+  ngOnDestroy() {
+    this.pararTimer();
+  }
+
+  atualizarEstadoCheckin() {
+    if (!this.voucher) {
+      this.checkinStatus = 'too-early';
+      this.minutosParaLiberar = '';
+      return;
+    }
+
+    const agora = new Date();
+    const dataHoraAgendamento = new Date(`${this.voucher.data}T${this.voucher.horaInicio}:00`);
+    const agendamentoMs = dataHoraAgendamento.getTime();
+    const agoraMs = agora.getTime();
+
+    const dezMinutosAntesMs = agendamentoMs - 10 * 60 * 1000;
+    const quinzeMinutosDepoisMs = agendamentoMs + 15 * 60 * 1000;
+
+    if (agoraMs < dezMinutosAntesMs) {
+      this.checkinStatus = 'too-early';
+      const diffMs = dezMinutosAntesMs - agoraMs;
+      const diffMinutos = Math.ceil(diffMs / (60 * 1000));
+
+      if (diffMinutos > 60) {
+        const horas = Math.floor(diffMinutos / 60);
+        const mins = diffMinutos % 60;
+        this.minutosParaLiberar = `${horas}h ${mins}min`;
+      } else {
+        this.minutosParaLiberar = `${diffMinutos} minuto${diffMinutos > 1 ? 's' : ''}`;
+      }
+    } else if (agoraMs > quinzeMinutosDepoisMs) {
+      this.checkinStatus = 'expired';
+      this.minutosParaLiberar = '';
+    } else {
+      this.checkinStatus = 'ready';
+      this.minutosParaLiberar = '';
+    }
+
+    this.cdr.detectChanges();
+  }
+
+  iniciarTimer() {
+    this.pararTimer();
+    this.timerId = setInterval(() => {
+      this.atualizarEstadoCheckin();
+    }, 10000); // Check status every 10 seconds
+  }
+
+  pararTimer() {
+    if (this.timerId) {
+      clearInterval(this.timerId);
+      this.timerId = null;
+    }
+  }
+
+  setTipoAtendimento(tipo: 'Convencional' | 'Preferencial') {
+    this.tipoAtendimento = tipo;
+    this.cdr.detectChanges();
   }
 
   confirmarCheckin() {
@@ -212,7 +282,7 @@ export class ClientHomeComponent implements OnInit {
     this.voucherError = null;
 
     this.apiService
-      .post<CheckinResponseView>(`/agendamentos/${this.voucher.id}/checkin`, {})
+      .post<CheckinResponseView>(`/agendamentos/${this.voucher.id}/checkin`, { tipo: this.tipoAtendimento })
       .subscribe({
         next: (response) => {
           const voucherStatus = getAppointmentStatusInfo(
@@ -230,6 +300,7 @@ export class ClientHomeComponent implements OnInit {
           };
           this.checkinSuccess = response.message || 'Check-in realizado com sucesso.';
           this.checkinLoading = false;
+          this.pararTimer();
           this.carregarDados();
           this.cdr.detectChanges();
         },

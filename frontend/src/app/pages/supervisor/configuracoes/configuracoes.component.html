@@ -145,6 +145,14 @@
               <label>Limite Atendimentos/Dia</label>
               <input type="number" formControlName="limiteAtendimentos">
             </div>
+            <div class="form-field mix-width">
+              <label>Meta de Eficiência Mínima: <strong class="text-teal" style="color: #0ea5e9;">{{ configForm.get('eficienciaMinima')?.value || 90 }}%</strong></label>
+              <div class="slider-container" style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+                <span style="font-size: 0.8rem; color: #64748b;">50%</span>
+                <input type="range" min="50" max="100" step="5" formControlName="eficienciaMinima" style="flex: 1; accent-color: #0ea5e9; cursor: pointer; height: 6px; border-radius: 4px;">
+                <span style="font-size: 0.8rem; color: #64748b;">100%</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -236,9 +244,8 @@
           <div class="filter-box custom-select">
             <select [(ngModel)]="perfilFiltro" (change)="aplicarFiltros()">
               <option value="">Todos os Perfis</option>
-              <option value="ADMIN">Administrador</option>
               <option value="SUPERVISOR">Supervisor</option>
-              <option value="OPERADOR">Operador</option>
+              <option value="OPERADOR">Operador (Guichê)</option>
             </select>
           </div>
         </div>
@@ -349,7 +356,7 @@
                   <div class="select-wrapper">
                     <select formControlName="perfil">
                       <option value="" disabled>Selecione um perfil...</option>
-                      <option value="ADMIN">Administrador</option>
+                      <option *ngIf="isEditingUsuario && usuarioEmEdicao?.perfil === 'ADMIN'" value="ADMIN">Administrador</option>
                       <option value="SUPERVISOR">Supervisor</option>
                       <option value="OPERADOR">Operador (Guichê)</option>
                     </select>

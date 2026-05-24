@@ -35,32 +35,35 @@
 
     <div class="form-container">
       <h2>Fazer Login</h2>
-      <p class="filial-text">Unidade: <strong>Matriz Centro</strong></p>
 
       <form (ngSubmit)="fazerLogin()">
         
         <div class="input-group">
-          <label>E-MAIL OU USUÁRIO</label>
+          <label for="login-username">E-MAIL OU USUÁRIO</label>
           <div class="input-wrapper">
             <lucide-icon [img]="icons.mail" size="20" class="input-icon"></lucide-icon>
             <input 
+              id="login-username"
               type="text" 
               placeholder="ex: joao.silva ou joao@empresa.com" 
               [(ngModel)]="credenciais.email" 
               name="email"
+              autocomplete="username"
               required>
           </div>
         </div>
 
         <div class="input-group">
-          <label>SENHA DE ACESSO</label>
+          <label for="login-password">SENHA DE ACESSO</label>
           <div class="input-wrapper">
             <lucide-icon [img]="icons.lock" size="20" class="input-icon"></lucide-icon>
             <input 
+              id="login-password"
               type="password" 
               placeholder="••••••••" 
               [(ngModel)]="credenciais.senha" 
               name="senha"
+              autocomplete="current-password"
               required>
           </div>
         </div>

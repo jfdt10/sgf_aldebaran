@@ -177,6 +177,8 @@ export class GuicheService {
     if (data.descricao !== undefined) updateDataRaw.descricao = data.descricao;
     if (data.status !== undefined) updateDataRaw.status = data.status;
     if (data.ativo !== undefined) updateDataRaw.ativo = data.ativo;
+    if (data.operadorAtualId !== undefined) updateDataRaw.operadorAtualId = data.operadorAtualId;
+    if (data.loginOperadorEm !== undefined) updateDataRaw.loginOperadorEm = data.loginOperadorEm;
     if (requestingUserFilialId !== undefined) {
       updateDataRaw.filial_id = requestingUserFilialId;
     } else if (data.filial_id !== undefined) {

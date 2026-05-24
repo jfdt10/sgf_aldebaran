@@ -81,6 +81,7 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
   
   filaAtual = 0;
   guichesAtivos = 0;
+  eficienciaMinima = 90;
   
   private callsPending = 0;
 
@@ -185,12 +186,31 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
   carregarTudo() {
     this.carregarMesesDisponiveis();
     
-    // Total of 4 async methods that affect insights
-    this.callsPending = 4;
+    // Total of 5 async methods that affect insights
+    this.callsPending = 5;
     this.carregarDadosApi();
     this.carregarGraficosPorHora();
     this.carregarOperadores();
     this.carregarMetricasFila();
+    this.carregarConfiguracaoEficiencia();
+  }
+
+  carregarConfiguracaoEficiencia() {
+    const token = localStorage.getItem('token') || '';
+    const filialParam = this.selectedFilialId ? `?filialId=${this.selectedFilialId}` : '';
+    this.http.get<any[]>(`${environment.apiUrl}/configuracoes/lista${filialParam}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
+      next: (configs) => {
+        const configMap: Record<string, string> = {};
+        configs.forEach((c: any) => configMap[c.chave] = c.value || c.valor);
+        const val = configMap['eficienciaMinima'] || configMap['EFICIENCIA_MINIMA'];
+        this.eficienciaMinima = val ? parseInt(val, 10) : 90;
+        this.cdr.detectChanges();
+        this.checkInsights();
+      },
+      error: () => this.checkInsights()
+    });
   }
 
   private checkInsights() {
@@ -251,9 +271,9 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
       }
 
       // 2. Operadores com baixa eficiência
-      const opsBaixaEficiencia = this.operadores.filter(op => op.efficiency < 90);
+      const opsBaixaEficiencia = this.operadores.filter(op => op.efficiency < this.eficienciaMinima);
       if (opsBaixaEficiencia.length > 0) {
-        novosInsights.push({ text: `⚠️ ${opsBaixaEficiencia.length} operador(es) com eficiência abaixo de 90%. Revisar processos.`, type: 'yellow', severidade: 2 });
+        novosInsights.push({ text: `⚠️ ${opsBaixaEficiencia.length} operador(es) com eficiência abaixo de ${this.eficienciaMinima}%. Revisar processos.`, type: 'yellow', severidade: 2 });
       }
 
       // 6. Operador destaque

@@ -9,6 +9,8 @@ export interface AgendamentoListItemSource {
   data: string;
   hora: string;
   status: string;
+  filial_id?: number | null;
+  servico_id?: number;
   servico?: {
     nome: string | null;
   } | null;
@@ -54,6 +56,8 @@ export function toAgendamentoResponse(
     senhaStatus: agendamento.senha?.[0]?.status || null,
     posicao: null,
     estimativa: null,
+    filialId: agendamento.filial_id,
+    servicoId: agendamento.servico_id,
   };
 }
 
