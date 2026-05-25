@@ -94,7 +94,7 @@
               class="bar"
               *ngFor="let g of graficosPorHora"
               [style.height]="getAlturaBarra(g.historicoFila, maxHistoricoFila)"
-              [title]="g.historicoFila + ' atendimentos às ' + g.horaLabel">
+              [attr.data-tooltip]="g.historicoFila">
             </div>
           </div>
           <div class="x-axis x-axis-full">
@@ -116,7 +116,7 @@
               class="bar"
               *ngFor="let g of graficosPorHora"
               [style.height]="getAlturaBarra(g.tempoEsperaMedio, maxTempoEspera)"
-              [title]="g.tempoEsperaMedio + ' min às ' + g.horaLabel">
+              [attr.data-tooltip]="g.tempoEsperaMedio">
             </div>
           </div>
           <div class="x-axis x-axis-full">
@@ -138,7 +138,7 @@
               class="bar"
               *ngFor="let g of graficosPorHora"
               [style.height]="getAlturaBarra(g.tempoAtendimentoMedio, maxTempoAtendimento)"
-              [title]="g.tempoAtendimentoMedio + ' min às ' + g.horaLabel">
+              [attr.data-tooltip]="g.tempoAtendimentoMedio">
             </div>
           </div>
           <div class="x-axis x-axis-full">

@@ -63,6 +63,7 @@ type AgendamentoCheckinSource = AgendamentoComRelacoes & {
 export class AgendamentoService {
   private static readonly ANTECEDENCIA_CANCELAMENTO_MINUTOS = 30;
   private static readonly JANELA_CHECKIN_MINUTOS = 120;
+  private static readonly TOLERANCIA_CHECKIN_APOS_HORARIO_MINUTOS = 15;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -568,7 +569,7 @@ export class AgendamentoService {
 
     return (
       AGENDAMENTO_STATUS_ATIVOS.has(agendamento.status) &&
-      inicio.getTime() >= now.getTime()
+      now.getTime() <= this.getFimJanelaCheckinMs(inicio)
     );
   }
 
@@ -583,7 +584,14 @@ export class AgendamentoService {
       AGENDAMENTO_STATUS_FINAIS.has(agendamento.status) ||
       (!possuiCheckIn &&
         AGENDAMENTO_STATUS_ATIVOS.has(agendamento.status) &&
-        inicio.getTime() < now.getTime())
+        now.getTime() > this.getFimJanelaCheckinMs(inicio))
+    );
+  }
+
+  private getFimJanelaCheckinMs(inicio: Date): number {
+    return (
+      inicio.getTime() +
+      AgendamentoService.TOLERANCIA_CHECKIN_APOS_HORARIO_MINUTOS * 60 * 1000
     );
   }
 

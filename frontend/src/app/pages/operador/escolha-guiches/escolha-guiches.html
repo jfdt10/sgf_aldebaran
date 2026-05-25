@@ -24,7 +24,7 @@
 
         <!-- Language Selector -->
         <div class="info-group language-selector">
-          <span class="info-label">Language</span>
+          <span class="info-label">Idioma</span>
           <div class="language-buttons">
             <button 
               class="lang-btn" 
@@ -43,19 +43,19 @@
       </div>
 
       <!-- User Profile Dropdown -->
-      <div class="user-profile" (click)="$event.stopPropagation()">
-        <div class="profile-trigger" (click)="toggleProfileMenu($event)">
-          <div class="user-info">
-            <strong>{{ operadorNome }}</strong>
-            <small>{{ operadorPerfil }}</small>
+      <div class="profile-dropdown-container user-profile" (click)="$event.stopPropagation()">
+        <div class="profile-trigger" (click)="toggleProfileMenu($event)" [class.active]="showProfileMenu">
+          <div class="profile-info">
+            <span class="profile-name">{{ operadorNome }}</span>
+            <span class="profile-role">{{ operadorPerfil }}</span>
           </div>
-          <div class="user-avatar">
-            <span>{{ operadorAvatar }}</span>
+          <div class="avatar-box bg-teal-dark">
+            <lucide-icon [img]="icons.user" size="20" color="white"></lucide-icon>
           </div>
         </div>
 
         <!-- Dropdown Menu -->
-        <div class="profile-dropdown" *ngIf="showProfileMenu" (click)="$event.stopPropagation()">
+        <div class="profile-menu profile-dropdown" *ngIf="showProfileMenu" (click)="$event.stopPropagation()">
           <div class="dropdown-header">
             <span class="m-name">{{ operadorNome }}</span>
             <span class="m-email">{{ operadorEmail || 'Sem e-mail' }}</span>
@@ -72,14 +72,6 @@
         </div>
       </div>
 
-      <!-- Logout Icon (legacy, kept for quick access) -->
-      <button class="logout-icon" (click)="sair()" title="Sair">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <polyline points="16 17 21 12 16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
     </div>
   </header>
 

@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { TotemConfigService } from './totem-config.service';
@@ -33,7 +34,7 @@ export class TotemService {
 
   // PASSO 1: Guarda o TIPO (Preferencial/Convencional) e vai para Categorias
   escolherTipo(tipo: string) {
-    console.log('1. Tipo selecionado:', tipo);
+    if (!environment.production) console.log('1. Tipo selecionado:', tipo);
     this.tipoSelecionado = tipo;
     this.router.navigate(['/totem/categoria']);
   }
@@ -54,7 +55,7 @@ export class TotemService {
       qtdeGarrafoes: qtdeGarrafoes
     };
 
-    console.log('2. Enviando para o Backend:', payload);
+    if (!environment.production) console.log('2. Enviando para o Backend:', payload);
 
     this.http.post<any>(`${this.apiUrl}/totem/senha`, payload).subscribe({
       next: (resposta) => {

@@ -1,9 +1,10 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideAngularModule, LayoutDashboard, Ticket, Settings, Monitor, LogOut, Menu, Users, Calendar, Truck, User, Bell, Search, ChevronDown, ChevronUp, FileText, Moon, Power, History, Clock, UserPlus, CheckCircle, X, Building2, ChevronRight, AlignLeft } from 'lucide-angular';
 import { Title } from '@angular/platform-browser';
 import { filter } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { NavigationEnd, ActivatedRoute } from '@angular/router';
 import { NotificationService } from '../../services/notification.service';
 import { FormsModule } from '@angular/forms';
@@ -18,14 +19,17 @@ import { AlertSoundService } from '../../services/alert-sound.service';
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, LucideAngularModule, FormsModule],
   templateUrl: './admin-layout.component.html',
-  styleUrl: './admin-layout.component.scss'
+  styleUrls: ['./admin-layout.component.scss']
 })
-export class AdminLayoutComponent implements OnInit {
+export class AdminLayoutComponent implements OnInit, OnDestroy {
   sidebarOpen = true;
   usuario: any = null;
   userInitials: string = 'CA';
   userName: string = 'Carlos Admin';
   userRole: string = 'Administrador';
+
+  globalSearchQuery = '';
+  globalSearch$ = new Subject<string>();
 
   filiais: Filial[] = [];
   selectedFilialId: number | null = null;
@@ -133,18 +137,14 @@ export class AdminLayoutComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log('[HARD-DEBUG] AdminLayoutComponent Inicializado!');
-
     const salvo = localStorage.getItem('usuario_sgf');
     if (!salvo) {
-      console.warn('[HARD-DEBUG] Nenhum usuário encontrado no localStorage. Redirecionando para login.');
       this.router.navigate(['/login']);
       return;
     }
 
     try {
       this.usuario = JSON.parse(salvo);
-      console.log('[HARD-DEBUG] Usuário logado:', this.usuario.nome, 'ID Filial:', this.usuario.filial_id);
 
       this.notificationService.fetchNotifications(this.usuario.id);
       this.notificationService.notifications$.subscribe((notifs: any[]) => {
@@ -174,8 +174,6 @@ export class AdminLayoutComponent implements OnInit {
         this.userRole = this.usuario.perfil || 'Usuário';
       }
 
-      console.log('[HARD-DEBUG] Role determinada:', this.userRole);
-
       // Sincronização de Filiais (Global)
       this.filialService.selectedFilial$.subscribe((id: number | null) => {
         this.selectedFilialId = id;
@@ -190,13 +188,21 @@ export class AdminLayoutComponent implements OnInit {
         filter(event => event instanceof NavigationEnd)
       ).subscribe(() => {
         this.updateActivePageTitle();
+        this.carregarContadores();
+        this.globalSearchQuery = '';
+        this.globalSearch$.next('');
       });
 
       this.updateActivePageTitle();
       this.carregarFiliais();
 
+      // Poll contadores every 5 seconds
+      setInterval(() => {
+        this.carregarContadores();
+      }, 5000);
+
     } catch (e) {
-      console.error('[HARD-DEBUG] Erro ao processar dados do usuário:', e);
+      console.error('Erro ao processar dados do usuário:', e);
       this.router.navigate(['/login']);
     }
   }
@@ -369,7 +375,7 @@ export class AdminLayoutComponent implements OnInit {
       this.filialService.setSelectedFilial(this.selectedFilialId);
       return;
     }
-    console.log('Filial alterada para ID:', this.selectedFilialId);
+    if (!environment.production) console.log('Filial alterada para ID:', this.selectedFilialId);
     this.filialService.setSelectedFilial(this.selectedFilialId);
     this.carregarContadores();
     this.carregarConfiguracoesAlertas();
@@ -377,7 +383,7 @@ export class AdminLayoutComponent implements OnInit {
     // Opcional: Feedback visual ou recarregar dados da página atual se necessário
     if (this.selectedFilialId) {
       const filial = this.filiais.find(f => f.id === this.selectedFilialId);
-      console.log('Nome da filial selecionada:', filial?.nome);
+      // Silent: removed verbose console logging for production
     }
   }
 
@@ -413,16 +419,120 @@ export class AdminLayoutComponent implements OnInit {
 
     this.dashboardService.getSupervisorOverview(this.selectedFilialId || undefined).subscribe({
       next: (res) => {
-        this.atendimentoCount = res.atendimentos.length;
-        this.agendamentoCount = res.agendamentos.length;
+        // --- Agendamentos ---
+        const activeAgendamentos = res.agendamentos.filter((a: any) => {
+          return a.status === 'PENDENTE' || a.status === 'CONFIRMADO';
+        });
+
+        const seenAgendIdsStr = localStorage.getItem('seenAgendamentoIdsSupervisor') || '[]';
+        let seenAgendIds: number[] = [];
+        try {
+          seenAgendIds = JSON.parse(seenAgendIdsStr);
+          if (!Array.isArray(seenAgendIds)) seenAgendIds = [];
+        } catch (e) {
+          seenAgendIds = [];
+        }
+
+        const modalAberto = localStorage.getItem('modalAbertoSupervisor') || '';
+        const isAgendamentosOpen = modalAberto === 'agendamentos';
+
+        if (isAgendamentosOpen) {
+          const currentIds = activeAgendamentos.map((a: any) => Number(a.id));
+          const updatedSeen = Array.from(new Set([...seenAgendIds.map(Number), ...currentIds]));
+          if (updatedSeen.length > 300) {
+            updatedSeen.splice(0, updatedSeen.length - 300);
+          }
+          localStorage.setItem('seenAgendamentoIdsSupervisor', JSON.stringify(updatedSeen));
+          this.agendamentoCount = 0;
+        } else {
+          this.agendamentoCount = activeAgendamentos.filter((a: any) => !seenAgendIds.map(Number).includes(Number(a.id))).length;
+        }
+
+        // --- Atendimentos ---
+        const activeAtendimentos = res.atendimentos;
+        const seenAtendIdsStr = localStorage.getItem('seenAtendimentoIdsSupervisor') || '[]';
+        let seenAtendIds: string[] = [];
+        try {
+          seenAtendIds = JSON.parse(seenAtendIdsStr);
+          if (!Array.isArray(seenAtendIds)) seenAtendIds = [];
+        } catch (e) {
+          seenAtendIds = [];
+        }
+
+        const isAtendimentosOpen = modalAberto === 'atendimentos';
+        if (isAtendimentosOpen) {
+          const currentIds = activeAtendimentos.map((a: any) => String(a.ticket));
+          const updatedSeen = Array.from(new Set([...seenAtendIds.map(String), ...currentIds]));
+          if (updatedSeen.length > 300) {
+            updatedSeen.splice(0, updatedSeen.length - 300);
+          }
+          localStorage.setItem('seenAtendimentoIdsSupervisor', JSON.stringify(updatedSeen));
+          this.atendimentoCount = 0;
+        } else {
+          this.atendimentoCount = activeAtendimentos.filter((a: any) => !seenAtendIds.map(String).includes(String(a.ticket))).length;
+        }
       },
       error: (err) => console.error('Erro ao carregar contadores:', err)
     });
+  }
+
+  resetSupervisorContador(tipo: 'atendimentos' | 'agendamentos') {
+    if (tipo === 'atendimentos') {
+      this.atendimentoCount = 0;
+      localStorage.setItem('modalAbertoSupervisor', 'atendimentos');
+      this.dashboardService.getSupervisorOverview(this.selectedFilialId || undefined).subscribe({
+        next: (res) => {
+          const currentIds = res.atendimentos.map((a: any) => String(a.ticket));
+          const seenIdsStr = localStorage.getItem('seenAtendimentoIdsSupervisor') || '[]';
+          let seenIds: string[] = [];
+          try {
+            seenIds = JSON.parse(seenIdsStr);
+            if (!Array.isArray(seenIds)) seenIds = [];
+          } catch (e) { }
+          const updated = Array.from(new Set([...seenIds.map(String), ...currentIds]));
+          if (updated.length > 300) {
+            updated.splice(0, updated.length - 300);
+          }
+          localStorage.setItem('seenAtendimentoIdsSupervisor', JSON.stringify(updated));
+        }
+      });
+    } else if (tipo === 'agendamentos') {
+      this.agendamentoCount = 0;
+      localStorage.setItem('modalAbertoSupervisor', 'agendamentos');
+      this.dashboardService.getSupervisorOverview(this.selectedFilialId || undefined).subscribe({
+        next: (res) => {
+          const activeAgendamentos = res.agendamentos.filter((a: any) => a.status === 'PENDENTE' || a.status === 'CONFIRMADO');
+          const currentIds = activeAgendamentos.map((a: any) => Number(a.id));
+          const seenIdsStr = localStorage.getItem('seenAgendamentoIdsSupervisor') || '[]';
+          let seenIds: number[] = [];
+          try {
+            seenIds = JSON.parse(seenIdsStr);
+            if (!Array.isArray(seenIds)) seenIds = [];
+          } catch (e) { }
+          const updated = Array.from(new Set([...seenIds.map(Number), ...currentIds]));
+          if (updated.length > 300) {
+            updated.splice(0, updated.length - 300);
+          }
+          localStorage.setItem('seenAgendamentoIdsSupervisor', JSON.stringify(updated));
+        }
+      });
+    }
   }
 
   logout() {
     this.showLogoutModal = false;
     localStorage.removeItem('usuario_sgf');
     this.router.navigate(['/login']);
+  }
+
+  onGlobalSearchChange(value: string) {
+    this.globalSearchQuery = value;
+    this.globalSearch$.next(value);
+  }
+
+  ngOnDestroy(): void {
+    if (typeof document !== 'undefined') {
+      document.body.classList.remove('dark-theme');
+    }
   }
 }

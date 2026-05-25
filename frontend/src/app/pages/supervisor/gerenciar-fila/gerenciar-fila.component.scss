@@ -35,7 +35,7 @@ $cyan-dark: #0891b2;
   }
   .header-titles {
     display: flex; flex-direction: column;
-    h1 { margin: 0; font-size: 1.4rem; font-weight: 800; color: $text-main; }
+    h1 { margin: 0; font-size: 1.4rem; font-weight: 800; color: $text-sec; }
     .header-subtitle { font-size: 0.95rem; color: $text-sec; }
   }
 
@@ -202,7 +202,21 @@ $cyan-dark: #0891b2;
 
     button { padding: 10px 20px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
     .btn-cancel { background: transparent; border: 1px solid #d1d5db; color: $text-sec; &:hover { background: #f9fafb; color: $text-main; } }
-    .btn-call { background: $blue-main; border: none; color: white; box-shadow: 0 2px 4px rgba(14,165,233, 0.2); &:hover { background: $blue-dark; } }
+    .btn-call {
+      background: linear-gradient(135deg, #0ea5e9 0%, #0f766e 100%);
+      border: none;
+      color: white;
+      box-shadow: 0 2px 4px rgba(14, 165, 233, 0.2);
+      transition: all 0.2s;
+      &:hover {
+        opacity: 0.92;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(14, 165, 233, 0.3);
+      }
+      &:active {
+        transform: translateY(0);
+      }
+    }
   }
 }
 
@@ -249,7 +263,7 @@ $cyan-dark: #0891b2;
 
     &.empty-state {
       align-items: center; justify-content: center; padding: 40px 24px; text-align: center;
-      h4 { margin: 16px 0 8px 0; font-size: 1.1rem; color: $text-main; }
+      h4 { margin: 16px 0 8px 0; font-size: 1.1rem; color: $text-sec; }
       .op-name { font-size: 0.95rem; color: $text-sec; font-weight: 500; }
       
       .icon-circle { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
@@ -688,8 +702,29 @@ $cyan-dark: #0891b2;
 .form-actions { display: flex; justify-content: flex-end; }
 
 .btn-solid-blue {
-  background-color: $cyan-main; color: white; border: none; border-radius: 8px; padding: 10px 24px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px;
-  &:hover { background-color: $cyan-dark; }
+  background: linear-gradient(135deg, #0ea5e9 0%, #0f766e 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(14, 165, 233, 0.2);
+
+  &:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(14, 165, 233, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
 }
 
 /* MODAL SUCESSO COPIADO */
@@ -1014,3 +1049,47 @@ $cyan-dark: #0891b2;
   &:hover:not(:disabled) { background: #dc2626; box-shadow: 0 2px 8px rgba(239,68,68,0.25); }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
+
+/* Estado CHAMANDO no card de guichê */
+.guiche-card.chamando {
+  border-color: #fbbf24 !important;
+  background: #fffbeb !important;
+}
+
+.chamando-state {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.calling-badge {
+  color: #d97706;
+  font-size: 1.1rem;
+}
+
+.calling-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.pulse-dot {
+  width: 10px;
+  height: 10px;
+  background: #f59e0b;
+  border-radius: 50%;
+  animation: pulse-amber 1.4s ease-in-out infinite;
+}
+
+.calling-text {
+  font-size: 0.85rem;
+  color: #92400e;
+  font-weight: 500;
+}
+
+@keyframes pulse-amber {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.3); }
+}
+

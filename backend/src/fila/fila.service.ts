@@ -2,16 +2,18 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
-  InternalServerErrorException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificacaoService } from '../notificacao/notificacao.service';
-import { Ticket } from '@prisma/client';
 import { NotificacaoGateway } from '../notificacao/notificacao.gateway';
 import { AgendamentoService } from '../agendamento/agendamento.service';
 import { ClienteRegrasService } from '../agendamento/cliente-regras.service';
 import type { AuthenticatedUser } from '../common/interfaces/authenticated-request.interface';
 import { SenhaService } from '../senha/senha.service';
+import { QueueEngine } from '../domain/engine/queue.engine';
+
 
 @Injectable()
 export class FilaService {
@@ -19,10 +21,10 @@ export class FilaService {
     private prisma: PrismaService,
     private notificacaoService: NotificacaoService,
     private notificacaoGateway: NotificacaoGateway,
-    private agendamentoService: AgendamentoService,
+    @Inject(forwardRef(() => AgendamentoService)) private agendamentoService: AgendamentoService,
     private senhaService: SenhaService,
-    private clienteRegrasService: ClienteRegrasService,
-  ) {}
+    @Inject(forwardRef(() => ClienteRegrasService)) private clienteRegrasService: ClienteRegrasService,
+  ) { }
 
   // Totem ticket generation logic
   async solicitarSenhaTotem(
@@ -403,7 +405,7 @@ export class FilaService {
   async buscarAgendamento(id: number) {
     const agendamento = await this.prisma.agendamento.findUnique({
       where: { id },
-      include: { servico: true },
+      include: { servico: true, filial: true },
     });
     if (!agendamento) throw new NotFoundException();
     return agendamento;
@@ -461,6 +463,38 @@ export class FilaService {
         status: 'CHECKIN_REALIZADO',
       },
     });
+
+    this.notificacaoGateway.broadcastRefresh();
+
+    return result;
+  }
+
+  async resgatarSenha(id: number) {
+    const ticket = await this.prisma.senha.findUnique({
+      where: { id },
+    });
+
+    if (!ticket) {
+      throw new NotFoundException('Senha não encontrada.');
+    }
+
+    // Restaurar a senha para AGUARDANDO e com data/hora atuais
+    const result = await this.prisma.senha.update({
+      where: { id },
+      data: {
+        status: 'AGUARDANDO',
+        dataCriacao: new Date(),
+      },
+    });
+
+    if (ticket.agendamento_id) {
+      await this.prisma.agendamento.update({
+        where: { id: ticket.agendamento_id },
+        data: {
+          status: 'CHECKIN_REALIZADO',
+        },
+      });
+    }
 
     this.notificacaoGateway.broadcastRefresh();
 
@@ -551,6 +585,339 @@ export class FilaService {
     return senha;
   }
 
+  public async executeTransition(
+    senhaId: number,
+    targetStatus: string,
+    operadorId?: number | null,
+    guicheId?: number | null,
+    txOverride?: any,
+  ) {
+    const ALLOWED_TRANSITIONS: Record<string, string[]> = {
+      'AGUARDANDO': ['CHAMADO', 'CANCELADO'],
+      'CHAMADO': ['EM_ATENDIMENTO', 'NAO_COMPARECEU', 'AGUARDANDO'],
+      'EM_ATENDIMENTO': ['FINALIZADO', 'CANCELADO', 'NAO_COMPARECEU'],
+      'NAO_COMPARECEU': ['AGUARDANDO'],
+      'FINALIZADO': [],
+      'CANCELADO': []
+    };
+
+    const prismaClient = txOverride || this.prisma;
+
+    const senha = await prismaClient.senha.findUnique({
+      where: { id: senhaId },
+      include: { filial: true, servico: true, agendamento: true },
+    });
+
+    if (!senha) {
+      throw new NotFoundException('Senha nao encontrada.');
+    }
+
+    const currentStatus = senha.status.toUpperCase();
+    const desiredStatus = targetStatus.toUpperCase();
+
+    if (currentStatus === desiredStatus) {
+      if (desiredStatus === 'EM_ATENDIMENTO') {
+        const openAtd = await prismaClient.atendimento.findFirst({
+          where: { senha_id: senhaId, fimAtendimento: null },
+          orderBy: { id: 'desc' },
+        });
+        if (openAtd && openAtd.guiche === guicheId && openAtd.operadorId === operadorId) {
+          return senha;
+        }
+        throw new BadRequestException('Atendimento ja esta em andamento com outro operador/guiche.');
+      }
+      if (desiredStatus === 'CHAMADO') {
+        if (!guicheId) {
+          throw new BadRequestException('Guiche e obrigatorio para confirmar chamada.');
+        }
+        const openAtd = await prismaClient.atendimento.findFirst({
+          where: { senha_id: senhaId, fimAtendimento: null },
+          orderBy: { id: 'desc' },
+        });
+        if (openAtd && openAtd.guiche === guicheId && (!operadorId || openAtd.operadorId === operadorId)) {
+          return senha;
+        }
+        throw new BadRequestException('Senha ja foi chamada por outro guiche.');
+      }
+      return senha;
+    }
+
+    const allowed = ALLOWED_TRANSITIONS[currentStatus] || [];
+    if (!allowed.includes(desiredStatus)) {
+      throw new BadRequestException(
+        `Transicao invalida de ${currentStatus} para ${desiredStatus}`,
+      );
+    }
+
+    if (desiredStatus === 'CHAMADO') {
+      if (!guicheId) {
+        throw new BadRequestException('Guiche e obrigatorio para chamar.');
+      }
+      const existingActive = await prismaClient.atendimento.findFirst({
+        where: {
+          guiche: guicheId,
+          fimAtendimento: null,
+          senha: { status: { in: ['CHAMADO', 'EM_ATENDIMENTO'] } },
+        },
+      });
+      if (existingActive) {
+        throw new BadRequestException(
+          `Guiche ja possui atendimento ativo (Senha ${existingActive.senha_id}).`,
+        );
+      }
+
+      // Cap recalls to a maximum of 3 attempts based on existing atendimento record counts
+      const countAtendimentos = await prismaClient.atendimento.count({
+        where: { senha_id: senhaId },
+      });
+      if (countAtendimentos >= 3) {
+        throw new BadRequestException('Esta senha já atingiu o limite máximo de 3 chamadas.');
+      }
+    }
+
+    const affected = await prismaClient.senha.updateMany({
+      where: {
+        id: senhaId,
+        status: currentStatus,
+      },
+      data: {
+        status: desiredStatus,
+      },
+    });
+
+    if (affected.count === 0) {
+      throw new BadRequestException(
+        `A senha já foi alterada por outro processo (esperado: ${currentStatus}).`,
+      );
+    }
+
+    const updatedSenha = await prismaClient.senha.findUnique({
+      where: { id: senhaId },
+      include: { agendamento: true, servico: true, cliente: true },
+    });
+
+    if (!updatedSenha) {
+      throw new NotFoundException('Senha não encontrada após a atualização.');
+    }
+
+    if (desiredStatus === 'CHAMADO') {
+      await prismaClient.atendimento.create({
+        data: {
+          guiche: guicheId,
+          senha_id: senhaId,
+          ...(operadorId
+            ? {
+              operadorId: operadorId,
+              operadorOrigemId: operadorId,
+            }
+            : {}),
+        },
+      });
+
+      await prismaClient.guiche.update({
+        where: { id: guicheId },
+        data: { atendimentoAtualCodigo: updatedSenha.numeroDisplay },
+      });
+    }
+
+    if (desiredStatus === 'EM_ATENDIMENTO') {
+      const openAtd = await prismaClient.atendimento.findFirst({
+        where: { senha_id: senhaId, fimAtendimento: null },
+        orderBy: { id: 'desc' },
+      });
+      if (openAtd) {
+        await prismaClient.atendimento.update({
+          where: { id: openAtd.id },
+          data: { inicioAtendimento: new Date() },
+        });
+      }
+    }
+
+    if (desiredStatus === 'FINALIZADO') {
+      if (updatedSenha.agendamento_id) {
+        await prismaClient.agendamento.update({
+          where: { id: updatedSenha.agendamento_id },
+          data: { status: 'REALIZADO' },
+        });
+      }
+      const openAtds = await prismaClient.atendimento.findMany({
+        where: { senha_id: senhaId, fimAtendimento: null },
+        select: { id: true, guiche: true },
+      });
+      if (openAtds.length > 0) {
+        await prismaClient.atendimento.updateMany({
+          where: { id: { in: openAtds.map((a) => a.id) } },
+          data: { fimAtendimento: new Date() },
+        });
+        const guicheIds = openAtds.map((a) => a.guiche).filter((id) => id !== null) as number[];
+        if (guicheIds.length > 0) {
+          await prismaClient.guiche.updateMany({
+            where: { id: { in: guicheIds } },
+            data: { atendimentoAtualCodigo: null },
+          });
+        }
+      }
+    }
+
+    if (desiredStatus === 'CANCELADO') {
+      if (updatedSenha.agendamento_id) {
+        await prismaClient.agendamento.update({
+          where: { id: updatedSenha.agendamento_id },
+          data: { status: 'CANCELADO' },
+        });
+      }
+      const openAtds = await prismaClient.atendimento.findMany({
+        where: { senha_id: senhaId, fimAtendimento: null },
+        select: { id: true, guiche: true },
+      });
+      if (openAtds.length > 0) {
+        await prismaClient.atendimento.updateMany({
+          where: { id: { in: openAtds.map((a) => a.id) } },
+          data: { fimAtendimento: new Date() },
+        });
+        const guicheIds = openAtds.map((a) => a.guiche).filter((id) => id !== null) as number[];
+        if (guicheIds.length > 0) {
+          await prismaClient.guiche.updateMany({
+            where: { id: { in: guicheIds } },
+            data: { atendimentoAtualCodigo: null },
+          });
+        }
+      }
+    }
+
+    if (desiredStatus === 'NAO_COMPARECEU') {
+      const redirectConfig = await prismaClient.configuracao.findFirst({
+        where: { chave: 'redirecionarAusentes', filial_id: updatedSenha.filial_id },
+      });
+
+      if (redirectConfig?.valor === 'true') {
+        const redirectedSenha = await prismaClient.senha.update({
+          where: { id: senhaId },
+          data: { status: 'AGUARDANDO', dataCriacao: new Date() },
+          include: { agendamento: true, servico: true, cliente: true },
+        });
+
+        const openAtds = await prismaClient.atendimento.findMany({
+          where: { senha_id: senhaId, fimAtendimento: null },
+          select: { id: true, guiche: true },
+        });
+        if (openAtds.length > 0) {
+          await prismaClient.atendimento.updateMany({
+            where: { id: { in: openAtds.map((a) => a.id) } },
+            data: { fimAtendimento: new Date() },
+          });
+          const guicheIds = openAtds.map((a) => a.guiche).filter((id) => id !== null) as number[];
+          if (guicheIds.length > 0) {
+            await prismaClient.guiche.updateMany({
+              where: { id: { in: guicheIds } },
+              data: { atendimentoAtualCodigo: null },
+            });
+          }
+        }
+
+        await prismaClient.log_auditoria.create({
+          data: {
+            acao: 'TRANSICAO_STATUS',
+            descricao: JSON.stringify({
+              from: currentStatus,
+              to: 'AGUARDANDO',
+              senhaId: senhaId,
+              guicheId: guicheId,
+              operadorId: operadorId,
+              motivo: 'redirecionarAusentes_ativo',
+            }),
+            usuario_id: operadorId || null,
+            filial_id: updatedSenha.filial_id || null,
+            entidade: 'senha',
+            status: 'Sucesso',
+          },
+        });
+
+        return redirectedSenha;
+      } else {
+        if (updatedSenha.agendamento_id) {
+          await prismaClient.agendamento.update({
+            where: { id: updatedSenha.agendamento_id },
+            data: { status: 'NAO_COMPARECEU' },
+          });
+        }
+        const openAtds = await prismaClient.atendimento.findMany({
+          where: { senha_id: senhaId, fimAtendimento: null },
+          select: { id: true, guiche: true },
+        });
+        if (openAtds.length > 0) {
+          await prismaClient.atendimento.updateMany({
+            where: { id: { in: openAtds.map((a) => a.id) } },
+            data: { fimAtendimento: new Date() },
+          });
+          const guicheIds = openAtds.map((a) => a.guiche).filter((id) => id !== null) as number[];
+          if (guicheIds.length > 0) {
+            await prismaClient.guiche.updateMany({
+              where: { id: { in: guicheIds } },
+              data: { atendimentoAtualCodigo: null },
+            });
+          }
+        }
+      }
+    }
+
+    if (desiredStatus === 'AGUARDANDO') {
+      const openAtds = await prismaClient.atendimento.findMany({
+        where: { senha_id: senhaId, fimAtendimento: null },
+        select: { id: true, guiche: true },
+      });
+      if (openAtds.length > 0) {
+        await prismaClient.atendimento.updateMany({
+          where: { id: { in: openAtds.map((a) => a.id) } },
+          data: { fimAtendimento: new Date(), transferidoEm: new Date() },
+        });
+        const guicheIds = openAtds.map((a) => a.guiche).filter((id) => id !== null) as number[];
+        if (guicheIds.length > 0) {
+          await prismaClient.guiche.updateMany({
+            where: { id: { in: guicheIds } },
+            data: { atendimentoAtualCodigo: null },
+          });
+        }
+      }
+    }
+
+    const openAtd = await prismaClient.atendimento.findFirst({
+      where: { senha_id: senhaId, fimAtendimento: null },
+      orderBy: { id: 'desc' },
+    });
+
+    if (openAtd && !['CHAMADO', 'EM_ATENDIMENTO'].includes(updatedSenha.status)) {
+      throw new BadRequestException(
+        'Invariante violada: atendimento ativo com status de senha invalido.',
+      );
+    }
+
+    if (['CHAMADO', 'EM_ATENDIMENTO'].includes(updatedSenha.status) && !openAtd) {
+      throw new BadRequestException(
+        'Invariante violada: senha ativa sem atendimento associado.',
+      );
+    }
+
+    await prismaClient.log_auditoria.create({
+      data: {
+        acao: 'TRANSICAO_STATUS',
+        descricao: JSON.stringify({
+          from: currentStatus,
+          to: desiredStatus,
+          senhaId: senhaId,
+          guicheId: guicheId,
+          operadorId: operadorId,
+        }),
+        usuario_id: operadorId || null,
+        filial_id: updatedSenha.filial_id || null,
+        entidade: 'senha',
+        status: 'Sucesso',
+      },
+    });
+
+    return updatedSenha;
+  }
+
   async chamarProximo(guicheId: number, repetir = false) {
     const guicheInfo = await this.prisma.guiche.findUnique({
       where: { id: guicheId },
@@ -562,24 +929,66 @@ export class FilaService {
       return this.rechamarSenhaAtual(guicheId, guicheInfo.numero?.toString());
     }
 
-    const configPrioridade = await this.prisma.configuracao.findFirst({
-      where: { chave: 'prioridadeAutomatica', filial_id: guicheInfo.filial_id }
-    });
-    
-    let orderByOpts: any = [{ dataCriacao: 'asc' }];
-    if (configPrioridade?.valor !== 'false') {
-      orderByOpts = [{ prioridade: 'desc' }, { dataCriacao: 'asc' }];
-    }
-
-    const proxima = await this.prisma.senha.findFirst({
+    const ticketsAguardando = await this.prisma.senha.findMany({
       where: {
         status: 'AGUARDANDO',
         filial_id: guicheInfo.filial_id,
       },
-      orderBy: orderByOpts,
+      include: { servico: true, agendamento: true },
     });
 
-    if (!proxima) throw new NotFoundException('Fila vazia nesta filial!');
+    if (ticketsAguardando.length === 0) throw new NotFoundException('Fila vazia nesta filial!');
+
+    const now = new Date();
+    const queueEngine = new QueueEngine();
+    const ticketsWithPriority = ticketsAguardando.map(ticket => {
+      const effectivePriority = queueEngine.calculateSenhaScore(ticket, now.getTime());
+      return {
+        ticket,
+        effectivePriority,
+      };
+    });
+
+    ticketsWithPriority.sort((a, b) => {
+      if (b.effectivePriority !== a.effectivePriority) {
+        return b.effectivePriority - a.effectivePriority;
+      }
+      const timeA = new Date(a.ticket.dataCriacao).getTime();
+      const timeB = new Date(b.ticket.dataCriacao).getTime();
+      if (timeA !== timeB) {
+        return timeA - timeB;
+      }
+      return a.ticket.id - b.ticket.id;
+    });
+
+    let senhaAtualizada: any = null;
+
+    for (const candidate of ticketsWithPriority) {
+      try {
+        senhaAtualizada = await this.prisma.$transaction(async (tx) => {
+          return this.executeTransition(
+            candidate.ticket.id,
+            'CHAMADO',
+            guicheInfo.operadorAtualId,
+            guicheId,
+            tx,
+          );
+        });
+        break;
+      } catch (err: any) {
+        const msg = String(err?.message || '');
+        if (msg.includes('ja foi chamada por outro guiche') || msg.includes('Transicao invalida')) {
+          continue;
+        }
+        throw err;
+      }
+    }
+
+    if (!senhaAtualizada) {
+      throw new NotFoundException('Fila vazia nesta filial!');
+    }
+
+    const proxima = senhaAtualizada;
 
     const tempoEsperaMs =
       new Date().getTime() - new Date(proxima.dataCriacao).getTime();
@@ -593,31 +1002,6 @@ export class FilaService {
         rota: '/admin/dashboard',
       });
     }
-
-    const senhaAtualizada = await this.prisma.senha.update({
-      where: { id: proxima.id },
-      data: { status: 'CHAMADO' },
-      include: { agendamento: true, servico: true, cliente: true },
-    });
-
-    await this.prisma.atendimento.create({
-      data: {
-        guiche: guicheId,
-        senha_id: proxima.id,
-        // Registra o operador responsável no momento em que o cliente é chamado
-        ...(guicheInfo.operadorAtualId
-          ? {
-            operadorId: guicheInfo.operadorAtualId,
-            operadorOrigemId: guicheInfo.operadorAtualId,
-          }
-          : {}),
-      },
-    });
-
-    await this.prisma.guiche.update({
-      where: { id: guicheId },
-      data: { atendimentoAtualCodigo: senhaAtualizada.numeroDisplay },
-    });
 
     this.notificacaoGateway.broadcastTicket({
       ticketId: senhaAtualizada.numeroDisplay,
@@ -702,28 +1086,11 @@ export class FilaService {
 
     const senha = await this.prisma.senha.findUnique({
       where: { id: senhaId },
-      include: { servico: true },
     });
     if (!senha) throw new NotFoundException('Senha não encontrada!');
-    if (senha.status !== 'AGUARDANDO') throw new BadRequestException('A senha não está mais aguardando.');
 
-    const senhaAtualizada = await this.prisma.senha.update({
-      where: { id: senhaId },
-      data: { status: 'CHAMADO' },
-      include: { agendamento: true, servico: true, cliente: true },
-    });
-
-    await this.prisma.atendimento.create({
-      data: {
-        guiche: guicheId,
-        senha_id: senhaId,
-        ...(guicheInfo.operadorAtualId
-          ? {
-            operadorId: guicheInfo.operadorAtualId,
-            operadorOrigemId: guicheInfo.operadorAtualId,
-          }
-          : {}),
-      },
+    const senhaAtualizada = await this.prisma.$transaction(async (tx) => {
+      return this.executeTransition(senhaId, 'CHAMADO', guicheInfo.operadorAtualId, guicheId, tx);
     });
 
     this.notificacaoGateway.broadcastTicket({
@@ -746,49 +1113,48 @@ export class FilaService {
   }
 
   async cancelarSenha(senhaId: number) {
-    const senha = await this.prisma.senha.findUnique({ where: { id: senhaId } });
-    if (!senha) throw new NotFoundException('Senha não encontrada!');
-
-    return await this.prisma.senha.update({
-      where: { id: senhaId },
-      data: { status: 'CANCELADO' }
+    const senha = await this.prisma.$transaction(async (tx) => {
+      return this.executeTransition(senhaId, 'CANCELADO', null, null, tx);
     });
+    this.notificacaoGateway.broadcastRefresh();
+    return senha;
   }
 
   async iniciarAtendimento(senhaId: number) {
-    const atualizado = await this.prisma.senha.update({
-      where: { id: senhaId },
-      data: { status: 'EM_ATENDIMENTO' },
-      include: { agendamento: true, servico: true },
+    const atendimentoAberto = await this.prisma.atendimento.findFirst({
+      where: { senha_id: senhaId, fimAtendimento: null },
+      orderBy: { id: 'desc' },
+    });
+
+    const atualizado = await this.prisma.$transaction(async (tx) => {
+      return this.executeTransition(
+        senhaId,
+        'EM_ATENDIMENTO',
+        atendimentoAberto?.operadorId ?? null,
+        atendimentoAberto?.guiche ?? null,
+        tx,
+      );
     });
     this.notificacaoGateway.broadcastRefresh();
     return atualizado;
   }
 
   async finalizarAtendimento(senhaId: number) {
-    const senha = await this.prisma.senha.update({
-      where: { id: senhaId },
-      data: { status: 'FINALIZADO' },
-      include: { agendamento: true, servico: true },
+    const senha = await this.prisma.$transaction(async (tx) => {
+      return this.executeTransition(senhaId, 'FINALIZADO', null, null, tx);
     });
 
-    if (senha.agendamento_id) {
-      await this.prisma.agendamento.update({
-        where: { id: senha.agendamento_id },
-        data: { status: 'REALIZADO' },
-      });
-    }
-
-    await this.encerrarAtendimentoAbertoPorSenha(senhaId);
     this.notificacaoGateway.broadcastRefresh();
 
-    await this.notificarClientePorDocumento(senha.agendamento?.documento, {
-      titulo: 'Atendimento concluído',
-      mensagem: `O atendimento da senha ${senha.numeroDisplay} foi concluído.`,
-      icon: 'checkCircle',
-      iconClass: 'blue-icon',
-      rota: '/client/meus-agendamentos',
-    });
+    if (senha.agendamento?.documento) {
+      await this.notificarClientePorDocumento(senha.agendamento.documento, {
+        titulo: 'Atendimento concluído',
+        mensagem: `O atendimento da senha ${senha.numeroDisplay} foi concluído.`,
+        icon: 'checkCircle',
+        iconClass: 'blue-icon',
+        rota: '/client/meus-agendamentos',
+      });
+    }
 
     return senha;
   }
@@ -810,48 +1176,41 @@ export class FilaService {
     });
   }
 
-  async naoCompareceu(senhaId: number) {
-    const senha = await this.prisma.senha.findUnique({ where: { id: senhaId } });
-    if (!senha) throw new NotFoundException('Senha não encontrada!');
-
-    const config = await this.prisma.configuracao.findFirst({
-      where: { chave: 'redirecionarAusentes', filial_id: senha.filial_id }
+  async atualizarGarrafoes(senhaId: number, qtdeGarrafoes: number) {
+    const senha = await this.prisma.senha.findUnique({
+      where: { id: senhaId }
     });
 
-    if (config?.valor === 'true') {
-      const atualizada = await this.prisma.senha.update({
-        where: { id: senhaId },
-        data: { status: 'AGUARDANDO', dataCriacao: new Date() },
-      });
-      this.notificacaoGateway.broadcastRefresh();
-      return atualizada;
-    }
+    if (!senha) throw new NotFoundException('Senha não encontrada');
 
-    const senhaAtualizada = await this.prisma.senha.update({
+    return this.prisma.senha.update({
       where: { id: senhaId },
-      data: { status: 'CANCELADO' },
-      include: { agendamento: true, servico: true },
+      data: {
+        qtdeGarrafoes: Math.max(0, qtdeGarrafoes)
+      },
+    });
+  }
+
+  async naoCompareceu(senhaId: number) {
+    const senha = await this.prisma.$transaction(async (tx) => {
+      return this.executeTransition(senhaId, 'NAO_COMPARECEU', null, null, tx);
     });
 
-    if (senhaAtualizada.agendamento_id) {
-      await this.prisma.agendamento.update({
-        where: { id: senhaAtualizada.agendamento_id },
-        data: { status: 'NAO_COMPARECEU' },
-      });
-    }
-
-    await this.encerrarAtendimentoAbertoPorSenha(senhaId);
     this.notificacaoGateway.broadcastRefresh();
 
-    await this.notificarClientePorDocumento(senhaAtualizada.agendamento?.documento, {
-      titulo: 'Não comparecimento registrado',
-      mensagem: `Sua senha ${senhaAtualizada.numeroDisplay} foi encerrada por não comparecimento.`,
-      icon: 'xCircle',
-      iconClass: 'gray-icon',
-      rota: '/client/meus-agendamentos',
-    });
+    if (senha.status === 'NAO_COMPARECEU') {
+      if (senha.agendamento?.documento) {
+        await this.notificarClientePorDocumento(senha.agendamento.documento, {
+          titulo: 'Não comparecimento registrado',
+          mensagem: `Sua senha ${senha.numeroDisplay} foi encerrada por não comparecimento.`,
+          icon: 'xCircle',
+          iconClass: 'gray-icon',
+          rota: '/client/meus-agendamentos',
+        });
+      }
+    }
 
-    return senhaAtualizada;
+    return senha;
   }
 
   async transferirAtendimento(
@@ -889,20 +1248,9 @@ export class FilaService {
     }
 
     if (retornarFila) {
-      await this.prisma.$transaction([
-        this.prisma.senha.update({
-          where: { id: senhaId },
-          data: { status: 'AGUARDANDO' },
-        }),
-        this.prisma.atendimento.update({
-          where: { id: atendimento.id },
-          data: { fimAtendimento: new Date(), transferidoEm: new Date() },
-        }),
-        this.prisma.guiche.update({
-          where: { id: atendimento.guiche },
-          data: { atendimentoAtualCodigo: null },
-        }),
-      ]);
+      await this.prisma.$transaction(async (tx) => {
+        await this.executeTransition(senhaId, 'AGUARDANDO', authUser.userId, null, tx);
+      });
 
       this.notificacaoGateway.broadcastRefresh();
       return { status: 'AGUARDANDO' };
@@ -936,8 +1284,8 @@ export class FilaService {
       throw new BadRequestException('Guiche de destino ja possui atendimento ativo.');
     }
 
-    await this.prisma.$transaction([
-      this.prisma.atendimento.update({
+    await this.prisma.$transaction(async (tx) => {
+      await tx.atendimento.update({
         where: { id: atendimento.id },
         data: {
           guiche: guicheDestinoId,
@@ -945,16 +1293,31 @@ export class FilaService {
           operadorOrigemId: atendimento.operadorOrigemId || authUser.userId,
           transferidoEm: new Date(),
         },
-      }),
-      this.prisma.guiche.update({
+      });
+      await tx.guiche.update({
         where: { id: atendimento.guiche },
         data: { atendimentoAtualCodigo: null },
-      }),
-      this.prisma.guiche.update({
+      });
+      await tx.guiche.update({
         where: { id: guicheDestinoId },
-        data: { atendimentoAtualCodigo: atendimento.senha.numeroDisplay },
-      }),
-    ]);
+        data: { atendimentoAtualCodigo: atendimento.senha?.numeroDisplay ?? null },
+      });
+      await tx.log_auditoria.create({
+        data: {
+          acao: 'TRANSFERENCIA_ATENDIMENTO',
+          descricao: JSON.stringify({
+            senhaId: senhaId,
+            guicheOrigemId: atendimento.guiche,
+            guicheDestinoId: guicheDestinoId,
+            operadorId: authUser.userId,
+          }),
+          usuario_id: authUser.userId,
+          filial_id: guicheDestino.filial_id,
+          entidade: 'senha',
+          status: 'Sucesso',
+        },
+      });
+    });
 
     this.notificacaoGateway.broadcastRefresh();
 
@@ -967,15 +1330,36 @@ export class FilaService {
   async listarAtendimentosOperador(
     operadorId: number,
     filialId?: number,
+    dataStr?: string,
   ) {
     const where: any = {
-      OR: [
-        { operadorOrigemId: operadorId },
-        { operadorOrigemId: null, operadorId: operadorId },
-      ],
+      operadorId: operadorId,
     };
     if (filialId) {
       where.guiche_rel = { filial_id: filialId };
+    }
+
+    // Filtro por data
+    if (dataStr) {
+      const dataInicio = new Date(`${dataStr}T00:00:00.000`);
+      const dataFim = new Date(`${dataStr}T23:59:59.999`);
+      where.inicioAtendimento = {
+        gte: dataInicio,
+        lte: dataFim,
+      };
+    } else {
+      // Se não enviou data, mostra os de hoje por padrão
+      const hoje = new Date();
+      const timezoneOffset = hoje.getTimezoneOffset() * 60000;
+      const localHoje = new Date(hoje.getTime() - timezoneOffset);
+      const hojeStr = localHoje.toISOString().split('T')[0];
+
+      const dataInicio = new Date(`${hojeStr}T00:00:00.000`);
+      const dataFim = new Date(`${hojeStr}T23:59:59.999`);
+      where.inicioAtendimento = {
+        gte: dataInicio,
+        lte: dataFim,
+      };
     }
 
     const atendimentos = await this.prisma.atendimento.findMany({
@@ -989,32 +1373,50 @@ export class FilaService {
     });
 
     return atendimentos.map((a) => {
-      const statusRaw = (a.senha?.status || '').toUpperCase();
+      const agendamentoStatusRaw = (a.senha?.agendamento?.status || '').toUpperCase();
+      const statusRaw = agendamentoStatusRaw === 'NAO_COMPARECEU'
+        ? 'NAO_COMPARECEU'
+        : (a.senha?.status || '').toUpperCase();
       const foiTransferido = Boolean(a.transferidoEm);
 
       let status = statusRaw || 'DESCONHECIDO';
       if (statusRaw === 'CANCELADO') status = 'Cancelado';
       else if (statusRaw === 'FINALIZADO') status = 'Finalizado';
       else if (foiTransferido) status = 'Transferido';
+      else if (statusRaw === 'NAO_COMPARECEU') status = 'Não Compareceu';
       else if (statusRaw === 'EM_ATENDIMENTO') status = 'Em Atendimento';
-      else if (statusRaw === 'CHAMADO') status = 'Chamado';
+      else if (statusRaw === 'CHAMADO') status = 'Em Atendimento';
 
       const inicio = a.inicioAtendimento ? new Date(a.inicioAtendimento).getTime() : null;
       const criacao = a.senha?.dataCriacao ? new Date(a.senha.dataCriacao).getTime() : null;
-      const diffMin = inicio && criacao ? Math.max(0, Math.floor((inicio - criacao) / 60000)) : 0;
+
+      let tempoEspera = '-';
+      let tempoEsperaMin = 0;
+      if (inicio && criacao) {
+        const diffMs = Math.max(0, inicio - criacao);
+        if (diffMs < 60000) {
+          const diffSeg = Math.floor(diffMs / 1000);
+          tempoEspera = `${diffSeg} seg`;
+        } else {
+          tempoEsperaMin = Math.floor(diffMs / 60000);
+          tempoEspera = `${tempoEsperaMin} min`;
+        }
+      }
 
       return {
         id: a.id,
         senhaId: a.senha?.id || null,
+        agendamentoId: a.senha?.agendamento?.id || null,
         ticket: a.senha?.numeroDisplay || 'S/N',
-        cliente: a.senha?.agendamento?.nomeCliente || 'Geral/Totem',
-        documento: a.senha?.agendamento?.documento || null,
+        cliente: a.senha?.nomeCliente || a.senha?.agendamento?.nomeCliente || 'Geral/Totem',
+        documento: a.senha?.documentoCliente || a.senha?.agendamento?.documento || null,
         categoria: a.senha?.servico?.nome || 'Geral',
         operador: a.operador?.nome || '-',
         operadorLogin: a.operador?.login || null,
         guiche: a.guiche_rel?.numero || null,
-        tempoEspera: `${diffMin} min`,
-        tempoEsperaMin: diffMin,
+        tempoEspera,
+        tempoEsperaMin,
+        qtdeGarrafoes: a.senha?.qtdeGarrafoes ?? 0,
         status,
         statusRaw,
         inicioAtendimento: a.inicioAtendimento,
@@ -1051,26 +1453,48 @@ export class FilaService {
     });
 
     return atendimentos.map((a) => {
-      const statusRaw = (a.senha?.status || '').toUpperCase();
+      const agendamentoStatusRaw = (a.senha?.agendamento?.status || '').toUpperCase();
+      const statusRaw = agendamentoStatusRaw === 'NAO_COMPARECEU'
+        ? 'NAO_COMPARECEU'
+        : (a.senha?.status || '').toUpperCase();
       const foiTransferido = Boolean(a.transferidoEm);
 
       let status = statusRaw || 'DESCONHECIDO';
       if (statusRaw === 'CANCELADO') status = 'Cancelado';
       else if (statusRaw === 'FINALIZADO') status = 'Finalizado';
       else if (foiTransferido) status = 'Transferido';
+      else if (statusRaw === 'NAO_COMPARECEU') status = 'Não Compareceu';
       else if (statusRaw === 'EM_ATENDIMENTO') status = 'Em Atendimento';
-      else if (statusRaw === 'CHAMADO') status = 'Chamado';
+      else if (statusRaw === 'CHAMADO') status = 'Em Atendimento';
 
       const inicio = a.inicioAtendimento ? new Date(a.inicioAtendimento).getTime() : null;
       const criacao = a.senha?.dataCriacao ? new Date(a.senha.dataCriacao).getTime() : null;
-      const diffMin = inicio && criacao ? Math.max(0, Math.floor((inicio - criacao) / 60000)) : 0;
+
+      let tempoEspera = '-';
+      let tempoEsperaMin = 0;
+      if (inicio && criacao) {
+        const diffMs = Math.max(0, inicio - criacao);
+        if (diffMs < 60000) {
+          const diffSeg = Math.floor(diffMs / 1000);
+          tempoEspera = `${diffSeg} seg`;
+        } else {
+          tempoEsperaMin = Math.floor(diffMs / 60000);
+          tempoEspera = `${tempoEsperaMin} min`;
+        }
+      }
 
       const fim = a.fimAtendimento ? new Date(a.fimAtendimento).getTime() : null;
-      const diffAtendMin = inicio && fim ? Math.max(0, Math.floor((fim - inicio) / 60000)) : 0;
-
       let tempoAtendimentoStr = '-';
-      if (a.fimAtendimento) {
-        tempoAtendimentoStr = `${diffAtendMin} min`;
+      let tempoAtendimentoMin = 0;
+      if (fim !== null && inicio !== null) {
+        const diffMs = Math.max(0, fim - inicio);
+        if (diffMs < 60000) {
+          const diffSeg = Math.floor(diffMs / 1000);
+          tempoAtendimentoStr = `${diffSeg} seg`;
+        } else {
+          tempoAtendimentoMin = Math.floor(diffMs / 60000);
+          tempoAtendimentoStr = `${tempoAtendimentoMin} min`;
+        }
       } else if (a.inicioAtendimento) {
         tempoAtendimentoStr = 'Em andamento';
       }
@@ -1078,17 +1502,19 @@ export class FilaService {
       return {
         id: a.id,
         senhaId: a.senha?.id || null,
+        agendamentoId: a.senha?.agendamento?.id || null,
         ticket: a.senha?.numeroDisplay || 'S/N',
-        cliente: a.senha?.agendamento?.nomeCliente || 'Geral/Totem',
-        documento: a.senha?.agendamento?.documento || null,
+        cliente: a.senha?.nomeCliente || a.senha?.agendamento?.nomeCliente || 'Geral/Totem',
+        documento: a.senha?.documentoCliente || a.senha?.agendamento?.documento || null,
         categoria: a.senha?.servico?.nome || 'Geral',
         operador: a.operador?.nome || '-',
         operadorLogin: a.operador?.login || null,
         guiche: a.guiche_rel?.numero || null,
-        tempoEspera: `${diffMin} min`,
-        tempoEsperaMin: diffMin,
+        tempoEspera,
+        tempoEsperaMin,
         tempoAtendimento: tempoAtendimentoStr,
-        tempoAtendimentoMin: diffAtendMin,
+        tempoAtendimentoMin,
+        qtdeGarrafoes: a.senha?.qtdeGarrafoes ?? 0,
         status,
         statusRaw,
         inicioAtendimento: a.inicioAtendimento,
@@ -1130,18 +1556,32 @@ export class FilaService {
 
     if (!atendimentoAtual?.senha) return null;
 
+    const statusRaw = (atendimentoAtual.senha.status || '').toUpperCase();
+    const statusLabel =
+      statusRaw === 'CHAMADO'
+        ? 'Chamando'
+        : statusRaw === 'EM_ATENDIMENTO'
+          ? 'Em Atendimento'
+          : statusRaw;
+
     return {
       id: atendimentoAtual.senha.id,
       numeroDisplay: atendimentoAtual.senha.numeroDisplay,
       status: atendimentoAtual.senha.status,
+      qtdeGarrafoes: atendimentoAtual.senha.qtdeGarrafoes ?? 0,
       dataCriacao: atendimentoAtual.senha.dataCriacao,
-      qtdeGarrafoes: atendimentoAtual.senha.qtdeGarrafoes,
       servico: atendimentoAtual.senha.servico,
       cliente: atendimentoAtual.senha.cliente,
       nomeCliente: atendimentoAtual.senha.nomeCliente,
       documentoCliente: atendimentoAtual.senha.documentoCliente,
       agendamento: atendimentoAtual.senha.agendamento,
       inicioAtendimento: atendimentoAtual.inicioAtendimento,
+      uiState: {
+        statusRaw,
+        statusLabel,
+        isChamando: statusRaw === 'CHAMADO',
+        isAtendendo: statusRaw === 'EM_ATENDIMENTO',
+      },
     };
   }
 
@@ -1265,71 +1705,6 @@ export class FilaService {
     });
 
     return { fila, atendidos, tempo: 12, graficoFluxo: [] };
-  }
-
-  // --- MOTOR DE PRIORIDADE ATOMICO (SKIP LOCKED) ---
-
-  public async dequeueAtomic(): Promise<Ticket | null> {
-    try {
-      const result = await this.prisma.$queryRaw<Ticket[]>`
-        WITH next_ticket AS (
-          SELECT id
-          FROM aldebaran_tickets
-          WHERE status = 'PENDING'
-          ORDER BY
-            (CASE WHEN origin = 'SCHEDULED' AND "scheduledTime" <= NOW() + INTERVAL '5 minutes' THEN 10000 ELSE 0 END) +
-            (CASE WHEN type = 'PREFERENTIAL' THEN 5000 ELSE 0 END) +
-            (CASE WHEN category IN ('CLIENTE_RAPIDO', 'RETIRADA_RAPIDA') THEN 1000 ELSE 0 END) +
-            (EXTRACT(EPOCH FROM (NOW() - "createdAt")) / 60 * 50)
-          DESC
-          LIMIT 1
-          FOR UPDATE SKIP LOCKED
-        )
-        UPDATE aldebaran_tickets
-        SET status = 'PROCESSING', "updatedAt" = NOW()
-        WHERE id = (SELECT id FROM next_ticket)
-        RETURNING *;
-      `;
-
-      return result.length > 0 ? result[0] : null;
-    } catch (error) {
-      console.error(
-        '[FilaService.dequeueAtomic] Falha na extracao de ticket',
-        error,
-      );
-      throw new InternalServerErrorException(
-        'Falha ao processar a fila. O banco de dados pode estar indisponivel.',
-      );
-    }
-  }
-
-  public async chamarProximoTicket(guicheId: string): Promise<void> {
-    const ticket = await this.dequeueAtomic();
-
-    if (ticket) {
-      this.notificacaoGateway.broadcastTicket({
-        ticketId: ticket.id,
-        category: ticket.category,
-        guicheOrDoca: guicheId,
-        calledAt: new Date(),
-      });
-    } else {
-      throw new NotFoundException('Fila de tickets vazia!');
-    }
-  }
-
-  public async completeTicket(ticketId: string): Promise<void> {
-    await this.prisma.ticket.update({
-      where: { id: ticketId },
-      data: { status: 'COMPLETED' },
-    });
-  }
-
-  public async failTicket(ticketId: string): Promise<void> {
-    await this.prisma.ticket.update({
-      where: { id: ticketId },
-      data: { status: 'FAILED' },
-    });
   }
 
   public async getHistorico(salaDesc: string) {

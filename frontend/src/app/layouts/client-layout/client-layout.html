@@ -1,5 +1,9 @@
 <div class="admin-container">
-  <aside class="sidebar" [class.closed]="!sidebarOpen">
+  <!-- Backdrop for mobile sidebar closing -->
+  <div class="sidebar-backdrop" *ngIf="sidebarOpen" (click)="sidebarOpen = false"></div>
+
+  <!-- On mobile, sidebarOpen true adds mobile-open class -->
+  <aside class="sidebar" [class.closed]="!sidebarOpen" [class.mobile-open]="sidebarOpen">
     <div class="logo-area" (click)="toggleSidebar()" style="cursor: pointer;">
       <div class="logo-wrapper" *ngIf="sidebarOpen">
         <img src="assets/logo-aldebaran.png" alt="Aldebaran" class="logo-full" />
@@ -60,7 +64,8 @@
   <div class="main-content-wrapper" [class.expanded]="!sidebarOpen">
     <header class="top-bar">
       <div class="top-bar-left">
-        <button class="icon-btn menu-btn" (click)="toggleSidebar()" style="background:none;border:none;margin-right:1rem;color:var(--text-color);cursor:pointer;" [class.d-none]="true" [class.d-md-inline-block]="false">
+        <button class="icon-btn menu-btn" (click)="toggleSidebar()" style="background:none;border:none;margin-right:1rem;color:var(--text-color);cursor:pointer;">
+          <lucide-icon [img]="icons['menu']" size="24"></lucide-icon>
         </button>
         <h1 class="page-title" style="margin: 0; font-size: 1.4rem; font-weight: 700;">{{ activePageTitle }}</h1>
       </div>

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
+import { environment } from '../../../../environments/environment';
 import { TotemConfigService } from '../../../services/totem-config.service';
 import { AuthService } from '../../../services/auth.service';
 import { LucideAngularModule, Building2, Check, ArrowRight } from 'lucide-angular';
@@ -72,7 +73,7 @@ export class TotemSetupComponent implements OnInit {
     const filial = this.filiais.find(f => f.id === this.selectedFilialId);
     if (filial) {
       this.configService.setFilial(filial.id, filial.nome);
-      console.log('Totem configurado para:', filial.nome);
+      if (!environment.production) console.log('Totem configurado para:', filial.nome);
       this.router.navigate(['/totem']);
     }
   }

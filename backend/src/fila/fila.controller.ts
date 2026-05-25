@@ -102,6 +102,14 @@ export class FilaController {
     return this.filaService.resgatarAgendamento(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('senha/:id/resgatar')
+  resgatarSenha(
+    @Param('id') id: string,
+  ) {
+    return this.filaService.resgatarSenha(+id);
+  }
+
   @Post('servicos')
   criarServico(@Body() body: { nome: string; sigla: string }) {
     return this.filaService.criarServico(body.nome, body.sigla);
@@ -170,9 +178,10 @@ export class FilaController {
   listarAtendimentosOperador(
     @Request() req: AuthenticatedRequest,
     @Query('filialId') filialId?: string,
+    @Query('data') data?: string,
   ) {
     const fid = filialId ? +filialId : req.user.filial_id;
-    return this.filaService.listarAtendimentosOperador(req.user.userId, fid);
+    return this.filaService.listarAtendimentosOperador(req.user.userId, fid, data);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -203,6 +212,15 @@ export class FilaController {
     @Body() body: { nome: string; documento?: string; clienteId?: string },
   ) {
     return this.filaService.vincularCliente(+id, body.nome, body.documento, body.clienteId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('senha/:id/garrafoes')
+  atualizarGarrafoes(
+    @Param('id') id: string,
+    @Body() body: { qtdeGarrafoes: number },
+  ) {
+    return this.filaService.atualizarGarrafoes(+id, body.qtdeGarrafoes);
   }
 
   @Post('nao_compareceu')

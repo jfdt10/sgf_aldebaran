@@ -19,7 +19,7 @@ type GerarSenhaAgendamentoParams = {
 
 @Injectable()
 export class SenhaService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async gerarSenhaCliente(params: GerarSenhaAgendamentoParams) {
     return this.gerarSenhaAgendamento(params);
@@ -31,6 +31,7 @@ export class SenhaService {
       'BONUS_PRIORIDADE_AGENDAMENTO',
       filialId,
     );
+    // Base priority: servico.prioridadePeso; agendamento adds BONUS_PRIORIDADE_AGENDAMENTO.
     const bonus = Number(configBonus?.valor) || 2;
 
     const hoje = new Date();
@@ -62,7 +63,7 @@ export class SenhaService {
       params.servico.nome,
     );
     const sequencial = (count + 1).toString().padStart(3, '0');
-    
+
     const isPreferencial = params.tipo === 'Preferencial' || params.tipo === 'PREFERENCIAL';
     const prefixoTipo = isPreferencial ? 'P' : 'C';
     const modPart = modificador ? `-${modificador}-` : '';

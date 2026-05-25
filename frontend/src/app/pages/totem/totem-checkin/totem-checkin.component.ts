@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TotemService } from '../../../services/totem.service';
+import { environment } from '../../../../environments/environment';
+
 
 @Component({
   selector: 'app-totem-checkin',
@@ -52,8 +54,8 @@ export class TotemCheckinComponent {
       this.erroMensagem = 'Informe um código válido.';
       return;
     }
-    
-    console.log('Código confirmado:', codigoNormalizado);
+
+    if (!environment.production) console.log('Código confirmado:', codigoNormalizado);
     const tipo = this.checkinPreferencial ? 'Preferencial' : 'Convencional';
     this.loading = true;
     this.erroMensagem = null;

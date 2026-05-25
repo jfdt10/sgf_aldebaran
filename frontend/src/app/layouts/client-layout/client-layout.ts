@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { LucideAngularModule, LayoutDashboard, Ticket, Settings, LogOut, Menu, User, Bell, ChevronDown, ChevronUp, Moon, Power, Home, CalendarPlus, History, ChevronRight, CheckCircle, XCircle, Clock } from 'lucide-angular';
@@ -26,7 +26,7 @@ interface ClientMenuGroup {
   templateUrl: './client-layout.html',
   styleUrls: ['./client-layout.scss']
 })
-export class ClientLayoutComponent implements OnInit {
+export class ClientLayoutComponent implements OnInit, OnDestroy {
   sidebarOpen = true;
   usuario: any = null;
   userInitials: string = 'CL';
@@ -91,6 +91,21 @@ export class ClientLayoutComponent implements OnInit {
     return path !== '/client/perfil';
   }
 
+  @HostListener('window:resize')
+  onResize() {
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize() {
+    if (typeof window !== 'undefined') {
+      if (window.innerWidth <= 768) {
+        this.sidebarOpen = false;
+      } else {
+        this.sidebarOpen = true;
+      }
+    }
+  }
+
   constructor(
     private router: Router,
     private titleService: Title,
@@ -98,6 +113,7 @@ export class ClientLayoutComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.checkScreenSize();
     this.carregarUsuarioCliente();
 
     if (this.usuario && this.usuario.id) {
@@ -115,6 +131,9 @@ export class ClientLayoutComponent implements OnInit {
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
       this.updateActivePageTitle();
+      if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+        this.sidebarOpen = false;
+      }
     });
 
     this.updateActivePageTitle();
@@ -250,5 +269,11 @@ export class ClientLayoutComponent implements OnInit {
     localStorage.removeItem('client_user');
     localStorage.removeItem('client_token');
     this.router.navigate(['/login']);
+  }
+
+  ngOnDestroy(): void {
+    if (typeof document !== 'undefined') {
+      document.body.classList.remove('dark-theme');
+    }
   }
 }

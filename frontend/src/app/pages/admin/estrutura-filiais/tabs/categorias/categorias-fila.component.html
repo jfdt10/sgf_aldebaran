@@ -34,7 +34,14 @@
 
             <!-- Type Section -->
             <div class="card-middle">
-                <p class="tipo" *ngIf="c.tipo">Tipo:{{ c.tipo }}</p>
+                <p class="tipo" *ngIf="c.tipo">
+                    Tipo: 
+                    <strong>
+                        {{ c.tipo === 'CLIENTE_RAPIDO' ? 'Cliente Rápido' : 
+                           c.tipo === 'CAMINHAO' ? 'Caminhão' : 
+                           c.tipo === 'RETIRADA_PESADA' ? 'Retirada Pesada' : c.tipo }}
+                    </strong>
+                </p>
             </div>
 
             <!-- Actions Section -->
@@ -80,8 +87,13 @@
             </div>
 
             <div class="form-row-premium">
-                <label>Tipo (Opcional)</label>
-                <input type="text" [(ngModel)]="formCategoria.tipo" placeholder="Ex: Fácil Cobrança">
+                <label>Tipo de Fila (Motor de Prioridade)</label>
+                <select [(ngModel)]="formCategoria.tipo">
+                    <option value="">Geral / Padrão (Sem Bônus)</option>
+                    <option value="CLIENTE_RAPIDO">Cliente Rápido (Fast-Track +1.000)</option>
+                    <option value="CAMINHAO">Caminhão / Logística</option>
+                    <option value="RETIRADA_PESADA">Retirada Pesada</option>
+                </select>
             </div>
 
             <div class="form-row-premium">

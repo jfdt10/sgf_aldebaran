@@ -191,7 +191,11 @@ export function normalizeAppointmentStatus(
 export function canManageAppointmentStatus(
   status: ClientAppointmentStatus,
 ): boolean {
-  return status === 'CONFIRMADO' || status === 'AGUARDANDO_CHECKIN';
+  return (
+    status === 'CONFIRMADO' ||
+    status === 'AGUARDANDO_CHECKIN' ||
+    status === 'PENDENTE'
+  );
 }
 
 function isInsideCheckinWindow(appointmentStart: Date, now: Date): boolean {

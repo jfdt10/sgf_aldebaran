@@ -45,9 +45,11 @@ export class GuicheService {
 
   private mapToOperadorGuiche(item: any): GuicheOperador {
     const statusTexto = (item?.status ?? '').toString().toUpperCase();
-    const ocupado = Boolean(item?.operadorAtualId) || statusTexto === 'OCUPADO';
-
     const atendimentoAtual = Array.isArray(item?.atendimentos) ? item.atendimentos[0] : null;
+    const ocupado =
+      Boolean(item?.operadorAtualId) ||
+      Boolean(atendimentoAtual) ||
+      statusTexto === 'OCUPADO';
     const statusSenha = (atendimentoAtual?.senha?.status ?? '').toString().toUpperCase();
     const situacaoAtendimento =
       statusSenha === 'CHAMADO'
@@ -105,19 +107,31 @@ export class GuicheService {
   private lastFilialId?: number;
   private mapGuicheData(g: any, correntes: any[]) {
     const displayLabel = g.nome || g.numero || String(g.id);
-    const temOperador = Boolean(g.operadorAtualId);
+    let temOperador = Boolean(g.operadorAtualId);
 
     const atendimentos = Array.isArray(g.atendimentos) ? g.atendimentos : [];
     const atendimentoAtivo = atendimentos.length > 0 ? atendimentos[0] : null;
     const temAtendimentoAtivo = Boolean(atendimentoAtivo);
+    if (temAtendimentoAtivo) temOperador = true;
+    const statusSenha = (atendimentoAtivo?.senha?.status || '').toString().toUpperCase();
 
-    const statusDb = (g.status || '').toLowerCase();
-    const statusCorreto = temOperador
-      ? (temAtendimentoAtivo ? 'ocupado' : 'disponivel')
-      : 'vazio';
-    const statusLabelCorreto = temOperador
-      ? (temAtendimentoAtivo ? 'Ocupado' : 'Disponível')
-      : 'Vazio';
+    let statusCorreto = 'vazio';
+    let statusLabelCorreto = 'Vazio';
+
+    if (temOperador) {
+      if (temAtendimentoAtivo) {
+        if (statusSenha === 'CHAMADO') {
+          statusCorreto = 'chamando';
+          statusLabelCorreto = 'Chamando';
+        } else {
+          statusCorreto = 'ocupado';
+          statusLabelCorreto = 'Ocupado';
+        }
+      } else {
+        statusCorreto = 'disponivel';
+        statusLabelCorreto = 'Disponível';
+      }
+    }
 
     const m = correntes.find((c: any) => c.id === g.id);
 
@@ -129,7 +143,9 @@ export class GuicheService {
     let startTime = null;
     let idleStartTime = null;
 
-    if (temAtendimentoAtivo && atendimentoAtivo.inicioAtendimento) {
+    if (statusCorreto === 'chamando') {
+      tempoOcupadoFormatado = '00:00';
+    } else if (temAtendimentoAtivo && atendimentoAtivo.inicioAtendimento && statusCorreto === 'ocupado') {
       startTime = new Date(atendimentoAtivo.inicioAtendimento).getTime();
       if (m && m.status === 'ocupado') {
         tempoOcupado = m.tempoOcupado;
@@ -174,7 +190,7 @@ export class GuicheService {
     const params = filialId ? `?filialId=${filialId}` : '';
     this.http.get<any[]>(`${this.apiUrl}${params}`, { headers: this.authHeaders() }).subscribe({
       next: (guichesDb) => {
-        const ativos = guichesDb.filter(g => g.ativo);
+        const ativos = guichesDb.filter(g => g.ativo !== false);
         const correntes = this.guichesSubject.value;
 
         const mapped = ativos.map(g => this.mapGuicheData(g, correntes));
@@ -201,7 +217,7 @@ export class GuicheService {
     const params = filialId ? `?filialId=${filialId}` : '';
     this.http.get<any[]>(`${this.apiUrl}${params}`, { headers: this.authHeaders() }).subscribe({
       next: (data) => {
-        const ativos = data.filter(g => g.ativo);
+        const ativos = data.filter(g => g.ativo !== false);
         const correntes = this.guichesSubject.value;
         const mapped = ativos.map(g => this.mapGuicheData(g, correntes));
 
@@ -263,17 +279,28 @@ export class GuicheService {
         } else if (g.status === 'disponivel' && g.idleStartTime) {
           const now = new Date().getTime();
           const tempoOciosoSegundos = Math.floor((now - g.idleStartTime) / 1000);
-          
+
           const minutos = Math.floor(tempoOciosoSegundos / 60);
           const segundos = tempoOciosoSegundos % 60;
           const tempoOciosoFormatado = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
-          
+
           if (g.tempoOcupadoFormatado !== tempoOciosoFormatado) {
             needsUpdate = true;
           }
           return {
             ...g,
             tempoOcupadoFormatado: tempoOciosoFormatado
+          };
+        } else if (g.status === 'chamando') {
+          if (g.tempoOcupadoFormatado !== '00:00' || g.tempoOcupadoSegundos !== 0) {
+            needsUpdate = true;
+          }
+          return {
+            ...g,
+            tempoOcupadoFormatado: '00:00',
+            tempoOcupadoSegundos: 0,
+            progresso: 0,
+            atrasado: false
           };
         }
         return g;

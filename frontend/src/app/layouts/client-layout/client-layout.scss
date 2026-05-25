@@ -947,3 +947,76 @@
     display: block;
   }
 }
+
+.sidebar-backdrop {
+  display: none;
+}
+
+/* RESPONSIVE LAYOUT (Mobile rules) */
+@media (max-width: 768px) {
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 99;
+  }
+
+  .admin-container {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    transform: translateX(-100%);
+    width: 265px !important;
+    
+    &.mobile-open {
+      transform: translateX(0);
+      box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+    }
+    
+    &.closed {
+      /* Overriding the .closed behavior on mobile, we just transform it away instead */
+      transform: translateX(-100%);
+      width: 265px !important;
+    }
+  }
+
+  .main-content-wrapper {
+    margin-left: 0 !important;
+    width: 100% !important;
+
+    &.expanded {
+      margin-left: 0 !important;
+      width: 100% !important;
+    }
+  }
+
+  .top-bar {
+    padding: 0 16px;
+    height: 70px;
+    
+    .top-bar-left {
+      .menu-btn {
+        display: inline-block !important; /* Show hamburger button */
+        padding: 8px;
+        background: transparent;
+        border: none;
+        color: var(--text-primary);
+        cursor: pointer;
+      }
+      
+      .page-title {
+        font-size: 1.25rem !important;
+      }
+    }
+  }
+
+  .page-content {
+    padding: 16px;
+  }
+}

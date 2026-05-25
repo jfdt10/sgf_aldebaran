@@ -109,7 +109,7 @@ function normalizeStatus(
 
   if (
     AGENDAMENTO_STATUS_ATIVOS.has(rawStatus) &&
-    inicio.getTime() < now.getTime()
+    now.getTime() > inicio.getTime() + 15 * 60 * 1000
   ) {
     return AgendamentoStatus.EXPIRADO;
   }

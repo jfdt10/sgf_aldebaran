@@ -12,6 +12,8 @@ import { FilaService } from './fila.service';
 describe('FilaService', () => {
   let service: FilaService;
   let prisma: DeepMockProxy<PrismaService>;
+  let notificacaoService: jest.Mocked<Pick<NotificacaoService, 'criar'>>;
+  let notificacaoGateway: jest.Mocked<Pick<NotificacaoGateway, 'broadcastTicket'>>;
   let clienteRegrasService: jest.Mocked<
     Pick<
       ClienteRegrasService,
@@ -23,6 +25,12 @@ describe('FilaService', () => {
 
   beforeEach(() => {
     prisma = createPrismaMock() as unknown as DeepMockProxy<PrismaService>;
+    notificacaoService = {
+      criar: jest.fn().mockResolvedValue({}),
+    };
+    notificacaoGateway = {
+      broadcastTicket: jest.fn(),
+    };
     clienteRegrasService = {
       validarAgendamentoCliente: jest.fn().mockResolvedValue(undefined),
       isHorarioDisponivelParaAgendamento: jest.fn().mockResolvedValue(true),
@@ -30,8 +38,8 @@ describe('FilaService', () => {
     };
     service = new FilaService(
       prisma as unknown as PrismaService,
-      {} as NotificacaoService,
-      {} as NotificacaoGateway,
+      notificacaoService as unknown as NotificacaoService,
+      notificacaoGateway as unknown as NotificacaoGateway,
       {} as AgendamentoService,
       {} as SenhaService,
       clienteRegrasService as unknown as ClienteRegrasService,
@@ -88,7 +96,7 @@ describe('FilaService', () => {
     );
     expect(result.status).toBe('CONFIRMADO');
     expect(result.servico.nome).toBe('Cliente Rapido');
-    expect(result.filial.nome).toBe('Matriz Centro');
+    expect(result.filial?.nome).toBe('Matriz Centro');
   });
 
   it('bloqueia agendamento com menos de 2 horas de antecedencia', async () => {
@@ -117,5 +125,95 @@ describe('FilaService', () => {
         'Agendamentos devem respeitar antecedencia minima de 2 horas.',
       ),
     );
+  });
+
+  it('chama a senha com maior score usando apenas o modelo senha', async () => {
+    const guiche = {
+      id: 3,
+      numero: '01',
+      filial_id: 1,
+      operadorAtualId: 9,
+    };
+    const now = new Date();
+    const senhaNormal = {
+      id: 10,
+      numeroDisplay: 'C-RP001',
+      status: 'AGUARDANDO',
+      dataCriacao: new Date(now.getTime() - 60_000),
+      servico_id: 1,
+      filial_id: 1,
+      tipo: 'Convencional',
+      tipoOrigem: 'TOTEM',
+      prioridade: 0,
+      agendamento_id: null,
+      servico: { id: 1, nome: 'Retirada Pesada', prioridadePeso: 1, tipo: 'RETIRADA_PESADA' },
+      agendamento: null,
+    };
+    const senhaFastTrack = {
+      id: 11,
+      numeroDisplay: 'C-CR001',
+      status: 'AGUARDANDO',
+      dataCriacao: new Date(now.getTime() - 60_000),
+      servico_id: 2,
+      filial_id: 1,
+      tipo: 'Convencional',
+      tipoOrigem: 'TOTEM',
+      prioridade: 0,
+      agendamento_id: null,
+      servico: { id: 2, nome: 'Cliente Rapido', prioridadePeso: 1, tipo: 'CLIENTE_RAPIDO' },
+      agendamento: null,
+    };
+    const atendimentoAberto = {
+      id: 99,
+      guiche: guiche.id,
+      senha_id: senhaFastTrack.id,
+      fimAtendimento: null,
+    };
+
+    prisma.guiche.findUnique.mockResolvedValue(guiche as never);
+    prisma.senha.findMany.mockResolvedValue([senhaNormal, senhaFastTrack] as never);
+    (prisma.$transaction as jest.Mock).mockImplementation(async (callback) =>
+      callback(prisma),
+    );
+    prisma.senha.findUnique
+      .mockResolvedValueOnce(senhaFastTrack as never)
+      .mockResolvedValueOnce({
+        ...senhaFastTrack,
+        status: 'CHAMADO',
+        cliente: null,
+      } as never);
+    prisma.atendimento.findFirst
+      .mockResolvedValueOnce(null as never)
+      .mockResolvedValueOnce(atendimentoAberto as never);
+    prisma.atendimento.count.mockResolvedValue(0 as never);
+    prisma.senha.updateMany.mockResolvedValue({ count: 1 } as never);
+    prisma.atendimento.create.mockResolvedValue(atendimentoAberto as never);
+    prisma.guiche.update.mockResolvedValue(guiche as never);
+    prisma.log_auditoria.create.mockResolvedValue({} as never);
+    prisma.senha.findFirst.mockResolvedValue(null as never);
+
+    const result = await service.chamarProximo(guiche.id);
+
+    expect(prisma.senha.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { status: 'AGUARDANDO', filial_id: guiche.filial_id },
+        include: { servico: true, agendamento: true },
+      }),
+    );
+    expect(prisma.$queryRaw).not.toHaveBeenCalled();
+    expect(prisma.senha.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: senhaFastTrack.id, status: 'AGUARDANDO' },
+        data: { status: 'CHAMADO' },
+      }),
+    );
+    expect(notificacaoGateway.broadcastTicket).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ticketId: senhaFastTrack.numeroDisplay,
+        category: senhaFastTrack.servico.nome,
+        guicheOrDoca: guiche.numero,
+      }),
+    );
+    expect(result.id).toBe(senhaFastTrack.id);
   });
 });

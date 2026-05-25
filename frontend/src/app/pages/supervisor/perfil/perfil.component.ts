@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LucideAngularModule, User, Mail, Camera, Save, Lock, Smartphone, Eye, EyeOff, CheckCircle } from 'lucide-angular';
+import { environment } from '../../../../environments/environment';
+
 
 @Component({
   selector: 'app-supervisor-perfil',
@@ -85,7 +87,7 @@ export class SupervisorPerfilComponent implements OnInit {
   }
 
   salvar() {
-    console.log('Salvando perfil:', this.perfilForm.value);
+    if (!environment.production) console.log('Salvando perfil:', this.perfilForm.value);
     
     this.successModal = true;
     this.perfilForm.patchValue({ senhaAtual: '', novaSenha: '', confirmarSenha: '' });

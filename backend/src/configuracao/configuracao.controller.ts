@@ -34,12 +34,23 @@ export class ConfiguracaoController {
     const res = await this.configuracaoService.updateBulk(configs, filialId, req.user.filial_id);
     await this.logService.logAction(
       'Configuração',
-      `Atualizou múltiplas configurações ${filialId ? 'da filial ' + filialId : 'do sistema'}`,
+      `Atualizou múltiplas configurações - ${res.filialNome}`,
       req.user.userId,
       'Configuração',
       'Sucesso',
       filialId ? +filialId : undefined,
     );
     return res;
+  }
+
+  @Post('calibrar-sla')
+  async calibrarSla(
+    @Request() req: AuthenticatedRequest,
+    @Body() body: { filialId?: number; servicoId?: number },
+  ) {
+    return this.configuracaoService.calibrarSla({
+      ...body,
+      usuarioId: req.user.userId,
+    });
   }
 }

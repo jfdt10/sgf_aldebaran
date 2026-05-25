@@ -772,3 +772,31 @@ $bg-page: #f8f9fa; /* Fundo cinza claro */
   from { opacity: 0; transform: translateY(10px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+@media (min-width: 769px) {
+  .actions-grid {
+    flex-direction: row !important;
+  }
+  .action-card {
+    flex: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .next-appointment-card {
+    .card-main {
+      flex-direction: column;
+      align-items: flex-start !important;
+      
+      .date-badge {
+        width: 100% !important;
+        height: 54px !important;
+        flex-direction: row !important;
+        gap: 10px;
+        
+        .day { font-size: 1.4rem !important; }
+        .month { margin-top: 0 !important; }
+      }
+    }
+  }
+}

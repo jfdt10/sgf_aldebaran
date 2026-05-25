@@ -244,8 +244,9 @@
           <div class="filter-box custom-select">
             <select [(ngModel)]="perfilFiltro" (change)="aplicarFiltros()">
               <option value="">Todos os Perfis</option>
+              <option value="ADMIN">Administrador</option>
               <option value="SUPERVISOR">Supervisor</option>
-              <option value="OPERADOR">Operador (Guichê)</option>
+              <option value="OPERADOR">Operador</option>
             </select>
           </div>
         </div>
@@ -278,9 +279,16 @@
                   <span class="badge" [ngClass]="u.ativo ? 'badge-green' : 'badge-gray'">{{ u.ativo ? 'Ativo' : 'Inativo' }}</span>
                 </td>
                 <td class="text-right">
-                  <button class="action-btn text-blue" title="Editar" (click)="abrirModalUsuario(u)"><lucide-icon [img]="icons.edit" size="16"></lucide-icon></button>
-                  <button class="action-btn text-teal" title="Ativar/Inativar" (click)="alternarStatus(u.id, u.ativo)"><lucide-icon [img]="icons.check" size="16"></lucide-icon></button>
-                  <button class="action-btn text-red" title="Excluir" (click)="excluirUsuario(u.id, u.nome)"><lucide-icon [img]="icons.trash" size="16"></lucide-icon></button>
+                  <ng-container *ngIf="u.perfil !== 'ADMIN'; else adminActions">
+                    <button class="action-btn text-blue" title="Editar" (click)="abrirModalUsuario(u)"><lucide-icon [img]="icons.edit" size="16"></lucide-icon></button>
+                    <button class="action-btn text-teal" title="Ativar/Inativar" (click)="alternarStatus(u.id, u.ativo)"><lucide-icon [img]="icons.check" size="16"></lucide-icon></button>
+                    <button class="action-btn text-red" title="Excluir" (click)="excluirUsuario(u.id, u.nome)"><lucide-icon [img]="icons.trash" size="16"></lucide-icon></button>
+                  </ng-container>
+                  <ng-template #adminActions>
+                    <button class="action-btn" style="color: #cbd5e1; cursor: not-allowed; opacity: 0.6;" title="Não é permitido alterar administradores" disabled><lucide-icon [img]="icons.edit" size="16"></lucide-icon></button>
+                    <button class="action-btn" style="color: #cbd5e1; cursor: not-allowed; opacity: 0.6;" title="Não é permitido alterar administradores" disabled><lucide-icon [img]="icons.check" size="16"></lucide-icon></button>
+                    <button class="action-btn" style="color: #cbd5e1; cursor: not-allowed; opacity: 0.6;" title="Não é permitido alterar administradores" disabled><lucide-icon [img]="icons.trash" size="16"></lucide-icon></button>
+                  </ng-template>
                 </td>
               </tr>
               <tr *ngIf="filteredUsuarios.length === 0">
@@ -326,15 +334,15 @@
       <!-- MODAL NOVO USUARIO -->
       <div class="modal-backdrop" *ngIf="usuarioModal">
         <div class="modal-c redesign-modal">
-          <div class="modal-header-gradient">
+          <div class="modal-header-gradient user-modal-header">
             <div class="modal-title-area">
               <div class="modal-icon-container">
-                <lucide-icon [img]="icons.plus" size="24"></lucide-icon>
+                <lucide-icon [img]="isEditingUsuario ? icons.edit : icons.plus" size="24"></lucide-icon>
               </div>
-              <h2>Novo Usuário</h2>
+              <h2>{{ isEditingUsuario ? 'Editar Usuário' : 'Novo Usuário' }}</h2>
             </div>
             <button class="close-btn-ghost" (click)="fecharModalUsuario()">
-              <lucide-icon [img]="icons.x" size="20"></lucide-icon> <!-- make sure x is imported in TS -->
+              <lucide-icon [img]="icons.x" size="20"></lucide-icon>
             </button>
           </div>
 
@@ -358,7 +366,7 @@
                       <option value="" disabled>Selecione um perfil...</option>
                       <option *ngIf="isEditingUsuario && usuarioEmEdicao?.perfil === 'ADMIN'" value="ADMIN">Administrador</option>
                       <option value="SUPERVISOR">Supervisor</option>
-                      <option value="OPERADOR">Operador (Guichê)</option>
+                      <option value="OPERADOR">Operador</option>
                     </select>
                   </div>
                 </div>

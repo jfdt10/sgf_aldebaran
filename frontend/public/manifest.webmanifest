@@ -1,6 +1,6 @@
 {
-  "name": "frontend",
-  "short_name": "frontend",
+  "name": "SGF Aldebaran",
+  "short_name": "SGF Aldebaran",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",

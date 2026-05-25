@@ -104,11 +104,20 @@ describe('toAgendamentoResponse', () => {
     expect(result.filialNome).toBe('Filial não informada');
   });
 
-  it('normaliza status para EXPIRADO quando ativo mas no passado', () => {
-    const passado = new Date('2200-01-01T00:00:00');
+  it('mantem status ativo durante os 15 minutos apos o horario', () => {
+    const dentroDaJanela = new Date('2099-06-15T10:15:00');
     const result = toAgendamentoResponse(
       { ...base, status: AgendamentoStatus.ATIVO },
-      { now: passado },
+      { now: dentroDaJanela },
+    );
+    expect(result.status).toBe(AgendamentoStatus.ATIVO);
+  });
+
+  it('normaliza status para EXPIRADO quando ativo apos a janela de check-in', () => {
+    const depoisDaJanela = new Date('2099-06-15T10:16:00');
+    const result = toAgendamentoResponse(
+      { ...base, status: AgendamentoStatus.ATIVO },
+      { now: depoisDaJanela },
     );
     expect(result.status).toBe(AgendamentoStatus.EXPIRADO);
   });

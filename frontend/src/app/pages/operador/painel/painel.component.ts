@@ -11,6 +11,7 @@ import { AuthService } from '../../../services/auth.service';
 import { finalize, switchMap, takeUntil, catchError, debounceTime } from 'rxjs/operators';
 import { Subject, of, interval } from 'rxjs';
 import { FilialService, Filial } from '../../../services/filial.service';
+import { environment } from '../../../../environments/environment';
 import { ApiService } from '../../../services/api.service';
 import { DashboardService } from '../../../services/dashboard.service';
 @Component({
@@ -27,6 +28,24 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
     atendimentoSelecionado: any = null;
     showJustificativaModal = false;
     justificativaForm!: FormGroup;
+
+    getLocalTodayString(): string {
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    selectedDateAtendimentos: string = (() => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    })();
+
+    onDateChange(event: any) {
+        this.selectedDateAtendimentos = event.target.value;
+        this.carregarResumos();
+    }
     formatarDocumento(event: any) {
         let value = event.target.value.replace(/\D/g, '');
         if (value.length <= 11) {
@@ -199,17 +218,31 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
     tipoClienteCadastro: 'PF' | 'PJ' = 'PF';
     clienteDetalhes: any = null;
 
+    isEditingClient: boolean = false;
+    editForm = {
+        nome: '',
+        telefone: '',
+        email: '',
+    };
+
     abrirDetalhesCliente() {
         if (!this.ticketAtual?.documento) {
             alert('Cliente sem documento cadastrado.');
             return;
         }
 
+        this.isEditingClient = false;
+
         const documentoLimpo = this.ticketAtual.documento.replace(/\D/g, '');
         this.api.get<any[]>(`/clientes?busca=${encodeURIComponent(documentoLimpo)}`).subscribe({
             next: (clientes) => {
                 if (clientes.length > 0) {
                     this.clienteDetalhes = clientes[0];
+                    this.editForm = {
+                        nome: this.clienteDetalhes.nome || '',
+                        telefone: this.clienteDetalhes.telefone || '',
+                        email: this.clienteDetalhes.email || '',
+                    };
                     this.modalAberto = 'detalhes-cliente';
                 } else {
                     this.clienteDetalhes = {
@@ -217,11 +250,29 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                         documento: this.ticketAtual.documento,
                         nota: 'Apenas os dados básicos estão vinculados a este atendimento. Cadastro completo não encontrado na base.'
                     };
+                    this.editForm = {
+                        nome: this.clienteDetalhes.nome || '',
+                        telefone: '',
+                        email: '',
+                    };
                     this.modalAberto = 'detalhes-cliente';
                 }
                 this.cdr.markForCheck();
             },
             error: () => alert('Ocorreu um erro ao buscar o cliente.')
+        });
+    }
+
+    atualizarDetalhesCliente() {
+        if (!this.clienteDetalhes?.id) return;
+        const payload = { ...this.editForm };
+        this.api.put<any>(`/clientes/${this.clienteDetalhes.id}`, payload).subscribe({
+            next: (updated) => {
+                this.clienteDetalhes = updated;
+                this.isEditingClient = false;
+                this.cdr.markForCheck();
+            },
+            error: (err) => alert(err?.error?.message || 'Erro ao atualizar cliente.')
         });
     }
 
@@ -262,6 +313,10 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        const isDark = localStorage.getItem('theme_sgf') === 'dark';
+        if (isDark && typeof document !== 'undefined') {
+            document.body.classList.add('dark-theme');
+        }
         this.nomeOperador = localStorage.getItem('usuario_nome') || 'Atendente Padrão';
         this.carregarDadosPerfil();
         this.carregarFiliais();
@@ -381,6 +436,9 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
         this.pararCronometroAtendimento();
         this.pararCronometroOcioso();
+        if (typeof document !== 'undefined') {
+            document.body.classList.remove('dark-theme');
+        }
     }
 
     private iniciarPollingGuiche() {
@@ -584,7 +642,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
     // Removendo declarações duplicadas no escopo superior.
     trocarIdioma(idioma: string) {
         this.idiomaAtivo = idioma;
-        console.log('Idioma alterado para:', idioma);
+        if (!environment.production) console.log('Idioma alterado para:', idioma);
     }
 
     abrirModalTransferir() {
@@ -732,10 +790,21 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
 
     incrementarGarrafoes() {
         this.quantidadeGarrafoes += 1;
+        this.salvarGarrafoes();
     }
 
     decrementarGarrafoes() {
         this.quantidadeGarrafoes = Math.max(0, this.quantidadeGarrafoes - 1);
+        this.salvarGarrafoes();
+    }
+
+    salvarGarrafoes() {
+        if (!this.ticketAtual || !this.ticketAtual.id) return;
+        this.api.patch<any>(`/fila/senha/${this.ticketAtual.id}/garrafoes`, {
+            qtdeGarrafoes: this.quantidadeGarrafoes
+        }).subscribe({
+            error: () => alert('Erro ao salvar quantidade de garrafões.')
+        });
     }
 
     private searchSubject = new Subject<string>();
@@ -810,7 +879,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
     }
 
     // -- Resumos de Badges (Meus Atendimentos e Agendamentos) --
-    private carregarResumos() {
+    carregarResumos() {
         if (!this.filialSelecionada) return;
         const fid = parseInt(this.filialSelecionada, 10);
 
@@ -833,7 +902,11 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
 
                 if (this.modalAberto === 'agendamentos') {
                     const currentIds = activeAgendamentos.map((a: any) => a.id);
-                    localStorage.setItem('seenAgendamentoIds', JSON.stringify(currentIds));
+                    const updated = Array.from(new Set([...seenAgendIds, ...currentIds]));
+                    if (updated.length > 300) {
+                        updated.splice(0, updated.length - 300);
+                    }
+                    localStorage.setItem('seenAgendamentoIds', JSON.stringify(updated));
                     this.badgeAgendamentosCount = 0;
                 } else {
                     this.badgeAgendamentosCount = activeAgendamentos.filter((a: any) => !seenAgendIds.includes(a.id)).length;
@@ -842,7 +915,12 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
             }
         });
 
-        this.api.get<any[]>('/fila/operador/atendimentos', { filialId: fid }).subscribe({
+        const params: any = { filialId: fid };
+        if (this.selectedDateAtendimentos) {
+            params.data = this.selectedDateAtendimentos;
+        }
+
+        this.api.get<any[]>('/fila/operador/atendimentos', params).subscribe({
             next: (res) => {
                 this.atendimentosList = res;
 
@@ -857,7 +935,11 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
 
                 if (this.modalAberto === 'atendimentos') {
                     const currentIds = res.map((a: any) => a.id);
-                    localStorage.setItem('seenAtendimentoIds', JSON.stringify(currentIds));
+                    const updated = Array.from(new Set([...seenIds, ...currentIds]));
+                    if (updated.length > 300) {
+                        updated.splice(0, updated.length - 300);
+                    }
+                    localStorage.setItem('seenAtendimentoIds', JSON.stringify(updated));
                     this.badgeMeusAtendimentosCount = 0;
                 } else {
                     this.badgeMeusAtendimentosCount = res.filter((a: any) => !seenIds.includes(a.id)).length;
@@ -1003,22 +1085,51 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                 return a.status === 'PENDENTE' || a.status === 'CONFIRMADO';
             });
             const currentIds = activeAgendamentos.map((a: any) => a.id);
-            localStorage.setItem('seenAgendamentoIds', JSON.stringify(currentIds));
+            const seenAgendIdsStr = localStorage.getItem('seenAgendamentoIds') || '[]';
+            let seenAgendIds: number[] = [];
+            try {
+                seenAgendIds = JSON.parse(seenAgendIdsStr);
+                if (!Array.isArray(seenAgendIds)) seenAgendIds = [];
+            } catch (e) {
+                seenAgendIds = [];
+            }
+            const updated = Array.from(new Set([...seenAgendIds, ...currentIds]));
+            if (updated.length > 300) {
+                updated.splice(0, updated.length - 300);
+            }
+            localStorage.setItem('seenAgendamentoIds', JSON.stringify(updated));
             this.badgeAgendamentosCount = 0;
         } else if (secao === 'meus-atendimentos') {
             this.modalAberto = 'atendimentos';
             const currentIds = this.atendimentosList.map((a: any) => a.id);
-            localStorage.setItem('seenAtendimentoIds', JSON.stringify(currentIds));
+            const seenIdsStr = localStorage.getItem('seenAtendimentoIds') || '[]';
+            let seenIds: number[] = [];
+            try {
+                seenIds = JSON.parse(seenIdsStr);
+                if (!Array.isArray(seenIds)) seenIds = [];
+            } catch (e) {
+                seenIds = [];
+            }
+            const updated = Array.from(new Set([...seenIds, ...currentIds]));
+            if (updated.length > 300) {
+                updated.splice(0, updated.length - 300);
+            }
+            localStorage.setItem('seenAtendimentoIds', JSON.stringify(updated));
             this.badgeMeusAtendimentosCount = 0;
         }
         this.cdr.markForCheck();
     }
 
     private calcularTempoEsperaReal(dataCriacao: any, inicioAtendimento?: any): string {
-        if (!dataCriacao) return '0 min';
+        if (!dataCriacao) return '0 seg';
         const criacao = new Date(dataCriacao).getTime();
         const fimEspera = inicioAtendimento ? new Date(inicioAtendimento).getTime() : new Date().getTime();
-        const diffMin = Math.max(0, Math.floor((fimEspera - criacao) / 60000));
+        const diffMs = fimEspera - criacao;
+        if (diffMs < 60000) {
+            const diffSeg = Math.max(0, Math.floor(diffMs / 1000));
+            return `${diffSeg} seg`;
+        }
+        const diffMin = Math.max(0, Math.floor(diffMs / 60000));
         return `${diffMin} minutos`;
     }
 
@@ -1026,7 +1137,12 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
         if (!dataCriacao) return 'AGUARDE';
         const criacao = new Date(dataCriacao).getTime();
         const agora = new Date().getTime();
-        const diffMin = Math.max(0, Math.floor((agora - criacao) / 60000));
+        const diffMs = agora - criacao;
+        if (diffMs < 60000) {
+            const diffSeg = Math.max(0, Math.floor(diffMs / 1000));
+            return `${diffSeg} seg`;
+        }
+        const diffMin = Math.max(0, Math.floor(diffMs / 60000));
         return `${diffMin} min`;
     }
 
@@ -1088,7 +1204,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
 
     confirmarCheckinOperador(tipo: string) {
         if (!this.agendamentoParaCheckin) return;
-        
+
         const filialId = this.filialSelecionada ? parseInt(this.filialSelecionada, 10) : undefined;
         const payload = {
             codigo: this.agendamentoParaCheckin.codigo,
@@ -1122,7 +1238,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
 
     confirmarCancelarAgendamento() {
         if (!this.agendamentoParaCancelar) return;
-        
+
         this.api.delete<any>(`/fila/agendamento/${this.agendamentoParaCancelar.id}`).subscribe({
             next: () => {
                 this.fecharModalCancelar();
@@ -1148,7 +1264,11 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
     confirmarResgatarAgendamento() {
         if (!this.agendamentoParaResgatar) return;
 
-        this.api.post<any>(`/fila/agendamento/${this.agendamentoParaResgatar.id}/resgatar`, {}).subscribe({
+        const endpoint = this.agendamentoParaResgatar.isAtendimento
+            ? `/fila/senha/${this.agendamentoParaResgatar.id}/resgatar`
+            : `/fila/agendamento/${this.agendamentoParaResgatar.id}/resgatar`;
+
+        this.api.post<any>(endpoint, {}).subscribe({
             next: () => {
                 this.fecharModalResgatar();
                 this.carregarResumos();
@@ -1156,7 +1276,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                 this.cdr.markForCheck();
             },
             error: (err) => {
-                alert(err?.error?.message || 'Erro ao resgatar agendamento.');
+                alert(err?.error?.message || 'Erro ao resgatar.');
             }
         });
     }

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { environment } from '../../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { TotemService, Ticket } from '../../../services/totem.service';
@@ -173,17 +174,17 @@ export class TotemSenhaComponent implements OnInit {
     // Delay para garantir que o estilo carregou antes de imprimir
     setTimeout(() => {
       window.print();
-    }, 1000);
+    }, 300);
 
     setTimeout(() => {
       this.router.navigate(['/totem']);
-    }, 10000);
+    }, 3000);
   }
 
   playAudio() {
     const audio = new Audio();
     audio.src = "assets/ding.mp3";
     audio.load();
-    audio.play().catch(e => console.log('Audio error:', e));
+    audio.play().catch(e => { if (!environment.production) console.log('Audio error:', e); });
   }
 }

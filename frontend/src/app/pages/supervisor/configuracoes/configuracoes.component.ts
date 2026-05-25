@@ -320,7 +320,7 @@ export class SupervisorConfiguracoesComponent implements OnInit {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (usuarios) => {
-        this.usuarios = usuarios.filter((u: any) => u.perfil !== 'ADMIN');
+        this.usuarios = usuarios;
         this.aplicarFiltros();
       },
       error: (err) => {

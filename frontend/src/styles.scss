@@ -1730,4 +1730,504 @@ body.dark-theme {
   }
 }
 
+.btn-solid-cyan {
+  background: #0ea5e9;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(14, 165, 233, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: #0284c7;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(14, 165, 233, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+/* --- DARK THEME CONTRAST OVERRIDES AND POLISH (ALL LAYOUTS) --- */
+body.dark-theme {
+  /* 1. Global / Reset Variables & Elements */
+  input::placeholder, select::placeholder, textarea::placeholder {
+    color: #64748b !important;
+  }
+
+  /* 2. Admin & Supervisor Rules / Cards (regras-fila, categorias-fila) */
+  .regras-container {
+    background: transparent !important;
+  }
+
+  .card-premium, 
+  .category-item-card, 
+  .logic-field-card, 
+  .logic-diagram,
+  .global-setting-card, 
+  .sla-calib-card,
+  .calib-status,
+  .calib-result,
+  .category-card {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+    color: var(--text-primary) !important;
+
+    h1, h2, h3, h4, h5, h6, strong, span, p, label, .card-title, .sla-label {
+      color: var(--text-primary) !important;
+    }
+    
+    .card-subtitle, .cat-name-box span, small, .calib-samples, .calib-empty, p.tipo, .prefix {
+      color: var(--text-secondary) !important;
+    }
+  }
+
+  .category-item-card:hover, .category-card:hover {
+    border-color: var(--auth-primary) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  .scheduling-logic {
+    background: rgba(15, 23, 42, 0.4) !important;
+    border-color: rgba(56, 166, 199, 0.25) !important;
+  }
+
+  .info-box-blue {
+    background: rgba(14, 165, 233, 0.08) !important;
+    border-color: rgba(14, 165, 233, 0.2) !important;
+    p {
+      color: #7dd3fc !important;
+    }
+  }
+
+  .calib-info-box {
+    background: rgba(14, 165, 233, 0.08) !important;
+    border-color: rgba(14, 165, 233, 0.2) !important;
+    p {
+      color: #7dd3fc !important;
+    }
+  }
+
+  .calib-meta {
+    background: rgba(16, 185, 129, 0.15) !important;
+    border-color: rgba(16, 185, 129, 0.3) !important;
+    color: #34d399 !important;
+  }
+
+  .refined-icon-box {
+    &.success-circle {
+      background: rgba(34, 197, 94, 0.15) !important;
+    }
+    &.alert-circle {
+      background: rgba(239, 68, 68, 0.15) !important;
+    }
+  }
+
+  /* Modals globally (Admin, Supervisor, Operator, Client) */
+  .modal-card, .refined-card, .category-modal, .redesign-modal {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+    color: var(--text-primary) !important;
+    
+    .modal-body {
+      background: var(--bg-card) !important;
+      color: var(--text-primary) !important;
+      
+      .form-group label {
+        color: var(--text-secondary) !important;
+      }
+      
+      input, select, textarea {
+        background: rgba(15, 23, 42, 0.6) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-primary) !important;
+        
+        &:focus {
+          border-color: var(--auth-primary) !important;
+          box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25) !important;
+        }
+      }
+    }
+
+    .modal-footer, .modal-footer-gradient {
+      background: rgba(15, 23, 42, 0.4) !important;
+      border-top: 1px solid var(--border-color) !important;
+      
+      .btn-cancel-flat, .btn-ghost {
+        background: rgba(29, 41, 61, 0.8) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-secondary) !important;
+        
+        &:hover {
+          background: rgba(29, 41, 61, 1) !important;
+          color: var(--text-primary) !important;
+        }
+      }
+    }
+  }
+
+  /* Logout Confirmation Modals */
+  .modal-backdrop {
+    background: rgba(2, 6, 23, 0.68) !important;
+    backdrop-filter: blur(10px) !important;
+    
+    .modal-content {
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-primary) !important;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+
+      h2 {
+        color: var(--text-primary) !important;
+      }
+      p {
+        color: var(--text-secondary) !important;
+      }
+    }
+  }
+
+  /* Form controls in Admin/Supervisor/Client */
+  .form-row-premium, .input-group-premium, .sla-input-wrapper {
+    label {
+      color: var(--text-secondary) !important;
+    }
+    input, select, textarea {
+      background: rgba(15, 23, 42, 0.6) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-primary) !important;
+      
+      &:focus {
+        border-color: var(--auth-primary) !important;
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25) !important;
+      }
+    }
+  }
+
+  /* Client portal custom elements */
+  .counter-box {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    
+    .counter-label, .counter-label span {
+      color: var(--text-primary) !important;
+    }
+    .jug-icon {
+      color: #38a6c7 !important;
+    }
+    .counter-controls {
+      .count-input {
+        background: rgba(15, 23, 42, 0.6) !important;
+        color: var(--text-primary) !important;
+      }
+      .round-btn {
+        background: rgba(29, 41, 61, 0.8) !important;
+        border-color: var(--border-color) !important;
+        color: var(--text-primary) !important;
+        &:hover {
+          background: var(--auth-primary) !important;
+          color: white !important;
+          border-color: var(--auth-primary) !important;
+        }
+      }
+    }
+  }
+
+  .no-appointments-card {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+    
+    h3 {
+      color: var(--text-primary) !important;
+    }
+    p {
+      color: var(--text-secondary) !important;
+    }
+    .empty-icon-wrap {
+      background: rgba(15, 23, 42, 0.6) !important;
+      color: #94a3b8 !important;
+    }
+    .btn-primary-home {
+      background: var(--primary-gradient) !important;
+      color: white !important;
+      box-shadow: 0 8px 16px var(--primary-shadow) !important;
+    }
+  }
+
+  .action-card {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    
+    span {
+      color: var(--text-primary) !important;
+    }
+    &:hover {
+      border-color: var(--auth-primary) !important;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+    }
+  }
+
+  /* Supervisor Dashboard elements */
+  .dashboard-header {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    
+    .header-titles {
+      .page-title {
+        color: var(--text-primary) !important;
+      }
+      .page-subtitle {
+        color: var(--text-secondary) !important;
+      }
+    }
+    
+    .header-filters {
+      .date-picker-container {
+        label {
+          color: var(--text-secondary) !important;
+        }
+        .ref-date-input {
+          background: rgba(15, 23, 42, 0.6) !important;
+          border-color: var(--border-color) !important;
+          color: var(--text-primary) !important;
+          
+          &:focus {
+            border-color: var(--auth-primary) !important;
+            background: rgba(15, 23, 42, 0.8) !important;
+          }
+        }
+      }
+    }
+  }
+
+  .section-title {
+    color: var(--text-primary) !important;
+  }
+  
+  .kpi-card {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    
+    .kpi-value {
+      color: var(--text-primary) !important;
+    }
+    .kpi-label {
+      color: var(--text-secondary) !important;
+    }
+  }
+
+  .desk-card {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    color: var(--text-primary) !important;
+    opacity: 1 !important; /* Avoid opacity decrease for closed guichês in dark mode to keep it premium */
+
+    .desk-label, .operator, .detail-col, .detail-label, .time-pill {
+      color: var(--text-secondary) !important;
+    }
+    .desk-number, .ticket-number, .waiting-text {
+      color: var(--text-primary) !important;
+    }
+    .desk-details {
+      background: rgba(15, 23, 42, 0.4) !important;
+      border-color: var(--border-color) !important;
+      
+      &.bg-gray-box {
+        background: rgba(15, 23, 42, 0.6) !important;
+      }
+      &.transparent-bg {
+        background: transparent !important;
+      }
+    }
+
+    /* Desk card state indicators */
+    &.atendendo {
+      border-color: #60a5fa !important;
+      background: rgba(59, 130, 246, 0.08) !important;
+      .status-badge { background: #3b82f6 !important; color: white !important; }
+    }
+    &.chamando {
+      border-color: #f59e0b !important;
+      background: rgba(245, 158, 11, 0.08) !important;
+      .status-badge { background: #f59e0b !important; color: white !important; }
+    }
+    &.disponivel {
+      border-color: #22c55e !important;
+      background: rgba(34, 197, 94, 0.08) !important;
+      .status-badge { background: #22c55e !important; color: white !important; }
+    }
+    &.fechado {
+      border-color: var(--border-color) !important;
+      background: var(--bg-card) !important;
+      opacity: 0.75 !important;
+      .status-badge { background: rgba(148, 163, 184, 0.2) !important; color: var(--text-secondary) !important; }
+    }
+  }
+
+  /* 3. Operator Console (console-operador) Styles */
+  .console-operador {
+    --brand-1: #38a6c7;
+    --brand-2: #0f6f75;
+    --text-900: #e5edf6;
+    --text-700: #b4c5d6;
+    --text-500: #9fb0c4;
+    --line: rgba(148, 163, 184, 0.18);
+    --panel: #172033;
+    --page: #0f172a;
+    --card-border: rgba(148, 163, 184, 0.18);
+    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+
+    background: var(--page) !important;
+    color: var(--text-900) !important;
+
+    .header-top {
+      background: var(--panel) !important;
+      border-bottom: 1px solid var(--line) !important;
+
+      .filial-glass-selector {
+        background: rgba(15, 23, 42, 0.5) !important;
+        border-color: var(--line) !important;
+        color: var(--text-900) !important;
+        
+        select {
+          background: transparent !important;
+          color: var(--text-900) !important;
+          option {
+            background: var(--panel) !important;
+            color: var(--text-900) !important;
+          }
+        }
+        
+        &:hover {
+          background: rgba(15, 23, 42, 0.8) !important;
+          border-color: var(--brand-1) !important;
+        }
+      }
+
+      .lang-btn {
+        background: rgba(15, 23, 42, 0.4) !important;
+        color: var(--text-500) !important;
+        border-color: var(--line) !important;
+        
+        &.active {
+          background: var(--brand-1) !important;
+          color: white !important;
+        }
+      }
+    }
+
+    .profile-dropdown {
+      background: var(--panel) !important;
+      border: 1px solid var(--line) !important;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4) !important;
+
+      .m-name {
+        color: var(--text-900) !important;
+      }
+      .m-email {
+        color: var(--text-500) !important;
+      }
+      .dropdown-item {
+        color: var(--text-700) !important;
+        
+        &:hover {
+          background: rgba(148, 163, 184, 0.08) !important;
+          color: var(--text-900) !important;
+        }
+      }
+      .dropdown-divider {
+        background-color: var(--line) !important;
+      }
+    }
+
+    /* Cards, Quick Actions, and Status Panels */
+    .status-card,
+    .quick-action-card,
+    .search-container,
+    .right-section,
+    .guiche-card,
+    .btn-toggle-status,
+    .timer-card,
+    .panel-card,
+    .card,
+    .info-card,
+    .kpi-card,
+    .desk-card,
+    .card-content-padding {
+      background: var(--panel) !important;
+      border: 1px solid var(--card-border) !important;
+      color: var(--text-900) !important;
+      box-shadow: var(--card-shadow) !important;
+
+      h1, h2, h3, h4, h5, h6, strong, span, p, label {
+        color: inherit !important;
+      }
+      
+      .card-subtitle, .desc, .meta, .label, small {
+        color: var(--text-500) !important;
+      }
+    }
+
+    /* Ticket containers in queue */
+    .queue-container, .queue-item, .ticket-row, .ticket-box, .ticket-card {
+      background: rgba(15, 23, 42, 0.4) !important;
+      border-color: var(--line) !important;
+      color: var(--text-900) !important;
+
+      h4, h5, .ticket-num, .ticket-time, .ticket-cat {
+        color: var(--text-900) !important;
+      }
+      .ticket-wait, .ticket-meta {
+        color: var(--text-500) !important;
+      }
+    }
+    
+    .queue-item:hover, .ticket-row:hover {
+      background: rgba(15, 23, 42, 0.7) !important;
+      border-color: var(--brand-1) !important;
+    }
+
+    .main-container {
+      background: transparent !important;
+    }
+
+    /* Operator tables and history */
+    .list-table, table {
+      th {
+        background: rgba(15, 23, 42, 0.5) !important;
+        color: var(--text-700) !important;
+        border-bottom-color: var(--line) !important;
+      }
+      td {
+        border-bottom-color: var(--line) !important;
+        color: var(--text-900) !important;
+      }
+      tr:hover td {
+        background: rgba(15, 23, 42, 0.4) !important;
+      }
+    }
+  }
+
+  /* 4. Client / TV / Totem contrast overrides */
+  .totem-page, .tv-page, .totem-container, .tv-container {
+    background: var(--page) !important;
+    color: var(--text-primary) !important;
+  }
+}
+
+
 

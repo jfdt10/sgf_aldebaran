@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LucideAngularModule, Lock, Check, AlertCircle } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-reset-password',
@@ -49,7 +50,7 @@ export class ResetPasswordComponent implements OnInit {
 
     this.authService.resetPassword(this.token, this.novaSenha).subscribe({
       next: (res) => {
-        console.log('Senha alterada:', res);
+        if (!environment.production) console.log('Senha alterada:', res);
         
         // Atualiza o estado
         this.carregando = false;

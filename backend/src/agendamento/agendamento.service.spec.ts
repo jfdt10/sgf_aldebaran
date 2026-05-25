@@ -126,6 +126,64 @@ describe('AgendamentoService', () => {
     expect(result[0]?.podeReagendar).toBe(false);
   });
 
+  it('mantem agendamento ativo em proximos durante tolerancia de 15 minutos apos o horario', async () => {
+    const now = new Date();
+    const quatroMinutosAtras = new Date(now.getTime() - 4 * 60 * 1000);
+    const dataLocal = `${quatroMinutosAtras.getFullYear()}-${String(
+      quatroMinutosAtras.getMonth() + 1,
+    ).padStart(2, '0')}-${String(quatroMinutosAtras.getDate()).padStart(2, '0')}`;
+    const horaLocal = `${String(quatroMinutosAtras.getHours()).padStart(2, '0')}:${String(
+      quatroMinutosAtras.getMinutes(),
+    ).padStart(2, '0')}`;
+
+    prisma.clientes.findUnique.mockResolvedValue(clienteAutenticado as never);
+    prisma.agendamento.findMany.mockResolvedValue([
+      {
+        ...baseAgendamento,
+        data: dataLocal,
+        hora: horaLocal,
+        status: AgendamentoStatus.CONFIRMADO,
+      },
+    ] as never);
+
+    const result = await service.listarMeusAgendamentos(
+      clienteAutenticado.id,
+      AgendamentoFiltroStatus.ACTIVE,
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.status).toBe(AgendamentoStatus.CONFIRMADO);
+  });
+
+  it('move agendamento ativo para historico somente apos tolerancia de 15 minutos', async () => {
+    const now = new Date();
+    const dezesseisMinutosAtras = new Date(now.getTime() - 16 * 60 * 1000);
+    const dataLocal = `${dezesseisMinutosAtras.getFullYear()}-${String(
+      dezesseisMinutosAtras.getMonth() + 1,
+    ).padStart(2, '0')}-${String(dezesseisMinutosAtras.getDate()).padStart(2, '0')}`;
+    const horaLocal = `${String(dezesseisMinutosAtras.getHours()).padStart(2, '0')}:${String(
+      dezesseisMinutosAtras.getMinutes(),
+    ).padStart(2, '0')}`;
+
+    prisma.clientes.findUnique.mockResolvedValue(clienteAutenticado as never);
+    prisma.agendamento.findMany.mockResolvedValue([
+      {
+        ...baseAgendamento,
+        data: dataLocal,
+        hora: horaLocal,
+        status: AgendamentoStatus.CONFIRMADO,
+      },
+    ] as never);
+
+    const result = await service.listarMeusAgendamentos(
+      clienteAutenticado.id,
+      AgendamentoFiltroStatus.HISTORY,
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.status).toBe(AgendamentoStatus.EXPIRADO);
+  });
+
   it('cancela um agendamento com sucesso', async () => {
     prisma.clientes.findUnique.mockResolvedValue(clienteAutenticado as never);
     prisma.agendamento.findUnique.mockResolvedValue(baseAgendamento as never);

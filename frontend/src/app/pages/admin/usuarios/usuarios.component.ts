@@ -1,9 +1,11 @@
-import { Component, OnInit, HostListener, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, HostListener, ChangeDetectorRef, OnDestroy, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
 import { ActivatedRoute } from '@angular/router';
 import { LucideAngularModule, Search, Plus, Edit2, Trash2, X, Users, Mail, Shield, UserX, CheckCircle, RefreshCw, User, Check, Building } from 'lucide-angular';
+import { Subscription } from 'rxjs';
+import { AdminLayoutComponent } from '../../../layouts/admin-layout/admin-layout.component';
 
 @Component({
     selector: 'app-usuarios',
@@ -12,7 +14,7 @@ import { LucideAngularModule, Search, Plus, Edit2, Trash2, X, Users, Mail, Shiel
     templateUrl: './usuarios.component.html',
     styleUrls: ['./usuarios.component.scss']
 })
-export class UsuariosComponent implements OnInit {
+export class UsuariosComponent implements OnInit, OnDestroy {
     icons = {
         search: Search, plus: Plus, edit2: Edit2,
         trash2: Trash2, x: X, users: Users,
@@ -51,10 +53,13 @@ export class UsuariosComponent implements OnInit {
         senha: ''
     };
 
+    private searchSub?: Subscription;
+
     constructor(
         private api: ApiService, 
         private cdr: ChangeDetectorRef,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        @Optional() private layout?: AdminLayoutComponent
     ) { }
 
     ngOnInit(): void {
@@ -75,6 +80,19 @@ export class UsuariosComponent implements OnInit {
             this.carregarUsuarios();
         });
         this.carregarFiliais();
+
+        if (this.layout) {
+            this.searchSub = this.layout.globalSearch$.subscribe((term: string) => {
+                this.filtro = term;
+                this.carregarUsuarios();
+            });
+        }
+    }
+
+    ngOnDestroy() {
+        if (this.searchSub) {
+            this.searchSub.unsubscribe();
+        }
     }
 
     carregarFiliais() {

@@ -245,6 +245,14 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Formats a minutes value: shows seconds if < 1 min, otherwise minutes */
+  private formatarMinutos(minutos: number): string {
+    if (minutos < 1) {
+      return `${Math.round(minutos * 60)} seg`;
+    }
+    return `${Math.floor(minutos)} min`;
+  }
+
   calcularInsights() {
     const novosInsights: any[] = [];
 
@@ -296,7 +304,7 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
       if (this.categorias.length > 0) {
          const piorCat = this.categorias.reduce((acc, cur) => cur.avgEsperaMins > acc.avgEsperaMins ? cur : acc);
          if (piorCat.avgEsperaMins > 0) {
-            novosInsights.push({ text: `🕐 Categoria "${piorCat.nome}" com maior tempo de espera: ${Math.floor(piorCat.avgEsperaMins)} min. Avaliar prioridade.`, type: 'blue', severidade: 3 });
+            novosInsights.push({ text: `🕐 Categoria "${piorCat.nome}" com maior tempo de espera: ${this.formatarMinutos(piorCat.avgEsperaMins)}. Avaliar prioridade.`, type: 'blue', severidade: 3 });
          }
       }
     }
@@ -391,7 +399,7 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
       { headers: { Authorization: `Bearer ${token}` } }
     ).subscribe({
       next: (res) => {
-        console.log('OPERADORES RESPONSE:', res);
+        if (!environment.production) console.log('OPERADORES RESPONSE:', res);
         this.operadores = res.operadores || [];
         this.carregandoOperadores = false;
         this.cdr.detectChanges();

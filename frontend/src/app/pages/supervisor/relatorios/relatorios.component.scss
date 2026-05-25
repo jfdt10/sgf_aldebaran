@@ -31,8 +31,9 @@ $border: #e5e7eb;
   }
   .header-titles {
     display: flex; flex-direction: column;
-    h1 { margin: 0; font-size: 1.4rem; font-weight: 800; color: $text-main; }
+    h1 { margin: 0; font-size: 1.4rem; font-weight: 800; color: $text-sec; }
     .header-subtitle { font-size: 0.95rem; color: $text-sec; }
+
   }
 
   .header-right { display: flex; align-items: center; gap: 16px; }
@@ -156,9 +157,62 @@ $border: #e5e7eb;
 .bar-chart {
   flex: 1; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; min-height: 140px;
   padding-bottom: 8px; border-bottom: 1px solid $border;
+  position: relative; /* Para posicionar os tooltips */
   .bar { 
     flex: 1; border-radius: 4px 4px 0 0; 
-    transition: height 0.5s ease-out;
+    transition: height 0.5s ease-out, transform 0.2s;
+    position: relative;
+    cursor: pointer;
+
+    &:hover {
+      transform: scaleY(1.02);
+      filter: brightness(1.1);
+    }
+
+    /* Tooltip customizado */
+    &::before {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      background: #1f2937;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+      z-index: 10;
+    }
+
+    /* Setinha do tooltip */
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-2px);
+      border: 5px solid transparent;
+      border-top-color: #1f2937;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+      z-index: 10;
+    }
+
+    &:hover::before,
+    &:hover::after {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    &:hover::before {
+      transform: translateX(-50%) translateY(-12px);
+    }
   }
   &.teal-bars .bar { background: #0d9488; }
   &.orange-bars .bar { background: #f97316; }

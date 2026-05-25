@@ -264,20 +264,6 @@ model operador_sessao {
   @@index([ativo], map: "IDX_operador_sessao_ativo")
 }
 
-model Ticket {
-  id            String       @id @default(uuid()) @db.Uuid
-  origin        Origin
-  type          TicketType
-  category      Category
-  status        TicketStatus @default(PENDING)
-  scheduledTime DateTime?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-
-  @@index([status, createdAt], map: "idx_active_tickets")
-  @@map("aldebaran_tickets")
-}
-
 model StatusItem {
   id       Int        @id @default(autoincrement())
   nome     String     @db.VarChar(50)
@@ -307,31 +293,6 @@ model TaskItem {
   status         StatusItem @relation(fields: [status_id], references: [id])
 
   @@map("task_items")
-}
-
-enum Origin {
-  TOTEM
-  SCHEDULED
-}
-
-enum TicketType {
-  PREFERENTIAL
-  CONVENTIONAL
-  NA
-}
-
-enum Category {
-  CAMINHAO
-  RETIRADA_PESADA
-  RETIRADA_RAPIDA
-  CLIENTE_RAPIDO
-}
-
-enum TicketStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  FAILED
 }
 
 enum Priority {

@@ -63,8 +63,8 @@ export class DashboardService {
         }
       }
     }
-
-    const tempoMedio = counts > 0 ? Math.round(totalEsperaMinutos / counts) : 0;
+    const avgEspera = counts > 0 ? totalEsperaMinutos / counts : 0;
+    const tempoMedioStr = avgEspera < 1 ? `${Math.round(avgEspera * 60)} seg` : `${Math.floor(avgEspera)} min`;
 
     const logsRecentes = await this.prisma.log_auditoria.findMany({
       where: {
@@ -97,7 +97,7 @@ export class DashboardService {
         filiaisAtivas: filiaisAtivas,
         guichesAtivos: guichesAtivos,
         atendimentosHoje: totalAtendimentosHoje,
-        tempoMedioEspera: tempoMedio,
+        tempoMedioEspera: tempoMedioStr,
       },
       atividadeRecente: listaAtividades,
     };
@@ -215,8 +215,8 @@ export class DashboardService {
         nome: m.nome,
         cor: m.cor,
         totalAtendidos: m.totalAtendidos,
-        avgEsperaStr: `${Math.floor(avgEspera)} min`,
-        avgAtendimentoStr: `${Math.floor(avgAtendimento)} min`,
+        avgEsperaStr: avgEspera < 1 ? `${Math.round(avgEspera * 60)} seg` : `${Math.floor(avgEspera)} min`,
+        avgAtendimentoStr: avgAtendimento < 1 ? `${Math.round(avgAtendimento * 60)} seg` : `${Math.floor(avgAtendimento)} min`,
         avgEsperaMins: avgEspera
       };
     }).sort((a, b) => b.totalAtendidos - a.totalAtendidos);
@@ -232,7 +232,7 @@ export class DashboardService {
       },
       select: { inicioAtendimento: true, fimAtendimento: true }
     });
-    
+
     let somaHist = 0;
     for (const h of historico30) {
       const d = (new Date(h.fimAtendimento!).getTime() - new Date(h.inicioAtendimento).getTime()) / 60000;
@@ -410,6 +410,7 @@ export class DashboardService {
       include: {
         servico: true,
         agendamento: true,
+        cliente: true,
         atendimento: {
           include: {
             guiche_rel: {
@@ -453,24 +454,32 @@ export class DashboardService {
           codigo: a.codigo || 'S/N',
           cliente: a.nomeCliente || 'Não informado',
           horario: a.hora,
+          qtdeGarrafoes: a.qtdeGarrafoes ?? 0,
           status: a.status,
         };
       }),
       atendimentos: atendimentosQueue.map((s) => {
         const atend =
           s.atendimento && s.atendimento.length > 0 ? s.atendimento[0] : null;
-        const esperaReal = Math.floor(
-          (new Date().getTime() - s.dataCriacao.getTime()) / 60000,
-        );
+        const diffMs = Math.max(0, new Date().getTime() - s.dataCriacao.getTime());
+        const esperaRealMin = Math.floor(diffMs / 60000);
+        let tempoEspera = '';
+        if (diffMs < 60000) {
+          tempoEspera = `${Math.floor(diffMs / 1000)} seg`;
+        } else {
+          tempoEspera = `${esperaRealMin} min`;
+        }
         return {
           ticket: s.numeroDisplay,
-          cliente: s.agendamento?.nomeCliente || 'Geral/Totem',
+          cliente: s.nomeCliente || s.cliente?.nome || s.agendamento?.nomeCliente || 'Geral/Totem',
           categoria: s.servico?.nome || 'Geral',
           operador: atend?.guiche_rel?.operadorAtual?.nome || '-',
           dataCriacao: s.dataCriacao,
-          tempoEspera: `${esperaReal} min`,
+          tempoEspera,
+          qtdeGarrafoes: s.qtdeGarrafoes ?? 0,
+          statusRaw: s.status,
           status: s.status === 'CHAMADO' ? 'Em Atendimento' : 'Aguardando',
-          atrasado: esperaReal > metaEspera,
+          atrasado: esperaRealMin > metaEspera,
         };
       }),
     };
@@ -792,7 +801,7 @@ export class DashboardService {
     const configPrioridade = await this.prisma.configuracao.findFirst({
       where: { chave: 'prioridadeAutomatica', filial_id: fid || null }
     });
-    
+
     let orderByOpts: any = [{ dataCriacao: 'asc' }];
     if (configPrioridade?.valor !== 'false') {
       orderByOpts = [{ prioridade: 'desc' }, { dataCriacao: 'asc' }];

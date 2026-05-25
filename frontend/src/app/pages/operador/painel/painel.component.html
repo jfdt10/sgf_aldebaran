@@ -21,7 +21,7 @@
 
       <!-- Language Selector -->
       <div class="info-group language-selector">
-        <span class="info-label">Language</span>
+        <span class="info-label">Idioma</span>
         <div class="language-buttons">
           <button 
             class="lang-btn" 
@@ -41,28 +41,28 @@
 
     <div class="header-right">
       <!-- Meus Atendimentos Badge -->
-      <button class="badge-button atendimentos" (click)="navegarPara('meus-atendimentos')">
-        <img src="assets/icon (2).svg" class="icon" alt="" />
+      <button class="nav-btn btn-transparent text-purple" (click)="navegarPara('meus-atendimentos')">
+        <lucide-icon [img]="icons.history" size="18"></lucide-icon>
         <span>Meus Atendimentos</span>
-        <div class="badge-count" *ngIf="badgeMeusAtendimentosCount > 0">{{ badgeMeusAtendimentosCount }}</div>
+        <span class="badge-count bg-purple" *ngIf="badgeMeusAtendimentosCount > 0">{{ badgeMeusAtendimentosCount }}</span>
       </button>
 
       <!-- Agendamentos Badge -->
-      <button class="badge-button agendamentos" (click)="navegarPara('agendamentos')">
-        <img src="assets/Icon (4).svg" class="icon" alt="" />
+      <button class="nav-btn btn-transparent text-blue" (click)="navegarPara('agendamentos')">
+        <lucide-icon [img]="icons.calendar" size="18"></lucide-icon>
         <span>Agendamentos</span>
-        <div class="badge-count" *ngIf="badgeAgendamentosCount > 0">{{ badgeAgendamentosCount }}</div>
+        <span class="badge-count bg-blue" *ngIf="badgeAgendamentosCount > 0">{{ badgeAgendamentosCount }}</span>
       </button>
 
       <!-- Operator Profile -->
-      <div class="operator-profile">
-        <div class="profile-trigger" (click)="toggleProfileMenu($event)" style="cursor: pointer; display: flex; align-items: center; gap: 12px;">
+      <div class="profile-dropdown-container operator-profile">
+        <div class="profile-trigger" (click)="toggleProfileMenu($event)" [class.active]="showProfileMenu">
           <div class="profile-info">
-            <p class="name">{{ nomeOperador }}</p>
-            <p class="guiche">{{ formatarTituloGuiche(numeroGuiche) }}</p>
+            <span class="profile-name">{{ nomeOperador }}</span>
+            <span class="profile-role">{{ formatarTituloGuiche(numeroGuiche) }}</span>
           </div>
-          <div class="avatar">
-            <img src="assets/Icon (7).svg" class="icon" alt="" />
+          <div class="avatar-box bg-teal-dark">
+            <lucide-icon [img]="icons.user" size="20" color="white"></lucide-icon>
           </div>
         </div>
 
@@ -481,7 +481,8 @@
           </div>
           <div class="card-content">
             <label>Nome / Razão Social</label>
-            <p>{{ clienteDetalhes?.nome || '-' }}</p>
+            <p *ngIf="!isEditingClient">{{ clienteDetalhes?.nome || '-' }}</p>
+            <input *ngIf="isEditingClient" type="text" class="sw-input" [(ngModel)]="editForm.nome" placeholder="Nome Completo">
           </div>
         </div>
 
@@ -503,7 +504,8 @@
           </div>
           <div class="card-content">
             <label>Telefone</label>
-            <p>{{ clienteDetalhes?.telefone || '-' }}</p>
+            <p *ngIf="!isEditingClient">{{ clienteDetalhes?.telefone || '-' }}</p>
+            <input *ngIf="isEditingClient" type="text" class="sw-input" [(ngModel)]="editForm.telefone" placeholder="Telefone">
           </div>
         </div>
 
@@ -514,14 +516,19 @@
           </div>
           <div class="card-content">
             <label>E-mail</label>
-            <p>{{ clienteDetalhes?.email || '-' }}</p>
+            <p *ngIf="!isEditingClient">{{ clienteDetalhes?.email || '-' }}</p>
+            <input *ngIf="isEditingClient" type="email" class="sw-input" [(ngModel)]="editForm.email" placeholder="E-mail">
           </div>
         </div>
       </div>
     </div>
     
     <div class="cadastro-footer">
-      <button class="btn-cancel btn-cadastro-cancel" (click)="fecharModal()">Fechar</button>
+      <button *ngIf="!isEditingClient" class="btn-cancel btn-cadastro-cancel" (click)="fecharModal()">Fechar</button>
+      <button *ngIf="!isEditingClient" class="btn-confirm btn-cadastro-save" (click)="isEditingClient = true">Editar Informações</button>
+
+      <button *ngIf="isEditingClient" class="btn-cancel btn-cadastro-cancel" (click)="isEditingClient = false">Cancelar</button>
+      <button *ngIf="isEditingClient" class="btn-confirm btn-cadastro-save" (click)="atualizarDetalhesCliente()">Salvar Alterações</button>
     </div>
   </div>
 </div>
@@ -637,11 +644,23 @@
       </button>
     </div>
     <div class="modal-body">
+      <!-- Local Date Filter inside Modal -->
+      <div class="modal-filter-bar">
+        <label for="oper-atend-date">Filtrar Data:</label>
+        <input 
+          type="date" 
+          id="oper-atend-date" 
+          [(ngModel)]="selectedDateAtendimentos" 
+          (change)="carregarResumos()"
+          class="modal-date-input"
+        />
+      </div>
+
       <div class="agendamentos-table-wrapper">
         <table class="agendamentos-table table-meus-atendimentos">
           <thead>
             <tr>
-              <th>Senha</th><th>Cliente</th><th>Categoria</th><th>Operador</th><th>Espera</th><th>Status</th><th>Ações</th>
+              <th>Senha</th><th>Cliente</th><th>Categoria</th><th>Galões</th><th>Espera</th><th>Status</th><th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -649,10 +668,31 @@
               <td class="table-senha"><strong>{{ atend.ticket }}</strong></td>
               <td>{{ atend.cliente }}</td>
               <td>{{ atend.categoria }}</td>
-              <td>{{ atend.operador }}</td>
+              <td>{{ atend.qtdeGarrafoes ?? '-' }}</td>
               <td><span>{{ atend.tempoEspera }}</span></td>
-              <td><span class="status-pill" [ngClass]="atend.status.toLowerCase().replace(' ', '-')">{{ atend.status }}</span></td>
-              <td><button class="btn-icon text-blue" (click)="verAtendimento(atend)"><lucide-icon [img]="icons.eye" size="16"></lucide-icon></button></td>
+              <td>
+                <span class="status-pill" [ngClass]="{
+                  'aguardando': atend.statusRaw === 'AGUARDANDO',
+                  'em-atendimento': atend.statusRaw === 'EM_ATENDIMENTO' || atend.statusRaw === 'CHAMADO',
+                  'finalizado': atend.statusRaw === 'FINALIZADO',
+                  'cancelado': atend.statusRaw === 'CANCELADO',
+                  'nao-compareceu': atend.statusRaw === 'NAO_COMPARECEU'
+                }">{{ atend.status || '-' }}</span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-icon text-blue" (click)="verAtendimento(atend)">
+                    <lucide-icon [img]="icons.eye" size="16"></lucide-icon>
+                  </button>
+                  <button
+                    *ngIf="atend.statusRaw === 'NAO_COMPARECEU'"
+                    class="btn-icon text-blue"
+                    title="Resgatar para fila"
+                    (click)="abrirModalResgatar({ id: atend.agendamentoId || atend.senhaId, cliente: atend.cliente, isAtendimento: true })">
+                    <lucide-icon [img]="icons.rotateCcw" size="16"></lucide-icon>
+                  </button>
+                </div>
+              </td>
             </tr>
             <tr *ngIf="atendimentosList.length === 0">
               <td colspan="7" style="text-align:center;padding:20px;">Nenhum atendimento registrado.</td>
@@ -662,7 +702,7 @@
       </div>
     </div>
     <div class="modal-footer-gradient">
-      <button class="btn-solid-blue w-full" (click)="fecharModal()">Fechar</button>
+      <button class="btn-solid-cyan w-full" (click)="fecharModal()">Fechar</button>
     </div>
   </div>
 </div>
@@ -686,7 +726,7 @@
         <table class="agendamentos-table table-agendamentos-dia">
           <thead>
             <tr>
-              <th>Senha</th><th>Cliente</th><th>Horário</th><th>Status</th><th>Ações</th>
+              <th>Senha</th><th>Cliente</th><th>Horário</th><th>Galões</th><th>Status</th><th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -694,17 +734,19 @@
               <td class="table-senha"><strong>{{ agenda.senha }}</strong></td>
               <td>{{ agenda.cliente || '-' }}</td>
               <td>{{ agenda.horario }}</td>
+              <td>{{ agenda.qtdeGarrafoes ?? '-' }}</td>
               <td>
                 <span class="status-pill" [ngClass]="{
                   'pendente': agenda.status === 'PENDENTE',
                   'confirmado': agenda.status === 'CONFIRMADO',
                   'checkin-realizado': agenda.status === 'CHECKIN_REALIZADO',
-                  'realizado': agenda.status === 'ATENDIDO',
+                  'realizado': agenda.status === 'ATENDIDO' || agenda.status === 'REALIZADO',
                   'nao-compareceu': agenda.status === 'NAO_COMPARECEU',
                   'cancelado': agenda.status === 'CANCELADO'
                 }">
                   {{ 
                     agenda.status === 'ATENDIDO' ? 'Realizado' :
+                    agenda.status === 'REALIZADO' ? 'Realizado' :
                     agenda.status === 'PENDENTE' ? 'Pendente' :
                     agenda.status === 'CONFIRMADO' ? 'Confirmado' :
                     agenda.status === 'CHECKIN_REALIZADO' ? 'Check-in Realizado' :
@@ -733,14 +775,14 @@
               </td>
             </tr>
             <tr *ngIf="agendamentos.length === 0">
-              <td colspan="5" style="text-align:center;padding:20px;">Nenhum agendamento para hoje.</td>
+              <td colspan="6" style="text-align:center;padding:20px;">Nenhum agendamento para hoje.</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
     <div class="modal-footer-gradient">
-      <button class="btn-solid-blue w-full" (click)="fecharModal()">Fechar</button>
+      <button class="btn-solid-cyan w-full" (click)="fecharModal()">Fechar</button>
     </div>
   </div>
 </div>
@@ -924,9 +966,9 @@
       </button>
     </div>
     <div class="modal-body text-center" style="padding: 24px;">
-      <p class="modal-subtitle" style="margin-bottom: 24px; color: #e2e8f0; font-size: 15px;">
+      <p class="modal-subtitle" style="margin-bottom: 24px; color: #374151; font-size: 15px; font-weight: 500;">
         Selecione o tipo de atendimento para o check-in do agendamento de <br>
-        <strong style="color: #60a5fa; font-size: 16px;">{{ agendamentoParaCheckin.cliente }}</strong>:
+        <strong style="color: #1d4ed8; font-size: 16px; font-weight: 700;">{{ agendamentoParaCheckin.cliente }}</strong>:
       </p>
       <div class="tipo-atendimento-options" style="display: flex; gap: 16px; justify-content: center; margin-bottom: 8px;">
         <button type="button" class="btn-tipo-atendimento convencional" (click)="confirmarCheckinOperador('Convencional')">

@@ -28,6 +28,9 @@ export class RegrasFilaComponent implements OnInit {
 
   loading = false;
   showSuccessModal = false;
+  calibrando = false;
+  calibracaoResultado: any[] | null = null;
+
 
   readonly iconsArr = { 
     settings: Settings, check: Check, clock: Clock, headphones: Headphones,
@@ -141,5 +144,28 @@ export class RegrasFilaComponent implements OnInit {
   fecharSucesso() {
     this.showSuccessModal = false;
     this.cdr.detectChanges();
+  }
+
+  calibrarSLAs() {
+    this.calibrando = true;
+    this.calibracaoResultado = null;
+    const filialQuery = this.selectedFilialId ? `?filialId=${this.selectedFilialId}` : '';
+    this.api.post<any>(`/configuracoes/calibrar-sla`, {
+      filialId: this.selectedFilialId
+    }).subscribe({
+      next: (res) => {
+        this.calibrando = false;
+        this.calibracaoResultado = res.resultados || [];
+        this.showSuccessModal = true;
+        this.carregarDados(); // reload updated SLA values
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Erro ao calibrar SLA:', err);
+        this.calibrando = false;
+        alert('Erro ao calibrar SLA. Verifique se há dados suficientes.');
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

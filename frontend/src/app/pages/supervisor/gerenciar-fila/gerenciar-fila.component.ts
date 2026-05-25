@@ -119,10 +119,10 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
       this.carregarDadosTempoMedio();
     }, 10000);
 
-    // Timer da Fila
+    // Timer da Fila (atualiza a cada 5 segundos para renderização em tempo real)
     this.filaTimer = setInterval(() => {
       this.carregarFilaEspera();
-    }, 60000);
+    }, 5000);
 
     // Inscrever aos dados de guichês do serviço
     this.guicheService.guiches$.subscribe((guiches: any[]) => {
@@ -542,18 +542,52 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
     });
   }
 
-  formatarTempoEspera(minutos: number): string {
-    if (minutos < 60) {
-      return `${minutos} min`;
+  formatarTempoEspera(dataCriacao: string | Date | undefined, minutosFallback: number): string {
+    const rawDate = dataCriacao ? new Date(dataCriacao) : null;
+    if (!rawDate || isNaN(rawDate.getTime())) {
+      if (minutosFallback < 60) {
+        return `${minutosFallback} min`;
+      }
+      const hours = Math.floor(minutosFallback / 60);
+      const mins = minutosFallback % 60;
+      return `${hours}h ${mins.toString().padStart(2, '0')}min`;
     }
-    const hours = Math.floor(minutos / 60);
-    const mins = minutos % 60;
+    
+    const diffMs = Math.max(0, new Date().getTime() - rawDate.getTime());
+    const diffSeconds = Math.floor(diffMs / 1000);
+    if (diffSeconds < 60) {
+      return `${diffSeconds} seg`;
+    }
+    const minutes = Math.floor(diffSeconds / 60);
+    if (minutes < 60) {
+      return `${minutes} min`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
     if (hours < 24) {
       return `${hours}h ${mins.toString().padStart(2, '0')}min`;
     }
     const days = Math.floor(hours / 24);
     const remainingHours = hours % 24;
     return `${days}d ${remainingHours}h`;
+  }
+
+  isAtrasado(dataCriacao: string | Date | undefined, minutosFallback: number): boolean {
+    const rawDate = dataCriacao ? new Date(dataCriacao) : null;
+    if (!rawDate || isNaN(rawDate.getTime())) {
+      return minutosFallback > 30;
+    }
+    const diffMs = new Date().getTime() - rawDate.getTime();
+    return (diffMs / 60000) > 30;
+  }
+
+  selectTab(tab: string) {
+    this.currentTab = tab;
+    if (tab === 'espera') {
+      this.carregarFilaEspera();
+    } else if (tab === 'guiche') {
+      this.guicheService.carregarGuichesDaApi(this.selectedFilialId || undefined);
+    }
   }
 
   get guichesAtivos(): number {

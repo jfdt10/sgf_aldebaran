@@ -1,10 +1,12 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
 import { FilialService } from '../../../services/filial.service';
 import { ActivatedRoute } from '@angular/router';
 import { LucideAngularModule, Calendar, Clock, User, MapPin, Phone, FileText, Search, Plus, Filter, X, CheckCircle, Trash2, AlertCircle, ChevronRight } from 'lucide-angular';
+import { Subscription } from 'rxjs';
+import { AdminLayoutComponent } from '../../../layouts/admin-layout/admin-layout.component';
 
 @Component({
   selector: 'app-agendamentos',
@@ -46,12 +48,14 @@ export class AgendamentosComponent implements OnInit, OnDestroy {
     check: CheckCircle, trash: Trash2, alert: AlertCircle, chevron: ChevronRight 
   };
   private filialSub?: any;
+  private searchSub?: Subscription;
 
   constructor(
     private api: ApiService,
     private filialService: FilialService,
     private cdr: ChangeDetectorRef,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    @Optional() private layout?: AdminLayoutComponent
   ) {}
 
   ngOnInit() {
@@ -68,10 +72,18 @@ export class AgendamentosComponent implements OnInit, OnDestroy {
         this.carregarServicos();
       }
     });
+
+    if (this.layout) {
+      this.searchSub = this.layout.globalSearch$.subscribe((term: string) => {
+        this.filtroBusca = term;
+        this.aplicarFiltros();
+      });
+    }
   }
 
   ngOnDestroy() {
     if (this.filialSub) this.filialSub.unsubscribe();
+    if (this.searchSub) this.searchSub.unsubscribe();
   }
 
   carregar() {

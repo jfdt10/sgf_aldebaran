@@ -117,7 +117,7 @@ export class PainelTvComponent implements OnInit, OnDestroy {
     });
 
     this.socket.on('connect', () => {
-      console.log('[Painel-TV] WebSocket conectado!');
+      if (!environment.production) console.log('[Painel-TV] WebSocket conectado!');
       if (this.iniciado && this.configurado) {
         this.atualizar();
       }

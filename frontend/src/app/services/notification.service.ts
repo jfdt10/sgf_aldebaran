@@ -33,13 +33,13 @@ export class NotificationService {
 
     this.socket.on('connect', () => {
       this.ngZone.run(() => {
-        console.log('Conectado ao WebSocket de notificações');
+        if (!environment.production) console.log('Conectado ao WebSocket de notificações');
       });
     });
 
     this.socket.on('nova_notificacao', (notificacao: Notificacao) => {
       this.ngZone.run(() => {
-        console.log('Nova notificação recebida:', notificacao);
+        if (!environment.production) console.log('Nova notificação recebida:', notificacao);
 
         let shouldKeep = true;
 
@@ -72,7 +72,7 @@ export class NotificationService {
         }
 
         if (!shouldKeep) {
-          console.log('Notificação descartada: não pertence ao usuário/cliente ativo.', notificacao);
+          if (!environment.production) console.log('Notificação descartada: não pertence ao usuário/cliente ativo.', notificacao);
           return;
         }
 
@@ -105,7 +105,7 @@ export class NotificationService {
         if (role === 'CLIENTE' || role === 'CLIENT') {
           return true;
         }
-      } catch {}
+      } catch { }
     }
 
     // 4. Check if stored ID is a UUID (UUIDs are non-numeric strings, internal users have integer IDs)

@@ -24,18 +24,18 @@
 
   <div class="page-content">
     <div class="custom-tabs">
-      <div class="tab" [class.active]="currentTab === 'espera'" (click)="currentTab = 'espera'">
+      <div class="tab" [class.active]="currentTab === 'espera'" (click)="selectTab('espera')">
         Fila de Espera <span class="badge">{{ filaEspera.length }}</span>
       </div>
-      <div class="tab" [class.active]="currentTab === 'guiche'" (click)="currentTab = 'guiche'">
+      <div class="tab" [class.active]="currentTab === 'guiche'" (click)="selectTab('guiche')">
         Status dos Guichês <span class="badge blue-bg">{{ guichesAtivos }}</span>
       </div>
       <!-- 
-      <div class="tab" [class.active]="currentTab === 'baia'" (click)="currentTab = 'baia'">
+      <div class="tab" [class.active]="currentTab === 'baia'" (click)="selectTab('baia')">
         Status das Baias <span class="badge blue-bg">{{ baiasAtivas }}</span>
       </div>
       -->
-      <div class="tab" [class.active]="currentTab === 'config'" (click)="currentTab = 'config'">
+      <div class="tab" [class.active]="currentTab === 'config'" (click)="selectTab('config')">
         Configurações
       </div>
     </div>
@@ -68,10 +68,10 @@
           </div>
 
           <div class="time-col">
-            <div class="time-box" [class.alert]="item.tempoEspera > 30">
+            <div class="time-box" [class.alert]="isAtrasado(item.dataCriacao, item.tempoEspera)">
               <lucide-icon [img]="icons.clock" size="16"></lucide-icon>
-              <span>{{ formatarTempoEspera(item.tempoEspera) }} aguardando</span>
-              <lucide-icon *ngIf="item.tempoEspera > 30" [img]="icons.alert" size="16"></lucide-icon>
+              <span>{{ formatarTempoEspera(item.dataCriacao, item.tempoEspera) }} aguardando</span>
+              <lucide-icon *ngIf="isAtrasado(item.dataCriacao, item.tempoEspera)" [img]="icons.alert" size="16"></lucide-icon>
             </div>
           </div>
 
@@ -197,8 +197,8 @@
           <div class="card-content empty-state" *ngIf="guiche.status === 'vazio'">
             <div class="icon-circle gray-circle">
               <lucide-icon [img]="icons.users" size="24"></lucide-icon>
-            </div>
-            <h4>Sem Operador</h4>
+            </div>  
+            <h4 style="color: #ffffff;">Sem Operador</h4>
           </div>
 
           <!-- Estado DISPONÍVEL -->
@@ -209,6 +209,22 @@
               </div>
               <h4>Pronta para Uso</h4>
               <span class="op-name">Operador: {{ guiche.operador }}</span>
+            </div>
+          </div>
+
+          <!-- Estado CHAMANDO (senha chamada, cliente a caminho) -->
+          <div class="card-content chamando-state" *ngIf="guiche.status === 'chamando'">
+            <div class="data-row">
+              <span class="label">Operador:</span>
+              <span class="value">{{ guiche.operador }}</span>
+            </div>
+            <div class="data-row">
+              <span class="label">Chamando:</span>
+              <span class="value font-bold calling-badge">{{ guiche.ticket }}</span>
+            </div>
+            <div class="calling-indicator">
+              <span class="pulse-dot"></span>
+              <span class="calling-text">Aguardando cliente...</span>
             </div>
           </div>
 
@@ -249,7 +265,7 @@
               Chamar Próximo
             </button>
             <button class="btn-action-secondary" (click)="encerrarAtendimentoGuiche(guiche)"
-              *ngIf="guiche.status === 'ocupado'">
+              *ngIf="guiche.status === 'ocupado' || guiche.status === 'chamando'">
               <lucide-icon [img]="icons.check" size="16"></lucide-icon>
               Encerrar Atendimento
             </button>

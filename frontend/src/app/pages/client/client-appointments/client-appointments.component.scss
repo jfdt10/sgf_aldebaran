@@ -292,6 +292,34 @@ $status-gray: #475569;
 
 @media (max-width: 520px) {
   .card-appointment {
+    padding: 16px;
+
+    .card-body {
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .date-badge {
+      width: 100% !important;
+      height: 48px !important;
+      flex-direction: row !important;
+      gap: 8px;
+      
+      .day { font-size: 1.3rem !important; }
+      .mes { margin-top: 0 !important; }
+    }
+
+    .card-actions {
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 12px;
+      
+      button {
+        width: 100%;
+      }
+    }
+
     .queue-summary {
       grid-template-columns: 1fr;
     }

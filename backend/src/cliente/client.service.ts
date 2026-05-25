@@ -159,9 +159,9 @@ export class ClientService {
              AND (
                unaccent(nome) ILIKE unaccent($1)
                OR unaccent(email) ILIKE unaccent($1)
-               OR cpf ILIKE $2
-               OR cnpj ILIKE $2
-               OR telefone ILIKE $2
+               OR regexp_replace(COALESCE(cpf, ''), '\\D', '', 'g') ILIKE $2
+               OR regexp_replace(COALESCE(cnpj, ''), '\\D', '', 'g') ILIKE $2
+               OR regexp_replace(COALESCE(telefone, ''), '\\D', '', 'g') ILIKE $2
              )`,
           sqlBusca,
           sqlDigits
@@ -186,8 +186,8 @@ export class ClientService {
         deletedAt: null,
         ...(filialId
           ? {
-              OR: [{ filial_id: filialId }, { filial_id: null }],
-            }
+            OR: [{ filial_id: filialId }, { filial_id: null }],
+          }
           : {}),
       },
       select: {

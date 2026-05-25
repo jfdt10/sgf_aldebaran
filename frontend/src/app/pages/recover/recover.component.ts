@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule, Mail, Check, ArrowLeft, AlertCircle } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-recover',
@@ -13,7 +14,7 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./recover.component.scss']
 })
 export class RecoverComponent {
-  
+
   step: 'FORM' | 'SUCCESS' = 'FORM';
   email: string = '';
   carregando: boolean = false;
@@ -30,7 +31,7 @@ export class RecoverComponent {
     private authService: AuthService,
     private router: Router,
     private cd: ChangeDetectorRef // <--- O Segredo para atualizar a tela
-  ) {}
+  ) { }
 
   enviar() {
     if (!this.email || !this.email.includes('@')) {
@@ -43,24 +44,24 @@ export class RecoverComponent {
 
     this.authService.recover(this.email).subscribe({
       next: (res) => {
-        console.log('Sucesso:', res);
-        
+        if (!environment.production) console.log('Sucesso:', res);
+
         this.carregando = false;
         this.step = 'SUCCESS'; // Troca a tela
-        
+
         this.cd.detectChanges(); // <--- Força a atualização visual
       },
       error: (err) => {
         console.error('Erro:', err);
         this.carregando = false;
-        
+
         // Se for 404, mostramos erro na tela. Se for outro, alert.
         if (err.status === 404) {
           this.erro = true;
         } else {
           alert('Erro ao conectar com o servidor.');
         }
-        
+
         this.cd.detectChanges(); // <--- Força a atualização visual
       }
     });

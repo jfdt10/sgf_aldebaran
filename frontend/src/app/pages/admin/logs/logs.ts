@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy, Optional } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
@@ -7,6 +7,8 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { Subscription } from 'rxjs';
+import { AdminLayoutComponent } from '../../../layouts/admin-layout/admin-layout.component';
 
 @Component({
   selector: 'app-logs',
@@ -16,7 +18,7 @@ import autoTable from 'jspdf-autotable';
   templateUrl: './logs.html',
   styleUrls: ['./logs.scss']
 })
-export class Logs implements OnInit {
+export class Logs implements OnInit, OnDestroy {
   logs: any[] = [];
   loading = false;
   total = 0;
@@ -38,11 +40,12 @@ export class Logs implements OnInit {
   };
 
   private searchSubject = new Subject<string>();
+  private globalSearchSub?: Subscription;
 
-  readonly icons = { 
-    fileText: FileText, 
-    search: Search, 
-    download: Download, 
+  readonly icons = {
+    fileText: FileText,
+    search: Search,
+    download: Download,
     lock: Lock,
     chevronLeft: ChevronLeft,
     chevronRight: ChevronRight,
@@ -53,9 +56,10 @@ export class Logs implements OnInit {
   Math = Math;
 
   constructor(
-    private api: ApiService, 
-    private cdr: ChangeDetectorRef
-  ) { 
+    private api: ApiService,
+    private cdr: ChangeDetectorRef,
+    @Optional() private layout?: AdminLayoutComponent
+  ) {
     this.searchSubject.pipe(
       debounceTime(250),
       distinctUntilChanged()
@@ -76,6 +80,18 @@ export class Logs implements OnInit {
     }
     this.carregarFiliais();
     this.carregar();
+
+    if (this.layout) {
+      this.globalSearchSub = this.layout.globalSearch$.subscribe((term: string) => {
+        this.onSearchChange(term);
+      });
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.globalSearchSub) {
+      this.globalSearchSub.unsubscribe();
+    }
   }
 
   carregarFiliais() {
@@ -149,11 +165,33 @@ export class Logs implements OnInit {
     if (a.includes('criação')) return 'criacao';
     if (a.includes('atualização')) return 'atualizacao';
     if (a.includes('exclusão')) return 'exclusao';
-    if (a.includes('pagamento')) return 'pagamento';
+    if (a.includes('transicao') || a.includes('transferencia')) return 'fila';
+    if (a.includes('calibracao')) return 'atualizacao';
     if (a.includes('login')) return 'login';
     if (a.includes('configuração')) return 'configuracao';
-    if (a.includes('fila')) return 'fila';
     return 'default';
+  }
+
+  formatDescription(descricao: string, acao: string): string {
+    try {
+      const parsed = JSON.parse(descricao);
+      if (acao === 'TRANSICAO_STATUS') {
+        const guicheTexto = parsed.guicheId ? ` no Guichê <strong>${parsed.guicheId}</strong>` : '';
+        return `A senha <strong>#${parsed.senhaId}</strong> mudou de <span class="badge-status">${parsed.from}</span> para <span class="badge-status highlight">${parsed.to}</span>${guicheTexto}.`;
+      }
+      if (acao === 'TRANSFERENCIA_ATENDIMENTO') {
+        return `A senha <strong>#${parsed.senhaId}</strong> foi transferida do Guichê <strong>${parsed.guicheOrigemId}</strong> para o Guichê <strong>${parsed.guicheDestinoId}</strong>.`;
+      }
+      if (acao === 'CALIBRACAO_SLA') {
+        return `O SLA do serviço <strong>${parsed.nomeServico}</strong> foi calibrado: Espera atualizada de ${parsed.metaEsperaAntiga} para <strong>${parsed.metaEsperaNova}min</strong> (${parsed.amostrasEspera} amostras). Atendimento atualizado de ${parsed.metaAtendimentoAntiga} para <strong>${parsed.metaAtendimentoNova}min</strong> (${parsed.amostrasAtendimento} amostras).`;
+      }
+
+      // Se for JSON valido mas não conhecemos a ação, formatar bonito
+      return `<pre style="margin: 0; font-size: 0.8rem; color: #64748b;">${JSON.stringify(parsed, null, 2)}</pre>`;
+    } catch {
+      // Se não for JSON, retorna string limpa ou escapa o HTML (simplesmente text)
+      return descricao;
+    }
   }
 
   exportPDF() {
@@ -173,7 +211,7 @@ export class Logs implements OnInit {
         doc.setFontSize(18);
         doc.setTextColor(0, 153, 171); // #0099ab
         doc.text('Relatório de Logs e Auditoria', 14, 22);
-        
+
         doc.setFontSize(10);
         doc.setTextColor(100);
         const dataEmissao = new Date().toLocaleString();

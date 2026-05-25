@@ -1,9 +1,11 @@
-import { Component, OnInit, HostListener, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, HostListener, ChangeDetectorRef, OnDestroy, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
 import { ActivatedRoute } from '@angular/router';
 import { LucideAngularModule, Search, Plus, Filter, User, Users, Building, Phone, Edit2, AlertCircle, X, ShieldAlert, Check, Calendar, Trash2, CheckCircle } from 'lucide-angular';
+import { Subscription } from 'rxjs';
+import { AdminLayoutComponent } from '../../../layouts/admin-layout/admin-layout.component';
 import { DatePipe } from '@angular/common';
 
 @Component({
@@ -14,7 +16,7 @@ import { DatePipe } from '@angular/common';
   templateUrl: './clientes.component.html',
   styleUrls: ['./clientes.component.scss']
 })
-export class ClientesComponent implements OnInit {
+export class ClientesComponent implements OnInit, OnDestroy {
   readonly icons = { search: Search, plus: Plus, filter: Filter, user: User, users: Users, building: Building, phone: Phone, edit: Edit2, alertCircle: AlertCircle, x: X, shieldAlert: ShieldAlert, check: Check, calendar: Calendar, trash2: Trash2, checkCircle: CheckCircle };
 
   clientes: any[] = [];
@@ -42,11 +44,14 @@ export class ClientesComponent implements OnInit {
   };
   selectedFilialId: number | null = null;
 
-    constructor(
+  private searchSub?: Subscription;
+
+  constructor(
     private api: ApiService, 
     private datePipe: DatePipe, 
     private cdr: ChangeDetectorRef,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    @Optional() private layout?: AdminLayoutComponent
   ) { }
 
   ngOnInit(): void {
@@ -55,6 +60,19 @@ export class ClientesComponent implements OnInit {
         this.selectedFilialId = fid ? Number(fid) : null;
         this.carregarClientes();
     });
+
+    if (this.layout) {
+      this.searchSub = this.layout.globalSearch$.subscribe((term: string) => {
+        this.filtro = term;
+        this.carregarClientes();
+      });
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.searchSub) {
+      this.searchSub.unsubscribe();
+    }
   }
 
   carregarClientes() {

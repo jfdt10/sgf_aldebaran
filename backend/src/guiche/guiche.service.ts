@@ -103,6 +103,7 @@ export class GuicheService {
     return await this.prisma.guiche.findMany({
       where: {
         deletadoEm: null,
+        ativo: true,
         filial_id: finalFilialId ? finalFilialId : undefined,
         filial: { ativo: true },
       },
@@ -250,8 +251,11 @@ export class GuicheService {
       where: { id: guicheId },
     });
 
+    if (!target || target.deletadoEm !== null || !target.ativo) {
+      throw new BadRequestException('Guichê não está disponível ou está inativo');
+    }
+
     if (
-      target &&
       target.operadorAtualId &&
       target.operadorAtualId !== operatorId
     ) {

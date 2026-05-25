@@ -55,7 +55,8 @@ export class ServicoService {
     }
 
     // Filtro de Tipo: Se informado, traz o tipo específico OU os sem tipo (Geral)
-    if (tipo) {
+    // Para fluxos de totem (Convencional/Preferencial), não devemos filtrar as categorias específicas
+    if (tipo && tipo.toLowerCase() !== 'convencional' && tipo.toLowerCase() !== 'preferencial') {
       const tipoFilter = {
         OR: [
           { tipo: { equals: tipo, mode: 'insensitive' } },

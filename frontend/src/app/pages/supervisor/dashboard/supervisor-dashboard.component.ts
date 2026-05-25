@@ -24,10 +24,29 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./supervisor-dashboard.component.scss']
 })
 export class SupervisorDashboardComponent implements OnInit {
-  selectedDate: string = new Date().toISOString().split('T')[0];
-  selectedDateAgendamentos: string = new Date().toISOString().split('T')[0];
-  selectedDateAtendimentos: string = new Date().toISOString().split('T')[0];
-  
+  getLocalTodayString(): string {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  selectedDate: string = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  })();
+
+  selectedDateAgendamentos: string = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  })();
+
+  selectedDateAtendimentos: string = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  })();
+
   agendamentoParaCheckin: any = null;
   agendamentoParaCancelar: any = null;
   agendamentoParaResgatar: any = null;
@@ -57,7 +76,7 @@ export class SupervisorDashboardComponent implements OnInit {
   filiais: any[] = [];
   selectedFilialId: number | null = null;
   filialId?: number;
-  
+
   private filialSub?: Subscription;
 
   atendimentoSelecionado: any = null;
@@ -127,7 +146,7 @@ export class SupervisorDashboardComponent implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       if (params['modal']) {
-        this.activeModal = params['modal'];
+        this.abrirModal(params['modal']);
         // Limpa o query param da URL sem navegar de novo
         this.router.navigate([], { queryParams: {}, replaceUrl: true });
       }
@@ -143,12 +162,14 @@ export class SupervisorDashboardComponent implements OnInit {
     });
 
     this.detectFilial();
-    
+    this.guicheService.carregarGuichesDaApi(this.selectedFilialId || undefined);
+
     this.filialSub = this.filialService.selectedFilial$.subscribe(id => {
       this.selectedFilialId = id;
+      this.guicheService.carregarGuichesDaApi(id || undefined);
       this.loadData();
     });
-    
+
     // Refresh data every 5 seconds
     setInterval(() => this.loadData(), 5000);
 
@@ -172,7 +193,7 @@ export class SupervisorDashboardComponent implements OnInit {
         if (this.selectedFilialId === null) {
           this.selectedFilialId = this.filialId || null;
         }
-      } catch (e) {}
+      } catch (e) { }
     }
   }
 
@@ -187,7 +208,7 @@ export class SupervisorDashboardComponent implements OnInit {
           try {
             const usuario = JSON.parse(usuarioRaw);
             usuarioFilialId = usuario.filial_id || null;
-          } catch {}
+          } catch { }
         }
 
         if (usuarioFilialId) {
@@ -218,23 +239,27 @@ export class SupervisorDashboardComponent implements OnInit {
         this.visaoGeral[2].valor = res.kpis.totalHoje; // Usando totalHoje em vez de atendimentosDiarios
         this.visaoGeral[3].valor = res.kpis.filaAtual;
 
-        // Update Lists only if they are not being filtered locally
+        // Atualiza as listas se o modal correspondente não estiver aberto, ou recarrega o modal para a data correta
         if (this.activeModal !== 'agendamentos') {
           this.agendamentos = res.agendamentos;
+        } else {
+          this.carregarAgendamentos();
         }
+
         if (this.activeModal !== 'atendimentos') {
           this.atendimentosList = res.atendimentos.map((a: any) => {
             if (a.dataCriacao) {
               const diffMs = new Date().getTime() - new Date(a.dataCriacao).getTime();
-              const totalMinutes = Math.floor(diffMs / 60000);
-              a.tempoEspera = this.formatWaitTime(totalMinutes);
+              a.tempoEspera = this.formatWaitTime(diffMs);
             }
             return a;
           });
+        } else {
+          this.carregarAtendimentos();
         }
 
         this.showAlertBanner = res.kpis.alertaSla;
-        
+
         // Sincroniza os guichês
         this.guicheService.refreshGuiches(this.selectedFilialId || undefined);
 
@@ -246,17 +271,25 @@ export class SupervisorDashboardComponent implements OnInit {
 
   abrirModal(id: string) {
     this.activeModal = id; // truck, operator, client, agendamentos, atendimentos
+    localStorage.setItem('modalAbertoSupervisor', id);
+    this.cdr.detectChanges(); // Garante que a mudança no activeModal seja detectada imediatamente
+
     if (id === 'agendamentos') {
-      this.selectedDateAgendamentos = new Date().toISOString().split('T')[0];
-      this.carregarAgendamentos();
+      this.selectedDateAgendamentos = this.getLocalTodayString();
+      setTimeout(() => {
+        this.carregarAgendamentos();
+      }, 0);
     } else if (id === 'atendimentos') {
-      this.selectedDateAtendimentos = new Date().toISOString().split('T')[0];
-      this.carregarAtendimentos();
+      this.selectedDateAtendimentos = this.getLocalTodayString();
+      setTimeout(() => {
+        this.carregarAtendimentos();
+      }, 0);
     }
   }
 
   fecharModal() {
     this.activeModal = null;
+    localStorage.setItem('modalAbertoSupervisor', '');
     this.successModal = null;
     this.caminhaoForm.reset({ tipoPessoa: 'Fisica', funcao: 'Operador' });
     this.operadorForm.reset({ tipoPessoa: 'Fisica', funcao: 'Operador' });
@@ -279,6 +312,22 @@ export class SupervisorDashboardComponent implements OnInit {
     this.dashboardService.getSupervisorOverview(filialId, this.selectedDateAgendamentos).subscribe({
       next: (res) => {
         this.agendamentos = res.agendamentos;
+        if (this.activeModal === 'agendamentos') {
+          const activeIds = res.agendamentos
+            .filter((a: any) => a.status === 'PENDENTE' || a.status === 'CONFIRMADO')
+            .map((a: any) => a.id);
+          const seenIdsStr = localStorage.getItem('seenAgendamentoIdsSupervisor') || '[]';
+          let seenIds: number[] = [];
+          try {
+            seenIds = JSON.parse(seenIdsStr);
+            if (!Array.isArray(seenIds)) seenIds = [];
+          } catch (e) {}
+          const updated = Array.from(new Set([...seenIds, ...activeIds]));
+          if (updated.length > 300) {
+            updated.splice(0, updated.length - 300);
+          }
+          localStorage.setItem('seenAgendamentoIdsSupervisor', JSON.stringify(updated));
+        }
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Erro ao carregar agendamentos:', err)
@@ -292,6 +341,20 @@ export class SupervisorDashboardComponent implements OnInit {
     }).subscribe({
       next: (res) => {
         this.atendimentosList = res;
+        if (this.activeModal === 'atendimentos') {
+          const activeTickets = res.map((a: any) => a.ticket);
+          const seenIdsStr = localStorage.getItem('seenAtendimentoIdsSupervisor') || '[]';
+          let seenIds: string[] = [];
+          try {
+            seenIds = JSON.parse(seenIdsStr);
+            if (!Array.isArray(seenIds)) seenIds = [];
+          } catch (e) {}
+          const updated = Array.from(new Set([...seenIds, ...activeTickets]));
+          if (updated.length > 300) {
+            updated.splice(0, updated.length - 300);
+          }
+          localStorage.setItem('seenAtendimentoIdsSupervisor', JSON.stringify(updated));
+        }
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Erro ao carregar atendimentos:', err)
@@ -310,7 +373,7 @@ export class SupervisorDashboardComponent implements OnInit {
 
   confirmarCheckinOperador(tipo: string) {
     if (!this.agendamentoParaCheckin) return;
-    
+
     const filialId = this.selectedFilialId ? +this.selectedFilialId : undefined;
     const payload = {
       codigo: this.agendamentoParaCheckin.codigo,
@@ -344,7 +407,7 @@ export class SupervisorDashboardComponent implements OnInit {
 
   confirmarCancelarAgendamento() {
     if (!this.agendamentoParaCancelar) return;
-    
+
     this.api.delete<any>(`/fila/agendamento/${this.agendamentoParaCancelar.id}`).subscribe({
       next: () => {
         this.fecharModalCancelar();
@@ -371,15 +434,22 @@ export class SupervisorDashboardComponent implements OnInit {
   confirmarResgatarAgendamento() {
     if (!this.agendamentoParaResgatar) return;
 
-    this.api.post<any>(`/fila/agendamento/${this.agendamentoParaResgatar.id}/resgatar`, {}).subscribe({
+    const endpoint = this.agendamentoParaResgatar.isAtendimento
+      ? `/fila/senha/${this.agendamentoParaResgatar.id}/resgatar`
+      : `/fila/agendamento/${this.agendamentoParaResgatar.id}/resgatar`;
+
+    this.api.post<any>(endpoint, {}).subscribe({
       next: () => {
         this.fecharModalResgatar();
         this.carregarAgendamentos();
+        if (this.activeModal === 'atendimentos') {
+          this.carregarAtendimentos();
+        }
         this.loadData();
         this.cdr.detectChanges();
       },
       error: (err) => {
-        alert(err?.error?.message || 'Erro ao resgatar agendamento.');
+        alert(err?.error?.message || 'Erro ao resgatar.');
       }
     });
   }
@@ -415,7 +485,7 @@ export class SupervisorDashboardComponent implements OnInit {
         next: () => {
           this.activeModal = null;
           this.successModal = 'operator';
-          
+
           setTimeout(() => {
             if (this.successModal === 'operator') {
               this.fecharModal();
@@ -426,7 +496,7 @@ export class SupervisorDashboardComponent implements OnInit {
           alert('Erro ao cadastrar operador: ' + (err.error?.message || 'Erro desconhecido'));
         }
       });
-      
+
       return; // Exit here since it's async
     }
     if (this.activeModal === 'client' && this.clienteForm.invalid) {
@@ -489,6 +559,9 @@ export class SupervisorDashboardComponent implements OnInit {
       } else if (guiche.status === 'ocupado') {
         status = 'ATENDENDO';
         tempo = guiche.tempoOcupadoFormatado || '00:00';
+      } else if (guiche.status === 'chamando') {
+        status = 'CHAMANDO';
+        tempo = '00:00';
       }
 
       return {
@@ -518,9 +591,8 @@ export class SupervisorDashboardComponent implements OnInit {
     this.atendimentosList.forEach(a => {
       if (a.dataCriacao && (a.status === 'Aguardando' || a.status === 'Em Atendimento')) {
         const diffMs = now - new Date(a.dataCriacao).getTime();
-        const totalMinutes = Math.floor(diffMs / 60000);
-        const formatado = this.formatWaitTime(totalMinutes);
-        
+        const formatado = this.formatWaitTime(diffMs);
+
         if (a.tempoEspera !== formatado) {
           a.tempoEspera = formatado;
           needsUpdate = true;
@@ -533,7 +605,12 @@ export class SupervisorDashboardComponent implements OnInit {
     }
   }
 
-  private formatWaitTime(totalMinutes: number): string {
+  private formatWaitTime(diffMs: number): string {
+    const totalSeconds = Math.max(0, Math.floor(diffMs / 1000));
+    if (totalSeconds < 60) {
+      return `${totalSeconds} seg`;
+    }
+    const totalMinutes = Math.floor(totalSeconds / 60);
     if (totalMinutes < 60) {
       return `${totalMinutes} min`;
     }
