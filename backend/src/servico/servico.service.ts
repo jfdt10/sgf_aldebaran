@@ -51,6 +51,7 @@ export class ServicoService {
     }
 
     if (finalFilialId) {
+      // where.filial_id = finalFilialId;
       where.OR = [
         { filial_id: finalFilialId },
         { filial_id: null }

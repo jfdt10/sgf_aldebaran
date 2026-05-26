@@ -15,7 +15,8 @@ export class ClienteRegrasService {
     now?: Date;
   }): Promise<void> {
     const configs = await this.getConfigMap(params.filialId);
-    const dataHora = buildAgendamentoDate(params.data, params.hora);
+    const timezone = configs['FUSO_HORARIO'] || 'America/Sao_Paulo';
+    const dataHora = buildAgendamentoDate(params.data, params.hora, timezone);
     const now = params.now || new Date();
 
     this.validarDiaAtivo(params.data, configs);
@@ -30,7 +31,8 @@ export class ClienteRegrasService {
     now?: Date;
   }): Promise<void> {
     const configs = await this.getConfigMap(params.filialId);
-    const dataHora = buildAgendamentoDate(params.data, params.hora);
+    const timezone = configs['FUSO_HORARIO'] || 'America/Sao_Paulo';
+    const dataHora = buildAgendamentoDate(params.data, params.hora, timezone);
     const now = params.now || new Date();
 
     this.validarDiaAtivo(params.data, configs);
