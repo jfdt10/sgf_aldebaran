@@ -16,7 +16,14 @@ export class PrismaService
       throw new Error('DATABASE_URL is not configured');
     }
 
-    const pool = new Pool({ connectionString });
+    const isProduction =
+      process.env.NODE_ENV === 'production' ||
+      (!connectionString.includes('localhost') && !connectionString.includes('127.0.0.1'));
+
+    const pool = new Pool({
+      connectionString,
+      ssl: isProduction ? { rejectUnauthorized: false } : undefined,
+    });
     const adapter = new PrismaPg(pool);
 
     super({
@@ -47,4 +54,3 @@ export class PrismaService
     }
   }
 }
-
