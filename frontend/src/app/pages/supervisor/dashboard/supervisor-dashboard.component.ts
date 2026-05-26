@@ -1,28 +1,56 @@
 import { Component, HostListener, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, ActivatedRoute } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import {
   LucideAngularModule, AlertTriangle, ChevronRight, TrendingUp,
   Clock, Activity, Users, Truck, UserPlus, User, Settings, BarChart2,
   Bell, History, Calendar, X, CheckCircle, FileText, ChevronDown, LogOut,
-  Hash, Building, Package, Key, Lock, Phone, Mail, Eye, AlertCircle
+  Hash, Building, Package, Key, Lock, Phone, Mail, Eye, AlertCircle, RotateCcw
 } from 'lucide-angular';
 import { GuicheService } from '../../../services/guiche.service';
 import { DashboardService } from '../../../services/dashboard.service';
 import { FilialService } from '../../../services/filial.service';
+import { ApiService } from '../../../services/api.service';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-supervisor-dashboard',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ReactiveFormsModule],
+  imports: [CommonModule, LucideAngularModule, ReactiveFormsModule, FormsModule, RouterLink],
   templateUrl: './supervisor-dashboard.component.html',
   styleUrls: ['./supervisor-dashboard.component.scss']
 })
 export class SupervisorDashboardComponent implements OnInit {
+  getLocalTodayString(): string {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  selectedDate: string = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  })();
+
+  selectedDateAgendamentos: string = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  })();
+
+  selectedDateAtendimentos: string = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  })();
+
+  agendamentoParaCheckin: any = null;
+  agendamentoParaCancelar: any = null;
+  agendamentoParaResgatar: any = null;
+
   // Ícones
   readonly icons: any = {
     alert: AlertTriangle, right: ChevronRight, trendingUp: TrendingUp,
@@ -32,12 +60,13 @@ export class SupervisorDashboardComponent implements OnInit {
     history: History, calendar: Calendar, x: X, check: CheckCircle, fileText: FileText,
     chevronDown: ChevronDown, logOut: LogOut,
     hash: Hash, building: Building, package: Package, key: Key, lock: Lock, phone: Phone, mail: Mail,
-    eye: Eye, alertCircle: AlertCircle
+    eye: Eye, alertCircle: AlertCircle, rotateCcw: RotateCcw
   };
 
   visaoGeral = [
     { titulo: 'Total Hoje', valor: '0', info: '-', corInfo: 'gray', icon: this.icons.trendingUp, bgIcon: '#e0f2fe', colorIcon: '#0284c7' },
-    { titulo: 'Tempo Médio', valor: '0 min', info: '-', corInfo: 'gray', icon: this.icons.clock, bgIcon: '#ecfdf5', colorIcon: '#059669' },
+    { titulo: 'Tempo Médio Diário', valor: '00:00', info: '-', corInfo: 'gray', icon: this.icons.clock, bgIcon: '#ecfdf5', colorIcon: '#059669' },
+    { titulo: 'Atendimento Diário', valor: '0', info: '-', corInfo: 'gray', icon: this.icons.activity, bgIcon: '#fef9c3', colorIcon: '#ca8a04' },
     { titulo: 'Fila Atual', valor: '0', info: '-', corInfo: 'gray', icon: this.icons.users, bgIcon: '#f3e8ff', colorIcon: '#9333ea' }
   ];
 
@@ -47,7 +76,7 @@ export class SupervisorDashboardComponent implements OnInit {
   filiais: any[] = [];
   selectedFilialId: number | null = null;
   filialId?: number;
-  
+
   private filialSub?: Subscription;
 
   atendimentoSelecionado: any = null;
@@ -78,6 +107,7 @@ export class SupervisorDashboardComponent implements OnInit {
     private dashboardService: DashboardService,
     private filialService: FilialService,
     private http: HttpClient,
+    private api: ApiService,
     private cdr: ChangeDetectorRef
   ) {
     this.justificativaForm = this.fb.group({
@@ -116,7 +146,7 @@ export class SupervisorDashboardComponent implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       if (params['modal']) {
-        this.activeModal = params['modal'];
+        this.abrirModal(params['modal']);
         // Limpa o query param da URL sem navegar de novo
         this.router.navigate([], { queryParams: {}, replaceUrl: true });
       }
@@ -132,14 +162,21 @@ export class SupervisorDashboardComponent implements OnInit {
     });
 
     this.detectFilial();
-    
+    this.guicheService.carregarGuichesDaApi(this.selectedFilialId || undefined);
+
     this.filialSub = this.filialService.selectedFilial$.subscribe(id => {
       this.selectedFilialId = id;
+      this.guicheService.carregarGuichesDaApi(id || undefined);
       this.loadData();
     });
-    
-    // Refresh data every 30 seconds
-    setInterval(() => this.loadData(), 30000);
+
+    // Refresh data every 5 seconds
+    setInterval(() => this.loadData(), 5000);
+
+    // Tick real-time seconds for waiting lists
+    setInterval(() => {
+      this.tickWaitTimes();
+    }, 1000);
   }
 
   ngOnDestroy() {
@@ -156,7 +193,7 @@ export class SupervisorDashboardComponent implements OnInit {
         if (this.selectedFilialId === null) {
           this.selectedFilialId = this.filialId || null;
         }
-      } catch (e) {}
+      } catch (e) { }
     }
   }
 
@@ -165,7 +202,20 @@ export class SupervisorDashboardComponent implements OnInit {
       headers: new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem('token')}`)
     }).subscribe({
       next: (data) => {
-        this.filiais = data;
+        const usuarioRaw = localStorage.getItem('usuario_sgf');
+        let usuarioFilialId: number | null = null;
+        if (usuarioRaw) {
+          try {
+            const usuario = JSON.parse(usuarioRaw);
+            usuarioFilialId = usuario.filial_id || null;
+          } catch { }
+        }
+
+        if (usuarioFilialId) {
+          this.filiais = data.filter((f: any) => f.id === usuarioFilialId);
+        } else {
+          this.filiais = data;
+        }
       },
       error: (err) => console.error('Erro ao carregar filiais:', err)
     });
@@ -173,22 +223,43 @@ export class SupervisorDashboardComponent implements OnInit {
 
   onFilialChange() {
     this.loadData();
+    if (this.activeModal === 'agendamentos') {
+      this.carregarAgendamentos();
+    } else if (this.activeModal === 'atendimentos') {
+      this.carregarAtendimentos();
+    }
   }
 
   loadData() {
-    this.dashboardService.getSupervisorOverview(this.selectedFilialId || undefined).subscribe({
+    this.dashboardService.getSupervisorOverview(this.selectedFilialId || undefined, this.selectedDate).subscribe({
       next: (res) => {
         // Update KPIs
         this.visaoGeral[0].valor = res.kpis.totalHoje;
         this.visaoGeral[1].valor = res.kpis.tempoMedio;
-        this.visaoGeral[2].valor = res.kpis.filaAtual;
+        this.visaoGeral[2].valor = res.kpis.totalHoje; // Usando totalHoje em vez de atendimentosDiarios
+        this.visaoGeral[3].valor = res.kpis.filaAtual;
 
-        // Update Lists
-        this.agendamentos = res.agendamentos;
-        this.atendimentosList = res.atendimentos;
+        // Atualiza as listas se o modal correspondente não estiver aberto, ou recarrega o modal para a data correta
+        if (this.activeModal !== 'agendamentos') {
+          this.agendamentos = res.agendamentos;
+        } else {
+          this.carregarAgendamentos();
+        }
+
+        if (this.activeModal !== 'atendimentos') {
+          this.atendimentosList = res.atendimentos.map((a: any) => {
+            if (a.dataCriacao) {
+              const diffMs = new Date().getTime() - new Date(a.dataCriacao).getTime();
+              a.tempoEspera = this.formatWaitTime(diffMs);
+            }
+            return a;
+          });
+        } else {
+          this.carregarAtendimentos();
+        }
 
         this.showAlertBanner = res.kpis.alertaSla;
-        
+
         // Sincroniza os guichês
         this.guicheService.refreshGuiches(this.selectedFilialId || undefined);
 
@@ -199,15 +270,188 @@ export class SupervisorDashboardComponent implements OnInit {
   }
 
   abrirModal(id: string) {
-    this.activeModal = id; // truck, operator, client
+    this.activeModal = id; // truck, operator, client, agendamentos, atendimentos
+    localStorage.setItem('modalAbertoSupervisor', id);
+    this.cdr.detectChanges(); // Garante que a mudança no activeModal seja detectada imediatamente
+
+    if (id === 'agendamentos') {
+      this.selectedDateAgendamentos = this.getLocalTodayString();
+      setTimeout(() => {
+        this.carregarAgendamentos();
+      }, 0);
+    } else if (id === 'atendimentos') {
+      this.selectedDateAtendimentos = this.getLocalTodayString();
+      setTimeout(() => {
+        this.carregarAtendimentos();
+      }, 0);
+    }
   }
 
   fecharModal() {
     this.activeModal = null;
+    localStorage.setItem('modalAbertoSupervisor', '');
     this.successModal = null;
     this.caminhaoForm.reset({ tipoPessoa: 'Fisica', funcao: 'Operador' });
     this.operadorForm.reset({ tipoPessoa: 'Fisica', funcao: 'Operador' });
     this.clienteForm.reset({ tipoPessoa: 'Fisica', funcao: 'Operador' });
+    this.agendamentoParaCheckin = null;
+    this.agendamentoParaCancelar = null;
+    this.agendamentoParaResgatar = null;
+  }
+
+  onDateChangeAgendamentos() {
+    this.carregarAgendamentos();
+  }
+
+  onDateChangeAtendimentos() {
+    this.carregarAtendimentos();
+  }
+
+  carregarAgendamentos() {
+    const filialId = this.selectedFilialId || undefined;
+    this.dashboardService.getSupervisorOverview(filialId, this.selectedDateAgendamentos).subscribe({
+      next: (res) => {
+        this.agendamentos = res.agendamentos;
+        if (this.activeModal === 'agendamentos') {
+          const activeIds = res.agendamentos
+            .filter((a: any) => a.status === 'PENDENTE' || a.status === 'CONFIRMADO')
+            .map((a: any) => a.id);
+          const seenIdsStr = localStorage.getItem('seenAgendamentoIdsSupervisor') || '[]';
+          let seenIds: number[] = [];
+          try {
+            seenIds = JSON.parse(seenIdsStr);
+            if (!Array.isArray(seenIds)) seenIds = [];
+          } catch (e) {}
+          const updated = Array.from(new Set([...seenIds, ...activeIds]));
+          if (updated.length > 300) {
+            updated.splice(0, updated.length - 300);
+          }
+          localStorage.setItem('seenAgendamentoIdsSupervisor', JSON.stringify(updated));
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Erro ao carregar agendamentos:', err)
+    });
+  }
+
+  carregarAtendimentos() {
+    this.api.get<any[]>('/fila/supervisor/atendimentos', {
+      filialId: this.selectedFilialId,
+      data: this.selectedDateAtendimentos
+    }).subscribe({
+      next: (res) => {
+        this.atendimentosList = res;
+        if (this.activeModal === 'atendimentos') {
+          const activeTickets = res.map((a: any) => a.ticket);
+          const seenIdsStr = localStorage.getItem('seenAtendimentoIdsSupervisor') || '[]';
+          let seenIds: string[] = [];
+          try {
+            seenIds = JSON.parse(seenIdsStr);
+            if (!Array.isArray(seenIds)) seenIds = [];
+          } catch (e) {}
+          const updated = Array.from(new Set([...seenIds, ...activeTickets]));
+          if (updated.length > 300) {
+            updated.splice(0, updated.length - 300);
+          }
+          localStorage.setItem('seenAtendimentoIdsSupervisor', JSON.stringify(updated));
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Erro ao carregar atendimentos:', err)
+    });
+  }
+
+  abrirModalCheckin(agenda: any) {
+    this.agendamentoParaCheckin = agenda;
+    this.cdr.detectChanges();
+  }
+
+  fecharModalCheckin() {
+    this.agendamentoParaCheckin = null;
+    this.cdr.detectChanges();
+  }
+
+  confirmarCheckinOperador(tipo: string) {
+    if (!this.agendamentoParaCheckin) return;
+
+    const filialId = this.selectedFilialId ? +this.selectedFilialId : undefined;
+    const payload = {
+      codigo: this.agendamentoParaCheckin.codigo,
+      filialId: filialId,
+      tipo: tipo,
+      ignorarRegras: true
+    };
+
+    this.api.post<any>('/fila/checkin/validar', payload).subscribe({
+      next: () => {
+        this.fecharModalCheckin();
+        this.carregarAgendamentos();
+        this.loadData();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        alert(err?.error?.message || 'Erro ao realizar check-in.');
+      }
+    });
+  }
+
+  abrirModalCancelar(agenda: any) {
+    this.agendamentoParaCancelar = agenda;
+    this.cdr.detectChanges();
+  }
+
+  fecharModalCancelar() {
+    this.agendamentoParaCancelar = null;
+    this.cdr.detectChanges();
+  }
+
+  confirmarCancelarAgendamento() {
+    if (!this.agendamentoParaCancelar) return;
+
+    this.api.delete<any>(`/fila/agendamento/${this.agendamentoParaCancelar.id}`).subscribe({
+      next: () => {
+        this.fecharModalCancelar();
+        this.carregarAgendamentos();
+        this.loadData();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        alert(err?.error?.message || 'Erro ao cancelar agendamento.');
+      }
+    });
+  }
+
+  abrirModalResgatar(agenda: any) {
+    this.agendamentoParaResgatar = agenda;
+    this.cdr.detectChanges();
+  }
+
+  fecharModalResgatar() {
+    this.agendamentoParaResgatar = null;
+    this.cdr.detectChanges();
+  }
+
+  confirmarResgatarAgendamento() {
+    if (!this.agendamentoParaResgatar) return;
+
+    const endpoint = this.agendamentoParaResgatar.isAtendimento
+      ? `/fila/senha/${this.agendamentoParaResgatar.id}/resgatar`
+      : `/fila/agendamento/${this.agendamentoParaResgatar.id}/resgatar`;
+
+    this.api.post<any>(endpoint, {}).subscribe({
+      next: () => {
+        this.fecharModalResgatar();
+        this.carregarAgendamentos();
+        if (this.activeModal === 'atendimentos') {
+          this.carregarAtendimentos();
+        }
+        this.loadData();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        alert(err?.error?.message || 'Erro ao resgatar.');
+      }
+    });
   }
 
   salvarCadastro() {
@@ -241,7 +485,7 @@ export class SupervisorDashboardComponent implements OnInit {
         next: () => {
           this.activeModal = null;
           this.successModal = 'operator';
-          
+
           setTimeout(() => {
             if (this.successModal === 'operator') {
               this.fecharModal();
@@ -252,7 +496,7 @@ export class SupervisorDashboardComponent implements OnInit {
           alert('Erro ao cadastrar operador: ' + (err.error?.message || 'Erro desconhecido'));
         }
       });
-      
+
       return; // Exit here since it's async
     }
     if (this.activeModal === 'client' && this.clienteForm.invalid) {
@@ -311,14 +555,17 @@ export class SupervisorDashboardComponent implements OnInit {
         status = 'FECHADO';
       } else if (guiche.status === 'disponivel') {
         status = 'DISPONIVEL';
-        tempo = '00:00';
+        tempo = guiche.tempoOcupadoFormatado || '00:00';
       } else if (guiche.status === 'ocupado') {
         status = 'ATENDENDO';
         tempo = guiche.tempoOcupadoFormatado || '00:00';
+      } else if (guiche.status === 'chamando') {
+        status = 'CHAMANDO';
+        tempo = '00:00';
       }
 
       return {
-        numero: guiche.numero,
+        numero: guiche.displayLabel || guiche.nome || guiche.numero,
         operador: guiche.operador || '',
         status: status,
         ticket: guiche.ticket || '',
@@ -330,5 +577,50 @@ export class SupervisorDashboardComponent implements OnInit {
 
   get tempoMedio(): string {
     return this.visaoGeral[1].valor;
+  }
+
+  get atendimentosDiarios(): string {
+    return this.visaoGeral[2].valor;
+  }
+
+  tickWaitTimes() {
+    if (!this.atendimentosList || this.atendimentosList.length === 0) return;
+    let needsUpdate = false;
+    const now = new Date().getTime();
+
+    this.atendimentosList.forEach(a => {
+      if (a.dataCriacao && (a.status === 'Aguardando' || a.status === 'Em Atendimento')) {
+        const diffMs = now - new Date(a.dataCriacao).getTime();
+        const formatado = this.formatWaitTime(diffMs);
+
+        if (a.tempoEspera !== formatado) {
+          a.tempoEspera = formatado;
+          needsUpdate = true;
+        }
+      }
+    });
+
+    if (needsUpdate) {
+      this.cdr.detectChanges();
+    }
+  }
+
+  private formatWaitTime(diffMs: number): string {
+    const totalSeconds = Math.max(0, Math.floor(diffMs / 1000));
+    if (totalSeconds < 60) {
+      return `${totalSeconds} seg`;
+    }
+    const totalMinutes = Math.floor(totalSeconds / 60);
+    if (totalMinutes < 60) {
+      return `${totalMinutes} min`;
+    }
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    if (hours < 24) {
+      return `${hours}h ${mins.toString().padStart(2, '0')}min`;
+    }
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+    return `${days}d ${remainingHours}h`;
   }
 }

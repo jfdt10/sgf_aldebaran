@@ -1,9 +1,11 @@
-import { Component, OnInit, HostListener, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, HostListener, ChangeDetectorRef, OnDestroy, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
 import { ActivatedRoute } from '@angular/router';
 import { LucideAngularModule, Search, Plus, Edit2, Trash2, X, Users, Mail, Shield, UserX, CheckCircle, RefreshCw, User, Check, Building } from 'lucide-angular';
+import { Subscription } from 'rxjs';
+import { AdminLayoutComponent } from '../../../layouts/admin-layout/admin-layout.component';
 
 @Component({
     selector: 'app-usuarios',
@@ -12,7 +14,7 @@ import { LucideAngularModule, Search, Plus, Edit2, Trash2, X, Users, Mail, Shiel
     templateUrl: './usuarios.component.html',
     styleUrls: ['./usuarios.component.scss']
 })
-export class UsuariosComponent implements OnInit {
+export class UsuariosComponent implements OnInit, OnDestroy {
     icons = {
         search: Search, plus: Plus, edit2: Edit2,
         trash2: Trash2, x: X, users: Users,
@@ -25,6 +27,8 @@ export class UsuariosComponent implements OnInit {
     loading = false;
     selectedFilialId: number | null = null;
     filiais: any[] = [];
+    isRestricted = false;
+    usuarioLogado: any = null;
 
     // Modal state
     showModal = false;
@@ -49,24 +53,58 @@ export class UsuariosComponent implements OnInit {
         senha: ''
     };
 
+    private searchSub?: Subscription;
+
     constructor(
         private api: ApiService, 
         private cdr: ChangeDetectorRef,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        @Optional() private layout?: AdminLayoutComponent
     ) { }
 
     ngOnInit(): void {
+        const salvo = localStorage.getItem('usuario_sgf');
+        if (salvo) {
+            this.usuarioLogado = JSON.parse(salvo);
+            if (this.usuarioLogado.filial_id) {
+                this.isRestricted = true;
+                this.selectedFilialId = Number(this.usuarioLogado.filial_id);
+            }
+        }
+
         this.route.queryParamMap.subscribe(params => {
-            const fid = params.get('filialId');
-            this.selectedFilialId = fid ? Number(fid) : null;
+            if (!this.isRestricted) {
+                const fid = params.get('filialId');
+                this.selectedFilialId = fid ? Number(fid) : null;
+            }
             this.carregarUsuarios();
         });
         this.carregarFiliais();
+
+        if (this.layout) {
+            this.searchSub = this.layout.globalSearch$.subscribe((term: string) => {
+                this.filtro = term;
+                this.carregarUsuarios();
+            });
+        }
+    }
+
+    ngOnDestroy() {
+        if (this.searchSub) {
+            this.searchSub.unsubscribe();
+        }
     }
 
     carregarFiliais() {
         this.api.get<any[]>(`/filiais`).subscribe({
-            next: (data) => this.filiais = data.filter(f => f.ativo),
+            next: (data) => {
+                const ativas = data.filter(f => f.ativo);
+                if (this.isRestricted) {
+                    this.filiais = ativas.filter(f => f.id === this.selectedFilialId);
+                } else {
+                    this.filiais = ativas;
+                }
+            },
             error: (err) => console.error('Erro ao carregar filiais', err)
         });
     }
@@ -173,7 +211,7 @@ export class UsuariosComponent implements OnInit {
                 perfil: this.usuarioForm.perfil,
                 filial_id: this.usuarioForm.filial_id
             };
-            this.api.patch(`/usuarios/${this.usuarioForm.id}`, payload).subscribe({
+            this.api.put(`/usuarios/${this.usuarioForm.id}`, payload).subscribe({
                 next: () => {
                     this.showModal = false;
                     this.successMessage = 'Usuário atualizado com sucesso.';

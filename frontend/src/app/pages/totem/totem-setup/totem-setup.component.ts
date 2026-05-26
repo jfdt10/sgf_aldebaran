@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
+import { environment } from '../../../../environments/environment';
 import { TotemConfigService } from '../../../services/totem-config.service';
+import { AuthService } from '../../../services/auth.service';
 import { LucideAngularModule, Building2, Check, ArrowRight } from 'lucide-angular';
 
 @Component({
@@ -27,9 +29,10 @@ export class TotemSetupComponent implements OnInit {
   constructor(
     private api: ApiService,
     private configService: TotemConfigService,
+    private authService: AuthService,
     private router: Router,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.carregarFiliais();
@@ -41,7 +44,17 @@ export class TotemSetupComponent implements OnInit {
     this.loading = true;
     this.api.get<any[]>('/filiais/public/list').subscribe({
       next: (res) => {
-        this.filiais = res;
+        const user = this.authService.getCurrentUser();
+        const role = (user?.perfil || user?.tipo || '').toString().toUpperCase();
+        const filialId = user?.filial_id ?? null;
+
+        this.filiais = role === 'ADMIN' && filialId
+          ? res.filter((f) => f.id === filialId)
+          : res;
+
+        if (role === 'ADMIN' && filialId) {
+          this.selectedFilialId = filialId;
+        }
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -60,7 +73,7 @@ export class TotemSetupComponent implements OnInit {
     const filial = this.filiais.find(f => f.id === this.selectedFilialId);
     if (filial) {
       this.configService.setFilial(filial.id, filial.nome);
-      console.log('Totem configurado para:', filial.nome);
+      if (!environment.production) console.log('Totem configurado para:', filial.nome);
       this.router.navigate(['/totem']);
     }
   }

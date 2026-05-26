@@ -39,6 +39,18 @@ export class AtendimentoComponent implements OnInit, OnDestroy {
   };
   private filialSub?: any;
 
+  formatarTituloGuiche(numero: string | number): string {
+    if (!numero) return '';
+    const limpo = String(numero).trim();
+    if (/^Guich[êe]/i.test(limpo)) {
+      return limpo.toUpperCase();
+    }
+    if (!isNaN(Number(limpo))) {
+      return `GUICHÊ ${limpo}`;
+    }
+    return limpo.toUpperCase();
+  }
+
   constructor(
     private api: ApiService,
     private filialService: FilialService,
@@ -118,13 +130,23 @@ export class AtendimentoComponent implements OnInit, OnDestroy {
   }
 
   finalizarAtendimento() {
-    if (!this.senhaAtual) return;
+    if (!this.senhaAtual || !this.senhaAtual.id) return;
     
-    // Status local
-    this.statusAtendimento = 'IDLE';
-    this.senhaAtual = null;
-    this.stopTimer();
-    this.cdr.detectChanges();
+    this.loading = true;
+    this.api.post<any>('/fila/finalizar_atendimento', { senhaId: this.senhaAtual.id }).subscribe({
+      next: () => {
+        this.statusAtendimento = 'IDLE';
+        this.senhaAtual = null;
+        this.stopTimer();
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        alert(err.error?.message || 'Erro ao finalizar atendimento.');
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   // --- Internal Session Timer ---

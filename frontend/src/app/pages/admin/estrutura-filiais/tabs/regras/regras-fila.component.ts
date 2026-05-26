@@ -23,9 +23,14 @@ export class RegrasFilaComponent implements OnInit {
   };
 
   selectedFilialId: number | null = null;
+  isRestricted = false;
+  usuarioLogado: any = null;
 
   loading = false;
   showSuccessModal = false;
+  calibrando = false;
+  calibracaoResultado: any[] | null = null;
+
 
   readonly iconsArr = { 
     settings: Settings, check: Check, clock: Clock, headphones: Headphones,
@@ -50,9 +55,20 @@ export class RegrasFilaComponent implements OnInit {
   }
 
   ngOnInit() {
+    const salvo = localStorage.getItem('usuario_sgf');
+    if (salvo) {
+      this.usuarioLogado = JSON.parse(salvo);
+      if (this.usuarioLogado.filial_id) {
+        this.isRestricted = true;
+        this.selectedFilialId = Number(this.usuarioLogado.filial_id);
+      }
+    }
+
     this.route.queryParamMap.subscribe(params => {
-      const fid = params.get('filialId');
-      this.selectedFilialId = fid ? Number(fid) : null;
+      if (!this.isRestricted) {
+        const fid = params.get('filialId');
+        this.selectedFilialId = fid ? Number(fid) : null;
+      }
       this.carregarDados();
     });
   }
@@ -128,5 +144,28 @@ export class RegrasFilaComponent implements OnInit {
   fecharSucesso() {
     this.showSuccessModal = false;
     this.cdr.detectChanges();
+  }
+
+  calibrarSLAs() {
+    this.calibrando = true;
+    this.calibracaoResultado = null;
+    const filialQuery = this.selectedFilialId ? `?filialId=${this.selectedFilialId}` : '';
+    this.api.post<any>(`/configuracoes/calibrar-sla`, {
+      filialId: this.selectedFilialId
+    }).subscribe({
+      next: (res) => {
+        this.calibrando = false;
+        this.calibracaoResultado = res.resultados || [];
+        this.showSuccessModal = true;
+        this.carregarDados(); // reload updated SLA values
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Erro ao calibrar SLA:', err);
+        this.calibrando = false;
+        alert('Erro ao calibrar SLA. Verifique se há dados suficientes.');
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

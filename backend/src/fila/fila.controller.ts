@@ -12,26 +12,37 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
+import { ValidarCheckinDto } from './dto/validar-checkin.dto';
 import { FilaService } from './fila.service';
 
 @Controller('fila')
 export class FilaController {
-  constructor(private readonly filaService: FilaService) {}
+  constructor(private readonly filaService: FilaService) { }
 
+  // Totem
   @Post('totem/senha')
   solicitarSenhaTotem(
-    @Body() body: { tipo: string; categoria: string; filialId?: number },
+    @Body()
+    body: {
+      tipo: string;
+      categoria?: string;
+      categoriaId?: number;
+      filialId?: number;
+      qtdeGarrafoes?: number;
+    },
   ) {
     return this.filaService.solicitarSenhaTotem(
       body.tipo,
       body.categoria,
       body.filialId,
+      body.categoriaId,
+      body.qtdeGarrafoes,
     );
   }
 
   @Post('checkin/validar')
-  validarCheckin(@Body() body: { codigo: string; filialId?: number }) {
-    return this.filaService.validarCheckin(body.codigo, body.filialId);
+  validarCheckin(@Body() body: ValidarCheckinDto) {
+    return this.filaService.validarCheckin(body.codigo, body.filialId, body.tipo, body.ignorarRegras);
   }
 
   @Get('dashboard-stats')
@@ -43,10 +54,12 @@ export class FilaController {
   getHorarios(
     @Query('data') data: string,
     @Query('filialId') filialId?: string,
+    @Query('servicoId') servicoId?: string,
   ) {
     return this.filaService.horariosDisponiveis(
       data,
       filialId ? +filialId : undefined,
+      servicoId ? +servicoId : undefined,
     );
   }
 
@@ -81,6 +94,22 @@ export class FilaController {
     return this.filaService.excluirAgendamento(+id, req.user);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('agendamento/:id/resgatar')
+  resgatarAgendamento(
+    @Param('id') id: string,
+  ) {
+    return this.filaService.resgatarAgendamento(+id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('senha/:id/resgatar')
+  resgatarSenha(
+    @Param('id') id: string,
+  ) {
+    return this.filaService.resgatarSenha(+id);
+  }
+
   @Post('servicos')
   criarServico(@Body() body: { nome: string; sigla: string }) {
     return this.filaService.criarServico(body.nome, body.sigla);
@@ -101,22 +130,69 @@ export class FilaController {
     return this.filaService.excluirServico(+id);
   }
 
+  // Operação de Fila
   @Post('solicitar_senha')
   solicitarSenha(@Body() body: { servico_id: number }) {
     return this.filaService.solicitarSenha(body.servico_id);
   }
 
   @Post('chamar_proximo')
-  chamarProximo(@Body() body: { guiche: number }) {
-    return this.filaService.chamarProximo(body.guiche);
+  chamarProximo(@Body() body: { guiche: number; repetir?: boolean }) {
+    return this.filaService.chamarProximo(body.guiche, !!body.repetir);
+  }
+
+  @Post('zerar')
+  zerarFila(@Body() body: { filialId?: number }) {
+    return this.filaService.zerarFila(body.filialId);
+  }
+
+  @Post('chamar_especifico')
+  chamarEspecifico(@Body() body: { guiche: number; senhaId: number }) {
+    return this.filaService.chamarEspecifico(body.guiche, body.senhaId);
+  }
+
+  @Patch('senha/:id/cancelar')
+  cancelarSenha(@Param('id') id: string) {
+    return this.filaService.cancelarSenha(+id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('operador/proximas')
   async listarProximas(@Request() req: any) {
+    // Busca os guiches do operador para saber a filial
     const guicheId = Number(req.headers['x-guiche-id']);
     if (!guicheId) return [];
     return this.filaService.listarProximas(guicheId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('operador/atual')
+  async buscarAtendimentoAtual(@Request() req: any) {
+    const guicheId = Number(req.headers['x-guiche-id']);
+    if (!guicheId) return null;
+    return this.filaService.buscarAtendimentoAtual(guicheId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('operador/atendimentos')
+  listarAtendimentosOperador(
+    @Request() req: AuthenticatedRequest,
+    @Query('filialId') filialId?: string,
+    @Query('data') data?: string,
+  ) {
+    const fid = filialId ? +filialId : req.user.filial_id;
+    return this.filaService.listarAtendimentosOperador(req.user.userId, fid, data);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('supervisor/atendimentos')
+  listarAtendimentosSupervisor(
+    @Request() req: AuthenticatedRequest,
+    @Query('filialId') filialId?: string,
+    @Query('data') data?: string,
+  ) {
+    const fid = filialId ? +filialId : req.user.filial_id;
+    return this.filaService.listarAtendimentosSupervisor(fid, data);
   }
 
   @Post('iniciar_atendimento')
@@ -129,14 +205,47 @@ export class FilaController {
     return this.filaService.finalizarAtendimento(body.senhaId);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Patch('senha/:id/cliente')
+  vincularCliente(
+    @Param('id') id: string,
+    @Body() body: { nome: string; documento?: string; clienteId?: string },
+  ) {
+    return this.filaService.vincularCliente(+id, body.nome, body.documento, body.clienteId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('senha/:id/garrafoes')
+  atualizarGarrafoes(
+    @Param('id') id: string,
+    @Body() body: { qtdeGarrafoes: number },
+  ) {
+    return this.filaService.atualizarGarrafoes(+id, body.qtdeGarrafoes);
+  }
+
   @Post('nao_compareceu')
   naoCompareceu(@Body() body: { senhaId: number }) {
     return this.filaService.naoCompareceu(body.senhaId);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('transferir')
+  transferirAtendimento(
+    @Request() req: AuthenticatedRequest,
+    @Body()
+    body: { senhaId: number; guicheDestinoId?: number; retornarFila?: boolean },
+  ) {
+    return this.filaService.transferirAtendimento(
+      body.senhaId,
+      body.guicheDestinoId ?? null,
+      !!body.retornarFila,
+      req.user,
+    );
+  }
+
   @Get('painel')
-  painel() {
-    return this.filaService.listarPainel();
+  painel(@Query('filialId') filialId?: string) {
+    return this.filaService.listarPainel(filialId ? +filialId : undefined);
   }
 
   @Post('avaliar')

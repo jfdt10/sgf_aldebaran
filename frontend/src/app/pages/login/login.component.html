@@ -4,7 +4,7 @@
     <div class="brand-content">
       <img src="assets/logo-aldebaran.png" alt="Aldebaran" class="logo-white animate-up">
       
-      <h1 class="animate-up delay-1">Bem-vindo ao<br>Sistema Fila</h1>
+      <h1 class="animate-up delay-1">Bem-vindo ao<br>Sistema de Filas Aldebaran</h1>
       <p class="subtitle animate-up delay-2">Gestão Inteligente para Água Mineral</p>
       
       <div class="stats-row animate-up delay-3">
@@ -34,33 +34,36 @@
     </div>
 
     <div class="form-container">
-      <h2>Fazer Login</h2>
-      <p class="filial-text">Unidade: <strong>Matriz Centro</strong></p>
+      <h2>Entrar</h2>
 
       <form (ngSubmit)="fazerLogin()">
         
         <div class="input-group">
-          <label>E-MAIL OU USUÁRIO</label>
+          <label for="login-username">E-MAIL OU USUÁRIO</label>
           <div class="input-wrapper">
             <lucide-icon [img]="icons.mail" size="20" class="input-icon"></lucide-icon>
             <input 
+              id="login-username"
               type="text" 
               placeholder="ex: joao.silva ou joao@empresa.com" 
               [(ngModel)]="credenciais.email" 
               name="email"
+              autocomplete="username"
               required>
           </div>
         </div>
 
         <div class="input-group">
-          <label>SENHA DE ACESSO</label>
+          <label for="login-password">SENHA DE ACESSO</label>
           <div class="input-wrapper">
             <lucide-icon [img]="icons.lock" size="20" class="input-icon"></lucide-icon>
             <input 
+              id="login-password"
               type="password" 
               placeholder="••••••••" 
               [(ngModel)]="credenciais.senha" 
               name="senha"
+              autocomplete="current-password"
               required>
           </div>
         </div>

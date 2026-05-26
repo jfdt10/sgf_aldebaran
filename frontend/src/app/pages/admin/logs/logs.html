@@ -11,8 +11,8 @@
                     </div>
                 </div>
                 <div class="selector-action">
-                    <select [(ngModel)]="selectedFilialId" (change)="onFilialChange()" class="filial-select-modern">
-                        <option [ngValue]="null">🌍 Todas as Unidades (Global)</option>
+                    <select [(ngModel)]="selectedFilialId" (change)="onFilialChange()" class="filial-select-modern" [disabled]="isRestricted">
+                        <option *ngIf="!isRestricted" [ngValue]="null">🌍 Todas as Unidades (Global)</option>
                         <option *ngFor="let f of filiais" [ngValue]="f.id">
                             🏢 {{ f.nome }}
                         </option>
@@ -54,13 +54,14 @@
                 <label>Ação:</label>
                 <select [(ngModel)]="filters.acao" (change)="carregar()">
                     <option value="">Todas as Ações</option>
-                    <option value="Criação">Criação</option>
+                    <option value="Criação">Criação / Cadastro</option>
                     <option value="Atualização">Atualização</option>
                     <option value="Exclusão">Exclusão</option>
-                    <option value="Pagamento">Pagamento</option>
-                    <option value="Login">Login</option>
+                    <option value="TRANSICAO_STATUS">Transição de Fila / Status</option>
+                    <option value="TRANSFERENCIA_ATENDIMENTO">Transferência de Guichê</option>
+                    <option value="CALIBRACAO_SLA">Calibração de SLA</option>
+                    <option value="Login">Login / Autenticação</option>
                     <option value="Configuração">Configuração</option>
-                    <option value="Fila">Fila</option>
                 </select>
             </div>
             <div class="filter-item">
@@ -101,7 +102,7 @@
                             </div>
                         </td>
                         <td><span class="entity-tag">{{ log.entidade || '-' }}</span></td>
-                        <td><p class="desc-text">{{ log.descricao }}</p></td>
+                        <td><p class="desc-text" [innerHTML]="formatDescription(log.descricao, log.acao)"></p></td>
                         <td>
                             <span class="status-badge" [ngClass]="log.status?.toLowerCase() === 'erro' ? 'erro' : 'sucesso'">
                                 {{ log.status || 'Sucesso' }}

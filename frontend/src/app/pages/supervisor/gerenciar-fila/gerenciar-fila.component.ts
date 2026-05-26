@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { LucideAngularModule, Search, Clock, User, AlertCircle, ArrowUpCircle, CheckCircle, Users, ArrowLeft, Plus, X, Mail, MoreVertical } from 'lucide-angular';
+import { LucideAngularModule, Search, Clock, User, AlertCircle, ArrowUpCircle, CheckCircle, Users, ArrowLeft, Plus, X, Mail, MoreVertical, Trash2 } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
-import { ReactiveFormsModule, FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
 import { GuicheService } from '../../../services/guiche.service';
 import { FilialService } from '../../../services/filial.service';
 import { environment } from '../../../../environments/environment';
@@ -11,31 +11,34 @@ import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-supervisor-gerenciar-fila',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterLink, ReactiveFormsModule],
+  imports: [CommonModule, LucideAngularModule, RouterLink, FormsModule, ReactiveFormsModule],
   templateUrl: './gerenciar-fila.component.html',
   styleUrls: ['./gerenciar-fila.component.scss']
 })
 export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
-  icons = { search: Search, clock: Clock, user: User, alert: AlertCircle, up: ArrowUpCircle, check: CheckCircle, users: Users, arrowLeft: ArrowLeft, plus: Plus, x: X, mail: Mail, moreVertical: MoreVertical };
+  icons = { search: Search, clock: Clock, user: User, alert: AlertCircle, up: ArrowUpCircle, check: CheckCircle, users: Users, arrowLeft: ArrowLeft, plus: Plus, x: X, mail: Mail, moreVertical: MoreVertical, trash: Trash2 };
   currentTab = 'espera';
 
   configForm!: FormGroup;
   showSuccessModal = false;
   tempoMedioAtendimentoGeral = 0;
 
-  contextMenuGuicheNumero: number | null = null;
+  contextMenuGuicheId: number | null = null;
   showRemoveOperatorConfirmModal = false;
   guicheSelecionadoParaRemocao: any = null;
 
   operadorForm!: FormGroup;
   showCriarOperadorModal = false;
 
+  filaEspera: any[] = [];
+  private filaTimer: any;
 
-  filaEspera = [
-    { ticket: 'RP045', prioridade: 'alta', prioridadeLabel: 'Preferencial', motorista: 'Carlos Souza', placa: 'XYZ-9876', servico: 'Retirada Pesada', tempoEspera: 45 },
-    { ticket: 'C042', prioridade: 'normal', prioridadeLabel: 'Normal', motorista: 'Pedro Almeida', placa: 'ABC-1234', servico: 'Caminhão', tempoEspera: 20 },
-    { ticket: 'CR039', prioridade: 'alta', prioridadeLabel: 'Urgente', motorista: 'Lucas Lima', placa: 'DEF-5678', servico: 'Carga Rápida', tempoEspera: 32 }
-  ];
+  showCancelModal = false;
+  itemParaCancelar: any = null;
+
+  showZerarFilaModal = false;
+  zerarFilaLoading = false;
+  zerarFilaResultado: { sucesso: boolean; mensagem: string } | null = null;
 
   baias = [
     { numero: 1, status: 'ocupada', statusLabel: 'Ocupada', operador: 'João Santos', ticket: 'RP044', placa: 'GHI-9012', progresso: 65, tempoOcupado: 12, tempoOcupadoFormatado: '12:00', atrasado: false, startTime: new Date().getTime() - 12 * 60 * 1000 },
@@ -45,6 +48,9 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
   ];
 
   guiches: any[] = [];
+  filtroFila = '';
+  filteredFilaEspera: any[] = [];
+  filteredGuiches: any[] = [];
   private baiasTimer: any;
 
   showOperadorModal = false;
@@ -53,6 +59,18 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
   operadorLoading = false;
   operadorError: string | null = null;
   private apiUrl = environment.apiUrl;
+
+  formatarTituloGuiche(numero: string | number | undefined): string {
+    if (numero === undefined || numero === null) return '';
+    const limpo = String(numero).trim();
+    if (/^Guich[êe]/i.test(limpo)) {
+      return limpo.toUpperCase();
+    }
+    if (!isNaN(Number(limpo))) {
+      return `GUICHÊ ${limpo}`;
+    }
+    return limpo.toUpperCase();
+  }
   private relatoriosTimer: any;
 
   private filialSub?: any;
@@ -72,7 +90,8 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
       tempoTolerancia: new FormControl(this.guicheService.tempoTolerancia),
       limiteAtendimentos: new FormControl(200),
       prioridadePcdIdoso: new FormControl(true),
-      redirecionarAusentes: new FormControl(false)
+      redirecionarAusentes: new FormControl(false),
+      eficienciaMinima: new FormControl(90)
     });
 
     this.operadorForm = this.fb.group({
@@ -90,6 +109,8 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
       this.selectedFilialId = id;
       this.atualizarNomeFilial();
       this.guicheService.carregarGuichesDaApi(id || undefined);
+      this.carregarFilaEspera();
+      this.carregarConfiguracoes();
     });
 
     // Buscar estatística de tempo médio do dia e atualizar constantemente
@@ -98,10 +119,15 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
       this.carregarDadosTempoMedio();
     }, 10000);
 
+    // Timer da Fila (atualiza a cada 5 segundos para renderização em tempo real)
+    this.filaTimer = setInterval(() => {
+      this.carregarFilaEspera();
+    }, 5000);
+
     // Inscrever aos dados de guichês do serviço
     this.guicheService.guiches$.subscribe((guiches: any[]) => {
       this.guiches = guiches;
-      this.cdr.detectChanges();
+      this.aplicarFiltroFila();
     });
 
     // Timer for baia occupancy countdowns
@@ -136,7 +162,74 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.baiasTimer) clearInterval(this.baiasTimer);
     if (this.relatoriosTimer) clearInterval(this.relatoriosTimer);
+    if (this.filaTimer) clearInterval(this.filaTimer);
     if (this.filialSub) this.filialSub.unsubscribe();
+  }
+
+  carregarFilaEspera() {
+    const token = localStorage.getItem('token') || '';
+    const filialParam = this.selectedFilialId ? `?filialId=${this.selectedFilialId}` : '';
+    this.http.get<any[]>(`${this.apiUrl}/dashboard/fila-espera${filialParam}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
+      next: (dados) => {
+        this.filaEspera = dados;
+        this.aplicarFiltroFila();
+      },
+      error: (err) => console.error('Erro ao carregar fila:', err)
+    });
+  }
+
+  aplicarFiltroFila() {
+    const termo = this.filtroFila?.toLowerCase().trim();
+    if (!termo) {
+      this.filteredFilaEspera = this.filaEspera;
+      this.filteredGuiches = this.guiches;
+    } else {
+      this.filteredFilaEspera = this.filaEspera.filter((item: any) => {
+        const combinacao = `${item.ticket} ${item.motorista} ${item.servico}`.toLowerCase();
+        return combinacao.includes(termo);
+      });
+      this.filteredGuiches = this.guiches.filter((g: any) => {
+        const combinacao = `${g.numero} ${g.status} ${g.nomeOperador || ''} ${g.senha || ''} ${g.placa || ''}`.toLowerCase();
+        return combinacao.includes(termo);
+      });
+    }
+    this.cdr.detectChanges();
+  }
+
+  carregarConfiguracoes() {
+    const token = localStorage.getItem('token') || '';
+    const filialParam = this.selectedFilialId ? `?filialId=${this.selectedFilialId}` : '';
+    this.http.get<any[]>(`${this.apiUrl}/configuracoes/lista${filialParam}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
+      next: (configs) => {
+        const configMap: Record<string, string> = {};
+        configs.forEach((c: any) => configMap[c.chave] = c.valor);
+        
+        const getVal = (keyCamel: string, keyUpper: string) => {
+          return configMap[keyCamel] !== undefined ? configMap[keyCamel] : configMap[keyUpper];
+        };
+
+        const valTolerancia = getVal('tempoTolerancia', 'TEMPO_TOLERANCIA');
+        const valLimite = getVal('limiteAtendimentosDia', 'LIMITE_ATENDIMENTOS');
+        const valPrioridade = getVal('prioridadeAutomatica', 'PRIORIDADE_AUTOMATICA');
+        const valRedirecionar = getVal('redirecionarAusentes', 'REDIRECIONAR_AUSENTES');
+        const valEficiencia = getVal('eficienciaMinima', 'EFICIENCIA_MINIMA');
+
+        this.configForm.patchValue({
+          tempoTolerancia: valTolerancia ? parseInt(valTolerancia, 10) : 15,
+          limiteAtendimentos: valLimite ? parseInt(valLimite, 10) : 200,
+          prioridadePcdIdoso: valPrioridade !== 'false',
+          redirecionarAusentes: valRedirecionar === 'true',
+          eficienciaMinima: valEficiencia ? parseInt(valEficiencia, 10) : 90
+        });
+        
+        this.guicheService.tempoTolerancia = this.configForm.value.tempoTolerancia;
+      },
+      error: (err) => console.error('Erro ao carregar configurações:', err)
+    });
   }
 
   carregarDadosTempoMedio() {
@@ -146,14 +239,105 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (dados: any) => {
-        this.tempoMedioAtendimentoGeral = dados.tempoMedioAtendimento || 0;
+        // O endpoint retorna { kpis: { mediaAtendimentoMinutos: X } }
+        const rawMinutos = dados?.kpis?.mediaAtendimentoMinutos || 0;
+        this.tempoMedioAtendimentoGeral = Math.round(rawMinutos);
         this.cdr.detectChanges();
       }
     });
   }
 
   chamar(item: any) {
-    alert(`Chamando ticket ${item.ticket} neste instante.`);
+    const guicheDisponivel = this.guiches.find(g => g.status === 'disponivel');
+    
+    if (!guicheDisponivel) {
+      alert('Nenhum guichê disponível no momento.');
+      return;
+    }
+
+    const token = localStorage.getItem('token') || '';
+    this.http.post(`${this.apiUrl}/fila/chamar_especifico`, 
+      { guiche: guicheDisponivel.id, senhaId: item.id }, 
+      { headers: { Authorization: `Bearer ${token}` } }
+    ).subscribe({
+      next: () => {
+        // Atualizar lista e guichês
+        this.carregarFilaEspera();
+        this.guicheService.refreshGuiches(this.selectedFilialId || undefined);
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Erro ao chamar a senha.');
+      }
+    });
+  }
+
+  abrirModalCancelar(item: any) {
+    this.itemParaCancelar = item;
+    this.showCancelModal = true;
+  }
+
+  fecharModalCancelar() {
+    this.itemParaCancelar = null;
+    this.showCancelModal = false;
+  }
+
+  // --- Zerar Fila ---
+  abrirModalZerarFila() {
+    this.zerarFilaResultado = null;
+    this.showZerarFilaModal = true;
+  }
+
+  fecharModalZerarFila() {
+    this.showZerarFilaModal = false;
+    this.zerarFilaLoading = false;
+    this.zerarFilaResultado = null;
+  }
+
+  confirmarZerarFila() {
+    this.zerarFilaLoading = true;
+    this.zerarFilaResultado = null;
+    const token = localStorage.getItem('token') || '';
+    const body = this.selectedFilialId ? { filialId: this.selectedFilialId } : {};
+    this.http.post<{ message: string; removidas: number }>(
+      `${this.apiUrl}/fila/zerar`,
+      body,
+      { headers: { Authorization: `Bearer ${token}` } }
+    ).subscribe({
+      next: (res) => {
+        this.zerarFilaLoading = false;
+        this.zerarFilaResultado = {
+          sucesso: true,
+          mensagem: `${res.message}. ${res.removidas} senha(s) removida(s).`
+        };
+        this.carregarFilaEspera();
+      },
+      error: (err) => {
+        this.zerarFilaLoading = false;
+        this.zerarFilaResultado = {
+          sucesso: false,
+          mensagem: err.error?.message || 'Erro ao zerar a fila. Tente novamente.'
+        };
+      }
+    });
+  }
+
+  confirmarCancelamento() {
+    if (!this.itemParaCancelar) return;
+
+    const token = localStorage.getItem('token') || '';
+    this.http.patch(`${this.apiUrl}/fila/senha/${this.itemParaCancelar.id}/cancelar`, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
+      next: () => {
+        this.fecharModalCancelar();
+        this.carregarFilaEspera();
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Erro ao cancelar a senha.');
+      }
+    });
   }
 
   chamarProximo(baia: any) {
@@ -171,16 +355,35 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
 
   salvarConfiguracoes() {
     if (this.configForm.valid) {
-      this.guicheService.tempoTolerancia = this.configForm.value.tempoTolerancia;
+      const formValue = this.configForm.value;
+      
+      const configs = [
+        { chave: 'tempoTolerancia', valor: formValue.tempoTolerancia.toString() },
+        { chave: 'limiteAtendimentosDia', valor: formValue.limiteAtendimentos.toString() },
+        { chave: 'prioridadeAutomatica', valor: formValue.prioridadePcdIdoso.toString() },
+        { chave: 'redirecionarAusentes', valor: formValue.redirecionarAusentes.toString() },
+        { chave: 'eficienciaMinima', valor: formValue.eficienciaMinima.toString() }
+      ];
+
+      const token = localStorage.getItem('token') || '';
+      const filialParam = this.selectedFilialId ? `?filialId=${this.selectedFilialId}` : '';
+      
+      this.http.post(`${this.apiUrl}/configuracoes/bulk${filialParam}`, { configs }, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).subscribe({
+        next: () => {
+          this.guicheService.tempoTolerancia = formValue.tempoTolerancia;
+          this.showSuccessModal = true;
+        },
+        error: (err) => {
+          console.error('Erro ao salvar configurações:', err);
+          alert('Erro ao salvar configurações.');
+        }
+      });
     }
-    this.showSuccessModal = true;
   }
 
-  resetarTempoMedio() {
-    if (confirm('Tem certeza que deseja zerar o histórico de tempo médio? O dashboard recomeçará o cálculo do zero.')) {
-      this.guicheService.resetarHistoricoTempoMedio();
-    }
-  }
+
 
   fecharSuccessModal() {
     this.showSuccessModal = false;
@@ -196,15 +399,20 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
   }
 
   carregarOperadores() {
-    const filialParam = this.selectedFilialId ? `?filialId=${this.selectedFilialId}` : '';
-    this.http.get<any[]>(`${this.apiUrl}/usuarios${filialParam}`).subscribe(
+    // Bug fix 1: Não filtrar por filialId — operadores cadastrados sem filial_id
+    // ficam invisiveis quando o filtro é aplicado no backend (WHERE filial_id = X).
+    // Bug fix 2: Incluir Authorization header — o endpoint é protegido por JwtAuthGuard.
+    const token = localStorage.getItem('token') || '';
+    this.http.get<any[]>(`${this.apiUrl}/usuarios`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe(
       (usuarios: any[]) => {
         // Filtrar apenas usuários com perfil 'OPERADOR' e ativos
         let operadoresFiltrados = usuarios.filter(
           u => u.perfil === 'OPERADOR' && u.ativo
         );
 
-        // Obter operadores já atribuídos a guichês
+        // Obter nomes dos operadores já atribuídos a guichês ativos
         const operadoresAtribuidos = this.guiches
           .filter(g => g.status !== 'vazio' && g.operador)
           .map(g => g.operador);
@@ -239,21 +447,49 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
 
   selecionarOperador(operador: any) {
     if (this.guicheAtual) {
-      // Atribuir operador usando o nome (compatível com GuicheService)
-      this.guicheService.atribuirOperador(this.guicheAtual.numero, operador.nome);
-      this.fecharModalOperador();
+      this.operadorLoading = true;
+      this.guicheService.atribuirOperador(this.guicheAtual.id, operador.id).subscribe({
+        next: () => {
+          this.guicheService.refreshGuiches(this.selectedFilialId || undefined);
+          this.fecharModalOperador();
+        },
+        error: (err) => {
+          console.error(err);
+          this.operadorError = 'Erro ao atribuir operador ao guichê.';
+          this.operadorLoading = false;
+        }
+      });
     }
   }
 
   chamarProximoGuiche(guiche: any) {
-    this.guicheService.chamarProximo(guiche.numero);
+    this.guicheService.chamarProximo(guiche.id).subscribe({
+      next: () => {
+        this.guicheService.refreshGuiches(this.selectedFilialId || undefined);
+      },
+      error: (err) => {
+        console.error(err);
+        alert(err.error?.message || 'Erro ao chamar próximo.');
+      }
+    });
   }
 
   encerrarAtendimentoGuiche(guiche: any) {
-    // Atendimento encerramento flow
     if (guiche.status === 'ocupado') {
-      if (confirm(`Deseja encerrar o atendimento ${guiche.ticket} no Guichê ${guiche.numero}?`)) {
-        this.guicheService.encerrarAtendimento(guiche.numero);
+      if (confirm(`Deseja encerrar o atendimento ${guiche.ticket} no Guichê ${guiche.displayLabel || guiche.nome || guiche.numero}?`)) {
+        if (!guiche.senhaId) {
+          alert('ID do atendimento não encontrado. Atualize a página e tente novamente.');
+          return;
+        }
+        this.guicheService.encerrarAtendimento(guiche.senhaId).subscribe({
+          next: () => {
+             this.guicheService.refreshGuiches(this.selectedFilialId || undefined);
+          },
+          error: (err) => {
+             console.error(err);
+             alert(err.error?.message || 'Erro ao encerrar atendimento.');
+          }
+        });
       }
     }
   }
@@ -306,6 +542,54 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
     });
   }
 
+  formatarTempoEspera(dataCriacao: string | Date | undefined, minutosFallback: number): string {
+    const rawDate = dataCriacao ? new Date(dataCriacao) : null;
+    if (!rawDate || isNaN(rawDate.getTime())) {
+      if (minutosFallback < 60) {
+        return `${minutosFallback} min`;
+      }
+      const hours = Math.floor(minutosFallback / 60);
+      const mins = minutosFallback % 60;
+      return `${hours}h ${mins.toString().padStart(2, '0')}min`;
+    }
+    
+    const diffMs = Math.max(0, new Date().getTime() - rawDate.getTime());
+    const diffSeconds = Math.floor(diffMs / 1000);
+    if (diffSeconds < 60) {
+      return `${diffSeconds} seg`;
+    }
+    const minutes = Math.floor(diffSeconds / 60);
+    if (minutes < 60) {
+      return `${minutes} min`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours < 24) {
+      return `${hours}h ${mins.toString().padStart(2, '0')}min`;
+    }
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+    return `${days}d ${remainingHours}h`;
+  }
+
+  isAtrasado(dataCriacao: string | Date | undefined, minutosFallback: number): boolean {
+    const rawDate = dataCriacao ? new Date(dataCriacao) : null;
+    if (!rawDate || isNaN(rawDate.getTime())) {
+      return minutosFallback > 30;
+    }
+    const diffMs = new Date().getTime() - rawDate.getTime();
+    return (diffMs / 60000) > 30;
+  }
+
+  selectTab(tab: string) {
+    this.currentTab = tab;
+    if (tab === 'espera') {
+      this.carregarFilaEspera();
+    } else if (tab === 'guiche') {
+      this.guicheService.carregarGuichesDaApi(this.selectedFilialId || undefined);
+    }
+  }
+
   get guichesAtivos(): number {
     return this.guicheService.getGuichesAtivos();
   }
@@ -316,11 +600,11 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
 
   toggleContextMenu(guiche: any, event: MouseEvent) {
     event.stopPropagation();
-    this.contextMenuGuicheNumero = this.contextMenuGuicheNumero === guiche.numero ? null : guiche.numero;
+    this.contextMenuGuicheId = this.contextMenuGuicheId === guiche.id ? null : guiche.id;
   }
 
   closeContextMenu() {
-    this.contextMenuGuicheNumero = null;
+    this.contextMenuGuicheId = null;
   }
 
   openRemoveOperatorConfirmation(guiche: any, event: MouseEvent) {
@@ -337,10 +621,20 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
 
   confirmarRemocaoOperador() {
     if (this.guicheSelecionadoParaRemocao) {
-      this.guicheService.liberarGuiche(this.guicheSelecionadoParaRemocao.numero);
-      this.guicheSelecionadoParaRemocao = null;
+      this.guicheService.liberarGuiche(this.guicheSelecionadoParaRemocao.id).subscribe({
+        next: () => {
+          this.guicheService.refreshGuiches(this.selectedFilialId || undefined);
+          this.guicheSelecionadoParaRemocao = null;
+          this.showRemoveOperatorConfirmModal = false;
+        },
+        error: (err) => {
+          console.error(err);
+          alert('Erro ao remover o operador.');
+        }
+      });
+    } else {
+      this.showRemoveOperatorConfirmModal = false;
     }
-    this.showRemoveOperatorConfirmModal = false;
   }
 
   @HostListener('document:click', ['$event'])

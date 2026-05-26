@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, RouterLink, ActivatedRoute } from '@angular/router';
 import { RouterOutlet } from '@angular/router';
-import { LucideAngularModule, Users, Building, Truck, Fingerprint, Building2, ChevronDown } from 'lucide-angular';
+import { LucideAngularModule, Users, User, Building, Truck, Building2, ChevronDown } from 'lucide-angular';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
 
@@ -18,12 +18,14 @@ export class CadastrosGerais implements OnInit {
   filiais: any[] = [];
   selectedFilialId: number | null = null;
   selectedFilialName: string = '';
+  isRestricted = false;
+  usuarioLogado: any = null;
 
   readonly icons = { 
     users: Users, 
+    user: User,
     building: Building, 
-    truck: Truck, 
-    list: Fingerprint,
+    truck: Truck,
     buildingSelect: Building2,
     chevronDown: ChevronDown
   };
@@ -31,8 +33,8 @@ export class CadastrosGerais implements OnInit {
   tabs = [
     { id: 'usuarios', label: 'Usuários do Sistema', icon: this.icons.users, route: '/admin/cadastros/usuarios' },
     { id: 'clientes', label: 'Clientes', icon: this.icons.building, route: '/admin/cadastros/clientes' },
-    { id: 'motoristas', label: 'Caminhoneiros', icon: this.icons.truck, route: '/admin/cadastros/motoristas' },
-    { id: 'caminhoes', label: 'Caminhões', icon: this.icons.list, route: '/admin/cadastros/caminhoes' }
+    { id: 'motoristas', label: 'Caminhoneiros', icon: this.icons.user, route: '/admin/cadastros/motoristas' },
+    { id: 'caminhoes', label: 'Caminhões', icon: this.icons.truck, route: '/admin/cadastros/caminhoes' }
   ];
 
   constructor(
@@ -48,12 +50,21 @@ export class CadastrosGerais implements OnInit {
   }
 
   ngOnInit(): void {
+    const salvo = localStorage.getItem('usuario_sgf');
+    if (salvo) {
+      this.usuarioLogado = JSON.parse(salvo);
+      if (this.usuarioLogado.filial_id) {
+        this.selectedFilialId = Number(this.usuarioLogado.filial_id);
+        this.isRestricted = true;
+      }
+    }
+
     this.updateCurrentTab(this.router.url);
     this.carregarFiliais();
     
-    // Pegar filial dos query params no carregamento inicial
+    // Pegar filial dos query params no carregamento inicial se não for restrito
     this.route.queryParams.subscribe(params => {
-      if (params['filialId']) {
+      if (!this.isRestricted && params['filialId']) {
         this.selectedFilialId = +params['filialId'];
         this.updateSelectedFilialName();
       }
@@ -63,7 +74,11 @@ export class CadastrosGerais implements OnInit {
   carregarFiliais() {
     this.api.get<any[]>('/filiais').subscribe({
       next: (res) => {
-        this.filiais = res.filter(f => f.ativo);
+        if (this.isRestricted) {
+          this.filiais = res.filter(f => f.ativo && f.id === this.selectedFilialId);
+        } else {
+          this.filiais = res.filter(f => f.ativo);
+        }
         this.updateSelectedFilialName();
       },
       error: (err) => console.error('Erro ao carregar filiais:', err)
@@ -80,7 +95,7 @@ export class CadastrosGerais implements OnInit {
   }
 
   updateSelectedFilialName() {
-    const filial = this.filiais.find(f => f.id === this.selectedFilialId);
+    const filial = this.filiais.find((f: any) => f.id === this.selectedFilialId);
     this.selectedFilialName = filial ? filial.nome : 'Todas as Unidades';
   }
 

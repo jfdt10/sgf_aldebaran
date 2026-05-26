@@ -1,16 +1,20 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
   ParseIntPipe,
   Patch,
+  Post,
   Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
+import { ConfirmarCheckinDto } from './dto/confirmar-checkin.dto';
 import { ListAgendamentosQueryDto } from './dto/list-agendamentos-query.dto';
+import { ReagendarAgendamentoDto } from './dto/reagendar-agendamento.dto';
 import { AgendamentoService } from './agendamento.service';
 
 @Controller('agendamentos')
@@ -29,6 +33,24 @@ export class AgendamentoController {
     );
   }
 
+  @Get('voucher/ativo')
+  buscarVoucherAtivo(@Request() req: AuthenticatedRequest) {
+    return this.agendamentoService.buscarVoucherAtivo(String(req.user.userId));
+  }
+
+  @Post(':id/checkin')
+  realizarCheckin(
+    @Request() req: AuthenticatedRequest,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: ConfirmarCheckinDto,
+  ) {
+    return this.agendamentoService.realizarCheckinCliente(
+      String(req.user.userId),
+      id,
+      body?.tipo,
+    );
+  }
+
   @Patch(':id/cancelar')
   cancelar(
     @Request() req: AuthenticatedRequest,
@@ -37,6 +59,19 @@ export class AgendamentoController {
     return this.agendamentoService.cancelarMeuAgendamento(
       String(req.user.userId),
       id,
+    );
+  }
+
+  @Patch(':id/reagendar')
+  reagendar(
+    @Request() req: AuthenticatedRequest,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: ReagendarAgendamentoDto,
+  ) {
+    return this.agendamentoService.reagendarMeuAgendamento(
+      String(req.user.userId),
+      id,
+      body,
     );
   }
 }

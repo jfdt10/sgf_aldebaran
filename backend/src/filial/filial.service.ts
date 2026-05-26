@@ -9,9 +9,12 @@ export class FilialService {
   constructor(
     private prisma: PrismaService,
     private notificacaoService: NotificacaoService,
-  ) {}
+  ) { }
 
-  async create(data: CreateFilialDto) {
+  async create(data: CreateFilialDto, requestingUserFilialId?: number) {
+    if (requestingUserFilialId) {
+      throw new NotFoundException('Permissão negada para criar filiais');
+    }
     const filial = await this.prisma.filial.create({
       data: {
         nome: data.nome,
@@ -34,19 +37,35 @@ export class FilialService {
     return filial;
   }
 
-  findAll() {
+  findAll(filialId?: number, requestingUserFilialId?: number) {
+    const finalFilialId = requestingUserFilialId ?? filialId;
+    
     return this.prisma.filial.findMany({
-      where: { deletadoEm: null },
+      where: {
+        deletadoEm: null,
+        ...(finalFilialId ? { id: finalFilialId } : {}),
+      },
       include: {
         _count: {
-          select: { guiches: true },
+          select: {
+            guiches: {
+              where: {
+                deletadoEm: null,
+                ativo: true,
+              },
+            },
+          },
         },
       },
       orderBy: { id: 'asc' },
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, requestingUserFilialId?: number) {
+    if (requestingUserFilialId && id !== requestingUserFilialId) {
+      throw new NotFoundException('Filial não encontrada');
+    }
+    
     const f = await this.prisma.filial.findUnique({
       where: { id },
       include: { guiches: true },
@@ -56,7 +75,8 @@ export class FilialService {
     return f;
   }
 
-  async update(id: number, data: UpdateFilialDto) {
+  async update(id: number, data: UpdateFilialDto, requestingUserFilialId?: number) {
+    await this.findOne(id, requestingUserFilialId);
     const { ativo, ...updateData } = data;
 
     let filial;
@@ -95,10 +115,12 @@ export class FilialService {
     return filial;
   }
 
-  remove(id: number) {
+  async remove(id: number, requestingUserFilialId?: number) {
+    await this.findOne(id, requestingUserFilialId);
+    
     return this.prisma.filial.update({
       where: { id },
-      data: { deletadoEm: new Date() },
+      data: { deletadoEm: new Date(), ativo: false, atualizadoEm: new Date() },
     });
   }
 

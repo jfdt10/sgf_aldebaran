@@ -6,51 +6,82 @@
     </div>
     
     <div class="header-center">
-      <!-- Filial Selector -->
-      <div class="control-group">
-        <label>Filial</label>
-        <select class="dropdown" [(ngModel)]="filialSelecionada" (change)="onFilialChange()">
-          <option *ngFor="let f of filiais" [value]="f.id">{{ f.nome }}</option>
-        </select>
+      <!-- Filial Selector (Supervisor-style) -->
+      <div class="info-group">
+        <span class="info-label">Filial</span>
+        <div class="filial-glass-selector">
+          <lucide-icon [img]="icons.building" size="16"></lucide-icon>
+          <select id="filial-select-painel" name="filial-select-painel" [(ngModel)]="filialSelecionada" (change)="onFilialChange()">
+            <option *ngIf="!hasRestrictedFilial" value="">Selecione uma filial...</option>
+            <option *ngFor="let f of filiais" [value]="f.id">{{ f.nome }}</option>
+          </select>
+          <lucide-icon [img]="icons.chevronDown" size="14" class="arrow"></lucide-icon>
+        </div>
       </div>
 
       <!-- Language Selector -->
-      <div class="control-group">
-        <label>Language</label>
-        <div class="language-toggle">
-          <button [class.active]="idiomaAtivo === 'PT'" (click)="trocarIdioma('PT')">PT</button>
-          <button [class.active]="idiomaAtivo === 'EN'" (click)="trocarIdioma('EN')">EN</button>
+      <div class="info-group language-selector">
+        <span class="info-label">Idioma</span>
+        <div class="language-buttons">
+          <button 
+            class="lang-btn" 
+            [class.active]="idiomaAtivo === 'PT'"
+            (click)="trocarIdioma('PT')">
+            PT
+          </button>
+          <button 
+            class="lang-btn" 
+            [class.active]="idiomaAtivo === 'EN'"
+            (click)="trocarIdioma('EN')">
+            EN
+          </button>
         </div>
       </div>
     </div>
 
     <div class="header-right">
       <!-- Meus Atendimentos Badge -->
-      <button class="badge-button atendimentos" (click)="navegarPara('meus-atendimentos')">
-        <img src="assets/icon (2).svg" class="icon" alt="" />
+      <button class="nav-btn btn-transparent text-purple" (click)="navegarPara('meus-atendimentos')">
+        <lucide-icon [img]="icons.history" size="18"></lucide-icon>
         <span>Meus Atendimentos</span>
-        <div class="badge-count" *ngIf="badgeMeusAtendimentosCount > 0">{{ badgeMeusAtendimentosCount }}</div>
+        <span class="badge-count bg-purple" *ngIf="badgeMeusAtendimentosCount > 0">{{ badgeMeusAtendimentosCount }}</span>
       </button>
 
       <!-- Agendamentos Badge -->
-      <button class="badge-button agendamentos" (click)="navegarPara('agendamentos')">
-        <img src="assets/Icon (4).svg" class="icon" alt="" />
+      <button class="nav-btn btn-transparent text-blue" (click)="navegarPara('agendamentos')">
+        <lucide-icon [img]="icons.calendar" size="18"></lucide-icon>
         <span>Agendamentos</span>
-        <div class="badge-count" *ngIf="badgeAgendamentosCount > 0">{{ badgeAgendamentosCount }}</div>
+        <span class="badge-count bg-blue" *ngIf="badgeAgendamentosCount > 0">{{ badgeAgendamentosCount }}</span>
       </button>
 
       <!-- Operator Profile -->
-      <div class="operator-profile">
-        <div class="profile-info">
-          <p class="name">{{ nomeOperador }}</p>
-          <p class="guiche">Guichê {{ numeroGuiche }}</p>
+      <div class="profile-dropdown-container operator-profile">
+        <div class="profile-trigger" (click)="toggleProfileMenu($event)" [class.active]="showProfileMenu">
+          <div class="profile-info">
+            <span class="profile-name">{{ nomeOperador }}</span>
+            <span class="profile-role">{{ formatarTituloGuiche(numeroGuiche) }}</span>
+          </div>
+          <div class="avatar-box bg-teal-dark">
+            <lucide-icon [img]="icons.user" size="20" color="white"></lucide-icon>
+          </div>
         </div>
-        <div class="avatar">
-          <img src="assets/Icon (7).svg" class="icon" alt="" />
+
+        <!-- Profile Menu Dropdown -->
+        <div class="profile-dropdown" *ngIf="showProfileMenu" (click)="$event.stopPropagation()">
+          <div class="dropdown-header">
+            <span class="m-name">{{ nomeOperador }}</span>
+            <span class="m-email">{{ operadorEmail || 'Sem email' }}</span>
+          </div>
+          <button type="button" class="dropdown-item" (click)="abrirEditarPerfil()">
+            <lucide-icon [img]="icons.user" size="16" style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;"></lucide-icon>
+            <span>Meu Perfil</span>
+          </button>
+          <div class="dropdown-divider"></div>
+          <button type="button" class="dropdown-item text-danger" (click)="sair()">
+            <lucide-icon [img]="icons.logout" size="16" style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;"></lucide-icon>
+            <span>Sair do Sistema</span>
+          </button>
         </div>
-        <button type="button" class="logout-btn" (click)="sair()" title="Sair">
-          <img src="assets/Icon.svg" class="icon" alt="" />
-        </button>
       </div>
     </div>
   </header>
@@ -61,7 +92,7 @@
     <div class="left-section">
       <!-- Call Buttons -->
       <div class="call-buttons">
-        <button class="btn-call-primary" (click)="chamarProximo()" [disabled]="!numeroGuiche">
+        <button class="btn-call-primary" (click)="chamarProximo()" [disabled]="!numeroGuiche || (ticketAtual && ticketAtual.status !== 'FINALIZADO' && ticketAtual.status !== 'CANCELADO')" [class.disabled-btn]="ticketAtual && ticketAtual.status !== 'FINALIZADO' && ticketAtual.status !== 'CANCELADO'">
           <div class="btn-call-wrap">
             <img src="assets/Icon (3).svg" class="icon" alt="" />
             <span>Chamar Próximo</span>
@@ -126,12 +157,12 @@
                 <p class="info-label">Cliente</p>
                 <div class="info-value info-value-client" [class.ghost]="!ticketAtual.clienteSelecionado">
                   <span>{{ ticketAtual.clienteSelecionado ? ticketAtual.cliente : 'Sem Cadastro' }}</span>
-                  <img *ngIf="ticketAtual.clienteSelecionado" src="assets/Icon (15).svg" class="client-eye-icon" alt="Visualizar cadastro" />
+                  <img *ngIf="ticketAtual.clienteSelecionado" src="assets/Icon (15).svg" class="client-eye-icon" alt="Visualizar cadastro" (click)="abrirDetalhesCliente()" style="cursor: pointer;" />
                 </div>
               </div>
               <div class="info-card">
                 <p class="info-label">Espera</p>
-                <p class="info-value">8 minutos</p>
+                <p class="info-value">{{ ticketAtual.tempoEsperaReal || '0 min' }}</p>
               </div>
               <div class="info-card highlight-card">
                 <div class="garrafoes-label">Quantidade de Garrafões 20 L <img src="assets/Vector (1).svg" /></div>
@@ -177,6 +208,8 @@
         <div class="search-input-wrapper">
           <img src="assets/Icon (10).svg" class="search-icon" alt="" />
           <input
+            id="search-cadastro-painel"
+            name="search-cadastro-painel"
             type="text"
             placeholder="Consultar Cadastro (CPF, Placa ou Nome)..."
             class="search-input"
@@ -218,17 +251,7 @@
           </div>
           <div class="card-content">
             <h4>Cadastrar Cliente</h4>
-            <p>Individual • Empresa • Caminhoneiro</p>
-          </div>
-        </button>
-
-        <button class="quick-action-card" (click)="abrirModalCadastro('pagamento')">
-          <div class="card-icon pagamento">
-            <img src="assets/Icon (8).svg" class="icon" alt="" />
-          </div>
-          <div class="card-content">
-            <h4>Registrar Pagamento</h4>
-            <p>Manual • Dinheiro • Cartão • PIX</p>
+            <p>Individual • Empresa </p>
           </div>
         </button>
       </div>
@@ -250,9 +273,9 @@
           </div>
           <p class="ticket-service">{{ ticket.servico }}</p>
           <div class="queue-item-footer">
-            <span class="queue-position">
-              <img src="assets/Vector (1).svg" class="icon queue-icon-img" alt="" />
-              {{ ticket.posicao }}
+            <span class="queue-position" *ngIf="ticket.qtdeGarrafoes > 0">
+              <img src="assets/Vector (1).svg" class="icon queue-icon-img" alt="" style="width:12px; margin-right:4px;" />
+              {{ ticket.qtdeGarrafoes }}
             </span>
           </div>
         </div>
@@ -320,7 +343,7 @@
                (click)="g.status !== 'FECHADO' && selecionarGuicheTransferencia(g.id)">
             <ng-container *ngIf="g.status !== 'FECHADO'">
               <div class="guiche-header">
-                <span>Guichê {{ g.guiche }}</span>
+                <span>{{ formatarTituloGuiche(g.guiche) }}</span>
                 <span class="badge-status" [class.disponivel]="g.status === 'DISPONÍVEL'">{{ g.status }}</span>
               </div>
               <div class="guiche-operador">
@@ -334,7 +357,7 @@
               </div>
             </ng-container>
             <ng-container *ngIf="g.status === 'FECHADO'">
-              <div class="guiche-fechado-title">Guichê {{ g.guiche }}</div>
+              <div class="guiche-fechado-title">{{ formatarTituloGuiche(g.guiche) }}</div>
               <div class="guiche-fechado-subtitle">Fechado</div>
             </ng-container>
           </div>
@@ -342,13 +365,13 @@
       </div>
 
       <div class="checkbox-grupo">
-        <input type="checkbox" id="retornarFila">
+        <input type="checkbox" id="retornarFila" [(ngModel)]="retornarFilaGeral" (change)="guicheTransferenciaSelecionado = null">
         <label for="retornarFila">Retornar senha para a fila geral (Sem operador específico)</label>
       </div>
     </div>
     <div class="modal-footer-transferir">
       <button class="btn-cancel btn-transferir-cancel" (click)="fecharModal()">Cancelar</button>
-      <button class="btn-primary btn-transferir-confirm" (click)="confirmarTransferencia()" [disabled]="!guicheTransferenciaSelecionado">Confirmar</button>
+      <button class="btn-primary btn-transferir-confirm" (click)="confirmarTransferencia()" [disabled]="!retornarFilaGeral && !guicheTransferenciaSelecionado">Confirmar</button>
     </div>
   </div>
 </div>
@@ -363,7 +386,7 @@
     <div class="success-flux">
       <span class="senha">{{ ticketAtual?.senha }}</span>
       <span class="seta">⟶</span>
-      <span class="guiche-destino">Guichê {{ guicheTransferenciaDestino?.guiche || '05' }} <span>({{ guicheTransferenciaDestino?.nome || 'Gustavo C.' }})</span></span>
+      <span class="guiche-destino">{{ formatarTituloGuiche(guicheTransferenciaDestino?.guiche || 'Fila Geral') }} <span>({{ guicheTransferenciaDestino?.nome || 'Sem operador' }})</span></span>
     </div>
     <button class="btn-voltar-console" (click)="encerrarTransferencia()">
       Voltar ao Console
@@ -375,29 +398,44 @@
 <div *ngIf="modalAberto === 'cadastro-caminhao'" class="modal-overlay">
   <div class="modal-content modal-cadastro">
     <div class="cadastro-header">
-      <h3><img src="assets/Icon (6).svg" alt="" /> Cadastrar Caminhão</h3>
+      <h3><lucide-icon [name]="icons.truck" style="color: white; width: 24px; height: 24px;"></lucide-icon> Cadastrar Caminhão</h3>
       <button class="close-btn" (click)="fecharModal()">✕</button>
     </div>
     <div class="cadastro-body">
       <div class="form-group">
         <label>Placa <span>*</span></label>
-        <input type="text" [(ngModel)]="formCaminhao.placa" placeholder="ABC - 1234" />
+        <div class="input-with-icon">
+          <lucide-icon [name]="icons.hash"></lucide-icon>
+          <input type="text" [(ngModel)]="formCaminhao.placa" (input)="formatarPlaca($event)" maxlength="8" style="text-transform: uppercase;" placeholder="ABC-1234" />
+        </div>
       </div>
       <div class="form-group">
         <label>Modelo <span>*</span></label>
-        <input type="text" [(ngModel)]="formCaminhao.modelo" placeholder="Ex: Mercedes-Benz Atego 1719" />
+        <div class="input-with-icon">
+          <lucide-icon [name]="icons.truck"></lucide-icon>
+          <input type="text" [(ngModel)]="formCaminhao.modelo" placeholder="Ex: Mercedes-Benz Atego 1719" />
+        </div>
       </div>
       <div class="form-group">
         <label>Transportadora <span>*</span></label>
-        <input type="text" [(ngModel)]="formCaminhao.transportadora" placeholder="Ex: Transportadora ABC Ltda" />
+        <div class="input-with-icon">
+          <lucide-icon [name]="icons.building"></lucide-icon>
+          <input type="text" [(ngModel)]="formCaminhao.transportadora" placeholder="Ex: Transportadora ABC Ltda" />
+        </div>
       </div>
       <div class="form-group">
         <label>Capacidade <span>*</span></label>
-        <input type="text" [(ngModel)]="formCaminhao.capacidade" placeholder="Ex: 10 toneladas" />
+        <div class="input-with-icon">
+          <lucide-icon [name]="icons.package"></lucide-icon>
+          <input type="text" [(ngModel)]="formCaminhao.capacidade" placeholder="Ex: 10 toneladas" />
+        </div>
       </div>
       <div class="form-group">
         <label>Observações</label>
-        <textarea [(ngModel)]="formCaminhao.observacoes" placeholder="Informações adicionais sobre o veículo..."></textarea>
+        <div class="input-with-icon">
+          <lucide-icon [name]="icons.fileText" class="file-icon"></lucide-icon>
+          <textarea [(ngModel)]="formCaminhao.observacoes" placeholder="Informações adicionais sobre o veículo..."></textarea>
+        </div>
       </div>
     </div>
     <div class="cadastro-footer">
@@ -407,11 +445,99 @@
   </div>
 </div>
 
+<!-- Modal Detalhes do Cliente -->
+<div *ngIf="modalAberto === 'detalhes-cliente'" class="modal-overlay">
+  <div class="modal-content modal-cadastro">
+    <div class="cadastro-header">
+      <h3>
+        <lucide-icon [img]="icons.user" style="color: white; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;"></lucide-icon>
+        Detalhes do Cliente
+      </h3>
+      <button class="close-btn" (click)="fecharModal()" title="Fechar">
+        <lucide-icon [img]="icons.x" style="width: 20px; height: 20px; color: white; display: flex; align-items: center; justify-content: center;"></lucide-icon>
+      </button>
+    </div>
+    
+    <div class="cadastro-body" style="padding: 24px 32px;">
+      <div *ngIf="clienteDetalhes?.nota" class="alert-box" style="background: #fffbeb; color: #b45309; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #fef3c7; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+        <lucide-icon [img]="icons.alertCircle" style="color: #d97706; width: 20px; height: 20px; flex-shrink: 0;"></lucide-icon>
+        <span>{{ clienteDetalhes.nota }}</span>
+      </div>
+
+      <!-- Avatar e Nome do Perfil -->
+      <div class="cliente-profile-section">
+        <div class="avatar-large">
+          {{ clienteDetalhes?.nome ? (clienteDetalhes.nome.substring(0, 2) | uppercase) : 'CL' }}
+        </div>
+        <h4 class="client-name-title">{{ clienteDetalhes?.nome || 'Cliente sem nome' }}</h4>
+        <span class="client-role-badge">Cliente Cadastrado</span>
+      </div>
+
+      <div class="details-grid">
+        <!-- Nome Completo -->
+        <div class="detail-card">
+          <div class="icon-wrapper">
+            <lucide-icon [img]="icons.user" style="width: 18px; height: 18px; display: flex;"></lucide-icon>
+          </div>
+          <div class="card-content">
+            <label>Nome / Razão Social</label>
+            <p *ngIf="!isEditingClient">{{ clienteDetalhes?.nome || '-' }}</p>
+            <input *ngIf="isEditingClient" type="text" class="sw-input" [(ngModel)]="editForm.nome" placeholder="Nome Completo">
+          </div>
+        </div>
+
+        <!-- Documento -->
+        <div class="detail-card">
+          <div class="icon-wrapper">
+            <lucide-icon [img]="icons.hash" style="width: 18px; height: 18px; display: flex;"></lucide-icon>
+          </div>
+          <div class="card-content">
+            <label>CPF / CNPJ / Documento</label>
+            <p>{{ clienteDetalhes?.documento || clienteDetalhes?.cpf || clienteDetalhes?.cnpj || '-' }}</p>
+          </div>
+        </div>
+
+        <!-- Telefone -->
+        <div class="detail-card">
+          <div class="icon-wrapper">
+            <lucide-icon [img]="icons.phone" style="width: 18px; height: 18px; display: flex;"></lucide-icon>
+          </div>
+          <div class="card-content">
+            <label>Telefone</label>
+            <p *ngIf="!isEditingClient">{{ clienteDetalhes?.telefone || '-' }}</p>
+            <input *ngIf="isEditingClient" type="text" class="sw-input" [(ngModel)]="editForm.telefone" placeholder="Telefone">
+          </div>
+        </div>
+
+        <!-- E-mail -->
+        <div class="detail-card">
+          <div class="icon-wrapper">
+            <lucide-icon [img]="icons.mail" style="width: 18px; height: 18px; display: flex;"></lucide-icon>
+          </div>
+          <div class="card-content">
+            <label>E-mail</label>
+            <p *ngIf="!isEditingClient">{{ clienteDetalhes?.email || '-' }}</p>
+            <input *ngIf="isEditingClient" type="email" class="sw-input" [(ngModel)]="editForm.email" placeholder="E-mail">
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="cadastro-footer">
+      <button *ngIf="!isEditingClient" class="btn-cancel btn-cadastro-cancel" (click)="fecharModal()">Fechar</button>
+      <button *ngIf="!isEditingClient" class="btn-confirm btn-cadastro-save" (click)="isEditingClient = true">Editar Informações</button>
+
+      <button *ngIf="isEditingClient" class="btn-cancel btn-cadastro-cancel" (click)="isEditingClient = false">Cancelar</button>
+      <button *ngIf="isEditingClient" class="btn-confirm btn-cadastro-save" (click)="atualizarDetalhesCliente()">Salvar Alterações</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal Cadastrar Cliente (PF/PJ) -->
 <div *ngIf="modalAberto === 'cadastro-cliente'" class="modal-overlay">
   <div class="modal-content modal-cadastro">
     <div class="cadastro-header">
-      <h3><img src="assets/Icon (5).svg" alt="" /> Cadastrar Cliente</h3>
+      <h3><lucide-icon [name]="icons.user" style="color: white; width: 24px; height: 24px;"></lucide-icon> Cadastrar Cliente</h3>
       <button class="close-btn" (click)="fecharModal()">✕</button>
     </div>
     <div class="cadastro-body">
@@ -424,88 +550,64 @@
       </div>
 
       <div class="form-group" *ngIf="tipoClienteCadastro === 'PJ'">
-        <label>Nome da Empresa <span>*</span></label>
-        <input type="text" [(ngModel)]="formCliente.nomeEmpresa" placeholder="Ex: Transportadora ABC Ltda" />
+        <label>Razão Social <span>*</span></label>
+        <div class="input-with-icon">
+          <lucide-icon [name]="icons.building"></lucide-icon>
+          <input type="text" [(ngModel)]="formCliente.nomeEmpresa" placeholder="Ex: Empresa LTDA" />
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="tipoClienteCadastro === 'PF'">
+        <label>Nome Completo <span>*</span></label>
+        <div class="input-with-icon">
+          <lucide-icon [name]="icons.user"></lucide-icon>
+          <input type="text" [(ngModel)]="formCliente.nome" placeholder="Ex: João da Silva" />
+        </div>
       </div>
 
       <div class="form-group">
-        <label>{{ tipoClienteCadastro === 'PJ' ? 'Nome Completo' : 'Nome Completo' }} <span>*</span></label>
-        <input type="text" [(ngModel)]="formCliente.nome" [placeholder]="tipoClienteCadastro === 'PJ' ? 'Ex: João Silva (Responsável)' : 'Ex: Maria Santos'" />
-      </div>
-
-      <div class="form-group">
-        <label>CPF/CNPJ <span>*</span></label>
-        <input type="text" [(ngModel)]="formCliente.documento" [placeholder]="tipoClienteCadastro === 'PJ' ? '00.000.000/0000-00' : '000.000.000-00'" />
-      </div>
-
-      <div class="form-group">
-        <label>Telefone <span>*</span></label>
-        <input type="text" [(ngModel)]="formCliente.telefone" placeholder="(11) 98765-4321" />
+        <label>{{ tipoClienteCadastro === 'PJ' ? 'CNPJ' : 'CPF' }} <span>*</span></label>
+        <div class="input-with-icon">
+          <lucide-icon [name]="icons.hash"></lucide-icon>
+          <input type="text" [(ngModel)]="formCliente.documento" (input)="formatarDocumento($event)" maxlength="18" [placeholder]="tipoClienteCadastro === 'PJ' ? '00.000.000/0000-00' : '000.000.000-00'" />
+        </div>
       </div>
 
       <div class="form-group">
         <label>E-mail</label>
-        <input type="text" [(ngModel)]="formCliente.email" placeholder="exemplo@email.com" />
-      </div>
-    </div>
-    <div class="cadastro-footer">
-      <button class="btn-cancel btn-cadastro-cancel" (click)="fecharModal()">Cancelar</button>
-      <button class="btn-primary btn-cadastro-save" (click)="salvarCadastroCliente()">Salvar</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Registrar Pagamento -->
-<div *ngIf="modalAberto === 'cadastro-pagamento'" class="modal-overlay">
-  <div class="modal-content modal-cadastro modal-pagamento">
-    <div class="cadastro-header">
-      <h3><img src="assets/Icon (8).svg" alt="" /> Registrar Pagamento Manual</h3>
-      <button class="close-btn" (click)="fecharModal()">✕</button>
-    </div>
-
-    <div class="pagamento-cliente-linha">
-      <span>Recebendo de: <strong>{{ ticketAtual?.cliente || 'João Silva' }}</strong></span>
-      <span>Ticket: <strong>{{ ticketAtual?.senha || 'RP042' }}</strong></span>
-    </div>
-
-    <div class="cadastro-body pagamento-body">
-      <div class="form-grid-2">
-        <div class="form-group">
-          <label>Valor (R$) <span>*</span></label>
-          <input type="text" [(ngModel)]="formPagamento.valor" placeholder="Ex: 150,00" />
-        </div>
-        <div class="form-group">
-          <label>Forma de Pagamento <span>*</span></label>
-          <select [(ngModel)]="formPagamento.formaPagamento">
-            <option value="" disabled>Selecione</option>
-            <option>Cartão de Crédito</option>
-            <option>Cartão de Débito</option>
-            <option>PIX</option>
-            <option>Dinheiro</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-grid-2">
-        <div class="form-group">
-          <label>Motivo / Categoria <span>*</span></label>
-          <input type="text" [(ngModel)]="formPagamento.motivo" placeholder="Venda de Produtos" />
-        </div>
-        <div class="form-group">
-          <label>Nº Pedido / NF / Doc <span>*</span></label>
-          <input type="text" [(ngModel)]="formPagamento.documento" placeholder="NF-e 12345" />
+        <div class="input-with-icon">
+          <lucide-icon [name]="icons.mail"></lucide-icon>
+          <input type="text" [(ngModel)]="formCliente.email" placeholder="seu@email.com" />
         </div>
       </div>
 
       <div class="form-group">
-        <label>Observações</label>
-        <textarea [(ngModel)]="formPagamento.observacoes" placeholder="Pagamento referente ao transporte de Mercadorias"></textarea>
+        <label>Telefone / Celular <span style="color: #94a3b8; font-weight: normal;">(opcional)</span></label>
+        <div class="input-with-icon">
+          <lucide-icon [name]="icons.phone"></lucide-icon>
+          <input type="text" [(ngModel)]="formCliente.telefone" (input)="formatarTelefone($event)" maxlength="15" placeholder="(00) 00000-0000" />
+        </div>
       </div>
     </div>
-
     <div class="cadastro-footer">
       <button class="btn-cancel btn-cadastro-cancel" (click)="fecharModal()">Cancelar</button>
-      <button class="btn-primary btn-cadastro-save" (click)="salvarPagamento()">Confirmar Pagamento</button>
+      <button class="btn-primary btn-cadastro-save" (click)="salvarCadastroCliente()">Cadastrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Sucesso -->
+<div class="modal-overlay" *ngIf="successModal" (click)="fecharModal()">
+  <div class="modal-content" style="max-width: 380px; padding: 2rem; border-radius: 20px;" (click)="$event.stopPropagation()">
+    <div class="success-view">
+      <div class="icon-halo">
+        <div class="icon-circle">
+          <lucide-icon [img]="icons.check" size="40" strokeWidth="3"></lucide-icon>
+        </div>
+      </div>
+      <h2>Sucesso!</h2>
+      <p>{{ successModal === 'truck' ? 'Caminhão cadastrado corretamente.' : 'Cliente cadastrado corretamente.' }}</p>
+      <button class="btn-success-ok" (click)="fecharModal()">OK, Entendi</button>
     </div>
   </div>
 </div>
@@ -527,6 +629,394 @@
   </div>
 </div>
 
+<!-- MODAL: Meus Atendimentos -->
+<div class="modal-overlay" *ngIf="modalAberto === 'atendimentos'">
+  <div class="modal-content operator-modal">
+    <div class="modal-header-gradient">
+      <div class="modal-title-area">
+        <div class="modal-icon-container">
+          <lucide-icon [img]="icons.history" size="24"></lucide-icon>
+        </div>
+        <h2>Meus Atendimentos</h2>
+      </div>
+      <button class="close-btn-ghost" (click)="fecharModal()">
+        <lucide-icon [img]="icons.close" size="20"></lucide-icon>
+      </button>
+    </div>
+    <div class="modal-body">
+      <!-- Local Date Filter inside Modal -->
+      <div class="modal-filter-bar">
+        <label for="oper-atend-date">Filtrar Data:</label>
+        <input 
+          type="date" 
+          id="oper-atend-date" 
+          [(ngModel)]="selectedDateAtendimentos" 
+          (change)="carregarResumos()"
+          class="modal-date-input"
+        />
+      </div>
+
+      <div class="agendamentos-table-wrapper">
+        <table class="agendamentos-table table-meus-atendimentos">
+          <thead>
+            <tr>
+              <th>Senha</th><th>Cliente</th><th>Categoria</th><th>Galões</th><th>Espera</th><th>Status</th><th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let atend of atendimentosList">
+              <td class="table-senha"><strong>{{ atend.ticket }}</strong></td>
+              <td>{{ atend.cliente }}</td>
+              <td>{{ atend.categoria }}</td>
+              <td>{{ atend.qtdeGarrafoes ?? '-' }}</td>
+              <td><span>{{ atend.tempoEspera }}</span></td>
+              <td>
+                <span class="status-pill" [ngClass]="{
+                  'aguardando': atend.statusRaw === 'AGUARDANDO',
+                  'em-atendimento': atend.statusRaw === 'EM_ATENDIMENTO' || atend.statusRaw === 'CHAMADO',
+                  'finalizado': atend.statusRaw === 'FINALIZADO',
+                  'cancelado': atend.statusRaw === 'CANCELADO',
+                  'nao-compareceu': atend.statusRaw === 'NAO_COMPARECEU'
+                }">{{ atend.status || '-' }}</span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-icon text-blue" (click)="verAtendimento(atend)">
+                    <lucide-icon [img]="icons.eye" size="16"></lucide-icon>
+                  </button>
+                  <button
+                    *ngIf="atend.statusRaw === 'NAO_COMPARECEU'"
+                    class="btn-icon text-blue"
+                    title="Resgatar para fila"
+                    (click)="abrirModalResgatar({ id: atend.agendamentoId || atend.senhaId, cliente: atend.cliente, isAtendimento: true })">
+                    <lucide-icon [img]="icons.rotateCcw" size="16"></lucide-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="atendimentosList.length === 0">
+              <td colspan="7" style="text-align:center;padding:20px;">Nenhum atendimento registrado.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer-gradient">
+      <button class="btn-solid-cyan w-full" (click)="fecharModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Agendamentos -->
+<div class="modal-overlay" *ngIf="modalAberto === 'agendamentos'">
+  <div class="modal-content operator-modal">
+    <div class="modal-header-gradient">
+      <div class="modal-title-area">
+        <div class="modal-icon-container">
+          <lucide-icon [img]="icons.calendar" size="24"></lucide-icon>
+        </div>
+        <h2>Agendamentos do Dia</h2>
+      </div>
+      <button class="close-btn-ghost" (click)="fecharModal()">
+        <lucide-icon [img]="icons.close" size="20"></lucide-icon>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="agendamentos-table-wrapper">
+        <table class="agendamentos-table table-agendamentos-dia">
+          <thead>
+            <tr>
+              <th>Senha</th><th>Cliente</th><th>Horário</th><th>Galões</th><th>Status</th><th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let agenda of agendamentos">
+              <td class="table-senha"><strong>{{ agenda.senha }}</strong></td>
+              <td>{{ agenda.cliente || '-' }}</td>
+              <td>{{ agenda.horario }}</td>
+              <td>{{ agenda.qtdeGarrafoes ?? '-' }}</td>
+              <td>
+                <span class="status-pill" [ngClass]="{
+                  'pendente': agenda.status === 'PENDENTE',
+                  'confirmado': agenda.status === 'CONFIRMADO',
+                  'checkin-realizado': agenda.status === 'CHECKIN_REALIZADO',
+                  'realizado': agenda.status === 'ATENDIDO' || agenda.status === 'REALIZADO',
+                  'nao-compareceu': agenda.status === 'NAO_COMPARECEU',
+                  'cancelado': agenda.status === 'CANCELADO'
+                }">
+                  {{ 
+                    agenda.status === 'ATENDIDO' ? 'Realizado' :
+                    agenda.status === 'REALIZADO' ? 'Realizado' :
+                    agenda.status === 'PENDENTE' ? 'Pendente' :
+                    agenda.status === 'CONFIRMADO' ? 'Confirmado' :
+                    agenda.status === 'CHECKIN_REALIZADO' ? 'Check-in Realizado' :
+                    agenda.status === 'NAO_COMPARECEU' ? 'Não Compareceu' :
+                    agenda.status === 'CANCELADO' ? 'Cancelado' :
+                    agenda.status
+                  }}
+                </span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <ng-container *ngIf="agenda.status === 'PENDENTE' || agenda.status === 'CONFIRMADO'">
+                    <button class="btn-icon text-green" title="Realizar check-in" (click)="abrirModalCheckin(agenda)">
+                      <lucide-icon [img]="icons.check" size="16"></lucide-icon>
+                    </button>
+                    <button class="btn-icon text-red" title="Cancelar agendamento" (click)="abrirModalCancelar(agenda)">
+                      <lucide-icon [img]="icons.x" size="16"></lucide-icon>
+                    </button>
+                  </ng-container>
+                  <ng-container *ngIf="agenda.status === 'NAO_COMPARECEU'">
+                    <button class="btn-icon text-blue" title="Resgatar agendamento para fila" (click)="abrirModalResgatar(agenda)">
+                      <lucide-icon [img]="icons.rotateCcw" size="16"></lucide-icon>
+                    </button>
+                  </ng-container>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="agendamentos.length === 0">
+              <td colspan="6" style="text-align:center;padding:20px;">Nenhum agendamento para hoje.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer-gradient">
+      <button class="btn-solid-cyan w-full" (click)="fecharModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Detalhe do Atendimento -->
+<div class="modal-overlay" *ngIf="atendimentoSelecionado && !showJustificativaModal">
+  <div class="modal-content operator-modal" style="max-width: 500px;">
+    <div class="modal-header-gradient">
+      <div class="modal-title-area">
+        <div class="modal-icon-container">
+          <lucide-icon [img]="icons.alert" size="24"></lucide-icon>
+        </div>
+        <h2>Detalhe do Atendimento</h2>
+      </div>
+      <button class="close-btn-ghost" (click)="fecharAtendimentoDetalhe()">
+        <lucide-icon [img]="icons.close" size="20"></lucide-icon>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="detalhe-atend">
+        <div class="detalhe-row">
+          <span class="detalhe-label">Senha</span>
+          <strong>{{ atendimentoSelecionado?.ticket }}</strong>
+        </div>
+        <div class="detalhe-row">
+          <span class="detalhe-label">Cliente</span>
+          <span>{{ atendimentoSelecionado?.cliente }}</span>
+        </div>
+        <div class="detalhe-row" *ngIf="atendimentoSelecionado?.documento">
+          <span class="detalhe-label">Documento</span>
+          <span>{{ atendimentoSelecionado?.documento }}</span>
+        </div>
+        <div class="detalhe-row">
+          <span class="detalhe-label">Categoria</span>
+          <span>{{ atendimentoSelecionado?.categoria }}</span>
+        </div>
+        <div class="detalhe-row" *ngIf="atendimentoSelecionado?.guiche">
+          <span class="detalhe-label">Guichê</span>
+          <span>{{ formatarTituloGuiche(atendimentoSelecionado?.guiche) }}</span>
+        </div>
+        <div class="detalhe-row">
+          <span class="detalhe-label">Operador</span>
+          <span>{{ atendimentoSelecionado?.operador }}</span>
+        </div>
+        <div class="detalhe-row">
+          <span class="detalhe-label">Tempo de Espera</span>
+          <span>{{ atendimentoSelecionado?.tempoEspera }}</span>
+        </div>
+        <div class="detalhe-row">
+          <span class="detalhe-label">Status</span>
+          <span class="status-pill" [ngClass]="atendimentoSelecionado?.status?.toLowerCase().replace(' ', '-')">{{ atendimentoSelecionado?.status }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer-gradient">
+      <button class="btn-ghost" (click)="fecharAtendimentoDetalhe()">Fechar</button>
+      <button class="btn-solid-blue" (click)="abrirJustificativa()">Justificar Demora</button>
+    </div>
+  </div>
+</div>
 
 
-  
+<!-- MODAL: Justificar Demora -->
+<div class="modal-overlay" *ngIf="showJustificativaModal">
+  <div class="modal-content operator-modal">
+    <div class="modal-header-gradient">
+      <div class="modal-title-area">
+        <div class="modal-icon-container">
+          <lucide-icon [img]="icons.fileText" size="24"></lucide-icon>
+        </div>
+        <h2>Justificar Demora</h2>
+      </div>
+      <button class="close-btn-ghost" (click)="fecharAtendimentoDetalhe()">
+        <lucide-icon [img]="icons.x" size="20"></lucide-icon>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="justificativaForm">
+        <div class="form-group full-width">
+          <label>Motivo <span>*</span></label>
+          <select formControlName="motivo">
+            <option value="">Selecione um motivo...</option>
+            <option value="alto_volume">Alto volume de atendimentos</option>
+            <option value="problema_tecnico">Problema tecnico</option>
+            <option value="cliente_dificultando">Cliente dificultando atendimento</option>
+            <option value="falta_operador">Falta de operador</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div class="form-group full-width">
+          <label>Observacoes Adicionais</label>
+          <textarea formControlName="observacoes" placeholder="Descreva mais detalhes sobre a situacao..."></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer-gradient">
+      <button class="btn-ghost" (click)="fecharAtendimentoDetalhe()">Cancelar</button>
+      <button class="btn-solid-blue" (click)="salvarJustificativa()" [disabled]="justificativaForm.invalid">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Editar Perfil -->
+<div class="modal-overlay" *ngIf="modalAberto === 'editar-perfil'" (click)="fecharModal()">
+  <div class="modal-content redesign-modal modal-profile-edit" style="max-width: 500px;" (click)="$event.stopPropagation()">
+    <div class="modal-header-gradient">
+      <div class="modal-title-area">
+        <div class="modal-icon-container">
+          <lucide-icon [img]="icons.user" size="24"></lucide-icon>
+        </div>
+        <h2>Editar Perfil</h2>
+      </div>
+      <button class="close-btn-ghost" (click)="fecharModal()">
+        <lucide-icon [img]="icons.close" size="20"></lucide-icon>
+      </button>
+    </div>
+    <form (submit)="salvarPerfil($event)">
+      <div class="modal-body">
+        <div class="form-group full-width">
+          <label>Nome <span>*</span></label>
+          <div class="input-with-icon">
+            <lucide-icon [img]="icons.user" size="20" style="color: #94a3b8;"></lucide-icon>
+            <input type="text" name="nome" [(ngModel)]="operadorForm.nome" placeholder="Seu nome completo" required />
+          </div>
+        </div>
+        
+        <div class="form-group full-width">
+          <label>E-mail <span>*</span></label>
+          <div class="input-with-icon">
+            <lucide-icon [img]="icons.mail" size="20" style="color: #94a3b8;"></lucide-icon>
+            <input type="email" name="email" [(ngModel)]="operadorForm.email" placeholder="seu.email@dominio.com" required />
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label>Login <span>*</span></label>
+          <div class="input-with-icon">
+            <lucide-icon [img]="icons.user" size="20" style="color: #94a3b8;"></lucide-icon>
+            <input type="text" name="login" [(ngModel)]="operadorForm.login" placeholder="Nome de usuário para login" required />
+          </div>
+        </div>
+      
+   
+
+        <div class="form-group full-width">
+          <label>Nova Senha</label>
+          <div class="input-with-icon">
+            <lucide-icon [img]="icons.lock" size="20" style="color: #94a3b8;"></lucide-icon>
+            <input type="password" name="senha" [(ngModel)]="operadorForm.senha" placeholder="Mínimo 6 caracteres" />
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label>Confirmar Nova Senha</label>
+          <div class="input-with-icon">
+            <lucide-icon [img]="icons.lock" size="20" style="color: #94a3b8;"></lucide-icon>
+            <input type="password" name="confirmarSenha" [(ngModel)]="operadorForm.confirmarSenha" placeholder="Digite a nova senha novamente" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer-gradient">
+        <button type="button" class="btn-ghost" (click)="fecharModal()">Cancelar</button>
+        <button type="submit" class="btn-solid-blue">Salvar Alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Check-in Operador -->
+<div *ngIf="agendamentoParaCheckin" class="modal-overlay">
+  <div class="modal-content redesign-modal" style="max-width: 450px;">
+    <div class="modal-header-gradient">
+      <div class="modal-title-area">
+        <div class="modal-icon-container">
+          <lucide-icon [img]="icons.check" size="24"></lucide-icon>
+        </div>
+        <h2>Realizar Check-in</h2>
+      </div>
+      <button class="close-btn-ghost" (click)="fecharModalCheckin()">
+        <lucide-icon [img]="icons.close" size="20"></lucide-icon>
+      </button>
+    </div>
+    <div class="modal-body text-center" style="padding: 24px;">
+      <p class="modal-subtitle" style="margin-bottom: 24px; color: #374151; font-size: 15px; font-weight: 500;">
+        Selecione o tipo de atendimento para o check-in do agendamento de <br>
+        <strong style="color: #1d4ed8; font-size: 16px; font-weight: 700;">{{ agendamentoParaCheckin.cliente }}</strong>:
+      </p>
+      <div class="tipo-atendimento-options" style="display: flex; gap: 16px; justify-content: center; margin-bottom: 8px;">
+        <button type="button" class="btn-tipo-atendimento convencional" (click)="confirmarCheckinOperador('Convencional')">
+          <lucide-icon [img]="icons.user" size="24" style="margin-bottom: 8px; color: #10b981;"></lucide-icon>
+          <span style="font-weight: 600; font-size: 14px;">Convencional</span>
+        </button>
+        <button type="button" class="btn-tipo-atendimento preferencial" (click)="confirmarCheckinOperador('Preferencial')">
+          <lucide-icon [img]="icons.check" size="24" style="margin-bottom: 8px; color: #f59e0b;"></lucide-icon>
+          <span style="font-weight: 600; font-size: 14px;">Preferencial</span>
+        </button>
+      </div>
+    </div>
+    <div class="modal-footer-gradient">
+      <button type="button" class="btn-ghost w-full" (click)="fecharModalCheckin()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cancelar Agendamento -->
+<div *ngIf="agendamentoParaCancelar" class="modal-overlay">
+  <div class="modal-content modal-nao-compareceu" style="max-width: 400px;">
+    <div class="modal-body">
+      <div>
+        <lucide-icon [img]="icons.close" size="48" style="color: #ef4444; filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.4)); margin-bottom: 16px; display: inline-block;"></lucide-icon>
+      </div>
+      <h3>Cancelar Agendamento?</h3>
+      <p>O agendamento de <span>{{ agendamentoParaCancelar.cliente }}</span> às <span>{{ agendamentoParaCancelar.horario }}</span> será cancelado permanentemente.<br>Essa ação não pode ser desfeita.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-cancel" (click)="fecharModalCancelar()">Voltar</button>
+      <button type="button" class="btn-danger" (click)="confirmarCancelarAgendamento()">Confirmar Cancelamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Resgatar Agendamento -->
+<div *ngIf="agendamentoParaResgatar" class="modal-overlay">
+  <div class="modal-content modal-nao-compareceu" style="max-width: 400px;">
+    <div class="modal-body">
+      <div>
+        <lucide-icon [img]="icons.rotateCcw" size="48" style="color: #3b82f6; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4)); margin-bottom: 16px; display: inline-block;"></lucide-icon>
+      </div>
+      <h3>Resgatar Agendamento?</h3>
+      <p>O agendamento de <span>{{ agendamentoParaResgatar.cliente }}</span> será retornado para a fila de espera como <strong style="color: #3b82f6;">AGUARDANDO</strong>.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-cancel" (click)="fecharModalResgatar()">Voltar</button>
+      <button type="button" class="btn-danger" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);" (click)="confirmarResgatarAgendamento()">Confirmar Resgate</button>
+    </div>
+  </div>
+</div>

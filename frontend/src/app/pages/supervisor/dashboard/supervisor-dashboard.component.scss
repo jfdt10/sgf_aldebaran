@@ -27,6 +27,9 @@ $orange-alert-bg: #fff7ed;
 $orange-alert-text: #ea580c;
 $red-indicator: #ef4444;
 
+$yellow-light-bg: #fef9c3;
+$yellow-light-text: #ca8a04;
+
 .supervisor-page {
   padding: 24px;
   background-color: var(--bg-body, $bg-app);
@@ -63,6 +66,67 @@ $red-indicator: #ef4444;
   width: 100%;
 }
 
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+
+  .header-titles {
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: $text-main;
+      margin: 0 0 4px 0;
+    }
+    .page-subtitle {
+      font-size: 0.9rem;
+      color: $text-secondary;
+      margin: 0;
+    }
+  }
+
+  .header-filters {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .date-picker-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: $text-secondary;
+      }
+
+      .ref-date-input {
+        padding: 10px 16px;
+        border: 1px solid $border-light;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: $text-main;
+        outline: none;
+        background: #f9fafb;
+        transition: all 0.2s ease;
+
+        &:focus {
+          border-color: $blue-main;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+          background: white;
+        }
+      }
+    }
+  }
+}
+
 .section { 
   margin-bottom: 32px; 
 }
@@ -77,7 +141,7 @@ $red-indicator: #ef4444;
 .kpi-grid { 
   display: grid; 
   grid-template-columns: repeat(4, 1fr); 
-  gap: 24px; 
+  gap: 20px; 
 }
 
 .kpi-card {
@@ -143,6 +207,7 @@ $red-indicator: #ef4444;
 .bg-green-light { background: $green-light-bg; } .text-green { color: $green-light-text; }
 .bg-purple-light { background: $purple-light-bg; } .text-purple { color: $purple-light-text; }
 .bg-teal-light { background: $teal-light-bg; } .text-teal { color: $teal-light-text; }
+.bg-yellow-light { background: $yellow-light-bg; } .text-yellow { color: $yellow-light-text; }
 .bg-gray-light { background: #f3f4f6; } .text-gray { color: #4b5563; }
 .bg-red-light { background: #fee2e2; } .text-red { color: #dc2626; }
 
@@ -171,6 +236,11 @@ $red-indicator: #ef4444;
     border-color: #60a5fa; 
     background: #eff6ff;
     .status-badge { background: $blue-main; color: white; } 
+  }
+  &.chamando { 
+    border-color: #f59e0b; 
+    background: #fffbeb;
+    .status-badge { background: #f59e0b; color: white; } 
   }
   &.disponivel { 
     border-color: $green-main; 
@@ -297,6 +367,7 @@ $red-indicator: #ef4444;
   background: white; 
   border-radius: 16px; 
   width: 90%; max-width: 800px; /* Modal mais largo para melhor aproveitamento de tela */
+  max-height: 80vh; /* Limita a altura a 80% da viewport */
   overflow: hidden; 
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -307,6 +378,10 @@ $red-indicator: #ef4444;
     padding: 20px 24px; 
     background: linear-gradient(135deg, #06b6d4, #0ea5e9);
     color: white;
+
+    &.truck, &.operator, &.client {
+      background: linear-gradient(135deg, #0ea5e9 0%, #0f766e 100%) !important;
+    }
 
     .modal-title-area {
       display: flex; align-items: center; gap: 12px;
@@ -330,6 +405,9 @@ $red-indicator: #ef4444;
   .modal-body {
     padding: 24px;
     background: white;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0; /* Necessário para flex overflow */
     form { display: flex; flex-direction: column; gap: 20px; }
   }
 
@@ -386,8 +464,54 @@ $red-indicator: #ef4444;
   }
 
   .btn-ghost { background: transparent; color: $text-secondary; &:hover { color: $text-main; background: #f3f4f6; } }
-  .btn-solid-blue { background: $blue-light-text; color: white; box-shadow: 0 2px 4px rgba(14, 165, 233, 0.2); &:hover { background: #0284c7; } }
-  .btn-solid-teal { background: $teal-main; color: white; box-shadow: 0 2px 4px rgba(20, 184, 166, 0.2); &:hover { background: #0f766e; } }
+  .btn-solid-blue {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0f766e 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(14, 165, 233, 0.2);
+    transition: opacity 0.2s;
+    &:hover { opacity: 0.9; }
+  }
+  .btn-solid-teal {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0f766e 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(20, 184, 166, 0.2);
+    transition: opacity 0.2s;
+    &:hover { opacity: 0.9; }
+  }
+
+  /* Filtro de Data do Modal */
+  .modal-filter-bar {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: flex-end;
+    
+    label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: $text-secondary;
+      margin: 0;
+    }
+  }
+
+  .modal-date-input {
+    background: #f9fafb;
+    border: 1px solid $border-light;
+    border-radius: 8px;
+    color: $text-main;
+    padding: 8px 12px;
+    font-size: 0.875rem;
+    outline: none;
+    font-family: inherit;
+    transition: all 0.2s;
+    
+    &:focus {
+      border-color: $blue-main;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      background: white;
+    }
+  }
 
   /* Tabela de Agendamentos (Modal) */
   .agendamentos-table-wrapper {
@@ -399,6 +523,24 @@ $red-indicator: #ef4444;
     width: 100%; border-collapse: collapse; min-width: 400px;
     font-size: 0.9rem;
     
+    tr {
+      transition: background-color 0.2s;
+      &:hover {
+        background-color: #f8fafc;
+      }
+    }
+
+    /* Distribuição ajustada para a tabela de atendimentos do supervisor (9 colunas) */
+    th:nth-child(1), td:nth-child(1) { width: 10%; } /* Senha */
+    th:nth-child(2), td:nth-child(2) { width: 18%; } /* Cliente */
+    th:nth-child(3), td:nth-child(3) { width: 12%; } /* Categoria */
+    th:nth-child(4), td:nth-child(4) { width: 8%; } /* Galões */
+    th:nth-child(5), td:nth-child(5) { width: 12%; } /* Operador */
+    th:nth-child(6), td:nth-child(6) { width: 10%; } /* Tempo Espera */
+    th:nth-child(7), td:nth-child(7) { width: 10%; } /* Tempo Atendimento */
+    th:nth-child(8), td:nth-child(8) { width: 12%; } /* Status */
+    th:nth-child(9), td:nth-child(9) { width: 8%; text-align: center; overflow: visible; } /* Ações */
+
     th {
       text-align: left; padding: 12px 16px; border-bottom: 2px solid $border-light;
       color: $text-secondary; font-weight: 600; font-size: 0.8rem; text-transform: uppercase;
@@ -413,19 +555,35 @@ $red-indicator: #ef4444;
 
     .status-pill {
       padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+      white-space: nowrap; display: inline-block;
+      text-transform: capitalize;
+      
       &.aguardando { background: #f3f4f6; color: $text-secondary; }
+      &.em-atendimento { background: #dbeafe; color: #1d4ed8; }
       &.atrasado { background: #fee2e2; color: #dc2626; }
       &.confirmado { background: #dcfce7; color: #16a34a; }
+      &.pendente { background: #fef9c3; color: #ca8a04; }
+      &.checkin-realizado { background: #e0f2fe; color: #0284c7; }
+      &.realizado { background: #dcfce7; color: #16a34a; }
+      &.nao-compareceu { background: #ffedd5; color: #ea580c; }
+      &.cancelado { background: #fee2e2; color: #dc2626; }
+    }
+
+    .btn-icon {
+      width: 32px; height: 32px; border-radius: 6px; border: none; background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+      &:hover { transform: scale(1.1); }
+      &.text-blue { color: #2563eb; &:hover { background: #dbeafe; } }
+      &.text-green { color: #16a34a; &:hover { background: #dcfce7; } }
+      &.text-red { color: #dc2626; &:hover { background: #fee2e2; } }
     }
 
     .actions-cell {
-      display: flex; gap: 8px; align-items: center;
-      .btn-icon {
-        width: 32px; height: 32px; border-radius: 6px; border: none; background: transparent; cursor: pointer;
-        display: flex; align-items: center; justify-content: center; transition: background 0.2s;
-        &.text-green:hover { background: #dcfce7; }
-        &.text-red:hover { background: #fee2e2; }
-      }
+      display: flex; 
+      flex-direction: row; /* Garante alinhamento horizontal */
+      gap: 8px; 
+      align-items: center; 
+      justify-content: center;
     }
   }
 }
@@ -463,4 +621,139 @@ $red-indicator: #ef4444;
 @keyframes modalIn {
   from { opacity: 0; transform: scale(0.95) translateY(10px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Estilização para o seletor de tipo de atendimento no check-in */
+.tipo-atendimento-options {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.btn-tipo-atendimento {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 110px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: #94a3b8;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  }
+
+  &.convencional {
+    border-left: 4px solid #10b981;
+    &:hover {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: #10b981;
+    }
+  }
+
+  &.preferencial {
+    border-left: 4px solid #f59e0b;
+    &:hover {
+      background: rgba(245, 158, 11, 0.1);
+      border-color: #f59e0b;
+    }
+  }
+}
+
+/* Modal Cancelar / Resgatar / Não compareceu */
+.modal-nao-compareceu {
+  max-width: 400px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  .modal-body {
+    padding: 32px;
+    text-align: center;
+    background: white;
+    
+    h3 {
+      margin: 0 0 12px;
+      font-size: 20px;
+      color: #1f2937;
+      font-weight: 700;
+    }
+    
+    p {
+      margin: 0;
+      color: #4b5563;
+      font-size: 15px;
+      line-height: 1.5;
+      
+      span {
+        color: #ef4444;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .modal-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 0 32px 32px;
+    background: white;
+  }
+
+  .btn-cancel {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #4b5563;
+    border-radius: 10px;
+    height: 44px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    &:hover {
+      background: #f3f4f6;
+      color: #1f2937;
+    }
+  }
+
+  .btn-danger {
+    border: 0;
+    background: #ef4444;
+    color: #fff;
+    border-radius: 10px;
+    height: 44px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    &:hover {
+      background: #dc2626;
+    }
+  }
+}
+
+/* Detalhe do Atendimento */
+.detalhe-atend {
+  .detalhe-row {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    padding: 12px 0; 
+    border-bottom: 1px solid #e5e7eb;
+    &:last-child { border-bottom: none; }
+  }
+  .detalhe-label { 
+    color: #6b7280; 
+    font-weight: 500; 
+    font-size: 0.9rem; 
+  }
 }

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../../services/api.service';
 import { LucideAngularModule, Plus, Edit2, Trash2, Power, X, Building, Check, Layout } from 'lucide-angular';
 import { ActivatedRoute } from '@angular/router';
+import { finalize, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-guiches',
@@ -17,26 +18,28 @@ export class GuichesComponent implements OnInit {
   guichesRaw: any[] = [];
   filiaisAgrupadas: any[] = [];
   loading = false;
+  saving = false;
+  errorMessage = '';
   selectedFilialId: number | null = null;
-  
-  // Modais State
+  isRestricted = false;
+  usuarioLogado: any = null;
+
   showModal = false;
   editando = false;
   showConfirmDelete = false;
   showSuccessModal = false;
-  
-  // Modal Form (Guiche)
+
   form: any = {
     id: null,
     nome: '',
     filial_id: null,
-    status: 'Ativo' // Will map to 'ativo' boolean: Ativo=true, Inativo=false
+    status: 'Ativo'
   };
 
   guicheParaExcluir: any = null;
 
-  readonly icons = { 
-    plus: Plus, edit: Edit2, trash: Trash2, power: Power, 
+  readonly icons = {
+    plus: Plus, edit: Edit2, trash: Trash2, power: Power,
     x: X, building: Building, check: Check, layout: Layout
   };
 
@@ -47,71 +50,88 @@ export class GuichesComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    const salvo = localStorage.getItem('usuario_sgf');
+    if (salvo) {
+      this.usuarioLogado = JSON.parse(salvo);
+      if (this.usuarioLogado.filial_id) {
+        this.isRestricted = true;
+        this.selectedFilialId = Number(this.usuarioLogado.filial_id);
+      }
+    }
+
     // Escuta mudanças de queryParams em toda a rota (inclusive no pai)
     this.route.queryParamMap.subscribe(params => {
-      const fid = params.get('filialId');
-      this.selectedFilialId = fid ? Number(fid) : null;
+      if (!this.isRestricted) {
+        const fid = params.get('filialId');
+        this.selectedFilialId = fid ? Number(fid) : null;
+      }
       this.carregarDados();
     });
   }
 
   carregarDados() {
     this.loading = true;
-    // Fetch both filiais and guichês
-    this.api.get<any[]>('/filiais').subscribe({
-      next: (filiais) => {
-        this.filiais = filiais;
-        const filialQuery = this.selectedFilialId ? `?filialId=${this.selectedFilialId}` : '';
-        this.api.get<any[]>(`/guiches${filialQuery}`).subscribe({
-          next: (guiches) => {
-            this.guichesRaw = guiches;
-            this.agruparGuiches();
-            this.loading = false;
-            this.cdr.detectChanges();
-          },
-          error: (err) => {
-              console.error(err);
-              this.loading = false;
-          }
-        });
+    this.errorMessage = '';
+
+    const queryParams = this.selectedFilialId ? { filialId: this.selectedFilialId } : undefined;
+
+    forkJoin({
+      filiais: this.api.get<any[]>('/filiais'),
+      guiches: this.api.get<any[]>('/guiches/admin/lista', queryParams),
+    }).pipe(
+      finalize(() => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }),
+    ).subscribe({
+      next: ({ filiais, guiches }) => {
+        const ativas = (filiais || []).filter(f => f.ativo);
+        if (this.isRestricted) {
+          this.filiais = ativas.filter(f => f.id === this.selectedFilialId);
+        } else {
+          this.filiais = ativas;
+        }
+        this.guichesRaw = guiches || [];
+        this.agruparGuiches();
       },
       error: (err) => {
-          console.error(err);
-          this.loading = false;
-      }
+        console.error(err);
+        this.errorMessage = 'Nao foi possivel carregar os guiches desta filial. Tente novamente.';
+        this.filiais = [];
+        this.guichesRaw = [];
+        this.filiaisAgrupadas = [];
+      },
     });
   }
 
   agruparGuiches() {
-    // Filtramos primeiro as filiais pela seleção atual
     this.filiaisAgrupadas = this.filiais
       .filter(f => {
-         const ativo = f.ativo;
-         const correspondeFiltro = !this.selectedFilialId || f.id === this.selectedFilialId;
-         return ativo && correspondeFiltro;
+        const ativo = f.ativo;
+        const correspondeFiltro =
+          !this.selectedFilialId || Number(f.id) === Number(this.selectedFilialId);
+        return ativo && correspondeFiltro;
       })
-      .map(f => {
-        return {
-          ...f,
-          guiches: this.guichesRaw.filter(g => g.filial_id === f.id)
-        };
-      })
-      .filter(f => f.guiches.length > 0 || !this.loading);
+      .map(f => ({
+        ...f,
+        guiches: this.guichesRaw.filter(g => Number(g.filial_id) === Number(f.id))
+      }));
   }
 
   abrirModal(guiche?: any) {
     if (guiche) {
       this.editando = true;
-      this.form = { 
+      this.form = {
         ...guiche,
+        nome: String(guiche.numero || guiche.nome || '').replace(/^Guich[êe]\s*/i, '').trim(),
         status: guiche.ativo ? 'Ativo' : 'Inativo'
       };
     } else {
       this.editando = false;
       this.form = {
-        id: null, 
+        id: null,
         nome: '',
-        filial_id: this.selectedFilialId || (this.filiais.length > 0 ? this.filiais[0].id : null), 
+        filial_id: this.selectedFilialId || (this.filiais.length > 0 ? this.filiais[0].id : null),
         status: 'Ativo'
       };
     }
@@ -132,32 +152,39 @@ export class GuichesComponent implements OnInit {
 
   salvar() {
     if (!this.form.nome || !this.form.filial_id) {
-       return alert("Todos os campos obrigatórios (*) devem ser preenchidos.");
+      return alert('Todos os campos obrigatorios (*) devem ser preenchidos.');
     }
-    
-    this.loading = true;
-    // Map status back to ativo boolean for API
+
+    this.saving = true;
+    const valorCanonico = String(this.form.nome).replace(/^Guich[êe]\s*/i, '').trim();
+
     const payload = {
-        ...this.form,
-        ativo: this.form.status === 'Ativo',
-        numero: this.form.nome // Use name as number for compatibility if backend requires it
+      id: this.form.id,
+      ativo: this.form.status === 'Ativo',
+      status: this.form.status,
+      nome: valorCanonico,
+      numero: valorCanonico,
+      filial_id: this.form.filial_id
     };
 
     const request = this.editando
       ? this.api.patch(`/guiches/${payload.id}`, payload)
       : this.api.post('/guiches', payload);
 
-    request.subscribe({
+    request.pipe(
+      finalize(() => {
+        this.saving = false;
+        this.cdr.detectChanges();
+      }),
+    ).subscribe({
       next: () => {
         this.fecharModal();
-        this.carregarDados();
         this.showSuccessModal = true;
-        this.loading = false;
+        this.carregarDados();
         this.cdr.detectChanges();
       },
       error: (err) => {
-        alert("Erro: " + (err.error?.message || "Erro desconhecido"));
-        this.loading = false;
+        alert('Erro: ' + (err.error?.message || 'Erro desconhecido'));
         this.cdr.detectChanges();
       }
     });
@@ -168,23 +195,33 @@ export class GuichesComponent implements OnInit {
   }
 
   toggleStatus(item: any) {
-    this.api.patch(`/guiches/${item.id}`, { ativo: !item.ativo }).subscribe(() => {
-      this.carregarDados();
-      this.cdr.detectChanges();
+    this.api.patch(`/guiches/${item.id}`, { ativo: !item.ativo }).subscribe({
+      next: () => {
+        this.carregarDados();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        alert('Erro: ' + (err.error?.message || 'Erro desconhecido'));
+      }
     });
   }
 
   excluir(id: number) {
-    this.guicheParaExcluir = this.guichesRaw.find(g => g.id === id);
+    this.guicheParaExcluir = this.guichesRaw.find(g => Number(g.id) === Number(id));
     this.showConfirmDelete = true;
   }
 
   confirmarExclur() {
     if (this.guicheParaExcluir) {
-      this.api.delete(`/guiches/${this.guicheParaExcluir.id}`).subscribe(() => {
-        this.carregarDados();
-        this.fecharConfirmacao();
-        this.cdr.detectChanges();
+      this.api.delete(`/guiches/${this.guicheParaExcluir.id}`).subscribe({
+        next: () => {
+          this.carregarDados();
+          this.fecharConfirmacao();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          alert('Erro: ' + (err.error?.message || 'Erro desconhecido'));
+        }
       });
     }
   }

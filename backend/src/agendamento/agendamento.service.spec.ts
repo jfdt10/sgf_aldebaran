@@ -2,16 +2,37 @@ import { BadRequestException, ForbiddenException, NotFoundException, Unauthorize
 import { DeepMockProxy } from 'jest-mock-extended';
 import { createPrismaMock } from '../prisma/prisma.mock';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificacaoService } from '../notificacao/notificacao.service';
+import { SenhaService } from '../senha/senha.service';
+import { ClienteRegrasService } from './cliente-regras.service';
 import { AgendamentoService } from './agendamento.service';
 import { AgendamentoFiltroStatus, AgendamentoStatus } from './enums/agendamento-status.enum';
 
 describe('AgendamentoService', () => {
   let service: AgendamentoService;
   let prisma: DeepMockProxy<PrismaService>;
+  let senhaService: jest.Mocked<Pick<SenhaService, 'gerarSenhaCliente' | 'calcularPosicao'>>;
+  let clienteRegrasService: jest.Mocked<Pick<ClienteRegrasService, 'validarCheckinCliente'>>;
+  let notificacaoService: jest.Mocked<Pick<NotificacaoService, 'criar'>>;
 
   beforeEach(() => {
     prisma = createPrismaMock() as unknown as DeepMockProxy<PrismaService>;
-    service = new AgendamentoService(prisma as unknown as PrismaService);
+    senhaService = {
+      gerarSenhaCliente: jest.fn(),
+      calcularPosicao: jest.fn(),
+    };
+    clienteRegrasService = {
+      validarCheckinCliente: jest.fn().mockResolvedValue(undefined),
+    };
+    notificacaoService = {
+      criar: jest.fn().mockResolvedValue({}),
+    };
+    service = new AgendamentoService(
+      prisma as unknown as PrismaService,
+      senhaService as unknown as SenhaService,
+      clienteRegrasService as unknown as ClienteRegrasService,
+      notificacaoService as unknown as NotificacaoService,
+    );
   });
 
   const clienteAutenticado = {
@@ -53,12 +74,12 @@ describe('AgendamentoService', () => {
     expect(result.every((item) => item.podeCancelar)).toBe(true);
   });
 
-  it('lista histórico em ordem decrescente', async () => {
+  it('lista histórico em ordem decrescente sem mover check-in para histórico', async () => {
     prisma.clientes.findUnique.mockResolvedValue(clienteAutenticado as never);
     prisma.agendamento.findMany.mockResolvedValue([
       { ...baseAgendamento, id: 1, data: '2025-04-20', hora: '09:00' },
       { ...baseAgendamento, id: 2, status: AgendamentoStatus.CANCELADO, data: '2099-04-21' },
-      { ...baseAgendamento, id: 3, status: AgendamentoStatus.REALIZADO },
+      { ...baseAgendamento, id: 3, status: AgendamentoStatus.CHECKIN_REALIZADO },
     ] as never);
 
     const result = await service.listarMeusAgendamentos(
@@ -66,11 +87,101 @@ describe('AgendamentoService', () => {
       AgendamentoFiltroStatus.HISTORY,
     );
 
-    expect(result).toHaveLength(3);
+    expect(result).toHaveLength(2);
     expect(result[0]?.id).toBe(2);
-    expect(result[1]?.id).toBe(3);
-    expect(result[2]?.id).toBe(1);
+    expect(result[1]?.id).toBe(1);
     expect(result.every((item) => item.podeCancelar === false)).toBe(true);
+  });
+
+  it('mantem agendamento com check-in realizado em proximos', async () => {
+    prisma.clientes.findUnique.mockResolvedValue(clienteAutenticado as never);
+    prisma.agendamento.findMany.mockResolvedValue([
+      {
+        ...baseAgendamento,
+        id: 3,
+        status: AgendamentoStatus.CHECKIN_REALIZADO,
+        senha: [
+          {
+            id: 99,
+            numeroDisplay: 'C-RPA001',
+            status: 'AGUARDANDO',
+            servico_id: 2,
+          },
+        ],
+        filial_id: 1,
+      },
+    ] as never);
+    senhaService.calcularPosicao.mockResolvedValue({ posicao: 2, estimativa: 10 });
+
+    const result = await service.listarMeusAgendamentos(
+      clienteAutenticado.id,
+      AgendamentoFiltroStatus.ACTIVE,
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.status).toBe(AgendamentoStatus.NA_FILA);
+    expect(result[0]?.senha).toBe('C-RPA001');
+    expect(result[0]?.posicao).toBe(2);
+    expect(result[0]?.podeCancelar).toBe(false);
+    expect(result[0]?.podeReagendar).toBe(false);
+  });
+
+  it('mantem agendamento ativo em proximos durante tolerancia de 15 minutos apos o horario', async () => {
+    const now = new Date();
+    const quatroMinutosAtras = new Date(now.getTime() - 4 * 60 * 1000);
+    const dataLocal = `${quatroMinutosAtras.getFullYear()}-${String(
+      quatroMinutosAtras.getMonth() + 1,
+    ).padStart(2, '0')}-${String(quatroMinutosAtras.getDate()).padStart(2, '0')}`;
+    const horaLocal = `${String(quatroMinutosAtras.getHours()).padStart(2, '0')}:${String(
+      quatroMinutosAtras.getMinutes(),
+    ).padStart(2, '0')}`;
+
+    prisma.clientes.findUnique.mockResolvedValue(clienteAutenticado as never);
+    prisma.agendamento.findMany.mockResolvedValue([
+      {
+        ...baseAgendamento,
+        data: dataLocal,
+        hora: horaLocal,
+        status: AgendamentoStatus.CONFIRMADO,
+      },
+    ] as never);
+
+    const result = await service.listarMeusAgendamentos(
+      clienteAutenticado.id,
+      AgendamentoFiltroStatus.ACTIVE,
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.status).toBe(AgendamentoStatus.CONFIRMADO);
+  });
+
+  it('move agendamento ativo para historico somente apos tolerancia de 15 minutos', async () => {
+    const now = new Date();
+    const dezesseisMinutosAtras = new Date(now.getTime() - 16 * 60 * 1000);
+    const dataLocal = `${dezesseisMinutosAtras.getFullYear()}-${String(
+      dezesseisMinutosAtras.getMonth() + 1,
+    ).padStart(2, '0')}-${String(dezesseisMinutosAtras.getDate()).padStart(2, '0')}`;
+    const horaLocal = `${String(dezesseisMinutosAtras.getHours()).padStart(2, '0')}:${String(
+      dezesseisMinutosAtras.getMinutes(),
+    ).padStart(2, '0')}`;
+
+    prisma.clientes.findUnique.mockResolvedValue(clienteAutenticado as never);
+    prisma.agendamento.findMany.mockResolvedValue([
+      {
+        ...baseAgendamento,
+        data: dataLocal,
+        hora: horaLocal,
+        status: AgendamentoStatus.CONFIRMADO,
+      },
+    ] as never);
+
+    const result = await service.listarMeusAgendamentos(
+      clienteAutenticado.id,
+      AgendamentoFiltroStatus.HISTORY,
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.status).toBe(AgendamentoStatus.EXPIRADO);
   });
 
   it('cancela um agendamento com sucesso', async () => {
@@ -127,7 +238,7 @@ describe('AgendamentoService', () => {
     prisma.clientes.findUnique.mockResolvedValue(clienteAutenticado as never);
     prisma.agendamento.findUnique.mockResolvedValue({
       ...baseAgendamento,
-      status: AgendamentoStatus.REALIZADO,
+      status: AgendamentoStatus.CHECKIN_REALIZADO,
     } as never);
 
     await expect(
@@ -238,5 +349,108 @@ describe('AgendamentoService', () => {
     );
 
     expect(result).toHaveLength(1);
+  });
+
+  it('retorna voucher ativo para agendamento confirmado', async () => {
+    prisma.clientes.findUnique.mockResolvedValue(clienteAutenticado as never);
+    prisma.agendamento.findMany.mockResolvedValue([
+      { ...baseAgendamento, status: AgendamentoStatus.CONFIRMADO },
+    ] as never);
+
+    const result = await service.buscarVoucherAtivo(clienteAutenticado.id);
+
+    expect(result.id).toBe(baseAgendamento.id);
+    expect(result.codigo).toBe(baseAgendamento.codigo);
+    expect(result.checkinRealizado).toBe(false);
+  });
+
+  it('prioriza voucher sem check-in quando tambem existe agendamento em fila', async () => {
+    prisma.clientes.findUnique.mockResolvedValue(clienteAutenticado as never);
+    prisma.agendamento.findMany.mockResolvedValue([
+      {
+        ...baseAgendamento,
+        id: 1,
+        status: AgendamentoStatus.CHECKIN_REALIZADO,
+        data: '2099-04-19',
+        codigo: 'CHECK1',
+      },
+      {
+        ...baseAgendamento,
+        id: 2,
+        status: AgendamentoStatus.CONFIRMADO,
+        data: '2099-04-20',
+        codigo: 'NOVO12',
+      },
+    ] as never);
+
+    const result = await service.buscarVoucherAtivo(clienteAutenticado.id);
+
+    expect(result.id).toBe(2);
+    expect(result.codigo).toBe('NOVO12');
+    expect(result.checkinRealizado).toBe(false);
+  });
+
+  it('realiza check-in, gera senha compartilhada e atualiza status', async () => {
+    const now = new Date();
+    const futuro = new Date(now.getTime() + 60 * 60 * 1000);
+    const dataLocal = `${futuro.getFullYear()}-${String(futuro.getMonth() + 1).padStart(2, '0')}-${String(futuro.getDate()).padStart(2, '0')}`;
+    const horaLocal = `${String(futuro.getHours()).padStart(2, '0')}:${String(futuro.getMinutes()).padStart(2, '0')}`;
+    const agendamento = {
+      ...baseAgendamento,
+      data: dataLocal,
+      hora: horaLocal,
+      filial_id: 1,
+      servico_id: 2,
+      qtdeGarrafoes: 3,
+      servico: {
+        id: 2,
+        nome: 'Retirada Manual',
+        sigla: 'RP',
+        prefixo: 'RP',
+        prioridadePeso: 1,
+      },
+      filial: { nome: 'Matriz' },
+    };
+    const senha = {
+      id: 99,
+      numeroDisplay: 'C-RPA001',
+      status: 'AGUARDANDO',
+      dataCriacao: now,
+      servico_id: 2,
+    };
+
+    prisma.clientes.findUnique.mockResolvedValue(clienteAutenticado as never);
+    prisma.agendamento.findUnique.mockResolvedValue(agendamento as never);
+    prisma.agendamento.update.mockResolvedValue({
+      ...agendamento,
+      status: AgendamentoStatus.CHECKIN_REALIZADO,
+      checkinAt: now,
+    } as never);
+    senhaService.gerarSenhaCliente.mockResolvedValue(senha as never);
+    senhaService.calcularPosicao.mockResolvedValue({ posicao: 1, estimativa: 5 });
+
+    const result = await service.realizarCheckinCliente(
+      clienteAutenticado.id,
+      agendamento.id,
+    );
+
+    expect(senhaService.gerarSenhaCliente).toHaveBeenCalledWith({
+      servico: agendamento.servico,
+      filialId: agendamento.filial_id,
+      agendamentoId: agendamento.id,
+      qtdeGarrafoes: agendamento.qtdeGarrafoes,
+    });
+    expect(prisma.agendamento.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: agendamento.id },
+        data: expect.objectContaining({
+          status: AgendamentoStatus.CHECKIN_REALIZADO,
+          checkinAt: expect.any(Date),
+        }),
+      }),
+    );
+    expect(result.ticket.numeroDisplay).toBe('C-RPA001');
+    expect(result.ticket.posicao).toBe(1);
+    expect(result.agendamento.checkinRealizado).toBe(true);
   });
 });

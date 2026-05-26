@@ -13,6 +13,7 @@ import {
 import { GuicheService } from './guiche.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { LogService } from '../log/log.service';
+import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
 @Controller('guiches')
 @UseGuards(JwtAuthGuard)
@@ -23,12 +24,12 @@ export class GuicheController {
   ) {}
 
   @Post()
-  async create(@Body() data: any, @Request() req: any) {
-    const res = await this.guicheService.create(data);
+  async create(@Body() data: any, @Request() req: AuthenticatedRequest) {
+    const res = await this.guicheService.create(data, req.user.filial_id);
     await this.logService.logAction(
       'Criação',
       `Criou novo guichê: ${res.nome}`,
-      req.user?.id,
+      req.user.userId,
       'Guichê',
       'Sucesso',
       res.filial_id ?? undefined,
@@ -37,23 +38,34 @@ export class GuicheController {
   }
 
   @Get()
-  findAll(@Query('filialId') filialId?: string) {
-    return this.guicheService.findAll(filialId ? +filialId : undefined);
+  findAll(@Query('filialId') filialId?: string, @Request() req?: AuthenticatedRequest) {
+    return this.guicheService.findAll(
+      filialId ? +filialId : undefined,
+      req?.user?.filial_id,
+    );
   }
 
   @Get('operador')
-  async listOperatorGuiches(@Query('filialId') filialId?: string) {
-    return await this.guicheService.findAll(filialId ? +filialId : undefined);
+  async listOperatorGuiches(@Query('filialId') filialId?: string, @Request() req?: AuthenticatedRequest) {
+    return await this.guicheService.findAll(
+      filialId ? +filialId : undefined,
+      req?.user?.filial_id,
+    );
+  }
+
+  @Get('admin/lista')
+  async listAdminGuiches(@Query('filialId') filialId?: string) {
+    return await this.guicheService.findAllAdmin(filialId ? +filialId : undefined);
   }
 
   @Get('operador/atual')
-  async getCurrentOperatorGuiche(@Request() req: any) {
+  async getCurrentOperatorGuiche(@Request() req: AuthenticatedRequest) {
     const userId = req.user.userId;
     return await this.guicheService.findCurrentByOperator(userId);
   }
 
   @Post('operador/selecionar')
-  async selectGuiche(@Body() body: { guicheId: number }, @Request() req: any) {
+  async selectGuiche(@Body() body: { guicheId: number }, @Request() req: AuthenticatedRequest) {
     const userId = req.user.userId;
     const res = await this.guicheService.selectGuiche(body.guicheId, userId);
     await this.logService.logAction(
@@ -68,7 +80,7 @@ export class GuicheController {
   }
 
   @Post('operador/liberar')
-  async releaseCurrentGuiche(@Request() req: any) {
+  async releaseCurrentGuiche(@Request() req: AuthenticatedRequest) {
     const userId = req.user.userId;
     const res = await this.guicheService.releaseGuiche(userId);
     if (!res) {
@@ -86,21 +98,21 @@ export class GuicheController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.guicheService.findOne(+id);
+  findOne(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    return this.guicheService.findOne(+id, req.user.filial_id);
   }
 
   @Patch(':id')
   async update(
     @Param('id') id: string,
     @Body() data: any,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
-    const res = await this.guicheService.update(+id, data);
+    const res = await this.guicheService.update(+id, data, req.user.filial_id);
     await this.logService.logAction(
       'Atualização',
       `Atualizou dados do guichê: ${res.nome}`,
-      req.user?.id,
+      req.user.userId,
       'Guichê',
       'Sucesso',
       res.filial_id ?? undefined,
@@ -109,13 +121,13 @@ export class GuicheController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @Request() req: any) {
-    const guiche = await this.guicheService.findOne(+id);
-    const res = await this.guicheService.remove(+id);
+  async remove(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    const guiche = await this.guicheService.findOne(+id, req.user.filial_id);
+    const res = await this.guicheService.remove(+id, req.user.filial_id);
     await this.logService.logAction(
       'Exclusão',
       `Excluiu guichê: ${guiche.nome}`,
-      req.user?.id,
+      req.user.userId,
       'Guichê',
       'Sucesso',
       guiche.filial_id ?? undefined,

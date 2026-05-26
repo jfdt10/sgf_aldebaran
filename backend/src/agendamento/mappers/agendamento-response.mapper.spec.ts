@@ -33,6 +33,22 @@ describe('addMinutes', () => {
     expect(addMinutes('23:45', 30)).toBe('00:15');
   });
 
+  it('lida com adição maior que 60 minutos cruzando o dia', () => {
+    expect(addMinutes('22:30', 90)).toBe('00:00');
+  });
+
+  it('mantém comportamento normal dentro do mesmo dia', () => {
+    expect(addMinutes('10:15', 30)).toBe('10:45');
+  });
+
+  it('lida com horário inicial em meia-noite', () => {
+    expect(addMinutes('00:00', 15)).toBe('00:15');
+  });
+
+  it('lida com virada de dia no último minuto', () => {
+    expect(addMinutes('23:59', 1)).toBe('00:00');
+  });
+
   it('adiciona 0 minutos e retorna a mesma hora formatada', () => {
     expect(addMinutes('08:05', 0)).toBe('08:05');
   });
@@ -88,21 +104,38 @@ describe('toAgendamentoResponse', () => {
     expect(result.filialNome).toBe('Filial não informada');
   });
 
-  it('normaliza status para EXPIRADO quando ativo mas no passado', () => {
-    const passado = new Date('2200-01-01T00:00:00');
+  it('mantem status ativo durante os 15 minutos apos o horario', () => {
+    const dentroDaJanela = new Date('2099-06-15T10:15:00');
     const result = toAgendamentoResponse(
       { ...base, status: AgendamentoStatus.ATIVO },
-      { now: passado },
+      { now: dentroDaJanela },
+    );
+    expect(result.status).toBe(AgendamentoStatus.ATIVO);
+  });
+
+  it('normaliza status para EXPIRADO quando ativo apos a janela de check-in', () => {
+    const depoisDaJanela = new Date('2099-06-15T10:16:00');
+    const result = toAgendamentoResponse(
+      { ...base, status: AgendamentoStatus.ATIVO },
+      { now: depoisDaJanela },
     );
     expect(result.status).toBe(AgendamentoStatus.EXPIRADO);
   });
 
-  it('mantém status REALIZADO quando há check-in', () => {
+  it('normaliza status REALIZADO como concluido', () => {
     const result = toAgendamentoResponse(
       { ...base, status: AgendamentoStatus.REALIZADO },
       { now: futuro },
     );
-    expect(result.status).toBe(AgendamentoStatus.REALIZADO);
+    expect(result.status).toBe(AgendamentoStatus.CONCLUIDO);
+  });
+
+  it('mantem status de check-in realizado como fluxo ativo', () => {
+    const result = toAgendamentoResponse(
+      { ...base, status: AgendamentoStatus.CHECKIN_REALIZADO },
+      { now: futuro },
+    );
+    expect(result.status).toBe(AgendamentoStatus.CHECKIN_REALIZADO);
   });
 
   it('mantém status CANCELADO sem alteração', () => {

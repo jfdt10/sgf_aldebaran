@@ -9,12 +9,20 @@ export interface AgendamentoListItemSource {
   data: string;
   hora: string;
   status: string;
+  filial_id?: number | null;
+  servico_id?: number;
   servico?: {
     nome: string | null;
   } | null;
   filial?: {
     nome: string | null;
   } | null;
+  senha?: {
+    id: number;
+    numeroDisplay: string;
+    status: string;
+    servico_id: number;
+  }[];
 }
 
 export interface AgendamentoPresentationState {
@@ -30,7 +38,8 @@ export function toAgendamentoResponse(
     agendamento.status,
     inicio,
     state.now,
-    agendamento.status === AgendamentoStatus.REALIZADO,
+    agendamento.status === AgendamentoStatus.CHECKIN_REALIZADO ||
+      agendamento.status === AgendamentoStatus.REALIZADO,
   );
 
   return {
@@ -43,6 +52,12 @@ export function toAgendamentoResponse(
     status: statusNormalizado,
     podeCancelar: false,
     podeReagendar: true,
+    senha: agendamento.senha?.[0]?.numeroDisplay || null,
+    senhaStatus: agendamento.senha?.[0]?.status || null,
+    posicao: null,
+    estimativa: null,
+    filialId: agendamento.filial_id,
+    servicoId: agendamento.servico_id,
   };
 }
 
@@ -57,10 +72,13 @@ export function normalizeTime(hora: string): string {
 export function addMinutes(hora: string, minutesToAdd: number): string {
   const [hourRaw, minuteRaw] = normalizeTime(hora).split(':').map(Number);
   const totalMinutes = hourRaw * 60 + minuteRaw + minutesToAdd;
-  const finalHour = Math.floor(totalMinutes / 60)
+  const minutesInDay = 24 * 60;
+  const normalizedMinutes =
+    ((totalMinutes % minutesInDay) + minutesInDay) % minutesInDay;
+  const finalHour = Math.floor(normalizedMinutes / 60)
     .toString()
     .padStart(2, '0');
-  const finalMinute = (totalMinutes % 60).toString().padStart(2, '0');
+  const finalMinute = (normalizedMinutes % 60).toString().padStart(2, '0');
   return `${finalHour}:${finalMinute}`;
 }
 
@@ -70,13 +88,28 @@ function normalizeStatus(
   now: Date,
   hasCheckIn: boolean,
 ): string {
-  if (hasCheckIn || rawStatus === AgendamentoStatus.REALIZADO) {
-    return AgendamentoStatus.REALIZADO;
+  if (
+    rawStatus === AgendamentoStatus.REALIZADO ||
+    rawStatus === AgendamentoStatus.FINALIZADO ||
+    rawStatus === AgendamentoStatus.CONCLUIDO
+  ) {
+    return AgendamentoStatus.CONCLUIDO;
+  }
+
+  if (rawStatus === AgendamentoStatus.NAO_COMPARECEU) {
+    return AgendamentoStatus.NAO_COMPARECEU;
+  }
+
+  if (
+    hasCheckIn ||
+    rawStatus === AgendamentoStatus.CHECKIN_REALIZADO
+  ) {
+    return AgendamentoStatus.CHECKIN_REALIZADO;
   }
 
   if (
     AGENDAMENTO_STATUS_ATIVOS.has(rawStatus) &&
-    inicio.getTime() < now.getTime()
+    now.getTime() > inicio.getTime() + 15 * 60 * 1000
   ) {
     return AgendamentoStatus.EXPIRADO;
   }

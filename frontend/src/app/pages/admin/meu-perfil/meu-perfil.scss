@@ -126,17 +126,17 @@
         justify-content: center;
         gap: 0.5rem;
         padding: 0.75rem 1.5rem;
-        background: #0ea5e9;
+        background: linear-gradient(135deg, #0ea5e9 0%, #0f766e 100%);
         color: white;
         border: none;
         border-radius: 8px;
         font-weight: 600;
         cursor: pointer;
-        transition: background 0.2s;
+        transition: opacity 0.2s;
         width: fit-content;
 
         &:hover {
-            background: #0284c7;
+            opacity: 0.9;
         }
     }
 

@@ -13,6 +13,13 @@
 
   <main class="dashboard-content">
     
+    <!-- Header -->
+    <header class="dashboard-header">
+      <div class="header-titles">
+        <h1 class="page-title">Painel do Supervisor</h1>
+        <p class="page-subtitle">Monitore a fila e agendamentos em tempo real</p>
+      </div>
+    </header>
     <!-- Visão Geral (KPIs) -->
     <section class="section">
       <h2 class="section-title">Visão Geral</h2>
@@ -31,14 +38,14 @@
           </div>
         </div>
 
-        <!-- Tempo Médio -->
+        <!-- Tempo Médio Diário -->
         <div class="kpi-card">
           <div class="kpi-content">
             <div class="icon-box bg-green-light text-green">
               <lucide-icon [img]="icons.clock" size="24"></lucide-icon>
             </div>
             <div class="kpi-info-flex">
-              <span class="kpi-label">Tempo Médio</span>
+              <span class="kpi-label">Tempo Médio Diário</span>
               <strong class="kpi-value">{{ tempoMedio }}</strong>
             </div>
           </div>
@@ -65,7 +72,7 @@
             </div>
             <div class="kpi-info-flex">
               <span class="kpi-label">Fila Atual</span>
-              <strong class="kpi-value">{{ visaoGeral[2].valor }}</strong>
+              <strong class="kpi-value">{{ visaoGeral[3].valor }}</strong>
             </div>
           </div>
         </div>
@@ -91,7 +98,7 @@
             </div>
             <div class="desk-info-right">
               <span class="status-badge">
-                {{ guiche.status === 'DISPONIVEL' ? 'Disponível' : guiche.status === 'ATENDENDO' ? 'Atendendo' : 'Fechado' }}
+                {{ guiche.status === 'DISPONIVEL' ? 'Disponível' : guiche.status === 'ATENDENDO' ? 'Atendendo' : guiche.status === 'CHAMANDO' ? 'Chamando' : 'Fechado' }}
               </span>
             </div>
           </div>
@@ -105,6 +112,19 @@
                   <strong class="ticket-number text-lg">{{ guiche.ticket }}</strong>
                 </div>
                 <div class="time-pill inline-time" [class.time-danger]="guiche.atrasado">
+                  <lucide-icon [img]="icons.clock" size="14"></lucide-icon>
+                  {{ guiche.tempo }}
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="guiche.status === 'CHAMANDO'">
+              <div class="desk-details space-between bg-gray-box">
+                <div class="detail-col">
+                  <span class="detail-label text-xs">Chamando</span>
+                  <strong class="ticket-number text-lg">{{ guiche.ticket }}</strong>
+                </div>
+                <div class="time-pill inline-time" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2);">
                   <lucide-icon [img]="icons.clock" size="14"></lucide-icon>
                   {{ guiche.tempo }}
                 </div>
@@ -168,20 +188,6 @@
           <span>Relatórios Gerenciais</span>
         </button>
 
-        <button class="action-card" (click)="abrirModal('atendimentos')">
-          <div class="action-icon bg-purple-light text-purple">
-            <lucide-icon [img]="icons.history" size="24"></lucide-icon>
-          </div>
-          <span>Atendimentos</span>
-        </button>
-
-        <button class="action-card" (click)="abrirModal('agendamentos')">
-          <div class="action-icon bg-teal-light text-teal">
-            <lucide-icon [img]="icons.calendar" size="24"></lucide-icon>
-          </div>
-          <span>Agendamentos</span>
-        </button>
-
       </div>
     </section>
 
@@ -203,7 +209,7 @@
           <h2 *ngIf="activeModal === 'operator'">Cadastrar Operador</h2>
           <h2 *ngIf="activeModal === 'client'">Cadastrar Cliente</h2>
           <h2 *ngIf="activeModal === 'agendamentos'">Agendamentos do Dia</h2>
-          <h2 *ngIf="activeModal === 'atendimentos'">Atendimentos em Andamento</h2>
+          <h2 *ngIf="activeModal === 'atendimentos'">Atendimentos do Dia</h2>
         </div>
         <button class="close-btn-ghost" (click)="fecharModal()">
           <lucide-icon [img]="icons.x" size="20"></lucide-icon>
@@ -332,73 +338,162 @@
         </form>
 
         <!-- Tabela de Agendamentos (Imagem 13) -->
-        <div *ngIf="activeModal === 'agendamentos'" class="agendamentos-table-wrapper">
-          <table class="agendamentos-table">
-            <thead>
-              <tr>
-                <th>Senha</th>
-                <th>Transportadora</th>
-                <th>Horário</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let agenda of agendamentos">
-                <td class="table-senha"><strong>{{ agenda.senha }}</strong></td>
-                <td>{{ agenda.transportadora }}</td>
-                <td>{{ agenda.horario }}</td>
-                <td>
-                  <span class="status-pill" [ngClass]="agenda.status.toLowerCase()">{{ agenda.status }}</span>
-                </td>
-                <td>
-                  <div class="actions-cell">
-                    <button class="btn-icon text-green"><lucide-icon [img]="icons.check" size="16"></lucide-icon></button>
-                    <button class="btn-icon text-red"><lucide-icon [img]="icons.x" size="16"></lucide-icon></button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div *ngIf="activeModal === 'agendamentos'">
+          <!-- Local Date Filter inside Modal -->
+          <div class="modal-filter-bar">
+            <label for="agend-date">Filtrar Data:</label>
+            <input 
+              type="date" 
+              id="agend-date" 
+              [(ngModel)]="selectedDateAgendamentos" 
+              (change)="onDateChangeAgendamentos()"
+              class="modal-date-input"
+            />
+          </div>
+          
+          <div class="agendamentos-table-wrapper">
+            <table class="agendamentos-table">
+              <thead>
+                <tr>
+                  <th>Senha</th>
+                  <th>Cliente</th>
+                  <th>Horário</th>
+                  <th>Galões</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let agenda of agendamentos">
+                  <td class="table-senha"><strong>{{ agenda.senha }}</strong></td>
+                  <td>{{ agenda.cliente || '-' }}</td>
+                  <td>{{ agenda.horario }}</td>
+                  <td>{{ agenda.qtdeGarrafoes ?? '-' }}</td>
+                  <td>
+                    <span class="status-pill" [ngClass]="{
+                      'pendente': agenda.status === 'PENDENTE',
+                      'confirmado': agenda.status === 'CONFIRMADO',
+                      'checkin-realizado': agenda.status === 'CHECKIN_REALIZADO',
+                      'realizado': agenda.status === 'ATENDIDO' || agenda.status === 'REALIZADO',
+                      'nao-compareceu': agenda.status === 'NAO_COMPARECEU',
+                      'cancelado': agenda.status === 'CANCELADO'
+                    }">
+                      {{ 
+                        agenda.status === 'ATENDIDO' ? 'Realizado' :
+                        agenda.status === 'REALIZADO' ? 'Realizado' :
+                        agenda.status === 'PENDENTE' ? 'Pendente' :
+                        agenda.status === 'CONFIRMADO' ? 'Confirmado' :
+                        agenda.status === 'CHECKIN_REALIZADO' ? 'Check-in Realizado' :
+                        agenda.status === 'NAO_COMPARECEU' ? 'Não Compareceu' :
+                        agenda.status === 'CANCELADO' ? 'Cancelado' :
+                        agenda.status
+                      }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="actions-cell">
+                      <ng-container *ngIf="agenda.status === 'PENDENTE' || agenda.status === 'CONFIRMADO'">
+                        <button class="btn-icon text-green" title="Realizar check-in" (click)="abrirModalCheckin(agenda)">
+                          <lucide-icon [img]="icons.check" size="16"></lucide-icon>
+                        </button>
+                        <button class="btn-icon text-red" title="Cancelar agendamento" (click)="abrirModalCancelar(agenda)">
+                          <lucide-icon [img]="icons.x" size="16"></lucide-icon>
+                        </button>
+                      </ng-container>
+                      <ng-container *ngIf="agenda.status === 'NAO_COMPARECEU'">
+                        <button class="btn-icon text-blue" title="Resgatar agendamento para fila" (click)="abrirModalResgatar(agenda)">
+                          <lucide-icon [img]="icons.rotateCcw" size="16"></lucide-icon>
+                        </button>
+                      </ng-container>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="agendamentos.length === 0">
+                  <td colspan="5" style="text-align:center;padding:20px;">Nenhum agendamento registrado.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <!-- Tabela de Atendimentos -->
-        <div *ngIf="activeModal === 'atendimentos'" class="agendamentos-table-wrapper">
-          <table class="agendamentos-table">
-            <thead>
-              <tr>
-                <th>Senha</th>
-                <th>Cliente</th>
-                <th>Categoria</th>
-                <th>Operador</th>
-                <th>Tempo Espera</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let atend of atendimentosList">
-                <td class="table-senha"><strong>{{ atend.ticket }}</strong></td>
-                <td>{{ atend.cliente }}</td>
-                <td>{{ atend.categoria }}</td>
-                <td>{{ atend.operador }}</td>
-                <td>
-                  <div class="time-pill inline-flex" [class.time-danger]="atend.status === 'Atrasado'">
-                    <lucide-icon [img]="icons.clock" size="12"></lucide-icon>
-                    {{ atend.tempoEspera }}
-                  </div>
-                </td>
-                <td>
-                  <span class="status-pill" [ngClass]="atend.status.toLowerCase().replace(' ', '-')">{{ atend.status }}</span>
-                </td>
-                <td>
-                  <button class="btn-icon text-blue" title="Ver detalhes" (click)="verAtendimento(atend)">
-                    <lucide-icon [img]="icons.eye" size="16"></lucide-icon>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div *ngIf="activeModal === 'atendimentos'">
+          <!-- Local Date Filter inside Modal -->
+          <div class="modal-filter-bar">
+            <label for="atend-date">Filtrar Data:</label>
+            <input 
+              type="date" 
+              id="atend-date" 
+              [(ngModel)]="selectedDateAtendimentos" 
+              (change)="onDateChangeAtendimentos()"
+              class="modal-date-input"
+            />
+          </div>
+
+          <div class="agendamentos-table-wrapper">
+            <table class="agendamentos-table">
+              <thead>
+                <tr>
+                  <th>Senha</th>
+                  <th>Cliente</th>
+                  <th>Categoria</th>
+                  <th>Galões</th>
+                  <th>Operador</th>
+                  <th>Tempo Espera</th>
+                  <th>Tempo Atendimento</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let atend of atendimentosList">
+                  <td class="table-senha"><strong>{{ atend.ticket }}</strong></td>
+                  <td>{{ atend.cliente }}</td>
+                  <td>{{ atend.categoria }}</td>
+                  <td>{{ atend.qtdeGarrafoes ?? '-' }}</td>
+                  <td>{{ atend.operador }}</td>
+                  <td>
+                    <div class="time-pill inline-flex" [class.time-danger]="atend.status === 'Atrasado'">
+                      <lucide-icon [img]="icons.clock" size="12"></lucide-icon>
+                      {{ atend.tempoEspera }}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="time-pill inline-flex" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);">
+                      <lucide-icon [img]="icons.clock" size="12"></lucide-icon>
+                      {{ atend.tempoAtendimento || '-' }}
+                    </div>
+                  </td>
+                  <td>
+                    <span class="status-pill" [ngClass]="{
+                      'aguardando': atend.statusRaw === 'AGUARDANDO',
+                      'em-atendimento': atend.statusRaw === 'EM_ATENDIMENTO' || atend.statusRaw === 'CHAMADO',
+                      'finalizado': atend.statusRaw === 'FINALIZADO',
+                      'cancelado': atend.statusRaw === 'CANCELADO',
+                      'nao-compareceu': atend.statusRaw === 'NAO_COMPARECEU'
+                    }">{{ atend.status || '-' }}</span>
+                  </td>
+                  <td>
+                    <div class="actions-cell">
+                      <button class="btn-icon text-blue" title="Ver detalhes" (click)="verAtendimento(atend)">
+                        <lucide-icon [img]="icons.eye" size="16"></lucide-icon>
+                      </button>
+                      <button
+                        *ngIf="atend.statusRaw === 'NAO_COMPARECEU'"
+                        class="btn-icon text-blue"
+                        title="Resgatar para fila"
+                        (click)="abrirModalResgatar({ id: atend.agendamentoId || atend.senhaId, cliente: atend.cliente, isAtendimento: true })">
+                        <lucide-icon [img]="icons.rotateCcw" size="16"></lucide-icon>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="atendimentosList.length === 0">
+                  <td colspan="9" style="text-align:center;padding:20px;">Nenhum atendimento registrado.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
       </div>
@@ -409,7 +504,7 @@
       
       <!-- Rodapé para Agendamentos e Atendimentos: só Fechar -->
       <div class="modal-footer-gradient" *ngIf="activeModal === 'agendamentos' || activeModal === 'atendimentos'">
-        <button class="btn-solid-blue w-full" (click)="fecharModal()">Fechar</button>
+        <button class="btn-solid-cyan w-full" (click)="fecharModal()">Fechar</button>
       </div>
     </div>
   </div>
@@ -449,6 +544,10 @@
           <div class="detalhe-row">
             <span class="detalhe-label">Tempo de Espera</span>
             <span>{{ atendimentoSelecionado?.tempoEspera }}</span>
+          </div>
+          <div class="detalhe-row" *ngIf="atendimentoSelecionado?.tempoAtendimento">
+            <span class="detalhe-label">Tempo de Atendimento</span>
+            <span>{{ atendimentoSelecionado?.tempoAtendimento }}</span>
           </div>
           <div class="detalhe-row">
             <span class="detalhe-label">Status</span>
@@ -518,6 +617,76 @@
       <p *ngIf="successModal === 'client'">Cliente registrado corretamente.</p>
       
       <button class="btn-solid-teal w-full" (click)="fecharModal()">OK, Entendi</button>
+    </div>
+  </div>
+
+  <!-- Modal Check-in Operador -->
+  <div *ngIf="agendamentoParaCheckin" class="modal-backdrop">
+    <div class="modal-c redesign-modal" style="max-width: 450px;">
+      <div class="modal-header-gradient">
+        <div class="modal-title-area">
+          <div class="modal-icon-container">
+            <lucide-icon [img]="icons.check" size="24"></lucide-icon>
+          </div>
+          <h2>Realizar Check-in</h2>
+        </div>
+        <button class="close-btn-ghost" (click)="fecharModalCheckin()">
+          <lucide-icon [img]="icons.x" size="20"></lucide-icon>
+        </button>
+      </div>
+      <div class="modal-body text-center" style="padding: 24px;">
+        <p class="modal-subtitle" style="margin-bottom: 24px; color: #374151; font-size: 15px; font-weight: 500;">
+          Selecione o tipo de atendimento para o check-in do agendamento de <br>
+          <strong style="color: #1d4ed8; font-size: 16px; font-weight: 700;">{{ agendamentoParaCheckin.cliente }}</strong>:
+        </p>
+        <div class="tipo-atendimento-options" style="display: flex; gap: 16px; justify-content: center; margin-bottom: 8px;">
+          <button type="button" class="btn-tipo-atendimento convencional" (click)="confirmarCheckinOperador('Convencional')">
+            <lucide-icon [img]="icons.user" size="24" style="margin-bottom: 8px; color: #10b981;"></lucide-icon>
+            <span style="font-weight: 600; font-size: 14px;">Convencional</span>
+          </button>
+          <button type="button" class="btn-tipo-atendimento preferencial" (click)="confirmarCheckinOperador('Preferencial')">
+            <lucide-icon [img]="icons.check" size="24" style="margin-bottom: 8px; color: #f59e0b;"></lucide-icon>
+            <span style="font-weight: 600; font-size: 14px;">Preferencial</span>
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer-gradient">
+        <button type="button" class="btn-ghost w-full" (click)="fecharModalCheckin()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Cancelar Agendamento -->
+  <div *ngIf="agendamentoParaCancelar" class="modal-backdrop">
+    <div class="modal-c modal-nao-compareceu" style="max-width: 400px; background: white; border-radius: 16px;">
+      <div class="modal-body">
+        <div>
+          <lucide-icon [img]="icons.x" size="48" style="color: #ef4444; filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.4)); margin-bottom: 16px; display: inline-block;"></lucide-icon>
+        </div>
+        <h3>Cancelar Agendamento?</h3>
+        <p>O agendamento de <span>{{ agendamentoParaCancelar.cliente }}</span> às <span>{{ agendamentoParaCancelar.horario }}</span> será cancelado permanentemente.<br>Essa ação não pode ser desfeita.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="fecharModalCancelar()">Voltar</button>
+        <button type="button" class="btn-danger" (click)="confirmarCancelarAgendamento()">Confirmar Cancelamento</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Resgatar Agendamento -->
+  <div *ngIf="agendamentoParaResgatar" class="modal-backdrop">
+    <div class="modal-c modal-nao-compareceu" style="max-width: 400px; background: white; border-radius: 16px;">
+      <div class="modal-body">
+        <div>
+          <lucide-icon [img]="icons.rotateCcw" size="48" style="color: #3b82f6; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4)); margin-bottom: 16px; display: inline-block;"></lucide-icon>
+        </div>
+        <h3>Resgatar Agendamento?</h3>
+        <p>O agendamento de <span>{{ agendamentoParaResgatar.cliente }}</span> será retornado para a fila de espera como <strong style="color: #3b82f6;">AGUARDANDO</strong>.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="fecharModalResgatar()">Voltar</button>
+        <button type="button" class="btn-danger" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white;" (click)="confirmarResgatarAgendamento()">Confirmar Resgate</button>
+      </div>
     </div>
   </div>
 

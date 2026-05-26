@@ -128,11 +128,50 @@
                     <label>Limpeza Automática</label>
                     <p>Remover automaticamente senhas expiradas e canceladas do banco de dados</p>
                 </div>
-                <div class="toggle-switch">
-                    <input type="checkbox" [(ngModel)]="configs.LIMPEZA_AUTOMATICA" (change)="configs.LIMPEZA_AUTOMATICA = $any($event.target).checked ? 'true' : 'false'" [checked]="configs.LIMPEZA_AUTOMATICA === 'true'">
+                <label class="toggle-switch">
+                    <input
+                        type="checkbox"
+                        [ngModel]="configs.LIMPEZA_AUTOMATICA === 'true'"
+                        (ngModelChange)="configs.LIMPEZA_AUTOMATICA = $event ? 'true' : 'false'"
+                    >
                     <span class="slider"></span>
-                </div>
+                </label>
             </div>
+        </div>
+    </div>
+
+    <!-- 4. Calibração Inteligente de SLA -->
+    <div class="card-premium mb-8 sla-calib-card">
+        <div class="calib-header">
+            <div class="calib-icon-box">
+                <lucide-icon [img]="iconsArr.zap" size="22" color="white"></lucide-icon>
+            </div>
+            <div>
+                <h2 class="card-title" style="margin-bottom:4px">4. Calibração Inteligente de SLA</h2>
+                <p class="card-subtitle">Aprende com os dados reais de atendimento (P75 de espera + mediana de serviço)</p>
+            </div>
+        </div>
+
+        <div class="calib-body">
+            <div class="calib-info-box">
+                <p>O sistema analisa os últimos <strong>30+ atendimentos concluídos</strong> por categoria e calibra automaticamente as metas de tempo, usando o <strong>percentil 75</strong> para espera e a <strong>mediana aparada</strong> para atendimento. Valores são limitados entre 5 e 60 minutos.</p>
+            </div>
+
+            <div class="calib-status" *ngIf="calibracaoResultado">
+                <div class="calib-result" *ngFor="let r of calibracaoResultado">
+                    <span class="calib-name">{{ r.nome }}</span>
+                    <span class="calib-meta" *ngIf="r.metaEsperaNova">Espera: <strong>{{ r.metaEsperaNova }}min</strong></span>
+                    <span class="calib-meta" *ngIf="r.metaAtendimentoNova">Atend: <strong>{{ r.metaAtendimentoNova }}min</strong></span>
+                    <span class="calib-samples">({{ r.amostrasEspera }} amostras)</span>
+                </div>
+                <p *ngIf="calibracaoResultado.length === 0" class="calib-empty">Nenhuma categoria com amostras suficientes (mín. 30).</p>
+            </div>
+
+            <button class="btn-calib" (click)="calibrarSLAs()" [disabled]="calibrando">
+                <span *ngIf="calibrando" class="spinner"></span>
+                <lucide-icon *ngIf="!calibrando" [img]="iconsArr.zap" size="16"></lucide-icon>
+                {{ calibrando ? 'Calibrando...' : 'Calibrar SLAs Agora' }}
+            </button>
         </div>
     </div>
 

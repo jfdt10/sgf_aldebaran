@@ -9,22 +9,87 @@ export class GuicheService {
     private notificacaoService: NotificacaoService,
   ) { }
 
-  async create(data: any) {
-    const guiche = await this.prisma.guiche.create({
-      data: {
-        numero: data.numero,
-        nome: data.nome,
-        status: data.status || 'Offline',
-        ativo: data.ativo ?? true,
-        filial_id: +data.filial_id,
-      },
-      include: { filial: true },
+  private normalizarDadosGuiche(data: any): any {
+    const normalizarString = (val: any) => {
+      if (val === undefined || val === null) return val;
+      return String(val)
+        .replace(/^Guich[êe]\s*/i, '')
+        .trim();
+    };
+
+    if ('numero' in data) {
+      data.numero = normalizarString(data.numero);
+    }
+    if ('nome' in data) {
+      data.nome = normalizarString(data.nome);
+    }
+
+    if (data.numero && !data.nome) data.nome = data.numero;
+    if (data.nome && !data.numero) data.numero = data.nome;
+
+    if ('numero' in data && 'nome' in data) {
+      data.nome = data.numero;
+    }
+
+    if (('numero' in data && data.numero === '') || ('nome' in data && data.nome === '')) {
+      throw new BadRequestException('Número/Nome do guichê não pode ser vazio');
+    }
+
+    return data;
+  }
+
+  async create(data: any, requestingUserFilialId?: number) {
+    data = this.normalizarDadosGuiche(data);
+    const filialId = requestingUserFilialId ?? (data.filial_id ? +data.filial_id : null);
+
+    // `numero` é único por filial no schema; valida considerando filial_id.
+    const guicheExistente = await this.prisma.guiche.findFirst({
+      where: { numero: data.numero, filial_id: filialId },
     });
 
-    // Notificação de novo guichê
+    let guiche;
+    let restaurado = false;
+
+    if (guicheExistente) {
+      if (!guicheExistente.deletadoEm) {
+        throw new BadRequestException(`Número de guichê "${data.numero}" já existe nesta filial.`);
+      }
+
+      // Ressuscita o guichê excluído logicamente
+      guiche = await this.prisma.guiche.update({
+        where: { id: guicheExistente.id },
+        data: {
+          nome: data.nome,
+          status: data.status || guicheExistente.status || 'Offline',
+          ativo: data.ativo ?? true,
+          filial_id: filialId ?? guicheExistente.filial_id,
+          deletadoEm: null,
+          operadorAtualId: null,
+          loginOperadorEm: null,
+          atendimentoAtualCodigo: null,
+          atualizadoEm: new Date(),
+        },
+        include: { filial: true },
+      });
+      restaurado = true;
+    } else {
+      guiche = await this.prisma.guiche.create({
+        data: {
+          numero: data.numero,
+          nome: data.nome,
+          status: data.status || 'Offline',
+          ativo: data.ativo ?? true,
+          filial_id: filialId,
+        },
+        include: { filial: true },
+      });
+    }
+
     await this.notificacaoService.criar({
-      titulo: 'Novo Guichê',
-      mensagem: `Guichê ${guiche.numero} - ${guiche.nome} cadastrado na filial ${guiche.filial?.nome}.`,
+      titulo: restaurado ? 'Guichê Restaurado' : 'Novo Guichê',
+      mensagem: restaurado
+        ? `Guichê ${guiche.numero} restaurado na filial ${guiche.filial?.nome}.`
+        : `Guichê ${guiche.numero} - ${guiche.nome} cadastrado na filial ${guiche.filial?.nome}.`,
       icon: 'monitor',
       rota: '/admin/servicos',
     });
@@ -32,11 +97,15 @@ export class GuicheService {
     return guiche;
   }
 
-  async findAll(filialId?: number) {
+  async findAll(filialId?: number, requestingUserFilialId?: number) {
+    const finalFilialId = requestingUserFilialId ?? filialId;
+    
     return await this.prisma.guiche.findMany({
       where: {
         deletadoEm: null,
-        filial: filialId ? { id: filialId, ativo: true } : { ativo: true },
+        ativo: true,
+        filial_id: finalFilialId ? finalFilialId : undefined,
+        filial: { ativo: true },
       },
       include: {
         filial: true,
@@ -47,7 +116,10 @@ export class GuicheService {
           },
         },
         atendimentos: {
-          where: { fimAtendimento: null },
+          where: {
+            fimAtendimento: null,
+            senha: { status: { in: ['CHAMADO', 'EM_ATENDIMENTO'] } }
+          },
           orderBy: { inicioAtendimento: 'desc' },
           take: 1,
           include: {
@@ -64,21 +136,57 @@ export class GuicheService {
     });
   }
 
-  async findOne(id: number) {
+  async findAllAdmin(filialId?: number) {
+    return await this.prisma.guiche.findMany({
+      where: {
+        deletadoEm: null,
+        filial_id: filialId ?? undefined,
+        filial: {
+          ativo: true,
+          deletadoEm: null,
+        },
+      },
+      include: {
+        filial: true,
+        operadorAtual: {
+          select: {
+            id: true,
+            nome: true,
+          },
+        },
+      },
+      orderBy: [{ filial: { nome: 'asc' } }, { numero: 'asc' }],
+    });
+  }
+
+  async findOne(id: number, requestingUserFilialId?: number) {
     const g = await this.prisma.guiche.findUnique({
       where: { id },
       include: { filial: true },
     });
-    if (!g || g.deletadoEm)
+    if (!g || g.deletadoEm || (requestingUserFilialId && g.filial_id !== requestingUserFilialId))
       throw new NotFoundException('Guichê não encontrado');
     return g;
   }
 
-  async update(id: number, data: any) {
-    const { id: _, filial, criadoEm, deletadoEm, ...updateData } = data;
+  async update(id: number, data: any, requestingUserFilialId?: number) {
+    await this.findOne(id, requestingUserFilialId);
+    // Pegar apenas os dados permitidos para update
+    const updateDataRaw: any = {};
+    if (data.numero !== undefined) updateDataRaw.numero = data.numero;
+    if (data.nome !== undefined) updateDataRaw.nome = data.nome;
+    if (data.descricao !== undefined) updateDataRaw.descricao = data.descricao;
+    if (data.status !== undefined) updateDataRaw.status = data.status;
+    if (data.ativo !== undefined) updateDataRaw.ativo = data.ativo;
+    if (data.operadorAtualId !== undefined) updateDataRaw.operadorAtualId = data.operadorAtualId;
+    if (data.loginOperadorEm !== undefined) updateDataRaw.loginOperadorEm = data.loginOperadorEm;
+    if (requestingUserFilialId !== undefined) {
+      updateDataRaw.filial_id = requestingUserFilialId;
+    } else if (data.filial_id !== undefined) {
+      updateDataRaw.filial_id = +data.filial_id;
+    }
 
-    // Ensure filial_id is numeric if provided
-    if (updateData.filial_id) updateData.filial_id = +updateData.filial_id;
+    const updateData = this.normalizarDadosGuiche(updateDataRaw);
 
     const guiche = await this.prisma.guiche.update({
       where: { id },
@@ -100,10 +208,12 @@ export class GuicheService {
     return guiche;
   }
 
-  async remove(id: number) {
+  async remove(id: number, requestingUserFilialId?: number) {
+    await this.findOne(id, requestingUserFilialId);
+    
     return await this.prisma.guiche.update({
       where: { id },
-      data: { deletadoEm: new Date() },
+      data: { deletadoEm: new Date(), ativo: false, atualizadoEm: new Date() },
     });
   }
 
@@ -141,8 +251,11 @@ export class GuicheService {
       where: { id: guicheId },
     });
 
+    if (!target || target.deletadoEm !== null || !target.ativo) {
+      throw new BadRequestException('Guichê não está disponível ou está inativo');
+    }
+
     if (
-      target &&
       target.operadorAtualId &&
       target.operadorAtualId !== operatorId
     ) {

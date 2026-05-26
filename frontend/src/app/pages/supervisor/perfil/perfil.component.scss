@@ -48,7 +48,14 @@ $blue-main: #0ea5e9;
 }
 
 .btn-ghost { background: transparent; color: $text-sec; &:hover { background: #e5e7eb; color: $text-main; } }
-.btn-solid-blue { background: $blue-main; color: white; &:hover { background: #0284c7; } }
+.btn-solid-blue {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0f766e 100%);
+  color: white;
+  transition: opacity 0.2s;
+  &:hover {
+    opacity: 0.9;
+  }
+}
 
 .perfil-content {
   display: flex;

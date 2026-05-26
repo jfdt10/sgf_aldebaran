@@ -1,9 +1,11 @@
-import { Component, OnInit, HostListener, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, HostListener, ChangeDetectorRef, OnDestroy, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
 import { ActivatedRoute } from '@angular/router';
 import { LucideAngularModule, Search, Plus, Edit2, Trash2, X, Users, Briefcase, Hash, User, CheckCircle, Truck, Check } from 'lucide-angular';
+import { Subscription } from 'rxjs';
+import { AdminLayoutComponent } from '../../../layouts/admin-layout/admin-layout.component';
 
 @Component({
     selector: 'app-motoristas',
@@ -12,7 +14,7 @@ import { LucideAngularModule, Search, Plus, Edit2, Trash2, X, Users, Briefcase, 
     templateUrl: './motoristas.component.html',
     styleUrls: ['./motoristas.component.scss']
 })
-export class MotoristasComponent implements OnInit {
+export class MotoristasComponent implements OnInit, OnDestroy {
     icons = { search: Search, plus: Plus, edit2: Edit2, trash2: Trash2, x: X, users: Users, briefcase: Briefcase, hash: Hash, user: User, checkCircle: CheckCircle, truck: Truck, check: Check };
 
     motoristas: any[] = [];
@@ -38,10 +40,13 @@ export class MotoristasComponent implements OnInit {
         filial_id: null as number | null
     };
 
+    private searchSub?: Subscription;
+
     constructor(
         private api: ApiService, 
         private cdr: ChangeDetectorRef,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        @Optional() private layout?: AdminLayoutComponent
     ) { }
 
     ngOnInit(): void {
@@ -50,6 +55,19 @@ export class MotoristasComponent implements OnInit {
             this.selectedFilialId = fid ? Number(fid) : null;
             this.carregarMotoristas();
         });
+
+        if (this.layout) {
+            this.searchSub = this.layout.globalSearch$.subscribe((term: string) => {
+                this.filtro = term;
+                this.carregarMotoristas();
+            });
+        }
+    }
+
+    ngOnDestroy() {
+        if (this.searchSub) {
+            this.searchSub.unsubscribe();
+        }
     }
 
     carregarMotoristas() {

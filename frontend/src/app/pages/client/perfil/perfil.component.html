@@ -23,7 +23,6 @@
           <div class="profile-summary-text">
             <p class="profile-tag">Conta autenticada</p>
             <h3>{{ profile.nome }}</h3>
-            <p class="profile-caption">Dados básicos do cliente prontos para futura integração com API.</p>
           </div>
         </div>
 
@@ -53,12 +52,8 @@
         </div>
 
         <div class="profile-actions-list">
-          <button
-            *ngFor="let action of primaryActions"
-            type="button"
-            class="profile-action-card"
-            (click)="onActionClick(action)"
-          >
+          <button *ngFor="let action of primaryActions" type="button" class="profile-action-card"
+            (click)="onActionClick(action)">
             <span class="action-icon">
               <lucide-icon [img]="action.icon" size="20"></lucide-icon>
             </span>
@@ -75,11 +70,8 @@
         </div>
 
         <div class="logout-block">
-          <button
-            type="button"
-            class="profile-action-card profile-action-card--danger"
-            (click)="onActionClick(logoutAction)"
-          >
+          <button type="button" class="profile-action-card profile-action-card--danger"
+            (click)="onActionClick(logoutAction)">
             <span class="action-icon">
               <lucide-icon [img]="logoutAction.icon" size="20"></lucide-icon>
             </span>

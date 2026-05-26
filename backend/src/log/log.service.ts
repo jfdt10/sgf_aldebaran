@@ -25,11 +25,12 @@ export class LogService {
     });
   }
 
-  async findAll(query?: any) {
+  async findAll(query?: any, requestingUserFilialId?: number) {
     const { page = 1, limit = 10, search, acao, de, ate } = query || {};
     const skip = (page - 1) * limit;
 
     const where: any = {};
+    
     if (search) {
       where.OR = [
         { acao: { contains: search, mode: 'insensitive' } },
@@ -39,7 +40,9 @@ export class LogService {
       ];
     }
 
-    if (query?.filialId) {
+    if (requestingUserFilialId) {
+      where.filial_id = requestingUserFilialId;
+    } else if (query?.filialId) {
       where.filial_id = isNaN(+query.filialId) ? null : +query.filialId;
     }
     if (acao) where.acao = acao;

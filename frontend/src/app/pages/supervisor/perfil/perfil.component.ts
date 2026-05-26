@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { LucideAngularModule, User, Mail, Camera, Save, Lock, Smartphone, Eye, CheckCircle } from 'lucide-angular';
+import { LucideAngularModule, User, Mail, Camera, Save, Lock, Smartphone, Eye, EyeOff, CheckCircle } from 'lucide-angular';
+import { environment } from '../../../../environments/environment';
+
 
 @Component({
   selector: 'app-supervisor-perfil',
@@ -12,13 +14,17 @@ import { LucideAngularModule, User, Mail, Camera, Save, Lock, Smartphone, Eye, C
   styleUrls: ['./perfil.component.scss']
 })
 export class SupervisorPerfilComponent implements OnInit {
-  icons = { user: User, mail: Mail, camera: Camera, save: Save, lock: Lock, smartphone: Smartphone, eye: Eye, check: CheckCircle };
+  icons = { user: User, mail: Mail, camera: Camera, save: Save, lock: Lock, smartphone: Smartphone, eye: Eye, eyeOff: EyeOff, check: CheckCircle };
   
   perfilForm!: FormGroup;
   fotoUrl: string | null = null;
   fotoNova: File | null = null;
   usuarioId: number = 0;
   successModal = false;
+
+  showSenhaAtual = false;
+  showNovaSenha = false;
+  showConfirmarSenha = false;
 
   constructor(private fb: FormBuilder) {}
 
@@ -55,7 +61,7 @@ export class SupervisorPerfilComponent implements OnInit {
       });
       // Try to load photo if user object had it
       if (user.fotoPerfil) {
-        this.fotoUrl = 'http://localhost:3000' + user.fotoPerfil;
+        this.fotoUrl = environment.apiUrl + user.fotoPerfil;
       }
     } else {
        // Mock fallback
@@ -81,7 +87,7 @@ export class SupervisorPerfilComponent implements OnInit {
   }
 
   salvar() {
-    console.log('Salvando perfil:', this.perfilForm.value);
+    if (!environment.production) console.log('Salvando perfil:', this.perfilForm.value);
     
     this.successModal = true;
     this.perfilForm.patchValue({ senhaAtual: '', novaSenha: '', confirmarSenha: '' });

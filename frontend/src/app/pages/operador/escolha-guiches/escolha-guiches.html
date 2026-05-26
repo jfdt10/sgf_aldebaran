@@ -9,18 +9,22 @@
 
       <!-- Center Content (Filial + Language) -->
       <div class="header-center">
-        <!-- Filial Dropdown -->
-        <div class="filial-dropdown">
-          <label>Filial</label>
-          <select [(ngModel)]="filialSelecionada" (change)="onFilialChange()" class="dropdown-select">
-            <option value="">Selecione uma filial...</option>
-            <option *ngFor="let f of filiais" [value]="f.id">{{ f.nome }}</option>
-          </select>
+        <!-- Filial Selector (Supervisor-style) -->
+        <div class="info-group">
+          <span class="info-label">Filial</span>
+          <div class="filial-glass-selector">
+            <lucide-icon [img]="icons.building" size="16"></lucide-icon>
+            <select [(ngModel)]="filialSelecionada" (change)="onFilialChange()">
+              <option *ngIf="!hasRestrictedFilial" value="">Selecione uma filial...</option>
+              <option *ngFor="let f of filiais" [value]="f.id">{{ f.nome }}</option>
+            </select>
+            <lucide-icon [img]="icons.chevronDown" size="14" class="arrow"></lucide-icon>
+          </div>
         </div>
 
         <!-- Language Selector -->
-        <div class="language-selector">
-          <label>Language</label>
+        <div class="info-group language-selector">
+          <span class="info-label">Idioma</span>
           <div class="language-buttons">
             <button 
               class="lang-btn" 
@@ -38,25 +42,36 @@
         </div>
       </div>
 
-      <!-- User Profile -->
-      <div class="user-profile">
-        <div class="user-info">
-          <strong>{{ operadorNome }}</strong>
-          <small>{{ operadorPerfil }}</small>
+      <!-- User Profile Dropdown -->
+      <div class="profile-dropdown-container user-profile" (click)="$event.stopPropagation()">
+        <div class="profile-trigger" (click)="toggleProfileMenu($event)" [class.active]="showProfileMenu">
+          <div class="profile-info">
+            <span class="profile-name">{{ operadorNome }}</span>
+            <span class="profile-role">{{ operadorPerfil }}</span>
+          </div>
+          <div class="avatar-box bg-teal-dark">
+            <lucide-icon [img]="icons.user" size="20" color="white"></lucide-icon>
+          </div>
         </div>
-        <div class="user-avatar">
-          <span>{{ operadorAvatar }}</span>
+
+        <!-- Dropdown Menu -->
+        <div class="profile-menu profile-dropdown" *ngIf="showProfileMenu" (click)="$event.stopPropagation()">
+          <div class="dropdown-header">
+            <span class="m-name">{{ operadorNome }}</span>
+            <span class="m-email">{{ operadorEmail || 'Sem e-mail' }}</span>
+          </div>
+          <button type="button" class="dropdown-item" (click)="abrirEditarPerfil()">
+            <lucide-icon [img]="icons.user" size="16"></lucide-icon>
+            <span>Meu Perfil</span>
+          </button>
+          <div class="dropdown-divider"></div>
+          <button type="button" class="dropdown-item text-danger" (click)="sair()">
+            <lucide-icon [img]="icons.logout" size="16"></lucide-icon>
+            <span>Sair do Sistema</span>
+          </button>
         </div>
       </div>
 
-      <!-- Logout Icon -->
-      <button class="logout-icon" (click)="logout()" title="Sair">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <polyline points="16 17 21 12 16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
     </div>
   </header>
 
@@ -85,7 +100,7 @@
         
         <!-- Header do Card: Número + Badge Status -->
         <div class="card-header">
-          <span class="guiche-numero">GUICHÊ {{ guiche.numero }}</span>
+          <span class="guiche-numero">{{ formatarTituloGuiche(guiche.numero) }}</span>
           <span class="status-badge" 
                 [class.badge-ocupado]="guiche.ocupado"
                 [class.badge-disponivel]="!guiche.ocupado">
@@ -140,7 +155,88 @@
     </div>
 
     <div class="logout">
-      <a href="#" (click)="$event.preventDefault(); logout()">Sair / Fazer Logout</a>
+      <a href="#" (click)="$event.preventDefault(); sair()">Sair / Fazer Logout</a>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Editar Perfil -->
+<div class="modal-overlay" *ngIf="modalAberto === 'editar-perfil'" (click)="fecharModal()">
+  <div class="modal-content redesign-modal modal-profile-edit" style="max-width: 500px;" (click)="$event.stopPropagation()">
+    <div class="modal-header-gradient">
+      <div class="modal-title-area">
+        <div class="modal-icon-container">
+          <lucide-icon [img]="icons.user" size="24"></lucide-icon>
+        </div>
+        <h2>Editar Perfil</h2>
+      </div>
+      <button class="close-btn-ghost" (click)="fecharModal()">
+        <lucide-icon [img]="icons.close" size="20"></lucide-icon>
+      </button>
+    </div>
+    <form (submit)="salvarPerfil($event)">
+      <div class="modal-body">
+        <div class="form-group full-width">
+          <label>Nome <span>*</span></label>
+          <div class="input-with-icon">
+            <lucide-icon [img]="icons.user" size="20" style="color: #94a3b8;"></lucide-icon>
+            <input type="text" name="nome" [(ngModel)]="operadorForm.nome" placeholder="Seu nome completo" required />
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label>E-mail <span>*</span></label>
+          <div class="input-with-icon">
+            <lucide-icon [img]="icons.mail" size="20" style="color: #94a3b8;"></lucide-icon>
+            <input type="email" name="email" [(ngModel)]="operadorForm.email" placeholder="seu.email@dominio.com" required />
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label>Login <span>*</span></label>
+          <div class="input-with-icon">
+            <lucide-icon [img]="icons.user" size="20" style="color: #94a3b8;"></lucide-icon>
+            <input type="text" name="login" [(ngModel)]="operadorForm.login" placeholder="Nome de usuário para login" required />
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label>Nova Senha</label>
+          <div class="input-with-icon">
+            <lucide-icon [img]="icons.lock" size="20" style="color: #94a3b8;"></lucide-icon>
+            <input type="password" name="senha" [(ngModel)]="operadorForm.senha" placeholder="Mínimo 6 caracteres" />
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label>Confirmar Nova Senha</label>
+          <div class="input-with-icon">
+            <lucide-icon [img]="icons.lock" size="20" style="color: #94a3b8;"></lucide-icon>
+            <input type="password" name="confirmarSenha" [(ngModel)]="operadorForm.confirmarSenha" placeholder="Digite a nova senha novamente" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer-gradient">
+        <button type="button" class="btn-ghost" (click)="fecharModal()">Cancelar</button>
+        <button type="submit" class="btn-solid-blue">Salvar Alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Sair -->
+<div *ngIf="modalAberto === 'sair'" class="modal-overlay">
+  <div class="modal-content logout-modal-redesign">
+    <div class="modal-body-centered">
+      <div class="logout-icon-glow">
+        <img src="assets/Icon.svg" class="glow-icon">
+      </div>
+      <h3 class="modal-title-bold">Finalizar Sessão?</h3>
+      <p class="modal-subtitle">Seu guichê será liberado para outros operadores e você retornará à tela de login.</p>
+    </div>
+    <div class="modal-actions-refined">
+      <button class="btn-cancel-glass" (click)="fecharModal()">Continuar Trabalhando</button>
+      <button class="btn-danger-solid" (click)="confirmarSair()">Encerrar e Sair</button>
     </div>
   </div>
 </div>

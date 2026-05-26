@@ -18,6 +18,17 @@ export class AgendamentoComponent implements OnInit {
   showSuccessModal = false;
   hoje = new Date();
   erroData: string | null = null;
+  erroAgendamento: string | null = null;
+  reagendandoId: number | null = null;
+  agendamentoConfirmado: {
+    filialNome: string;
+    categoriaNome: string;
+    quantidade: number;
+    data: number | null;
+    mes: number;
+    ano: number;
+    hora: string;
+  } | null = null;
 
   form = {
     filialId: null as number | null,
@@ -81,12 +92,33 @@ export class AgendamentoComponent implements OnInit {
   checkReschedule() {
     const reId = this.route.snapshot.queryParamMap.get('re');
     if (reId) {
-      this.api.get<any[]>('/fila/agendamento').subscribe(data => {
-        const ag = data.find(a => a.id === Number(reId));
-        if (ag) {
-          this.form.filialId = ag.filial_id || this.form.filialId;
-          this.form.servicoId = ag.servico_id || this.form.servicoId;
-          this.cdr.detectChanges();
+      this.api.get<any[]>('/agendamentos', { meus: 'true', status: 'active' }).subscribe({
+        next: (data) => {
+          const ag = (data || []).find(a => a.id === Number(reId));
+          if (ag) {
+            this.reagendandoId = ag.id;
+            this.form.filialId = ag.filialId || this.form.filialId;
+            this.form.servicoId = ag.servicoId || this.form.servicoId;
+            
+            if (ag.data) {
+              const dateParts = ag.data.split('-');
+              if (dateParts.length === 3) {
+                this.anoAtual = Number(dateParts[0]);
+                this.mesAtual = Number(dateParts[1]) - 1; // 0-based
+                this.form.data = Number(dateParts[2]);
+              }
+            }
+            if (ag.horaInicio) {
+              this.form.hora = ag.horaInicio;
+            }
+            
+            this.gerarCalendario();
+            this.carregarConfiguracoes();
+            this.cdr.detectChanges();
+          }
+        },
+        error: (err) => {
+          console.error('Erro ao carregar agendamento para reagendar:', err);
         }
       });
     }
@@ -100,22 +132,33 @@ export class AgendamentoComponent implements OnInit {
       })
     ).subscribe(data => {
       this.filiais = data || [];
-      if (this.filiais.length > 0) {
+      const reId = this.route.snapshot.queryParamMap.get('re');
+      if (!reId && this.filiais.length > 0) {
         this.form.filialId = this.filiais[0].id;
         this.carregarConfiguracoes();
       }
       this.cdr.detectChanges();
     });
+  }
 
-    this.api.get<any[]>('/servicos').pipe(
+  carregarCategorias() {
+    if (!this.form.filialId) return;
+    this.api.get<any[]>(`/servicos?filialId=${this.form.filialId}`).pipe(
       catchError(err => {
-        console.error('Erro ao carregar categorias', err);
+        console.error('Erro ao carregar categorias da filial', err);
         return of([]);
       })
     ).subscribe(data => {
-      console.log('Categorias recebidas:', data);
       this.categorias = data || [];
-      if (this.categorias.length > 0) this.form.servicoId = this.categorias[0].id;
+      if (this.categorias.length > 0) {
+        const existe = this.categorias.some(c => c.id === this.form.servicoId);
+        if (!existe) {
+          this.form.servicoId = this.categorias[0].id;
+        }
+      } else {
+        this.form.servicoId = null;
+      }
+      this.atualizarHorarios();
       this.cdr.detectChanges();
     });
   }
@@ -156,7 +199,7 @@ export class AgendamentoComponent implements OnInit {
         this.erroData = null;
       }
 
-      this.atualizarHorarios();
+      this.carregarCategorias();
       this.cdr.detectChanges();
     });
   }
@@ -173,8 +216,9 @@ export class AgendamentoComponent implements OnInit {
 
     const dataObj = new Date(this.anoAtual, this.mesAtual, this.form.data, 12, 0, 0);
     const dataStr = dataObj.toISOString().split('T')[0];
+    const servicoPart = this.form.servicoId ? `&servicoId=${this.form.servicoId}` : '';
 
-    this.api.get<any[]>(`/fila/agendamento/horarios?data=${dataStr}&filialId=${this.form.filialId}`).pipe(
+    this.api.get<any[]>(`/fila/agendamento/horarios?data=${dataStr}&filialId=${this.form.filialId}${servicoPart}`).pipe(
       catchError(err => {
         console.error('Erro ao carregar horários', err);
         return of([]);
@@ -216,6 +260,36 @@ export class AgendamentoComponent implements OnInit {
     for (let i = 1; i <= ultimoDiaMes; i++) {
       this.diasCalendario.push(i);
     }
+  }
+
+  mesAnterior() {
+    if (this.mesAtual === 0) {
+      this.mesAtual = 11;
+      this.anoAtual--;
+    } else {
+      this.mesAtual--;
+    }
+
+    this.form.data = null;
+    this.erroData = null;
+    this.horariosDisponiveis = [];
+    this.gerarCalendario();
+    this.cdr.detectChanges();
+  }
+
+  proximoMes() {
+    if (this.mesAtual === 11) {
+      this.mesAtual = 0;
+      this.anoAtual++;
+    } else {
+      this.mesAtual++;
+    }
+
+    this.form.data = null;
+    this.erroData = null;
+    this.horariosDisponiveis = [];
+    this.gerarCalendario();
+    this.cdr.detectChanges();
   }
 
   inc() { this.form.quantidade++; }
@@ -271,20 +345,22 @@ export class AgendamentoComponent implements OnInit {
   }
 
   getFilialNome(): string {
-    const f = this.filiais.find(x => x.id === this.form.filialId);
+    const f = this.filiais.find(x => Number(x.id) === Number(this.form.filialId));
     return f ? f.nome : 'Filial';
   }
 
   getCategoriaNome(): string {
-    const c = this.categorias.find(x => x.id === this.form.servicoId);
+    const c = this.categorias.find(x => Number(x.id) === Number(this.form.servicoId));
     return c ? c.nome : 'Categoria';
   }
 
   confirmar() {
+    this.erroAgendamento = null;
+    this.agendamentoConfirmado = null;
     // Fetch logged user data
     const userJson = localStorage.getItem('usuario_sgf');
     if (!userJson) {
-      alert('Usuário não identificado. Por favor, faça login novamente.');
+      this.erroAgendamento = 'Usuário não identificado. Por favor, faça login novamente.';
       this.router.navigate(['/login']);
       return;
     }
@@ -296,6 +372,40 @@ export class AgendamentoComponent implements OnInit {
 
     // Generate unique slot reference
     const codigo = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const filialSelecionada = this.filiais.find(x => Number(x.id) === Number(this.form.filialId));
+    const categoriaSelecionada = this.categorias.find(x => Number(x.id) === Number(this.form.servicoId));
+    const quantidade = Math.max(0, Number(this.form.quantidade) || 0);
+
+    if (this.reagendandoId) {
+      const payload = {
+        data: dataFormatada,
+        hora: this.form.hora
+      };
+
+      this.api.patch<any>(`/agendamentos/${this.reagendandoId}/reagendar`, payload).subscribe({
+        next: (res) => {
+          const ag = res.agendamento || res;
+          this.agendamentoConfirmado = {
+            filialNome: ag?.filialNome || this.getFilialNome(),
+            categoriaNome: ag?.categoriaNome || this.getCategoriaNome(),
+            quantidade: quantidade,
+            data: this.form.data,
+            mes: this.mesAtual,
+            ano: this.anoAtual,
+            hora: this.form.hora,
+          };
+          this.showSuccessModal = true;
+          this.reagendandoId = null;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.erroAgendamento =
+            err.error?.message || 'Erro ao reagendar. Tente novamente mais tarde.';
+          this.cdr.detectChanges();
+        }
+      });
+      return;
+    }
 
     // Construct API payload
     const payload = {
@@ -305,22 +415,29 @@ export class AgendamentoComponent implements OnInit {
       hora: this.form.hora,
       servico_id: this.form.servicoId,
       filial_id: this.form.filialId,
+      qtdeGarrafoes: quantidade,
       codigo: codigo
     };
 
-    console.log('Enviando agendamento:', payload);
-
     // Dispatch request
     this.api.post<any>('/fila/agendamento', payload).subscribe({
-      next: (res) => {
-        console.log('Agendamento salvo com sucesso:', res);
+      next: (agendamento) => {
+        this.agendamentoConfirmado = {
+          filialNome: agendamento?.filial?.nome || filialSelecionada?.nome || this.getFilialNome(),
+          categoriaNome: agendamento?.servico?.nome || categoriaSelecionada?.nome || this.getCategoriaNome(),
+          quantidade,
+          data: this.form.data,
+          mes: this.mesAtual,
+          ano: this.anoAtual,
+          hora: this.form.hora,
+        };
         this.showSuccessModal = true;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Erro ao salvar agendamento:', err);
-        const msg = err.error?.message || 'Erro ao realizar agendamento. Tente novamente mais tarde.';
-        alert(msg);
+        this.erroAgendamento =
+          err.error?.message || 'Erro ao realizar agendamento. Tente novamente mais tarde.';
+        this.cdr.detectChanges();
       }
     });
   }
@@ -335,5 +452,7 @@ export class AgendamentoComponent implements OnInit {
 
   fecharModal() {
     this.showSuccessModal = false;
+    this.agendamentoConfirmado = null;
+    this.verAgendamentos();
   }
 }

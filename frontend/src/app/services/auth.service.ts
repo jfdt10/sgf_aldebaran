@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface AuthenticatedUser {
   id?: string | number;
@@ -11,16 +12,17 @@ export interface AuthenticatedUser {
   cnpj?: string | null;
   tipo?: string | null;
   perfil?: string | null;
+  filial_id?: number | null;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly baseUrl = 'http://localhost:3000';
+  private readonly baseUrl = environment.apiUrl;
   private apiUrl = `${this.baseUrl}/auth`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   login(credenciais: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, credenciais);

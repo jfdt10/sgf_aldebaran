@@ -25,6 +25,8 @@ import { TotemInicialComponent } from './pages/totem/totem-inicial/totem-inicial
 import { TotemSenhaComponent } from './pages/totem/totem-senha/totem-senha.component';
 import { TotemTipoAtendimentoComponent } from './pages/totem/totem-tipo-atendimento/totem-tipo-atendimento.component';
 import { PainelTvComponent } from './pages/tv/painel-tv.component';
+import { TicketComponent } from './pages/mobile/ticket/ticket.component';
+import { ComprovanteComponent } from './pages/mobile/comprovante/comprovante.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -33,6 +35,8 @@ export const routes: Routes = [
   { path: 'signup', component: SignupComponent },
   { path: 'recover', component: RecoverComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
+  { path: 'mobile/ticket/:id', component: TicketComponent },
+  { path: 'mobile/comprovante/:id', component: ComprovanteComponent },
 
   {
     path: 'client',
@@ -57,6 +61,20 @@ export const routes: Routes = [
           import('./pages/client/configuracoes/configuracoes.component').then(
             (m) => m.ClientConfiguracoesComponent,
           ),
+      },
+      {
+        path: 'configuracoes/termos-de-uso',
+        loadComponent: () =>
+          import('./pages/client/configuracoes/legal/termos-de-uso.component').then(
+            (m) => m.TermosDeUsoComponent,
+          ),
+      },
+      {
+        path: 'configuracoes/politica-de-privacidade',
+        loadComponent: () =>
+          import(
+            './pages/client/configuracoes/legal/politica-privacidade.component'
+          ).then((m) => m.PoliticaPrivacidadeComponent),
       },
       { path: 'suporte', component: SuporteComponent },
     ],
@@ -197,6 +215,20 @@ export const routes: Routes = [
           ).then((m) => m.SupervisorConfiguracoesComponent),
       },
       {
+        path: 'configuracoes/termos-de-uso',
+        loadComponent: () =>
+          import('./pages/client/configuracoes/legal/termos-de-uso.component').then(
+            (m) => m.TermosDeUsoComponent,
+          ),
+      },
+      {
+        path: 'configuracoes/politica-de-privacidade',
+        loadComponent: () =>
+          import(
+            './pages/client/configuracoes/legal/politica-privacidade.component'
+          ).then((m) => m.PoliticaPrivacidadeComponent),
+      },
+      {
         path: 'meu-perfil',
         loadComponent: () =>
           import('./pages/supervisor/perfil/perfil.component').then(
@@ -220,6 +252,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'inicial', pathMatch: 'full' },
       {
         path: 'setup',
+        canActivate: [roleGuard],
         loadComponent: () =>
           import('./pages/totem/totem-setup/totem-setup.component').then(
             (m) => m.TotemSetupComponent,
@@ -239,7 +272,14 @@ export const routes: Routes = [
       { path: 'senha', component: TotemSenhaComponent },
     ],
   },
-
+  {
+    path: 'painel/setup',
+    canActivate: [roleGuard],
+    loadComponent: () =>
+      import('./pages/tv/painel-setup/painel-setup.component').then(
+        (m) => m.PainelSetupComponent,
+      ),
+  },
   { path: 'painel', component: PainelTvComponent },
   {
     path: 'operador/escolha-guiches',
