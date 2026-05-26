@@ -51,7 +51,10 @@ export class ServicoService {
     }
 
     if (finalFilialId) {
-      where.filial_id = finalFilialId;
+      where.OR = [
+        { filial_id: finalFilialId },
+        { filial_id: null }
+      ];
     }
 
     // Filtro de Tipo: Se informado, traz o tipo específico OU os sem tipo (Geral)
