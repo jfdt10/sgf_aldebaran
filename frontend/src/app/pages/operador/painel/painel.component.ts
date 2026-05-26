@@ -233,7 +233,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
 
         this.isEditingClient = false;
 
-        const documentoLimpo = this.ticketAtual.documento.replace(/\D/g, '');
+        const documentoLimpo = this.ticketAtual.documento.replace(/\D/g, '') || this.ticketAtual.documento;
         this.api.get<any[]>(`/clientes?busca=${encodeURIComponent(documentoLimpo)}`).subscribe({
             next: (clientes) => {
                 if (clientes.length > 0) {

@@ -138,18 +138,41 @@ export class AuthService {
 
   // Password recovery
   async recover(email: string) {
-    const user = await this.prisma.clientes.findUnique({
+    // 1. Verificar se é staff (usuario)
+    const staff = await this.prisma.usuario.findFirst({
+      where: { email, ativo: true, deletadoEm: null },
+      select: { id: true, email: true, nome: true },
+    });
+
+    if (staff) {
+      // Gera JWT com expiração curta para reset (15 min)
+      const token = this.jwtService.sign(
+        { sub: staff.id, email: staff.email, isStaff: true },
+        { expiresIn: '15m' },
+      );
+
+      const frontendUrl = process.env['FRONT_URL'] || 'http://localhost:4200';
+      const link = `${frontendUrl}/reset-password?token=${token}`;
+
+      // TODO: Implementar envio real de e-mail (usar nodemailer, SendGrid, etc.)
+      console.log(`📧 Reset link para staff ${email}: ${link}`);
+
+      return { message: 'Link de recuperação enviado.' };
+    }
+
+    // 2. Verificar se é cliente
+    const cliente = await this.prisma.clientes.findUnique({
       where: { email },
       select: { id: true, email: true, nome: true },
     });
 
-    if (!user) {
+    if (!cliente) {
       throw new NotFoundException('E-mail não encontrado.');
     }
 
     // Gera JWT com expiração curta para reset (15 min)
     const token = this.jwtService.sign(
-      { sub: user.id, email: user.email },
+      { sub: cliente.id, email: cliente.email, isStaff: false },
       { expiresIn: '15m' },
     );
 
@@ -157,7 +180,7 @@ export class AuthService {
     const link = `${frontendUrl}/reset-password?token=${token}`;
 
     // TODO: Implementar envio real de e-mail (usar nodemailer, SendGrid, etc.)
-    console.log(`📧 Reset link para ${email}: ${link}`);
+    console.log(`📧 Reset link para cliente ${email}: ${link}`);
 
     return { message: 'Link de recuperação enviado.' };
   }
@@ -168,14 +191,22 @@ export class AuthService {
       // Valida e decodifica o token JWT
       const decoded = this.jwtService.verify(token);
       const userId = decoded.sub;
+      const isStaff = decoded.isStaff;
 
       // Hash da nova senha
       const senhaHash = await bcrypt.hash(novaSenha, 12);
 
-      await this.prisma.clientes.update({
-        where: { id: userId },
-        data: { senha: senhaHash },
-      });
+      if (isStaff) {
+        await this.prisma.usuario.update({
+          where: { id: Number(userId) },
+          data: { senha: senhaHash },
+        });
+      } else {
+        await this.prisma.clientes.update({
+          where: { id: String(userId) },
+          data: { senha: senhaHash },
+        });
+      }
 
       return { message: 'Senha alterada com sucesso!' };
     } catch (error) {

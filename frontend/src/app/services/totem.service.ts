@@ -21,7 +21,7 @@ export interface Ticket {
   providedIn: 'root'
 })
 export class TotemService {
-  private apiUrl = 'http://localhost:3000/fila';
+  private apiUrl = `${environment.apiUrl}/fila`;
 
   // MUDANÇA: Agora guardamos o TIPO, não a categoria
   private tipoSelecionado: string = '';

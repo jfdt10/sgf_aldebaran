@@ -61,7 +61,7 @@ export class SupervisorPerfilComponent implements OnInit {
       });
       // Try to load photo if user object had it
       if (user.fotoPerfil) {
-        this.fotoUrl = 'http://localhost:3000' + user.fotoPerfil;
+        this.fotoUrl = environment.apiUrl + user.fotoPerfil;
       }
     } else {
        // Mock fallback
