@@ -1,9 +1,19 @@
 import 'dotenv/config';
+import { Pool } from 'pg';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcrypt';
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+const connectionString = process.env.DATABASE_URL!;
+const isProduction =
+  process.env.NODE_ENV === 'production' ||
+  (!connectionString.includes('localhost') && !connectionString.includes('127.0.0.1'));
+
+const pool = new Pool({
+  connectionString,
+  ssl: isProduction ? { rejectUnauthorized: false } : undefined,
+});
+const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
@@ -59,4 +69,5 @@ main()
     })
     .finally(async () => {
         await prisma.$disconnect();
+        await pool.end();
     });
