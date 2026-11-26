@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS "guiche" (
+    "id" SERIAL PRIMARY KEY,
+    "numero" INTEGER NOT NULL,
+    "descricao" VARCHAR(120),
+    "ativo" BOOLEAN NOT NULL DEFAULT true,
+    "status" VARCHAR(20) NOT NULL DEFAULT 'DISPONIVEL',
+    "operadorAtualId" INTEGER UNIQUE REFERENCES "usuario"("id") ON DELETE SET NULL ON UPDATE CASCADE,
+    "loginOperadorEm" TIMESTAMP(6),
+    "atendimentoAtualCodigo" VARCHAR(30),
+    "criadoEm" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "atualizadoEm" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
