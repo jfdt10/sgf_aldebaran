@@ -64,7 +64,10 @@
   gap: 4px;
 }
 
-.tv-language span {
+.tv-language button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
   min-width: clamp(36px, 3vw, 48px);
   height: clamp(26px, 3vh, 36px);
   border-radius: 8px;
@@ -74,7 +77,7 @@
   color: #ffffff;
 }
 
-.tv-language span.active {
+.tv-language button.active {
   background: #ffffff;
   color: #0ea5e9;
   box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.1), 0px 4px 6px rgba(0, 0, 0, 0.1);

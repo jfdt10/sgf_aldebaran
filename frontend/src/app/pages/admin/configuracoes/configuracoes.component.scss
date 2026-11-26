@@ -630,3 +630,10 @@
   from { transform: translateX(100%) scale(0.9); opacity: 0; }
   to { transform: translateX(0) scale(1); opacity: 1; }
 }
+
+@media (max-width: 768px) {
+  .settings-grid, .notif-grid { grid-template-columns: minmax(0, 1fr); }
+  .settings-header-actions, .time-range, .upload-row { flex-wrap: wrap; }
+  .settings-header-actions .filial-glass-selector { min-width: 0; }
+  .settings-card .toggle-item-wrapper { min-width: 0; }
+}

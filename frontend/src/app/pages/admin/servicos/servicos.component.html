@@ -12,7 +12,7 @@
 
   <div class="content-card">
     <div class="form-header">
-      <span class="inline-title"><lucide-icon [img]="icons.plus" size="18"></lucide-icon> {{ editando ? 'Editar' :
+      <span class="inline-title"><lucide-icon [img]="icons.plus" size="18"></lucide-icon> {{ editando ? ("Editar" | tr) :
         'Novo' }}</span>
       <button *ngIf="editando" class="btn-cancel" (click)="limpar()">Cancelar Edição</button>
     </div>
@@ -58,7 +58,7 @@
             <td class="primary-text">{{ s.nome }}</td>
             <td class="bold-cyan">{{ s.sigla }}</td>
             <td class="actions justify-end">
-              <button class="action-btn edit" title="Editar" (click)="editar(s)">
+              <button class="action-btn edit" [title]='"Editar" | tr' (click)="editar(s)">
                 <lucide-icon [img]="icons.edit" size="16"></lucide-icon>
               </button>
               <button class="action-btn danger" title="Remover" (click)="excluir(s.id)">

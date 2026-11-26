@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, HostListener, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
@@ -19,7 +20,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-supervisor-dashboard',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ReactiveFormsModule, FormsModule, RouterLink],
+  imports: [TranslatePipe, CommonModule, LucideAngularModule, ReactiveFormsModule, FormsModule, RouterLink],
   templateUrl: './supervisor-dashboard.component.html',
   styleUrls: ['./supervisor-dashboard.component.scss']
 })

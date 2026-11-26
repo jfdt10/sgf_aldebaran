@@ -33,7 +33,7 @@
 
             <div class="card-middle">
                 <p class="tipo" *ngIf="c.tipo">
-                    Tipo: 
+                    {{ "Tipo:" | tr }}
                     <strong>
                         {{ c.tipo === 'CLIENTE_RAPIDO' ? 'Cliente Rápido' : 
                            c.tipo === 'CAMINHAO' ? 'Caminhão' : 
@@ -45,12 +45,12 @@
             <div class="category-actions">
                 <button class="btn-edit-fill" (click)="abrirModalCategoria(c)">
                     <lucide-icon [img]="icons.edit" size="16"></lucide-icon>
-                    Editar
+                    {{ "Editar" | tr }}
                 </button>
                 <button class="btn-toggle-fill" [class.btn-activate]="!c.ativo" [class.btn-deactivate]="c.ativo"
                     (click)="toggleStatusCategoria(c)">
                     <lucide-icon [img]="icons.power" size="16"></lucide-icon>
-                    {{ c.ativo ? 'Desativar' : 'Ativar' }}
+                    {{ c.ativo ? 'Desativar' : ("Ativar" | tr) }}
                 </button>
                 <button class="btn-delete-card" (click)="excluirCategoria(c.id)">
                     <lucide-icon [img]="icons.trash" size="16"></lucide-icon>
@@ -120,8 +120,8 @@
         </div>
 
         <div class="modal-footer no-border">
-            <button class="btn-cancel-flat" (click)="fecharModalCategoria()">Cancelar</button>
-            <button class="btn-submit-gradient" (click)="salvarCategoria()" [disabled]="loading">Salvar</button>
+            <button class="btn-cancel-flat" (click)="fecharModalCategoria()">{{ "Cancelar" | tr }}</button>
+            <button class="btn-submit-gradient" (click)="salvarCategoria()" [disabled]="loading">{{ "Salvar" | tr }}</button>
         </div>
     </div>
 </div>
@@ -139,7 +139,7 @@
             </p>
 
             <div class="refined-actions">
-                <button class="btn-refined-outline" (click)="fecharConfirmacao()">Cancelar</button>
+                <button class="btn-refined-outline" (click)="fecharConfirmacao()">{{ "Cancelar" | tr }}</button>
                 <button class="btn-refined-danger" (click)="confirmarExclur()">Sim, Excluir</button>
             </div>
         </div>
@@ -152,11 +152,11 @@
             <div class="refined-icon-box success-circle">
                 <lucide-icon [img]="icons.check" size="32" color="#22c55e"></lucide-icon>
             </div>
-            <h2 class="refined-title">Sucesso!</h2>
+            <h2 class="refined-title">{{ "Sucesso!" | tr }}</h2>
             <p class="refined-desc">Os dados foram salvos corretamente.</p>
 
             <div class="refined-actions mt-4">
-                <button class="btn-refined-teal" (click)="fecharSucesso()">OK, Entendi</button>
+                <button class="btn-refined-teal" (click)="fecharSucesso()">{{ "OK, Entendi" | tr }}</button>
             </div>
         </div>
     </div>

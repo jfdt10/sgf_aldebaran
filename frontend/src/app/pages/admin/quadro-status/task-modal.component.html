@@ -50,13 +50,13 @@
       <div class="modal-footer">
         <button type="button" *ngIf="task" class="btn-danger" (click)="deleteTask()" [disabled]="loading">
           <lucide-icon [name]="icons.trash" size="18"></lucide-icon>
-          Excluir
+          {{ "Excluir" | tr }}
         </button>
         <div class="action-group">
-          <button type="button" class="btn-secondary" (click)="close.emit()">Cancelar</button>
+          <button type="button" class="btn-secondary" (click)="close.emit()">{{ "Cancelar" | tr }}</button>
           <button type="submit" class="btn-primary" [disabled]="taskForm.invalid || loading">
             <lucide-icon [name]="icons.save" size="18"></lucide-icon>
-            {{ loading ? 'Salvando...' : 'Salvar' }}
+            {{ loading ? 'Salvando...' : ("Salvar" | tr) }}
           </button>
         </div>
       </div>

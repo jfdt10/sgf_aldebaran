@@ -2,12 +2,12 @@
     <div class="list-card">
         <div class="list-card-header">
             <div class="titles">
-                <h2>Caminhões</h2>
+                <h2>{{ "Caminhões" | tr }}</h2>
                 <p>Gerencie a frota de veículos registrados no pátio</p>
             </div>
             <button class="btn-primary" (click)="abrirModalNovo()">
                 <lucide-icon [img]="icons.plus" size="18"></lucide-icon>
-                Novo Caminhão
+                {{ "Novo Caminhão" | tr }}
             </button>
         </div>
 
@@ -27,12 +27,12 @@
             <table class="list-table">
                 <thead>
                     <tr>
-                        <th>Placa</th>
+                        <th>{{ "Placa" | tr }}</th>
                         <th>Veículo</th>
                         <th>Ano</th>
                         <th>Proprietário</th>
                         <th>Status</th>
-                        <th>Ações</th>
+                        <th>{{ "Ações" | tr }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -63,12 +63,12 @@
                                 'maintenance': c.status === 'MANUTENCAO'
                             }">
                                 <lucide-icon [img]="c.status === 'ATIVO' ? icons.checkCircle : (c.status === 'INATIVO' ? icons.x : icons.truck)" size="14"></lucide-icon>
-                                {{ c.status === 'ATIVO' ? 'Ativo' : (c.status === 'INATIVO' ? 'Inativo' : 'Manutenção') }}
+                                {{ c.status === 'ATIVO' ? 'Ativo' : (c.status === 'INATIVO' ? 'Inativo' : ("Manutenção" | tr)) }}
                             </div>
                         </td>
                         <td>
                             <div class="action-btns">
-                                <button class="btn-edit" (click)="abrirModalEditar(c)" title="Editar">
+                                <button class="btn-edit" (click)="abrirModalEditar(c)" [title]='"Editar" | tr'>
                                     <lucide-icon [img]="icons.edit2" size="14"></lucide-icon>
                                 </button>
                                 <button class="btn-toggle" [ngClass]="c.status === 'ATIVO' ? 'deactivate' : 'activate'" 
@@ -101,7 +101,7 @@
             <div class="modal-header">
                 <h2>
                     <lucide-icon [img]="icons.user" size="20"></lucide-icon>
-                    {{ isEditing ? 'Editar Caminhão' : 'Novo Caminhão' }}
+                    {{ isEditing ? ("Editar Caminhão" | tr) : ("Novo Caminhão" | tr) }}
                 </h2>
                 <button class="close-btn" (click)="fecharModal()">
                     <lucide-icon [img]="icons.x" size="20"></lucide-icon>
@@ -154,7 +154,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Observações</label>
+                    <label>{{ "Observações" | tr }}</label>
                     <textarea [(ngModel)]="caminhaoForm.observacoes" placeholder="Comentários adicionais..." rows="3"
                         style="width: 100%; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-family: 'Inter', sans-serif; resize: vertical;"></textarea>
                 </div>
@@ -162,10 +162,10 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn-outline" (click)="fecharModal()">Cancelar</button>
+                <button class="btn-outline" (click)="fecharModal()">{{ "Cancelar" | tr }}</button>
                 <button type="button" class="btn-primary" (click)="salvar()">
                     <lucide-icon [img]="icons.checkCircle" size="18"></lucide-icon>
-                    {{ isEditing ? 'Atualizar' : 'Cadastrar' }}
+                    {{ isEditing ? 'Atualizar' : ("Cadastrar" | tr) }}
                 </button>
             </div>
         </div>
@@ -180,9 +180,9 @@
                         <lucide-icon [img]="icons.check" size="40" strokeWidth="3"></lucide-icon>
                     </div>
                 </div>
-                <h2>Sucesso!</h2>
+                <h2>{{ "Sucesso!" | tr }}</h2>
                 <p>Caminhão {{ isEditing ? 'atualizado' : 'cadastrado' }} corretamente.</p>
-                <button class="btn-success-ok" (click)="fecharModal()">OK, Entendi</button>
+                <button class="btn-success-ok" (click)="fecharModal()">{{ "OK, Entendi" | tr }}</button>
             </div>
         </div>
     </div>

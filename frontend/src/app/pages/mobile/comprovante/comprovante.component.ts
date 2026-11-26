@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
@@ -19,7 +20,7 @@ import * as QRCode from 'qrcode';
 @Component({
   selector: 'app-comprovante',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, RouterLink, LucideAngularModule],
   templateUrl: './comprovante.component.html',
   styleUrl: './comprovante.component.scss'
 })

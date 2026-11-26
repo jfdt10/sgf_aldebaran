@@ -2,43 +2,43 @@
   <div class="settings-header-actions">
     <div class="filial-selector-wrapper">
       <lucide-icon [img]="icons.building" size="18" class="text-blue"></lucide-icon>
-      <label for="filialSelect">Filial atual:</label>
+      <label for="filialSelect">{{ "Filial atual:" | tr }}</label>
       <select id="filialSelect" [(ngModel)]="selectedFilialId" (change)="onFilialChange()" class="filial-select" [disabled]="isRestricted">
-        <option *ngIf="!isRestricted" [ngValue]="null">Configurações Gerais (Global)</option>
+        <option *ngIf="!isRestricted" [ngValue]="null">{{ "Configurações Gerais (Global)" | tr }}</option>
         <option *ngFor="let f of filiais" [ngValue]="f.id">{{ f.nome }}</option>
       </select>
     </div>
     
     <div class="header-info" *ngIf="loading">
       <span class="loading-spinner"></span>
-      Carregando...
+      {{ "Carregando..." | tr }}
     </div>
   </div>
 
   <div class="settings-tabs">
     <button class="tab-btn" [class.active]="activeTab === 'geral'" (click)="activeTab = 'geral'" type="button">
       <lucide-icon [img]="icons.settings" size="20"></lucide-icon>
-      Geral
+      {{ "Geral" | tr }}
     </button>
     <button class="tab-btn" [class.active]="activeTab === 'notificacoes'" (click)="activeTab = 'notificacoes'" type="button">
       <lucide-icon [img]="icons.bell" size="20"></lucide-icon>
-      Notificações
+      {{ "Notificações" | tr }}
     </button>
     <button class="tab-btn" [class.active]="activeTab === 'integracoes'" (click)="activeTab = 'integracoes'" type="button">
       <lucide-icon [img]="icons.power" size="20"></lucide-icon>
-      Integrações
+      {{ "Integrações" | tr }}
     </button>
     <button class="tab-btn" [class.active]="activeTab === 'seguranca'" (click)="activeTab = 'seguranca'" type="button">
       <lucide-icon [img]="icons.shield" size="20"></lucide-icon>
-      Segurança
+      {{ "Segurança" | tr }}
     </button>
     <button class="tab-btn" [class.active]="activeTab === 'tv'" (click)="activeTab = 'tv'" type="button">
       <lucide-icon [img]="icons.tv" size="20"></lucide-icon>
-      Gestão de TV/Dispositivos
+      {{ "Gestão de TV/Dispositivos" | tr }}
     </button>
     <button class="tab-btn" [class.active]="activeTab === 'templates'" (click)="activeTab = 'templates'" type="button">
       <lucide-icon [img]="icons.mail" size="20"></lucide-icon>
-      Template de Mensagens
+      {{ "Template de Mensagens" | tr }}
     </button>
   </div>
 
@@ -46,30 +46,30 @@
     
     <div *ngSwitchCase="'geral'" class="tab-pane fade-in">
       <div class="pane-header">
-        <h2>Configurações Gerais</h2>
-        <p>Configure os parâmetros básicos do sistema</p>
+        <h2>{{ "Configurações Gerais" | tr }}</h2>
+        <p>{{ "Configure os parâmetros básicos do sistema" | tr }}</p>
       </div>
 
       <div class="settings-grid">
         <div class="settings-card">
           <div class="card-header">
             <lucide-icon [img]="icons.building" size="18" class="text-blue"></lucide-icon>
-            <h3>Dados da Filial</h3>
+            <h3>{{ "Dados da Filial" | tr }}</h3>
           </div>
           <div class="card-body">
             <div class="form-group">
-              <label>Nome da Unidade</label>
+              <label>{{ "Nome da Unidade" | tr }}</label>
               <input type="text" [(ngModel)]="form.UNIDADE_NOME" placeholder="Ex: Filial Centro - São Paulo">
             </div>
             <div class="form-group">
-              <label>Fuso Horário</label>
-              <input type="text" [(ngModel)]="form.FUSO_HORARIO" placeholder="Escolha o fuso">
+              <label>{{ "Fuso Horário" | tr }}</label>
+              <input type="text" [(ngModel)]="form.FUSO_HORARIO" [placeholder]='"Escolha o fuso" | tr'>
             </div>
             <div class="form-group">
-              <label>Idioma do Sistema</label>
+              <label>{{ "Idioma do Sistema" | tr }}</label>
               <div class="toggle-group-btns">
-                <button class="lang-btn" [class.active]="form.IDIOMA_SISTEMA === 'PT'" (click)="form.IDIOMA_SISTEMA = 'PT'" type="button">PT</button>
-                <button class="lang-btn" [class.active]="form.IDIOMA_SISTEMA === 'EN'" (click)="form.IDIOMA_SISTEMA = 'EN'" type="button">EN</button>
+                <button class="lang-btn" [class.active]="form.IDIOMA_SISTEMA === 'PT'" (click)="form.IDIOMA_SISTEMA = 'PT'; language.select('PT')" type="button">PT</button>
+                <button class="lang-btn" [class.active]="form.IDIOMA_SISTEMA === 'EN'" (click)="form.IDIOMA_SISTEMA = 'EN'; language.select('EN')" type="button">EN</button>
               </div>
             </div>
           </div>
@@ -78,7 +78,7 @@
         <div class="settings-card">
           <div class="card-header">
             <lucide-icon [img]="icons.layout" size="18" class="text-blue"></lucide-icon>
-            <h3>Identidade Visual</h3>
+            <h3>{{ "Identidade Visual" | tr }}</h3>
           </div>
           <div class="card-body">
             <div class="upload-row">
@@ -86,15 +86,15 @@
                 <input type="file" #logoInput (change)="onLogoSelected($event)" accept="image/*" style="display: none">
                 <lucide-icon [img]="icons.upload" size="32" class="upload-icon"></lucide-icon>
                 <p>{{ form.LOGO_SISTEMA ? 'Trocar Logo' : 'Arraste seu Logo aqui' }}</p>
-                <span>ou clique para selecionar</span>
+                <span>{{ "ou clique para selecionar" | tr }}</span>
                 <small>PNG, JPG (Max 2MB)</small>
               </div>
               <div class="preview-area">
-                <span>Preview Atual:</span>
+                <span>{{ "Preview Atual:" | tr }}</span>
                 <div class="preview-box" [class.empty]="!form.LOGO_SISTEMA">
                    <img *ngIf="form.LOGO_SISTEMA" [src]="form.LOGO_SISTEMA" style="max-width: 100%; max-height: 100%; border-radius: 8px;">
                    <lucide-icon *ngIf="!form.LOGO_SISTEMA" [img]="icons.layout" size="24"></lucide-icon>
-                   <small *ngIf="!form.LOGO_SISTEMA">Sem logo</small>
+                   <small *ngIf="!form.LOGO_SISTEMA">{{ "Sem logo" | tr }}</small>
                 </div>
               </div>
             </div>
@@ -104,26 +104,26 @@
         <div class="settings-card full-width totem-card">
           <div class="card-header">
             <lucide-icon [img]="icons.clock" size="18" class="text-blue"></lucide-icon>
-            <h3>Funcionamento e Agendamentos</h3>
+            <h3>{{ "Funcionamento e Agendamentos" | tr }}</h3>
           </div>
           <div class="card-body">
-            <p class="desc">Defina os horários e dias permitidos para emissão de senhas e agendamentos.</p>
+            <p class="desc">{{ "Defina os horários e dias permitidos para emissão de senhas e agendamentos." | tr }}</p>
             <div class="time-range">
               <div class="form-group">
-                <label>Início</label>
+                <label>{{ "Início" | tr }}</label>
                 <input type="time" [(ngModel)]="form.TOTEM_HORARIO_INICIO">
               </div>
               <div class="form-group">
-                <label>Fim</label>
+                <label>{{ "Fim" | tr }}</label>
                 <input type="time" [(ngModel)]="form.TOTEM_HORARIO_FIM">
               </div>
             </div>
             <p class="error-inline" *ngIf="horarioInvalido">
               <lucide-icon [img]="icons.bell" size="14"></lucide-icon>
-              Atenção: O horário de início deve ser anterior ao de término.
+              {{ "Atenção: O horário de início deve ser anterior ao de término." | tr }}
             </p>
             <div class="days-section">
-              <label class="label-dias">Dias da Semana</label>
+              <label class="label-dias">{{ "Dias da Semana" | tr }}</label>
               <div class="days-grid">
                 <button *ngFor="let dia of diasDaSemanaLabels" 
                         [class.active]="isDiaSelected(dia.id)"
@@ -131,29 +131,29 @@
                         [title]="dia.full"
                         type="button">{{ dia.label }}</button>
               </div>
-              <p class="small-hint">Clique nos dias para ativar/desativar</p>
+              <p class="small-hint">{{ "Clique nos dias para ativar/desativar" | tr }}</p>
             </div>
 
             <div class="time-range" style="margin-top: 25px;">
               <div class="form-group">
-                <label>Intervalo de Slots (Minutos)</label>
+                <label>{{ "Intervalo de Slots (Minutos)" | tr }}</label>
                 <select [(ngModel)]="form.TOTEM_INTERVALO_MINUTOS" class="filial-select" style="min-width: 100%; width: 100%; height: 46px; border: 2px solid #E2E8F0; border-radius: 8px; padding: 0 12px; font-size: 15px; font-weight: 500; color: #1E293B; background-color: white;">
-                  <option value="15">15 minutos</option>
-                  <option value="30">30 minutos</option>
-                  <option value="45">45 minutos</option>
-                  <option value="60">60 minutos</option>
+                  <option value="15">{{ "15 minutos" | tr }}</option>
+                  <option value="30">{{ "30 minutos" | tr }}</option>
+                  <option value="45">{{ "45 minutos" | tr }}</option>
+                  <option value="60">{{ "60 minutos" | tr }}</option>
                 </select>
               </div>
               <div class="form-group">
-                <label>Antecedência Mínima de Agendamento</label>
+                <label>{{ "Antecedência Mínima de Agendamento" | tr }}</label>
                 <select [(ngModel)]="form.TOTEM_ANTECEDENCIA_MINIMA_MINUTOS" class="filial-select" style="min-width: 100%; width: 100%; height: 46px; border: 2px solid #E2E8F0; border-radius: 8px; padding: 0 12px; font-size: 15px; font-weight: 500; color: #1E293B; background-color: white;">
-                  <option value="0">Sem antecedência (Imediato)</option>
-                  <option value="15">15 minutos</option>
-                  <option value="30">30 minutos</option>
-                  <option value="60">1 hora</option>
-                  <option value="120">2 horas</option>
-                  <option value="180">3 horas</option>
-                  <option value="240">4 horas</option>
+                  <option value="0">{{ "Sem antecedência (Imediato)" | tr }}</option>
+                  <option value="15">{{ "15 minutos" | tr }}</option>
+                  <option value="30">{{ "30 minutos" | tr }}</option>
+                  <option value="60">{{ "1 hora" | tr }}</option>
+                  <option value="120">{{ "2 horas" | tr }}</option>
+                  <option value="180">{{ "3 horas" | tr }}</option>
+                  <option value="240">{{ "4 horas" | tr }}</option>
                 </select>
               </div>
             </div>
@@ -163,7 +163,7 @@
         <div class="settings-card full-width">
           <div class="card-header">
             <lucide-icon [img]="icons.database" size="18" class="text-blue"></lucide-icon>
-            <h3>Manutenção</h3>
+            <h3>{{ "Manutenção" | tr }}</h3>
           </div>
           <div class="card-body horizontal">
             <div class="toggle-item-wrapper">
@@ -172,8 +172,8 @@
                    <lucide-icon [img]="icons.database" size="20"></lucide-icon>
                 </div>
                 <div class="info">
-                  <strong>Backup Automático Diário</strong>
-                  <span>Backup dos dados às 02:00</span>
+                  <strong>{{ "Backup Automático Diário" | tr }}</strong>
+                  <span>{{ "Backup dos dados às 02:00" | tr }}</span>
                 </div>
                 <label class="switch">
                   <input type="checkbox" [(ngModel)]="form.BACKUP_DIARIO" id="chk-backup">
@@ -188,8 +188,8 @@
                    <lucide-icon [img]="icons.layout" size="20"></lucide-icon>
                 </div>
                 <div class="info">
-                  <strong>Log de Auditoria Detalhado</strong>
-                  <span>Rastreia todas as ações</span>
+                  <strong>{{ "Log de Auditoria Detalhado" | tr }}</strong>
+                  <span>{{ "Rastreia todas as ações" | tr }}</span>
                 </div>
                 <label class="switch">
                   <input type="checkbox" [(ngModel)]="form.LOG_DETALHADO" id="chk-log">
@@ -205,16 +205,16 @@
 
     <div *ngSwitchCase="'notificacoes'" class="tab-pane fade-in">
       <div class="pane-header">
-        <h2>Notificações e Mensagens</h2>
-        <p>Configure alertas via WhatsApp, SMS e E-mail</p>
+        <h2>{{ "Notificações e Mensagens" | tr }}</h2>
+        <p>{{ "Configure alertas via WhatsApp, SMS e E-mail" | tr }}</p>
       </div>
       
       <div class="notif-grid">
         <div class="notif-card highlight-green">
            <lucide-icon [img]="icons.share" size="20" class="text-green"></lucide-icon>
            <div class="info">
-             <strong>Ativar Alertas WhatsApp</strong>
-             <p>Enviar notificações via WhatsApp</p>
+             <strong>{{ "Ativar Alertas WhatsApp" | tr }}</strong>
+             <p>{{ "Enviar notificações via WhatsApp" | tr }}</p>
            </div>
            <label class="switch">
              <input type="checkbox" [(ngModel)]="form.ALERTA_WHATSAPP">
@@ -225,8 +225,8 @@
         <div class="notif-card highlight-blue">
           <lucide-icon [img]="icons.power" size="20" class="text-blue"></lucide-icon>
           <div class="info">
-            <strong>Ativar Alertas SMS</strong>
-            <p>Enviar notificações via SMS</p>
+            <strong>{{ "Ativar Alertas SMS" | tr }}</strong>
+            <p>{{ "Enviar notificações via SMS" | tr }}</p>
           </div>
           <label class="switch">
             <input type="checkbox" [(ngModel)]="form.ALERTA_SMS">
@@ -237,8 +237,8 @@
        <div class="notif-card highlight-purple">
         <lucide-icon [img]="icons.mail" size="20" class="text-purple"></lucide-icon>
         <div class="info">
-          <strong>Ativar Alertas E-mail</strong>
-          <p>Enviar notificações via E-mail</p>
+          <strong>{{ "Ativar Alertas E-mail" | tr }}</strong>
+          <p>{{ "Enviar notificações via E-mail" | tr }}</p>
         </div>
         <label class="switch">
           <input type="checkbox" [(ngModel)]="form.ALERTA_EMAIL">
@@ -248,12 +248,12 @@
       </div>
 
       <div class="models-section">
-        <h3>Modelos de Mensagem</h3>
+        <h3>{{ "Modelos de Mensagem" | tr }}</h3>
         <div class="models-list">
           <div class="toggle-item-card white">
             <div class="info">
-              <strong>Notificar ao Chamar Senha</strong>
-              <span>Cliente recebe notificação quando sua senha é chamada</span>
+              <strong>{{ "Notificar ao Chamar Senha" | tr }}</strong>
+              <span>{{ "Cliente recebe notificação quando sua senha é chamada" | tr }}</span>
             </div>
             <label class="switch">
               <input type="checkbox" [(ngModel)]="form.NOTIF_CHAMADA">
@@ -262,8 +262,8 @@
           </div>
           <div class="toggle-item-card white">
             <div class="info">
-              <strong>Notificar ao Completar Atendimento</strong>
-              <span>Cliente recebe confirmação após atendimento</span>
+              <strong>{{ "Notificar ao Completar Atendimento" | tr }}</strong>
+              <span>{{ "Cliente recebe confirmação após atendimento" | tr }}</span>
             </div>
             <label class="switch">
               <input type="checkbox" [(ngModel)]="form.NOTIF_ATENDIMENTO">
@@ -272,8 +272,8 @@
           </div>
           <div class="toggle-item-card white">
             <div class="info">
-              <strong>Notificar ao Cancelar Senha</strong>
-              <span>Cliente recebe notificação se a senha for cancelada</span>
+              <strong>{{ "Notificar ao Cancelar Senha" | tr }}</strong>
+              <span>{{ "Cliente recebe notificação se a senha for cancelada" | tr }}</span>
             </div>
             <label class="switch">
               <input type="checkbox" [(ngModel)]="form.NOTIF_CANCELAMENTO">
@@ -286,30 +286,30 @@
 
     <div *ngSwitchCase="'integracoes'" class="tab-pane fade-in">
       <div class="pane-header">
-        <h2>Integrações Externas</h2>
-        <p>Configure conexões com serviços externos</p>
+        <h2>{{ "Integrações Externas" | tr }}</h2>
+        <p>{{ "Configure conexões com serviços externos" | tr }}</p>
       </div>
 
       <div class="integracoes-list">
         <div class="int-card-row green-border">
            <lucide-icon [img]="icons.share" size="20"></lucide-icon>
            <div class="int-body">
-              <label>WhatsApp API Key</label>
-              <input type="password" [(ngModel)]="form.WHATSAPP_API_KEY" placeholder="Digite sua API Key do WhatsApp Business">
+              <label>{{ "WhatsApp API Key" | tr }}</label>
+              <input type="password" [(ngModel)]="form.WHATSAPP_API_KEY" [placeholder]='"Digite sua API Key do WhatsApp Business" | tr'>
            </div>
         </div>
         <div class="int-card-row blue-border">
           <lucide-icon [img]="icons.power" size="20"></lucide-icon>
           <div class="int-body">
-             <label>Provedor de SMS</label>
-             <input type="text" [(ngModel)]="form.PROVEDOR_SMS" placeholder="Configure sua URL ou Token de SMS">
+             <label>{{ "Provedor de SMS" | tr }}</label>
+             <input type="text" [(ngModel)]="form.PROVEDOR_SMS" [placeholder]='"Configure sua URL ou Token de SMS" | tr'>
           </div>
        </div>
        <div class="int-card-row purple-border">
         <lucide-icon [img]="icons.mail" size="20"></lucide-icon>
         <div class="int-body">
-           <label>Gateway de Pagamento</label>
-           <input type="text" [(ngModel)]="form.GATEWAY_PAGAMENTO" placeholder="Chave de API do meio de pagamento">
+           <label>{{ "Gateway de Pagamento" | tr }}</label>
+           <input type="text" [(ngModel)]="form.GATEWAY_PAGAMENTO" [placeholder]='"Chave de API do meio de pagamento" | tr'>
         </div>
      </div>
       </div>
@@ -317,20 +317,20 @@
 
     <div *ngSwitchCase="'seguranca'" class="tab-pane fade-in">
       <div class="pane-header">
-        <h2>Segurança e Privacidade</h2>
-        <p>Ajuste as políticas de acesso e proteção do sistema</p>
+        <h2>{{ "Segurança e Privacidade" | tr }}</h2>
+        <p>{{ "Ajuste as políticas de acesso e proteção do sistema" | tr }}</p>
       </div>
       <div class="settings-grid">
          <div class="settings-card">
             <div class="card-header">
               <lucide-icon [img]="icons.shield" size="18"></lucide-icon>
-              <h3>Proteção de Conta</h3>
+              <h3>{{ "Proteção de Conta" | tr }}</h3>
             </div>
             <div class="card-body">
               <div class="toggle-item-card">
                 <div class="info">
-                  <strong>Autenticação de Dois Fatores (MFA)</strong>
-                  <span>Exigir código por e-mail ou SMS no login</span>
+                  <strong>{{ "Autenticação de Dois Fatores (MFA)" | tr }}</strong>
+                  <span>{{ "Exigir código por e-mail ou SMS no login" | tr }}</span>
                 </div>
                 <label class="switch">
                   <input type="checkbox" [(ngModel)]="form.MFA_ATIVO">
@@ -344,32 +344,32 @@
 
     <div *ngSwitchCase="'tv'" class="tab-pane fade-in">
         <div class="pane-header">
-          <h2>Gestão de TV/Dispositivos</h2>
-          <p>Configure o layout e mídia para as telas de TV</p>
+          <h2>{{ "Gestão de TV/Dispositivos" | tr }}</h2>
+          <p>{{ "Configure o layout e mídia para as telas de TV" | tr }}</p>
         </div>
         <div class="settings-grid">
           <div class="settings-card full-width">
             <div class="card-header">
               <lucide-icon [img]="icons.tv" size="18" class="text-blue"></lucide-icon>
-              <h3>Configurações de Transmissão</h3>
+              <h3>{{ "Configurações de Transmissão" | tr }}</h3>
             </div>
             <div class="card-body">
               <div class="form-group">
-                <label>Layout da TV</label>
+                <label>{{ "Layout da TV" | tr }}</label>
                 <select class="filial-select" [(ngModel)]="form.TV_LAYOUT" style="min-width: 100%; width: 100%;">
-                  <option value="PADRAO">Layout Padrão (Senhas + Notícias)</option>
-                  <option value="FULLVIDEO">Vídeo em Tela Cheia</option>
-                  <option value="SPLIT">Dividido (Vídeo + Chamadas)</option>
+                  <option value="PADRAO">{{ "Layout Padrão (Senhas + Notícias)" | tr }}</option>
+                  <option value="FULLVIDEO">{{ "Vídeo em Tela Cheia" | tr }}</option>
+                  <option value="SPLIT">{{ "Dividido (Vídeo + Chamadas)" | tr }}</option>
                 </select>
               </div>
               <div class="form-group">
-                <label>URL do Vídeo/Playlist (YouTube/MP4)</label>
+                <label>{{ "URL do Vídeo/Playlist (YouTube/MP4)" | tr }}</label>
                 <input type="text" [(ngModel)]="form.TV_VIDEO_URL" placeholder="https://youtube.com/...">
               </div>
               <div class="toggle-item-card white">
                 <div class="info">
-                  <strong>Mostrar Barra de Notícias</strong>
-                  <span>Exibir últimas notícias e avisos no rodapé da TV</span>
+                  <strong>{{ "Mostrar Barra de Notícias" | tr }}</strong>
+                  <span>{{ "Exibir últimas notícias e avisos no rodapé da TV" | tr }}</span>
                 </div>
                 <label class="switch">
                   <input type="checkbox" [(ngModel)]="form.MOSTRAR_NOTICIAS">
@@ -383,19 +383,19 @@
 
     <div *ngSwitchCase="'templates'" class="tab-pane fade-in">
         <div class="pane-header">
-          <h2>Template de Mensagens</h2>
-          <p>Personalize os textos enviados aos clientes</p>
+          <h2>{{ "Template de Mensagens" | tr }}</h2>
+          <p>{{ "Personalize os textos enviados aos clientes" | tr }}</p>
         </div>
         <div class="settings-grid">
           <div class="settings-card full-width">
             <div class="card-header">
               <lucide-icon [img]="icons.mail" size="18" class="text-blue"></lucide-icon>
-              <h3>Mensagens Customizadas</h3>
+              <h3>{{ "Mensagens Customizadas" | tr }}</h3>
             </div>
             <div class="card-body">
               <div class="alert-info-box">
                 <lucide-icon [img]="icons.bell" size="20"></lucide-icon>
-                <p>Em breve você poderá personalizar cada palavra enviada aos seus clientes via WhatsApp, SMS e E-mail.</p>
+                <p>{{ "Em breve você poderá personalizar cada palavra enviada aos seus clientes via WhatsApp, SMS e E-mail." | tr }}</p>
               </div>
             </div>
           </div>
@@ -406,7 +406,7 @@
   <div class="save-footer-global">
     <button class="btn-save-modern" [disabled]="salvando" (click)="salvar(); $event.stopPropagation()" type="button">
        <lucide-icon [img]="icons.save" size="20"></lucide-icon>
-       {{ salvando ? 'Salvando...' : 'Salvar Alterações' }}
+       {{ salvando ? 'Salvando...' : ("Salvar Alterações" | tr) }}
     </button>
   </div>
 
@@ -415,8 +415,8 @@
       <lucide-icon [img]="icons.check" class="toast-icon"></lucide-icon>
     </div>
     <div class="toast-content">
-      <strong>Sucesso!</strong>
-      <span>Configurações salvas com sucesso.</span>
+      <strong>{{ "Sucesso!" | tr }}</strong>
+      <span>{{ "Configurações salvas com sucesso." | tr }}</span>
     </div>
   </div>
 </div>

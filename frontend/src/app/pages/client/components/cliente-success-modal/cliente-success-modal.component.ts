@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../../services/translate.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Check, LucideAngularModule } from 'lucide-angular';
@@ -5,7 +6,7 @@ import { Check, LucideAngularModule } from 'lucide-angular';
 @Component({
   selector: 'app-cliente-success-modal',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, LucideAngularModule],
   templateUrl: './cliente-success-modal.component.html',
   styleUrl: './cliente-success-modal.component.scss',
 })

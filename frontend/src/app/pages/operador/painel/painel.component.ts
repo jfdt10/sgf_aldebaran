@@ -1,3 +1,6 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -17,12 +20,13 @@ import { DashboardService } from '../../../services/dashboard.service';
 @Component({
     selector: 'app-painel-operador',
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
+    imports: [TranslatePipe, CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
     templateUrl: './painel.component.html',
     styleUrls: ['./painel.component.scss'],
     providers: [DashboardService]
 })
 export class PainelOperadorComponent implements OnInit, OnDestroy {
+  readonly language = inject(LanguageService);
     atendimentosList: any[] = [];
     agendamentos: any[] = [];
     atendimentoSelecionado: any = null;
@@ -152,7 +156,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
     nomeOperador = 'Operador (Carregando...)';
     numeroGuiche: string | number = 0;
     guicheAtualId: number | null = null;
-    idiomaAtivo = 'PT';
+    get idiomaAtivo() { return this.language.current(); }
     filialSelecionada = '';
     filiais: Filial[] = [];
     hasRestrictedFilial = false;
@@ -624,7 +628,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
 
 
     trocarIdioma(idioma: string) {
-        this.idiomaAtivo = idioma;
+        this.language.select(idioma === 'EN' ? 'EN' : 'PT');
         if (!environment.production) console.log('Idioma alterado para:', idioma);
     }
 

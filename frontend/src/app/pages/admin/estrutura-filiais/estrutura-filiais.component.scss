@@ -166,3 +166,9 @@
         transform: translateY(0);
     }
 }
+
+
+@media (max-width: 768px) {
+  .filial-selector-glass .selector-content { flex-direction: column; align-items: stretch; gap: 0.625rem; }
+  .tabs-header { flex-wrap: wrap; }
+}

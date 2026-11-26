@@ -69,7 +69,7 @@
             <lucide-icon [img]="icons.list" size="24"></lucide-icon>
           </div>
           <div class="action-details">
-            <h3>Meus Agendamentos</h3>
+            <h3>{{ "Meus Agendamentos" | tr }}</h3>
             <span>Consulte atendimentos passados</span>
           </div>
         </button>
@@ -128,7 +128,7 @@
           </div>
 
           <div class="ticket-highlight" *ngIf="ticket?.numeroDisplay">
-            <span>Senha</span>
+            <span>{{ "Senha" | tr }}</span>
             <strong>{{ ticket?.numeroDisplay }}</strong>
           </div>
 
@@ -159,7 +159,7 @@
             <strong>{{ voucher.categoriaNome }}</strong>
           </div>
           <div>
-            <span>Filial</span>
+            <span>{{ "Filial" | tr }}</span>
             <strong>{{ voucher.filialNome }}</strong>
           </div>
           <div>
@@ -167,7 +167,7 @@
             <strong>{{ voucher.data }}</strong>
           </div>
           <div>
-            <span>Horário</span>
+            <span>{{ "Horário" | tr }}</span>
             <strong>{{ voucher.horaInicio }} - {{ voucher.horaFim }}</strong>
           </div>
         </div>
@@ -195,14 +195,14 @@
               class="option-btn" 
               [class.active]="tipoAtendimento === 'Convencional'"
               (click)="setTipoAtendimento('Convencional')">
-              Convencional
+              {{ "Convencional" | tr }}
             </button>
             <button 
               type="button" 
               class="option-btn" 
               [class.active]="tipoAtendimento === 'Preferencial'"
               (click)="setTipoAtendimento('Preferencial')">
-              Preferencial
+              {{ "Preferencial" | tr }}
             </button>
           </div>
         </div>
@@ -216,12 +216,12 @@
         </button>
 
         <button class="btn-keep" *ngIf="voucher.checkinRealizado || ticket" (click)="fecharVoucher()">
-          Fechar
+          {{ "Fechar" | tr }}
         </button>
       </ng-container>
 
       <button class="btn-keep" *ngIf="!voucherLoading && !voucher && voucherError" (click)="fecharVoucher()">
-        Fechar
+        {{ "Fechar" | tr }}
       </button>
     </div>
   </div>

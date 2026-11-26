@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -39,7 +40,7 @@ import { finalize } from 'rxjs';
 @Component({
   selector: 'app-perfil-editar',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, ClienteSuccessModalComponent],
+  imports: [TranslatePipe, CommonModule, ReactiveFormsModule, LucideAngularModule, ClienteSuccessModalComponent],
   templateUrl: './perfil-editar.component.html',
   styleUrl: './perfil-editar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -2178,3 +2178,12 @@ body.dark-theme {
 
 
 
+
+
+@media (max-width: 768px) {
+  .list-card { min-width: 0; max-width: 100%; }
+  .list-card .list-card-header { flex-wrap: wrap; gap: 0.75rem; }
+  .list-card .list-card-search .search-input-wrapper { width: 100%; min-width: 0; }
+  .list-card .list-card-search input { box-sizing: border-box; }
+  .list-card .table-responsive { max-width: 100%; }
+}

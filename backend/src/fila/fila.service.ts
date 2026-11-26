@@ -201,6 +201,29 @@ export class FilaService {
     return servico;
   }
 
+  async diasAgendamento(filialId: number): Promise<number[]> {
+    const configs = await this.prisma.configuracao.findMany({
+      where: { chave: 'TOTEM_DIAS', OR: [{ filial_id: filialId }, { filial_id: null }] },
+      select: { filial_id: true, valor: true },
+    });
+    return this.parseDiasAgendamento(
+      configs.find(c => c.filial_id === filialId)?.valor?.trim() ||
+        configs.find(c => c.filial_id === null)?.valor,
+    );
+  }
+
+  private parseDiasAgendamento(value?: string): number[] {
+    if (value) {
+      try {
+        const dias: unknown = JSON.parse(value);
+        if (Array.isArray(dias) && dias.every(d => Number.isInteger(d) && d >= 0 && d <= 6)) return dias;
+      } catch {
+        return [1, 2, 3, 4, 5];
+      }
+    }
+    return [1, 2, 3, 4, 5];
+  }
+
   async horariosDisponiveis(data: string, filialId?: any, servicoId?: any) {
     const fId =
       filialId && filialId !== 'null' && filialId !== 'undefined'
@@ -236,14 +259,7 @@ export class FilaService {
 
     const inicioStr = getConfig('TOTEM_HORARIO_INICIO', '08:00');
     const fimStr = getConfig('TOTEM_HORARIO_FIM', '18:00');
-    const diasPermitidosJson = getConfig('TOTEM_DIAS', '[1,2,3,4,5]');
-
-    let diasPermitidos: number[] = [];
-    try {
-      diasPermitidos = JSON.parse(diasPermitidosJson);
-    } catch {
-      diasPermitidos = [1, 2, 3, 4, 5];
-    }
+    const diasPermitidos = this.parseDiasAgendamento(getConfig('TOTEM_DIAS', '[1,2,3,4,5]'));
 
     const dataObj = new Date(`${data}T12:00:00`);
     const diaSemana = dataObj.getDay();
@@ -253,7 +269,8 @@ export class FilaService {
     }
 
     const intervaloStr = getConfig('TOTEM_INTERVALO_MINUTOS', '30');
-    const intervalo = isNaN(Number(intervaloStr)) ? 30 : Number(intervaloStr);
+    const minutos = Number(intervaloStr);
+    const intervalo = Number.isInteger(minutos) && minutos > 0 ? minutos : 30;
 
     const grade: string[] = [];
     let atual = this.parseTime(inicioStr);

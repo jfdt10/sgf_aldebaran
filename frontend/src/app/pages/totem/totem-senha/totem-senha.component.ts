@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { CommonModule } from '@angular/common';
@@ -7,7 +8,7 @@ import { TotemService, Ticket } from '../../../services/totem.service';
 @Component({
   selector: 'app-totem-senha',
   standalone: true,
-  imports: [CommonModule],
+  imports: [TranslatePipe, CommonModule],
   templateUrl: './totem-senha.component.html',
   styles: [`
     :host {

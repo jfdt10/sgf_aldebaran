@@ -1,47 +1,62 @@
 <div class="page-container animate-up">
-    <div class="content-card">
-        <div class="header-section">
-            <div class="title-group">
-                <lucide-icon [img]="icons.user" size="24" class="title-icon"></lucide-icon>
-                <div>
-                    <h1>Meu Perfil</h1>
-                    <p>Gerencie suas informações pessoais e credenciais de acesso.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="profile-content">
-            <div class="avatar-section">
-                <div class="avatar-circle">
-                    <span>{{ usuario.nome.substring(0, 2).toUpperCase() }}</span>
-                </div>
-                <div class="role-badge">
-                    <lucide-icon [img]="icons.shield" size="14"></lucide-icon>
-                    {{ usuario.perfil }}
-                </div>
-            </div>
-
-            <div class="form-section">
-                <div class="input-group">
-                    <label>Nome Completo</label>
-                    <input type="text" [(ngModel)]="usuario.nome" placeholder="Seu nome" />
-                </div>
-
-                <div class="input-group">
-                    <label>E-mail</label>
-                    <input type="email" [(ngModel)]="usuario.email" placeholder="Seu e-mail" />
-                </div>
-
-                <div class="input-group">
-                    <label>Nova Senha</label>
-                    <input type="password" placeholder="Deixe em branco para não alterar" />
-                </div>
-
-                <button class="btn-primary mt-4" (click)="salvarPerfil()">
-                    <lucide-icon [img]="icons.save" size="18"></lucide-icon>
-                    Salvar Alterações
-                </button>
-            </div>
-        </div>
+  <div class="content-card">
+    <div class="header-section">
+      <div class="title-group">
+        <lucide-icon [img]="icons.user" size="24" class="title-icon"></lucide-icon>
+        <h1>{{ 'Meu Perfil' | tr }}</h1>
+      </div>
     </div>
+
+    <div class="profile-content">
+      <div class="avatar-section">
+        <div class="avatar-circle" aria-hidden="true">{{ nome.slice(0, 2).toUpperCase() }}</div>
+        <div class="role-badge">
+          <lucide-icon [img]="icons.shield" size="14"></lucide-icon>
+          {{ usuario?.perfil }}
+        </div>
+      </div>
+
+      <div class="profile-forms">
+        <form class="form-section" #profileForm="ngForm" (ngSubmit)="salvarPerfil()">
+          <h2>{{ 'Dados pessoais' | tr }}</h2>
+          <div class="input-group">
+            <label for="profile-name">{{ 'Nome Completo' | tr }}</label>
+            <input id="profile-name" name="nome" [(ngModel)]="nome" autocomplete="name" required maxlength="150">
+          </div>
+          <div class="input-group">
+            <label for="profile-email">{{ 'E-mail' | tr }}</label>
+            <input id="profile-email" name="email" type="email" email [(ngModel)]="email" autocomplete="email" required maxlength="150">
+          </div>
+          <button class="btn-primary" type="submit" [disabled]="profileForm.invalid || savingProfile()">
+            <lucide-icon [img]="icons.save" size="18"></lucide-icon>
+            {{ 'Salvar perfil' | tr }}
+          </button>
+          @if (profileStatus()) {
+            <p class="form-message" role="status">{{ profileStatus() | tr }}</p>
+          }
+        </form>
+
+        <form class="form-section password-form" #passwordForm="ngForm" (ngSubmit)="alterarSenha()">
+          <h2>{{ 'Alterar senha' | tr }}</h2>
+          <div class="input-group">
+            <label for="current-password">{{ 'Senha atual' | tr }}</label>
+            <input id="current-password" name="senhaAtual" type="password" [(ngModel)]="senhaAtual" autocomplete="current-password" required maxlength="72">
+          </div>
+          <div class="input-group">
+            <label for="new-password">{{ 'Nova Senha' | tr }}</label>
+            <input id="new-password" name="senha" type="password" [(ngModel)]="senha" autocomplete="new-password" aria-describedby="password-hint" required minlength="8" maxlength="72">
+            <small id="password-hint">{{ 'Use pelo menos 8 caracteres.' | tr }}</small>
+          </div>
+          <div class="input-group">
+            <label for="confirm-password">{{ 'Confirmar nova senha' | tr }}</label>
+            <input id="confirm-password" name="confirmacao" type="password" [(ngModel)]="confirmacao" autocomplete="new-password" required maxlength="72">
+          </div>
+          <button class="btn-primary" type="submit" [disabled]="passwordForm.invalid || savingPassword()">{{ 'Alterar senha' | tr }}</button>
+          @if (passwordStatus()) {
+            <p class="form-message" role="status">{{ passwordStatus() | tr }}</p>
+          }
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,3 +1,6 @@
+import { LanguageService } from '../../services/language.service';
+import { inject } from '@angular/core';
+import { TranslatePipe } from '../../services/translate.pipe';
 import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,11 +11,12 @@ import { LucideAngularModule, Mail, Lock, AlertCircle } from 'lucide-angular';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, FormsModule, RouterLink, LucideAngularModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
+  readonly language = inject(LanguageService);
 
   credenciais = {
     email: '',
@@ -53,21 +57,24 @@ export class LoginComponent implements OnInit {
   }
 
   fazerLogin() {
-    if (!this.credenciais.email || !this.credenciais.senha) {
-      alert('Por favor, preencha todos os campos.');
+    const identificador = this.credenciais.email.trim();
+    if (!identificador || !this.credenciais.senha) {
+      alert(this.language.text("Por favor, preencha todos os campos."));
       return;
     }
 
     this.carregando = true;
     this.erroLogin = false;
 
-    this.authService.login(this.credenciais).subscribe({
+    this.authService.login({ ...this.credenciais, email: identificador }).subscribe({
       next: (resposta: any) => {
+        localStorage.removeItem('client_token');
+        localStorage.removeItem('client_user');
         localStorage.setItem('token', resposta.token);
 
         if (resposta.usuario) {
           localStorage.setItem('usuario_nome', resposta.usuario.nome);
-          localStorage.setItem('usuario_sgf', JSON.stringify(resposta.usuario));
+          this.authService.setCurrentUser(resposta.usuario);
         }
 
         const tipoUsuario = resposta.usuario?.tipo;
@@ -79,7 +86,6 @@ export class LoginComponent implements OnInit {
             this.router.navigate(['/supervisor/dashboard']);
             break;
           case 'OPERADOR':
-            this.router.navigate(['/operador/painel']);
             this.router.navigate(['/operador/escolha-guiches']);
             break;
           case 'CLIENTE':
@@ -97,9 +103,9 @@ export class LoginComponent implements OnInit {
         this.erroLogin = true;
 
         if (erro.status === 401) {
-          alert('Senha incorreta! Verifique suas credenciais.');
+          alert(this.language.text("Senha incorreta! Verifique suas credenciais."));
         } else {
-          alert('Erro ao conectar. Tente novamente.');
+          alert(this.language.text("Erro ao conectar. Tente novamente."));
         }
 
         this.cd.detectChanges();

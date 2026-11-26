@@ -99,6 +99,6 @@ Depois do deploy, abra o frontend, verifique `GET /health` e faça um teste de l
 
 ## Contas e dados
 
-Em produção, a recuperação de acesso é assistida. A tela **Esqueci minha senha** orienta a pessoa a procurar o administrador. A redefinição deve ocorrer depois de confirmar a identidade da pessoa. Compartilhe a senha temporária por um canal privado e peça a troca no primeiro acesso.
+Em produção, a recuperação de acesso é assistida. A tela **Esqueci minha senha** registra uma solicitação privada para o administrador, que pode redefinir a senha após confirmar a identidade da pessoa. Compartilhe a senha temporária por um canal privado e peça a troca no primeiro acesso.
 
 Mantenha arquivos de ambiente, credenciais e backups com dados fora do Git. Para manutenção, use dados sintéticos e preserve as migrações já aplicadas.

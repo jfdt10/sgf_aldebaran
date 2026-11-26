@@ -1,11 +1,11 @@
 <div class="perfil-page">
   <div class="page-top">
     <div class="header-titles">
-      <h1>Meu Perfil</h1>
+      <h1>{{ "Meu Perfil" | tr }}</h1>
     </div>
     <div class="page-actions">
-      <button class="btn-ghost" routerLink="/supervisor/dashboard">Voltar</button>
-      <button class="btn-solid-blue" (click)="salvar()">Salvar Alterações</button>
+      <button class="btn-ghost" routerLink="/supervisor/dashboard">{{ "Voltar" | tr }}</button>
+      <button class="btn-solid-blue" (click)="salvar()">{{ "Salvar Alterações" | tr }}</button>
     </div>
   </div>
 
@@ -30,15 +30,15 @@
             <h3>Informações Pessoais</h3>
             <div class="form-grid">
               <div class="form-group full-width">
-                <label>Nome Completo</label>
+                <label>{{ "Nome Completo" | tr }}</label>
                 <input type="text" formControlName="nome" placeholder="Digite seu nome">
               </div>
               <div class="form-group">
-                <label>E-mail</label>
+                <label>{{ "E-mail" | tr }}</label>
                 <input type="email" formControlName="email">
               </div>
               <div class="form-group">
-                <label>Telefone</label>
+                <label>{{ "Telefone" | tr }}</label>
                 <input type="text" formControlName="telefone" placeholder="(00) 00000-0000">
               </div>
               <div class="form-group full-width">
@@ -51,7 +51,7 @@
           <hr class="form-divider">
 
           <div class="form-block">
-            <h3>Segurança</h3>
+            <h3>{{ "Segurança" | tr }}</h3>
             <div class="form-grid">
               <div class="form-group">
                 <label>Senha Atual</label>
@@ -64,7 +64,7 @@
               <div></div>
               
               <div class="form-group">
-                <label>Nova Senha</label>
+                <label>{{ "Nova Senha" | tr }}</label>
                 <div class="input-with-icon">
                   <input [type]="showNovaSenha ? 'text' : 'password'" formControlName="novaSenha" placeholder="••••••••">
                   <lucide-icon [img]="icons.lock" size="16" class="field-icon-left"></lucide-icon>
@@ -72,7 +72,7 @@
                 </div>
               </div>
               <div class="form-group">
-                <label>Confirmar Nova Senha</label>
+                <label>{{ "Confirmar Nova Senha" | tr }}</label>
                 <div class="input-with-icon">
                   <input [type]="showConfirmarSenha ? 'text' : 'password'" formControlName="confirmarSenha" placeholder="••••••••">
                   <lucide-icon [img]="icons.lock" size="16" class="field-icon-left"></lucide-icon>
@@ -92,7 +92,7 @@
       <div class="s-icon bg-green-light">
         <lucide-icon [img]="icons.check" size="48" color="#22c55e"></lucide-icon>
       </div>
-      <h2>Sucesso!</h2>
+      <h2>{{ "Sucesso!" | tr }}</h2>
       <p>Perfil atualizado com sucesso.</p>
       
       <button class="btn-solid-blue w-full" (click)="fecharModal()">Continuar</button>

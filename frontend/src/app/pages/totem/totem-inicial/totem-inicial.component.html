@@ -6,8 +6,8 @@
     </div>
 
     <div class="lang-switch">
-      <div class="lang-option active">PT</div>
-      <div class="lang-option">EN</div>
+      <button type="button" class="lang-option" [class.active]="language.current() === 'PT'" [attr.aria-pressed]="language.current() === 'PT'" (click)="language.select('PT')">PT</button>
+      <button type="button" class="lang-option" [class.active]="language.current() === 'EN'" [attr.aria-pressed]="language.current() === 'EN'" (click)="language.select('EN')">EN</button>
     </div>
   </header>
 
@@ -16,10 +16,10 @@
     <div class="center-wrapper">
       
       <div class="heading-group">
-        <h1>Bem-vindo</h1>
-        <p>Selecione uma opção para iniciar o atendimento</p>
+        <h1>{{ "Bem-vindo" | tr }}</h1>
+        <p>{{ "Selecione uma opção para iniciar o atendimento" | tr }}</p>
         <div class="filial-indicator" *ngIf="filialNome">
-             📍 Unidade: <strong>{{ filialNome }}</strong>
+             {{ "📍 Unidade:" | tr }} <strong>{{ filialNome }}</strong>
         </div>
       </div>
 
@@ -35,8 +35,8 @@
               <path d="M9 16L11 18L15 14" stroke="#0099CC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
-          <h2>Tenho Agendamento</h2>
-          <p>Check-in via QR Code</p>
+          <h2>{{ "Tenho Agendamento" | tr }}</h2>
+          <p>{{ "Check-in via QR Code" | tr }}</p>
           <div class="bar-indicator"></div>
         </div>
 
@@ -47,8 +47,8 @@
               <path d="M9 12.5H15" stroke="#0099CC" stroke-width="2" stroke-linecap="round" stroke-dasharray="0.1 0.1"/>
             </svg>
           </div>
-          <h2>Retirar Senha</h2>
-          <p>Chegada sem hora marcada</p>
+          <h2>{{ "Retirar Senha" | tr }}</h2>
+          <p>{{ "Chegada sem hora marcada" | tr }}</p>
           <div class="bar-indicator"></div>
         </div>
 
@@ -57,7 +57,7 @@
   </main>
 
   <footer class="totem-footer">
-    <p>© 2026 Aldebaran SGF - Todos os direitos reservados</p>
+    <p>{{ "© 2026 Aldebaran SGF - Todos os direitos reservados" | tr }}</p>
   </footer>
 
 </div>

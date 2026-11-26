@@ -24,7 +24,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { LogService } from '../log/log.service';
 import { AuthenticatedRequest, AuthenticatedUser } from '../common/interfaces/authenticated-request.interface';
 import { AccountManagementGuard, StaffGuard, canManageAccounts } from '../auth/account-role.guards';
-import { PasswordDto } from '../auth/password.dto';
+import { ChangeStaffPasswordDto, PasswordDto } from '../auth/password.dto';
 
 @Controller('usuarios')
 export class UsuarioController {
@@ -109,6 +109,14 @@ export class UsuarioController {
       'Usuário',
     );
     return res;
+  }
+
+  @UseGuards(JwtAuthGuard, StaffGuard)
+  @Patch('me/senha')
+  async changeMyPassword(@Body() body: ChangeStaffPasswordDto, @Request() req: AuthenticatedRequest) {
+    await this.usuarioService.changeMyPassword(req.user.userId, body.senhaAtual, body.senha);
+    await this.logService.logAction('Alteracao de senha', 'Usuario alterou a propria senha', req.user.userId, 'Autenticacao');
+    return { updated: true };
   }
 
   @UseGuards(JwtAuthGuard, StaffGuard)

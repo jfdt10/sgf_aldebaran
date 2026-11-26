@@ -1,3 +1,6 @@
+import { LanguageService } from '../../services/language.service';
+import { inject } from '@angular/core';
+import { TranslatePipe } from '../../services/translate.pipe';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ApiService } from '../../services/api.service';
@@ -10,11 +13,12 @@ import { PainelConfigService } from '../../services/painel-config.service';
 @Component({
   selector: 'app-painel-tv',
   standalone: true,
-  imports: [CommonModule, DatePipe],
+  imports: [TranslatePipe, CommonModule, DatePipe],
   templateUrl: './painel-tv.component.html',
   styleUrls: ['./painel-tv.component.scss']
 })
 export class PainelTvComponent implements OnInit, OnDestroy {
+  readonly language = inject(LanguageService);
   dataAtual = new Date();
   dataAtualTexto = '';
   senhaAtual: any = null;
@@ -276,7 +280,7 @@ export class PainelTvComponent implements OnInit, OnDestroy {
           : destinoTipo;
 
         const mensagem = new SpeechSynthesisUtterance(`Senha. ${numero}, Dirija-se ao, ${destino}.`);
-        mensagem.lang = 'pt-BR';
+        mensagem.lang = this.language.current() === 'EN' ? 'en' : 'pt-BR';
         mensagem.rate = 0.85;
 
         window.speechSynthesis.cancel();

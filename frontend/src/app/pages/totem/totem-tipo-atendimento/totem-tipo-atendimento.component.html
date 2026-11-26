@@ -6,8 +6,8 @@
     </div>
 
     <div class="lang-switch">
-      <div class="lang-option active">PT</div>
-      <div class="lang-option">EN</div>
+      <button type="button" class="lang-option" [class.active]="language.current() === 'PT'" [attr.aria-pressed]="language.current() === 'PT'" (click)="language.select('PT')">PT</button>
+      <button type="button" class="lang-option" [class.active]="language.current() === 'EN'" [attr.aria-pressed]="language.current() === 'EN'" (click)="language.select('EN')">EN</button>
     </div>
   </header>
 
@@ -16,8 +16,8 @@
     <div class="center-wrapper">
       
       <div class="heading-group">
-        <h1>Tipo de Atendimento</h1>
-        <p>Selecione a opção que se aplica a você</p>
+        <h1>{{ "Tipo de Atendimento" | tr }}</h1>
+        <p>{{ "Selecione a opção que se aplica a você" | tr }}</p>
       </div>
 
       <div class="cards-row">
@@ -29,8 +29,8 @@
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
           </div>
-          <h2>Convencional</h2>
-          <p>Atendimento padrão</p>
+          <h2>{{ "Convencional" | tr }}</h2>
+          <p>{{ "Atendimento padrão" | tr }}</p>
           <div class="bar-indicator"></div>
         </div>
 
@@ -42,8 +42,8 @@
             <img src="assets/icon-idoso-degrade.png" class="icon-img">
           </div>
           
-          <h2>Preferencial</h2>
-          <p class="desc-long">Idosos 60+, Gestantes, PCD,<br>Autistas e lactantes</p>
+          <h2>{{ "Preferencial" | tr }}</h2>
+          <p class="desc-long">{{ "Idosos 60+, Gestantes, PCD," | tr }}<br>{{ "Autistas e lactantes" | tr }}</p>
           <div class="bar-indicator"></div>
         </div>
 
@@ -56,7 +56,7 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>
         </svg>
-        Voltar
+        {{ "Voltar" | tr }}
       </button>
     </div>
 

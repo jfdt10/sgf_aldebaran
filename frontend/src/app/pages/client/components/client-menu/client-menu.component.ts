@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../../services/translate.pipe';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -7,7 +8,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-client-menu',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, RouterLink, RouterLinkActive, LucideAngularModule],
   templateUrl: './client-menu.component.html',
   styleUrls: ['./client-menu.component.scss']
 })

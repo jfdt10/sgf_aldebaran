@@ -2,7 +2,7 @@
   <div class="edit-profile-shell">
     <header class="edit-profile-header">
       <div>
-        <p class="page-eyebrow">Portal do Cliente</p>
+        <p class="page-eyebrow">{{ "Portal do Cliente" | tr }}</p>
         <h2>Editar Dados</h2>
         <p class="page-description">
           Atualize os dados cadastrais da sua conta e gerencie sua senha com seguranca.
@@ -56,7 +56,7 @@
             </div>
 
             <div class="form-field">
-              <label>{{ isPessoaJuridica ? 'E-mail comercial' : 'E-mail' }}</label>
+              <label>{{ isPessoaJuridica ? 'E-mail comercial' : ("E-mail" | tr) }}</label>
               <div class="input-with-icon">
                 <lucide-icon [img]="icons.mail" size="18"></lucide-icon>
                 <input type="email" formControlName="email" />
@@ -67,7 +67,7 @@
             </div>
 
             <div class="form-field form-field--phone">
-              <label>Telefone / Celular</label>
+              <label>{{ "Telefone / Celular" | tr }}</label>
               <div class="input-with-icon">
                 <lucide-icon [img]="icons.phone" size="18"></lucide-icon>
                 <input type="text" formControlName="telefone" placeholder="(00) 00000-0000" />

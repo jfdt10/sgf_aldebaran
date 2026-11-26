@@ -41,7 +41,7 @@
                                     <input type="number" [(ngModel)]="s.metaEspera" [style.width.ch]="(s.metaEspera?.toString()?.length || 1) + 1">
                                     <span>min</span>
                                 </div>
-                                <span class="sla-label">Espera</span>
+                                <span class="sla-label">{{ "Espera" | tr }}</span>
                             </div>
                             <div class="sla-item">
                                 <div class="sla-input-wrapper">
@@ -173,7 +173,7 @@
         <button class="fab-save" (click)="salvarAlteracoes()" [disabled]="loading">
             <lucide-icon *ngIf="!loading" [img]="iconsArr.save" size="20"></lucide-icon>
             <span *ngIf="loading" class="spinner"></span>
-            Salvar Alterações
+            {{ "Salvar Alterações" | tr }}
         </button>
     </div>
 </div>
@@ -186,9 +186,9 @@
                     <lucide-icon [img]="iconsArr.check" size="40" strokeWidth="3"></lucide-icon>
                 </div>
             </div>
-            <h2>Sucesso!</h2>
+            <h2>{{ "Sucesso!" | tr }}</h2>
             <p>As configurações foram salvas e aplicadas em todo o sistema.</p>
-            <button class="btn-success-ok" (click)="fecharSucesso()">OK, Entendi</button>
+            <button class="btn-success-ok" (click)="fecharSucesso()">{{ "OK, Entendi" | tr }}</button>
         </div>
     </div>
 </div>

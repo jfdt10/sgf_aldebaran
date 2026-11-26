@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -28,7 +29,7 @@ interface SettingsFeedback {
 @Component({
   selector: 'app-client-configuracoes',
   standalone: true,
-  imports: [
+  imports: [TranslatePipe,
     CommonModule,
     LucideAngularModule,
     SettingsSectionCardComponent,

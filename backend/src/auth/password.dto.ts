@@ -6,3 +6,9 @@ export class PasswordDto {
   @IsByteLength(8, 72)
   senha: string;
 }
+
+export class ChangeStaffPasswordDto extends PasswordDto {
+  @IsString()
+  @IsByteLength(1, 72)
+  senhaAtual: string;
+}

@@ -1,3 +1,6 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -16,11 +19,12 @@ interface Categoria {
 @Component({
   selector: 'app-totem-categoria',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, RouterLink, LucideAngularModule],
   templateUrl: './totem-categoria.component.html',
   styleUrls: ['./totem-categoria.component.scss']
 })
 export class TotemCategoriaComponent implements OnInit {
+  readonly language = inject(LanguageService);
 
   categorias: Categoria[] = [];  
   categoriaSelecionada: Categoria | null = null;

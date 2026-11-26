@@ -2,36 +2,37 @@
   <div class="list-card">
     <div class="list-card-header">
       <div class="titles">
-        <h2>Clientes</h2>
-        <p>Gerencie os clientes cadastrados</p>
+        <h2>{{ "Clientes" | tr }}</h2>
+        <p>{{ 'Gerencie os clientes cadastrados' | tr }}</p>
       </div>
       <button class="btn-primary" (click)="abrirModalNovo()">
         <lucide-icon [img]="icons.plus" size="18"></lucide-icon>
-        Novo Cliente
+        {{ "Novo Cliente" | tr }}
       </button>
     </div>
 
+    <p *ngIf="passwordResult === 'success'" role="status" class="list-card-footer">{{ 'Senha redefinida. Compartilhe-a por um canal privado.' | tr }}</p>
     <div class="list-card-search" *ngIf="clientes.length > 0 || filtro">
       <div class="search-input-wrapper">
         <lucide-icon [img]="icons.search" size="18" class="search-icon"></lucide-icon>
-        <input type="text" placeholder="Buscar por razão social, nome fantasia ou CNPJ/CPF..." [(ngModel)]="filtro"
+        <input type="text" [placeholder]="'Buscar por razão social, nome fantasia ou CNPJ/CPF...' | tr" [(ngModel)]="filtro"
           (keyup.enter)="carregarClientes()">
       </div>
     </div>
 
     <div class="skeleton-loader" *ngIf="loading" style="padding: 2rem;">
-      Aguarde, carregando...
+      {{ 'Aguarde, carregando...' | tr }}
     </div>
 
     <div class="table-responsive" *ngIf="!loading && clientes.length > 0">
       <table class="list-table">
         <thead>
           <tr>
-            <th>Cliente</th>
+            <th>{{ "Cliente" | tr }}</th>
             <th>CPF/CNPJ</th>
-            <th>Contato</th>
+            <th>{{ 'Contato' | tr }}</th>
             <th>Status</th>
-            <th>Ações</th>
+            <th>{{ "Ações" | tr }}</th>
           </tr>
         </thead>
         <tbody>
@@ -53,8 +54,11 @@
             </td>
             <td>
               <div class="action-btns">
-                <button class="btn-edit" (click)="abrirModalEditar(c)" title="Editar">
+                <button class="btn-edit" (click)="abrirModalEditar(c)" [title]='"Editar" | tr'>
                   <lucide-icon [img]="icons.edit" size="14"></lucide-icon>
+                </button>
+                <button type="button" class="btn-edit" *ngIf="isAtivo(c)" (click)="abrirRedefinicao(c)" [attr.aria-label]="'Redefinir acesso do cliente' | tr" [title]="'Redefinir acesso do cliente' | tr">
+                  <lucide-icon [img]="icons.shieldAlert" size="14"></lucide-icon>
                 </button>
                 <button class="btn-toggle" [ngClass]="isAtivo(c) ? 'deactivate' : 'activate'" 
                   (click)="alternarStatus(c.id)"
@@ -72,8 +76,8 @@
       <div class="icon-circle empty">
         <lucide-icon [img]="icons.users" size="40"></lucide-icon>
       </div>
-      <h3>Nenhum cliente encontrado</h3>
-      <p>O banco está vazio ou a busca não retornou resultados.</p>
+      <h3>{{ 'Nenhum cliente encontrado' | tr }}</h3>
+      <p>{{ 'O banco está vazio ou a busca não retornou resultados.' | tr }}</p>
     </div>
 
     <div class="list-card-footer" *ngIf="!loading && clientes.length > 0">
@@ -87,7 +91,7 @@
     <div class="modal-header">
       <h2>
         <lucide-icon [img]="icons.user" size="20"></lucide-icon>
-        {{ isEditing ? 'Editar Cliente' : 'Criar Novo Cliente' }}
+        {{ isEditing ? ("Editar Cliente" | tr) : 'Criar Novo Cliente' }}
       </h2>
       <button class="close-btn" (click)="fecharModal()"><lucide-icon [img]="icons.x"></lucide-icon></button>
     </div>
@@ -95,7 +99,7 @@
     <div class="alert-info" *ngIf="!isEditing && !clienteForm.senha" style="margin: 16px 24px 0;">
       <lucide-icon [img]="icons.alertCircle" size="20"></lucide-icon>
       <div>
-        <strong>Aviso:</strong> Se nenhuma senha for informada, o sistema usara <code>Aldebaran@123</code> como senha inicial.
+        <strong>Acesso ao portal:</strong> Para liberar o primeiro acesso, informe uma senha temporária ou solicite a redefinição pelo administrador.
       </div>
     </div>
 
@@ -104,14 +108,14 @@
         <div class="form-group flex-1">
           <label>TIPO</label>
           <div class="segmented-control">
-            <button type="button" [class.active]="clienteForm.tipo === 'PF'" (click)="clienteForm.tipo = 'PF'">Pessoa Física</button>
-            <button type="button" [class.active]="clienteForm.tipo === 'PJ'" (click)="clienteForm.tipo = 'PJ'">Pessoa Jurídica</button>
+            <button type="button" [class.active]="clienteForm.tipo === 'PF'" (click)="clienteForm.tipo = 'PF'">{{ "Pessoa Física" | tr }}</button>
+            <button type="button" [class.active]="clienteForm.tipo === 'PJ'" (click)="clienteForm.tipo = 'PJ'">{{ "Pessoa Jurídica" | tr }}</button>
           </div>
         </div>
       </div>
 
       <div class="form-group">
-        <label>{{ clienteForm.tipo === 'PF' ? 'Nome Completo' : 'Razão Social' }} *</label>
+        <label>{{ clienteForm.tipo === 'PF' ? ("Nome Completo" | tr) : ("Razão Social" | tr) }} *</label>
         <input type="text" [(ngModel)]="clienteForm.nome" [placeholder]="clienteForm.tipo === 'PF' ? 'Ex: João Silva' : 'Ex: Minha Empresa LTDA'" />
       </div>
 
@@ -126,7 +130,7 @@
             placeholder="00.000.000/0000-00" />
         </div>
         <div class="form-group flex-1">
-          <label>Telefone</label>
+          <label>{{ "Telefone" | tr }}</label>
           <input type="text" [(ngModel)]="clienteForm.telefone" placeholder="(00) 00000-0000" />
         </div>
       </div>
@@ -152,10 +156,10 @@
 
     </div>
     <div class="modal-footer">
-      <button class="btn-cancel" (click)="fecharModal()">Cancelar</button>
+      <button class="btn-cancel" (click)="fecharModal()">{{ "Cancelar" | tr }}</button>
       <button type="button" class="btn-submit" (click)="salvar()">
         <lucide-icon [img]="icons.checkCircle" size="18"></lucide-icon>
-        {{ isEditing ? 'Salvar' : 'Cadastrar' }}
+        {{ isEditing ? ("Salvar" | tr) : ("Cadastrar" | tr) }}
       </button>
     </div>
   </div>
@@ -170,9 +174,32 @@
           <lucide-icon [img]="icons.check" size="40" strokeWidth="3"></lucide-icon>
         </div>
       </div>
-      <h2>Sucesso!</h2>
-      <p>Cliente {{ isEditing ? 'atualizado' : 'cadastrado' }} corretamente.</p>
-      <button class="btn-success-ok" (click)="fecharModal()">OK, Entendi</button>
+      <h2>{{ "Sucesso!" | tr }}</h2>
+      <p>{{ "Cliente" | tr }} {{ isEditing ? 'atualizado' : 'cadastrado' }} corretamente.</p>
+      <button class="btn-success-ok" (click)="fecharModal()">{{ "OK, Entendi" | tr }}</button>
     </div>
   </div>
 </div>
+@if (passwordTarget; as cliente) {
+  <div class="modal-overlay">
+    <form class="modal-content animate-pop" role="dialog" aria-modal="true" aria-labelledby="client-password-title" (ngSubmit)="redefinirAcesso()">
+      <div class="modal-header">
+        <h3 id="client-password-title">{{ 'Redefinir acesso do cliente' | tr }}</h3>
+      </div>
+      <div class="modal-body">
+        <p><strong>{{ cliente.nome }}</strong></p>
+        <p>{{ 'Confirme a identidade do cliente antes de definir uma senha temporária.' | tr }}</p>
+        <div class="form-group">
+          <label for="temporary-client-password">{{ 'Senha temporária' | tr }}</label>
+          <input id="temporary-client-password" name="password" type="password" autocomplete="new-password" [(ngModel)]="tempPassword" minlength="8" maxlength="72" required>
+        </div>
+        <label><input type="checkbox" name="verified" [(ngModel)]="identityConfirmed"> {{ 'Confirmei a identidade do cliente' | tr }}</label>
+        <p *ngIf="passwordResult === 'error'" role="alert">{{ 'Não foi possível redefinir a senha.' | tr }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" [disabled]="savingPassword" (click)="passwordTarget = undefined; tempPassword = ''; passwordResult = ''">{{ 'Cancelar' | tr }}</button>
+        <button type="submit" class="btn-submit" [disabled]="savingPassword || !identityConfirmed || tempPassword.length < 8">{{ 'Redefinir senha' | tr }}</button>
+      </div>
+    </form>
+  </div>
+}

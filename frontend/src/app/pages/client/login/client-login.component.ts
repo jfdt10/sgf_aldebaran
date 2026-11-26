@@ -1,3 +1,6 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -8,11 +11,12 @@ import { ClientAuthService } from '../../../services/client-auth.service';
 @Component({
   selector: 'app-client-login',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, RouterLink, FormsModule, LucideAngularModule],
   templateUrl: './client-login.component.html',
   styleUrls: ['./client-login.component.scss']
 })
 export class ClientLoginComponent {
+  readonly language = inject(LanguageService);
   email: string = '';
   senha: string = '';
   carregando: boolean = false;

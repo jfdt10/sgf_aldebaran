@@ -264,3 +264,35 @@ h2 {
 
 @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
 @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+.recovery-language {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+
+  button {
+    padding: 0.35rem 0.65rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    background: #fff;
+    color: #334155;
+    cursor: pointer;
+  }
+
+  button.active { background: #075985; border-color: #075985; color: #fff; }
+}
+
+.success-view { display: grid; gap: 0.75rem; }
+.success-view p { margin: 0; color: #475569; line-height: 1.5; }
+.btn-outline {
+  justify-self: start;
+  border: 1px solid #075985;
+  border-radius: 0.5rem;
+  color: #075985;
+  background: #fff;
+  padding: 0.65rem 0.9rem;
+  cursor: pointer;
+}
+
+.error-msg { color: #b91c1c; }

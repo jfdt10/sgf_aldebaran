@@ -1,6 +1,14 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LogService } from '../log/log.service';
+import { IsString, MaxLength, MinLength } from 'class-validator';
+
+class RecoveryRequestDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(150)
+  email: string;
+}
 
 @Controller('auth')
 export class AuthController {
@@ -47,7 +55,7 @@ export class AuthController {
   }
 
   @Post('recover')
-  async recover(@Body() body: { email: string }) {
+  async recover(@Body() body: RecoveryRequestDto) {
     return this.authService.recover(body.email);
   }
 

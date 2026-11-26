@@ -3,7 +3,7 @@
   <main class="form-container animate-up">
     
     <div class="input-group">
-      <label>Filial</label>
+      <label>{{ "Filial" | tr }}</label>
       <div class="select-wrapper">
         <select [(ngModel)]="form.filialId" (change)="carregarConfiguracoes()">
           <option *ngFor="let f of filiais" [ngValue]="f.id">{{ f.nome }}</option>
@@ -17,7 +17,7 @@
     </div>
 
     <div class="input-group">
-      <label>Categoria</label>
+      <label>{{ "Categoria" | tr }}</label>
       <div class="select-wrapper">
         <select [(ngModel)]="form.servicoId" (change)="atualizarHorarios()">
           <option *ngFor="let c of categorias" [ngValue]="c.id">{{ c.nome }}</option>
@@ -26,10 +26,10 @@
       </div>
     </div>
     <div class="input-group">
-      <label>Quantidade</label>
+      <label>{{ "Quantidade" | tr }}</label>
       <div class="counter-box">
         <div class="counter-label">
-          <span>Garrafão 20 L</span>
+          <span>{{ "Garrafão 20 L" | tr }}</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="jug-icon">
             <path d="M10 2h4v2h-4z" />
             <path d="M11 4v2h2V4z" />
@@ -55,10 +55,10 @@
       <div class="cal-header">
         <h3>{{ mesesLabels[mesAtual] }} {{ anoAtual }}</h3>
         <div class="nav-arrows">
-          <button type="button" class="calendar-nav-btn" (click)="mesAnterior()" aria-label="Mês anterior">
+          <button type="button" class="calendar-nav-btn" (click)="mesAnterior()" [attr.aria-label]='"Mês anterior" | tr'>
             <lucide-icon [img]="icons.left" size="20"></lucide-icon>
           </button>
-          <button type="button" class="calendar-nav-btn" (click)="proximoMes()" aria-label="Próximo mês">
+          <button type="button" class="calendar-nav-btn" (click)="proximoMes()" [attr.aria-label]='"Próximo mês" | tr'>
             <lucide-icon [img]="icons.right" size="20"></lucide-icon>
           </button>
         </div>
@@ -82,15 +82,15 @@
         </button>      </div>
 
       <div class="date-feedback" [class.error]="erroData" *ngIf="form.data || erroData">
-        <span *ngIf="!erroData">Data selecionada: {{ getFormattedDate() }}</span>
+        <span *ngIf="!erroData">{{ "Data selecionada:" | tr }} {{ getFormattedDate() }}</span>
         <span *ngIf="erroData">{{ erroData }}</span>
       </div>    </div>
 
     <div class="time-section">
-      <h3>Horários</h3>
+      <h3>{{ "Horários" | tr }}</h3>
       <div class="loading-slots" *ngIf="loadingHorarios">
         <span class="spinner"></span>
-        <p>Carregando horários...</p>
+        <p>{{ "Carregando horários..." | tr }}</p>
       </div>
 
       <div class="time-grid" *ngIf="horariosDisponiveis.length > 0 && !loadingHorarios">
@@ -107,14 +107,14 @@
 
       <div class="no-slots-card" *ngIf="horariosDisponiveis.length === 0 && !erroData && configCarregada && !loadingHorarios">
         <lucide-icon [img]="icons.calendar" size="24"></lucide-icon>
-        <p>Não há horários disponíveis para este dia.</p>
+        <p>{{ "Não há horários disponíveis para este dia." | tr }}</p>
       </div>
     </div>
 
     <div class="input-group">
-      <label>Observações</label>
+      <label>{{ "Observações" | tr }}</label>
       <textarea 
-        placeholder="Digite se precisar de acessibilidade..." 
+        [placeholder]='"Digite se precisar de acessibilidade..." | tr'
         [(ngModel)]="form.obs" 
         rows="3"></textarea>
     </div>
@@ -126,7 +126,7 @@
   <footer class="bottom-bar animate-up delay-1">
     <button class="btn-confirm" (click)="confirmar()" [disabled]="erroData || !form.data">
       <lucide-icon [img]="icons.check" size="20"></lucide-icon>
-      Confirmar Agendamento
+      {{ "Confirmar Agendamento" | tr }}
     </button>
   </footer>
 
@@ -136,8 +136,8 @@
         <lucide-icon [img]="icons.check" size="44"></lucide-icon>
       </div>
 
-      <h2>Sucesso!</h2>
-      <p class="success-desc">Agendamento confirmado com sucesso.</p>
+      <h2>{{ "Sucesso!" | tr }}</h2>
+      <p class="success-desc">{{ "Agendamento confirmado com sucesso." | tr }}</p>
 
       <div class="summary-card">
         <div class="summary-item">
@@ -146,7 +146,7 @@
           </div>
           <div class="item-text">
             {{ agendamentoConfirmado?.data }} de {{ mesesLabels[agendamentoConfirmado?.mes || 0] }},
-            {{ agendamentoConfirmado?.ano }} às {{ agendamentoConfirmado?.hora }}
+            {{ agendamentoConfirmado?.ano }} {{ "às" | tr }} {{ agendamentoConfirmado?.hora }}
           </div>
         </div>
 
@@ -168,17 +168,17 @@
           <div class="item-icon">
             <lucide-icon [img]="icons.drop" size="18"></lucide-icon>
           </div>
-          <div class="item-text">{{ agendamentoConfirmado?.quantidade }} unidades de Garrafão 20 L</div>
+          <div class="item-text">{{ agendamentoConfirmado?.quantidade }} {{ "unidades de Garrafão 20 L" | tr }}</div>
         </div>
       </div>
 
       <div class="modal-actions">
         <button class="btn-view-appointments" (click)="verAgendamentos()">
-          Ver Meus Agendamentos
+          {{ "Ver Meus Agendamentos" | tr }}
           <lucide-icon [img]="icons.arrowRight" size="18"></lucide-icon>
         </button>
         <button class="btn-back-home" (click)="voltarInicio()">
-          Voltar ao Início
+          {{ "Voltar ao Início" | tr }}
         </button>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, HostListener, ChangeDetectorRef, OnDestroy, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +12,7 @@ import { DatePipe } from '@angular/common';
 @Component({
   selector: 'app-clientes',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, FormsModule, LucideAngularModule],
   providers: [DatePipe],
   templateUrl: './clientes.component.html',
   styleUrls: ['./clientes.component.scss']
@@ -27,6 +28,11 @@ export class ClientesComponent implements OnInit, OnDestroy {
   showModal = false;
   showSuccessModal = false;
   isEditing = false;
+  passwordTarget?: { id: string; nome: string };
+  tempPassword = '';
+  identityConfirmed = false;
+  savingPassword = false;
+  passwordResult: 'success' | 'error' | '' = '';
 
   clienteForm = {
     id: null as number | null,
@@ -178,7 +184,7 @@ export class ClientesComponent implements OnInit, OnDestroy {
     }
 
     if (this.isEditing) {
-      this.api.patch(`/clientes/${this.clienteForm.id}`, payload)
+      this.api.put(`/clientes/${this.clienteForm.id}`, payload)
         .subscribe({
           next: () => {
             this.showModal = false;
@@ -200,6 +206,33 @@ export class ClientesComponent implements OnInit, OnDestroy {
           error: (err) => this.handleError(err, 'Erro ao criar cliente.')
         });
     }
+  }
+
+  abrirRedefinicao(cliente: { id: string; nome: string }) {
+    this.passwordTarget = cliente;
+    this.tempPassword = '';
+    this.identityConfirmed = false;
+    this.passwordResult = '';
+  }
+
+  redefinirAcesso() {
+    const id = this.passwordTarget?.id;
+    if (!id || !this.identityConfirmed || this.tempPassword.length < 8 || this.savingPassword) return;
+    this.savingPassword = true;
+    this.api.patch('/clientes/' + id + '/senha', { senha: this.tempPassword }).subscribe({
+      next: () => {
+        this.passwordTarget = undefined;
+        this.tempPassword = '';
+        this.passwordResult = 'success';
+        this.savingPassword = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.passwordResult = 'error';
+        this.savingPassword = false;
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   alternarStatus(id: string) {
