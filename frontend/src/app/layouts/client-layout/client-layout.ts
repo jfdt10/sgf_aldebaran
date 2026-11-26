@@ -1,3 +1,6 @@
+import { LanguageService } from '../../services/language.service';
+import { inject } from '@angular/core';
+import { LanguageSwitchComponent } from '../../components/language-switch.component';
 import { TranslatePipe } from '../../services/translate.pipe';
 import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -23,11 +26,12 @@ interface ClientMenuGroup {
 @Component({
   selector: 'app-client-layout',
   standalone: true,
-  imports: [TranslatePipe, CommonModule, RouterOutlet, RouterLink, RouterLinkActive, LucideAngularModule],
+  imports: [LanguageSwitchComponent, TranslatePipe, CommonModule, RouterOutlet, RouterLink, RouterLinkActive, LucideAngularModule],
   templateUrl: './client-layout.html',
   styleUrls: ['./client-layout.scss']
 })
 export class ClientLayoutComponent implements OnInit, OnDestroy {
+  readonly language = inject(LanguageService);
   sidebarOpen = true;
   usuario: any = null;
   userInitials: string = 'CL';
@@ -233,7 +237,7 @@ export class ClientLayoutComponent implements OnInit, OnDestroy {
     const days = Math.floor(hours / 24);
     if (days < 7) return `${days} d`;
 
-    return created.toLocaleDateString('pt-BR', {
+    return created.toLocaleDateString(this.language.locale(), {
       day: '2-digit',
       month: '2-digit',
     });

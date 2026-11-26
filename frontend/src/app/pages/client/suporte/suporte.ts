@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, Search, MessageCircle, Ticket, BookOpen, Clock, ChevronRight } from 'lucide-angular';
@@ -5,7 +6,7 @@ import { LucideAngularModule, Search, MessageCircle, Ticket, BookOpen, Clock, Ch
 @Component({
   selector: 'app-suporte',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, LucideAngularModule],
   templateUrl: './suporte.html',
   styleUrls: ['./suporte.scss'],
 })

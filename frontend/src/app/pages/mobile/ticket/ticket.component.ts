@@ -1,3 +1,5 @@
+import { LanguageSwitchComponent } from '../../../components/language-switch.component';
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
@@ -7,7 +9,7 @@ import { LucideAngularModule, Clock, Users, MapPin } from 'lucide-angular';
 @Component({
   selector: 'app-ticket',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [LanguageSwitchComponent, TranslatePipe, CommonModule, LucideAngularModule],
   templateUrl: './ticket.component.html',
   styleUrl: './ticket.component.scss'
 })

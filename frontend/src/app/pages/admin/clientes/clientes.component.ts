@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, HostListener, ChangeDetectorRef, OnDestroy, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -18,6 +20,7 @@ import { DatePipe } from '@angular/common';
   styleUrls: ['./clientes.component.scss']
 })
 export class ClientesComponent implements OnInit, OnDestroy {
+  private readonly language = inject(LanguageService);
   readonly icons = { search: Search, plus: Plus, filter: Filter, user: User, users: Users, building: Building, phone: Phone, edit: Edit2, alertCircle: AlertCircle, x: X, shieldAlert: ShieldAlert, check: Check, calendar: Calendar, trash2: Trash2, checkCircle: CheckCircle };
 
   clientes: any[] = [];
@@ -109,7 +112,7 @@ export class ClientesComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Erro ao carregar clientes', err);
-        if (err.status === 401) alert('Sessão expirada ou usuário não autenticado.');
+        if (err.status === 401) alert(this.language.text("Sessão expirada ou usuário não autenticado."));
         this.loading = false;
       }
     });
@@ -157,14 +160,14 @@ export class ClientesComponent implements OnInit, OnDestroy {
 
   salvar() {
     if (!this.clienteForm.nome || !this.clienteForm.email) {
-      alert('Nome e E-mail são obrigatórios!');
+      alert(this.language.text("Nome e E-mail são obrigatórios!"));
       return;
     }
     if (this.clienteForm.tipo === 'PF' && !this.clienteForm.cpf) {
-      alert('CPF é obrigatório para Pessoa Física.'); return;
+      alert(this.language.text("CPF é obrigatório para Pessoa Física.")); return;
     }
     if (this.clienteForm.tipo === 'PJ' && !this.clienteForm.cnpj) {
-      alert('CNPJ é obrigatório para Pessoa Jurídica.'); return;
+      alert(this.language.text("CNPJ é obrigatório para Pessoa Jurídica.")); return;
     }
 
     const payload: any = {

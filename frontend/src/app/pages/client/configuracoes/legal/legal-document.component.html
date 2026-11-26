@@ -12,14 +12,14 @@
         </span>
 
         <div>
-          <p class="legal-eyebrow">{{ eyebrow }}</p>
-          <h2 id="legal-document-title">{{ content.title }}</h2>
-          <p class="legal-updated">{{ content.updatedAt }}</p>
+          <p class="legal-eyebrow">{{ eyebrow | tr }}</p>
+          <h2 id="legal-document-title">{{ activeContent.title }}</h2>
+          <p class="legal-updated">{{ activeContent.updatedAt }}</p>
         </div>
       </header>
 
       <div class="legal-content">
-        <section class="legal-section" *ngFor="let section of content.sections">
+        <section class="legal-section" *ngFor="let section of activeContent.sections">
           <h3 *ngIf="section.heading">{{ section.heading }}</h3>
           <p *ngFor="let paragraph of section.paragraphs">{{ paragraph }}</p>
         </section>

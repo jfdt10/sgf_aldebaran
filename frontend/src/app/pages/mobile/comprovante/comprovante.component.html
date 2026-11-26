@@ -1,16 +1,17 @@
 <div class="voucher-shell">
   <div class="voucher-modal">
+    <app-language-switch class="page-language" />
     <div class="voucher-header">
-      <h2>Voucher de Agendamento:</h2>
+      <h2>{{ "Voucher de Agendamento:" | tr }}</h2>
       <button
         class="btn-refresh"
         type="button"
         (click)="recarregarAgora()"
         [disabled]="!podeAtualizar"
-        title="Atualizar agora"
+        [title]='"Atualizar agora" | tr'
       >
         <lucide-icon [img]="icons.refresh" [size]="16"></lucide-icon>
-        {{ carregandoSilencioso ? 'Atualizando...' : 'Atualizar' }}
+        {{ carregandoSilencioso ? ("Atualizando..." | tr) : ("Atualizar" | tr) }}
       </button>
     </div>
 
@@ -19,11 +20,11 @@
     </p>
 
     <div class="state loading" *ngIf="loading">
-      Carregando voucher...
+      {{ "Carregando voucher..." | tr }}
     </div>
 
     <div class="state error" *ngIf="!loading && erro">
-      {{ erro }}
+      {{ erro | tr }}
     </div>
 
     <div class="voucher-body" *ngIf="!loading && !erro && dados">
@@ -31,7 +32,7 @@
         <div class="meta-item">
           <lucide-icon [img]="icons.calendar" [size]="16"></lucide-icon>
           <div>
-            <span>Data</span>
+            <span>{{ "Data" | tr }}</span>
             <strong>{{ getDataFormatada() }}</strong>
           </div>
         </div>
@@ -39,7 +40,7 @@
         <div class="meta-item">
           <lucide-icon [img]="icons.clock" [size]="16"></lucide-icon>
           <div>
-            <span>Horario</span>
+            <span>{{ "Horario" | tr }}</span>
             <strong>{{ getHorarioExibicao() }}</strong>
           </div>
         </div>
@@ -47,7 +48,7 @@
         <div class="meta-item">
           <lucide-icon [img]="icons.map" [size]="16"></lucide-icon>
           <div>
-            <span>Local</span>
+            <span>{{ "Local" | tr }}</span>
             <strong>{{ getLocalExibicao() }}</strong>
           </div>
         </div>
@@ -62,7 +63,7 @@
       </div>
 
       <div class="qr-panel" *ngIf="qrCodeImage">
-        <img [src]="qrCodeImage" alt="QR Code de Check-in" />
+        <img [src]="qrCodeImage" [alt]='"QR Code de Check-in" | tr' />
       </div>
 
     </div>
@@ -77,7 +78,7 @@
       </div>
 
       <p class="hint">
-        Escaneie o QR Code ou digite o codigo no Totem para confirmar sua chegada.
+        {{ "Escaneie o QR Code ou digite o codigo no Totem para confirmar sua chegada." | tr }}
       </p>
 
       <button class="btn-fechar" [routerLink]="['/client/home']" type="button">

@@ -24,7 +24,7 @@
             [ngClass]="item.class || ''"
           >
             <lucide-icon [img]="icons[item.icon]"></lucide-icon>
-            <span *ngIf="sidebarOpen">{{ getMenuLabel(item.path, item.label) }}</span>
+            <span *ngIf="sidebarOpen">{{ getMenuLabel(item.path, item.label) | tr }}</span>
           </a>
         </ng-container>
       </ng-container>
@@ -69,6 +69,7 @@
       </div>
 
       <div class="top-bar-right">
+        <app-language-switch />
         <div class="notification-container">
           <button class="notification-btn circular" (click)="toggleNotifications($event)" [class.active]="showNotifications">
             <lucide-icon [img]="icons['bell']" size="20"></lucide-icon>
@@ -82,7 +83,7 @@
               <div>
                 <h3>{{ "Notificações" | tr }}</h3>
                 <span class="header-subtitle" *ngIf="hasUnreadNotifications">
-                  {{ unreadNotificationsCount }} não lida{{ unreadNotificationsCount === 1 ? '' : 's' }}
+                  {{ unreadNotificationsCount }} {{ (unreadNotificationsCount === 1 ? 'não lida' : 'não lidas') | tr }}
                 </span>
               </div>
               <button class="btn-link" [disabled]="!hasUnreadNotifications" (click)="marcarTodasLidas()">{{ "Marcar como lidas" | tr }}</button>
@@ -97,12 +98,12 @@
                 </div>
                 <div class="item-content">
                   <div class="item-title-row">
-                    <div class="item-title">{{ n.titulo }}</div>
+                    <div class="item-title">{{ n.titulo | tr }}</div>
                     <span class="read-status" [class.unread-status]="!n.lida">
-                      {{ n.lida ? 'Lida' : 'Nova' }}
+                      {{ n.lida ? ("Lida" | tr) : ("Nova" | tr) }}
                     </span>
                   </div>
-                  <div class="item-desc">{{ n.mensagem }}</div>
+                  <div class="item-desc">{{ n.mensagem | tr }}</div>
                   <div class="item-meta">{{ getNotificationTime(n.criadoEm) }}</div>
                 </div>
               </div>
@@ -123,7 +124,7 @@
         <lucide-icon [img]="icons['power']" size="32" class="power-icon"></lucide-icon>
       </div>
       <h2>{{ "Deseja sair do sistema?" | tr }}</h2>
-      <p>Sua sessão será encerrada agora.</p>
+      <p>{{ "Sua sessão será encerrada agora." | tr }}</p>
       <div class="modal-actions">
         <button class="btn-cancel" (click)="cancelLogout()">{{ "Cancelar" | tr }}</button>
         <button class="btn-confirm" (click)="logout()">{{ "Sim, Sair" | tr }}</button>

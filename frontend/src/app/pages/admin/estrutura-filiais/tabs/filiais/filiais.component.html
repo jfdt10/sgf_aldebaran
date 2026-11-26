@@ -1,12 +1,12 @@
 <div class="list-card animate-up">
     <div class="list-card-header">
         <div class="titles">
-            <h2>Filiais Cadastradas</h2>
-            <p>Gerencie as unidades e pontos de atendimento</p>
+            <h2>{{ "Filiais Cadastradas" | tr }}</h2>
+            <p>{{ "Gerencie as unidades e pontos de atendimento" | tr }}</p>
         </div>
         <button class="btn-primary" (click)="abrirModal()" *ngIf="!isRestricted">
             <lucide-icon [img]="icons.plus" size="18"></lucide-icon>
-            Nova Filial
+            {{ "Nova Filial" | tr }}
         </button>
     </div>
 
@@ -14,12 +14,12 @@
     <table class="premium-table">
         <thead>
             <tr>
-                <th>FILIAL</th>
-                <th>LOCALIZAÇÃO</th>
-                <th>TELEFONE</th>
-                <th>GUICHÊS</th>
+                <th>{{ "FILIAL" | tr }}</th>
+                <th>{{ "LOCALIZAÇÃO" | tr }}</th>
+                <th>{{ "TELEFONE" | tr }}</th>
+                <th>{{ "GUICHÊS" | tr }}</th>
                 <th>STATUS</th>
-                <th>AÇÕES</th>
+                <th>{{ "AÇÕES" | tr }}</th>
             </tr>
         </thead>
         <tbody>
@@ -39,7 +39,7 @@
                 <td class="col-loc">
                     <div class="loc-wrapper">
                         <lucide-icon [img]="icons.map" size="16" class="gray-icon"></lucide-icon>
-                        <span class="address">{{ f.endereco || 'Endereço não informado' }}</span>
+                        <span class="address">{{ f.endereco || ("Endereço não informado" | tr) }}</span>
                     </div>
                 </td>
 
@@ -58,7 +58,7 @@
 
                 <td>
                     <span class="badge" [class.badge-ativo]="f.ativo" [class.badge-inativo]="!f.ativo">
-                        {{ f.ativo ? 'Ativo' : 'Inativo' }}
+                        {{ f.ativo ? ("Ativo" | tr) : ("Inativo" | tr) }}
                     </span>
                 </td>
 
@@ -79,14 +79,14 @@
         </tbody>
     </table>
     <div class="table-footer">
-        Total de {{ filiais.length }} filial(is)
+        {{ "Total de" | tr }} {{ filiais.length }} {{ "filial(is)" | tr }}
     </div>
 </div>
 
 <div class="modal-overlay" *ngIf="showModal">
     <div class="modal-card">
         <div class="modal-header">
-            <h3>{{ editando ? 'Editar Filial' : 'Nova Filial' }}</h3>
+            <h3>{{ editando ? ("Editar Filial" | tr) : ("Nova Filial" | tr) }}</h3>
             <button class="btn-close" (click)="fecharModal()">
                 <lucide-icon [img]="icons.x" size="20"></lucide-icon>
             </button>
@@ -94,8 +94,8 @@
 
         <div class="modal-body">
             <div class="form-row">
-                <label>Nome da Filial</label>
-                <input type="text" [(ngModel)]="form.nome" placeholder="Ex: Matriz - Centro">
+                <label>{{ "Nome da Filial" | tr }}</label>
+                <input type="text" [(ngModel)]="form.nome" [placeholder]='"Ex: Matriz - Centro" | tr'>
             </div>
 
             <div class="form-row">
@@ -104,8 +104,8 @@
             </div>
 
             <div class="form-row">
-                <label>Localização</label>
-                <input type="text" [(ngModel)]="form.endereco" placeholder="Rua, número - Bairro, Cidade/Estado">
+                <label>{{ "Localização" | tr }}</label>
+                <input type="text" [(ngModel)]="form.endereco" [placeholder]='"Rua, número - Bairro, Cidade/Estado" | tr'>
             </div>
 
             <div class="form-grid">
@@ -116,8 +116,8 @@
                 <div class="form-row">
                     <label>Status</label>
                     <select [(ngModel)]="form.ativo">
-                        <option [ngValue]="true">Ativo</option>
-                        <option [ngValue]="false">Inativo</option>
+                        <option [ngValue]="true">{{ "Ativo" | tr }}</option>
+                        <option [ngValue]="false">{{ "Inativo" | tr }}</option>
                     </select>
                 </div>
             </div>
@@ -136,15 +136,15 @@
             <div class="refined-icon-box alert-circle">
                 <lucide-icon [img]="icons.power" size="32" color="#ef4444"></lucide-icon>
             </div>
-            <h2 class="refined-title">Deseja excluir?</h2>
+            <h2 class="refined-title">{{ "Deseja excluir?" | tr }}</h2>
             <p class="refined-desc">
-                A filial <strong>{{ filialParaExcluir?.nome }}</strong>
-                será removida permanentemente do sistema.
+                {{ "A filial" | tr }} <strong>{{ filialParaExcluir?.nome }}</strong>
+                {{ "será removida permanentemente do sistema." | tr }}
             </p>
 
             <div class="refined-actions">
                 <button class="btn-refined-outline" (click)="fecharConfirmacao()">{{ "Cancelar" | tr }}</button>
-                <button class="btn-refined-danger" (click)="confirmarExclur()">Sim, Excluir</button>
+                <button class="btn-refined-danger" (click)="confirmarExclur()">{{ "Sim, Excluir" | tr }}</button>
             </div>
         </div>
     </div>
@@ -157,7 +157,7 @@
                 <lucide-icon [img]="icons.check" size="32" color="#22c55e"></lucide-icon>
             </div>
             <h2 class="refined-title">{{ "Sucesso!" | tr }}</h2>
-            <p class="refined-desc">Os dados foram salvos corretamente.</p>
+            <p class="refined-desc">{{ "Os dados foram salvos corretamente." | tr }}</p>
 
             <div class="refined-actions mt-4">
                 <button class="btn-refined-teal" (click)="fecharSucesso()">{{ "OK, Entendi" | tr }}</button>

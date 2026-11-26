@@ -2,8 +2,8 @@
     <div class="list-card">
         <div class="list-card-header">
             <div class="titles">
-                <h2>Caminhoneiros</h2>
-                <p>Gerencie os motoristas cadastrados</p>
+                <h2>{{ "Caminhoneiros" | tr }}</h2>
+                <p>{{ "Gerencie os motoristas cadastrados" | tr }}</p>
             </div>
             <button class="btn-primary" (click)="abrirModalNovo()">
                 <lucide-icon [img]="icons.plus" size="18"></lucide-icon>
@@ -14,13 +14,13 @@
         <div class="list-card-search" *ngIf="motoristas.length > 0 || filtro">
             <div class="search-input-wrapper">
                 <lucide-icon [img]="icons.search" size="18" class="search-icon"></lucide-icon>
-                <input type="text" placeholder="Buscar por nome, CPF ou CNH..." [(ngModel)]="filtro"
+                <input type="text" [placeholder]='"Buscar por nome, CPF ou CNH..." | tr' [(ngModel)]="filtro"
                     (keyup.enter)="buscar()">
             </div>
         </div>
 
         <div class="skeleton-loader" *ngIf="loading" style="padding: 2rem;">
-            Aguarde, carregando...
+            {{ "Aguarde, carregando..." | tr }}
         </div>
 
         <div class="table-responsive" *ngIf="!loading && motoristas.length > 0">
@@ -30,7 +30,7 @@
                         <th>CPF</th>
                         <th>CNH</th>
                         <th>{{ "Categoria" | tr }}</th>
-                        <th>Contato</th>
+                        <th>{{ "Contato" | tr }}</th>
                         <th>Status</th>
                         <th>{{ "Ações" | tr }}</th>
                     </tr>
@@ -47,12 +47,12 @@
                         </td>
                         <td>
                             <span class="tb-title">{{ m.telefone || '(00) 00000-0000' }}</span>
-                            <span class="tb-subtitle">{{ m.transportadora || 'Autônomo' }}</span>
+                            <span class="tb-subtitle">{{ m.transportadora || ("Autônomo" | tr) }}</span>
                         </td>
                         <td>
                             <div class="status-badge" [ngClass]="m.ativo ? 'active' : 'inactive'">
                                 <lucide-icon [img]="m.ativo ? icons.checkCircle : icons.user" size="14"></lucide-icon>
-                                {{ m.ativo ? 'Ativo' : 'Inativo' }}
+                                {{ m.ativo ? ("Ativo" | tr) : ("Inativo" | tr) }}
                             </div>
                         </td>
                         <td>
@@ -62,7 +62,7 @@
                                 </button>
                                 <button class="btn-toggle" [ngClass]="m.ativo ? 'deactivate' : 'activate'" 
                                     (click)="alternarStatus(m.id)"
-                                    [title]="m.ativo ? 'Inativar' : 'Ativar'">
+                                    [title]='m.ativo ? ("Inativar" | tr) : ("Ativar" | tr)'>
                                     <lucide-icon [img]="m.ativo ? icons.trash2 : icons.checkCircle" size="14"></lucide-icon>
                                 </button>
                             </div>
@@ -76,12 +76,12 @@
             <div class="icon-circle empty">
                 <lucide-icon [img]="icons.users" size="40"></lucide-icon>
             </div>
-            <h3>Nenhum caminhoneiro encontrado</h3>
-            <p>O banco está vazio ou a busca não retornou resultados.</p>
+            <h3>{{ "Nenhum caminhoneiro encontrado" | tr }}</h3>
+            <p>{{ "O banco está vazio ou a busca não retornou resultados." | tr }}</p>
         </div>
 
         <div class="list-card-footer" *ngIf="!loading && motoristas.length > 0">
-            <span>Total de {{ motoristas.length }} caminhoneiro(s)</span>
+            <span>{{ "Total de" | tr }} {{ motoristas.length }} {{ "caminhoneiro(s)" | tr }}</span>
         </div>
     </div>
 
@@ -99,8 +99,8 @@
 
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Nome Completo *</label>
-                    <input type="text" [(ngModel)]="motoristaForm.nome" placeholder="Ex: José da Silva">
+                    <label>{{ "Nome Completo *" | tr }}</label>
+                    <input type="text" [(ngModel)]="motoristaForm.nome" [placeholder]='"Ex: José da Silva" | tr'>
                 </div>
 
                 <div class="form-row">
@@ -110,11 +110,11 @@
                             (blur)="checkIdentidade()"
                             placeholder="000.000.000-00">
                         <small *ngIf="isEditing"
-                            style="font-size: 0.75rem; color: #64748b; opacity: 0.7; margin-top: 4px; display: block;">ID persistente: {{ motoristaForm.cpf }}</small>
+                            style="font-size: 0.75rem; color: #64748b; opacity: 0.7; margin-top: 4px; display: block;">{{ "ID persistente:" | tr }} {{ motoristaForm.cpf }}</small>
                     </div>
                     <div class="form-group flex-1">
                         <label>CNH *</label>
-                        <input type="text" [(ngModel)]="motoristaForm.cnh" (blur)="checkIdentidade()" placeholder="Número da carteira"
+                        <input type="text" [(ngModel)]="motoristaForm.cnh" (blur)="checkIdentidade()" [placeholder]='"Número da carteira" | tr'
                             maxlength="11">
                     </div>
                 </div>
@@ -131,16 +131,16 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Transportadora (Opcional)</label>
+                    <label>{{ "Transportadora (Opcional)" | tr }}</label>
                     <input type="text" [(ngModel)]="motoristaForm.transportadora"
-                        placeholder="Nome da transportadora ou Autônomo">
+                        [placeholder]='"Nome da transportadora ou Autônomo" | tr'>
                 </div>
 
                 <div class="form-row mt-4">
                     <div class="form-group flex-1">
                         <div class="toggle-wrapper">
                             <input type="checkbox" [(ngModel)]="motoristaForm.ativo" id="chkMotAtivo" />
-                            <label for="chkMotAtivo">Motorista ativo</label>
+                            <label for="chkMotAtivo">{{ "Motorista ativo" | tr }}</label>
                         </div>
                     </div>
                 </div>
@@ -166,7 +166,7 @@
                     </div>
                 </div>
                 <h2>{{ "Sucesso!" | tr }}</h2>
-                <p>Caminhoneiro {{ isEditing ? 'atualizado' : 'cadastrado' }} corretamente.</p>
+                <p>{{ "Caminhoneiro" | tr }} {{ isEditing ? ("atualizado" | tr) : ("cadastrado" | tr) }} {{ "corretamente." | tr }}</p>
                 <button class="btn-success-ok" (click)="fecharModal()">{{ "OK, Entendi" | tr }}</button>
             </div>
         </div>

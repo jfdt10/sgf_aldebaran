@@ -5,11 +5,11 @@
     </div>
 
     <p class="placeholder-eyebrow">{{ "Portal do Cliente" | tr }}</p>
-    <h2>{{ title }}</h2>
-    <p class="placeholder-description">{{ description }}</p>
+    <h2>{{ title | tr }}</h2>
+    <p class="placeholder-description">{{ description | tr }}</p>
 
     <a routerLink="/client/perfil" class="placeholder-link">
-      Voltar para Meu Perfil
+      {{ "Voltar para Meu Perfil" | tr }}
       <lucide-icon [img]="icons.arrow" size="18"></lucide-icon>
     </a>
   </div>

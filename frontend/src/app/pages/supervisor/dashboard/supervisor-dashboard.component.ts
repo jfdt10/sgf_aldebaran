@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, HostListener, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -25,6 +27,7 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./supervisor-dashboard.component.scss']
 })
 export class SupervisorDashboardComponent implements OnInit {
+  private readonly language = inject(LanguageService);
   getLocalTodayString(): string {
     const d = new Date();
     const year = d.getFullYear();
@@ -382,7 +385,7 @@ export class SupervisorDashboardComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        alert(err?.error?.message || 'Erro ao realizar check-in.');
+        alert(err?.error?.message || this.language.text("Erro ao realizar check-in."));
       }
     });
   }
@@ -408,7 +411,7 @@ export class SupervisorDashboardComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        alert(err?.error?.message || 'Erro ao cancelar agendamento.');
+        alert(err?.error?.message || this.language.text("Erro ao cancelar agendamento."));
       }
     });
   }
@@ -441,24 +444,24 @@ export class SupervisorDashboardComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        alert(err?.error?.message || 'Erro ao resgatar.');
+        alert(err?.error?.message || this.language.text("Erro ao resgatar."));
       }
     });
   }
 
   salvarCadastro() {
     if (this.activeModal === 'truck' && this.caminhaoForm.invalid) {
-      alert('Preencha os campos obrigatórios corretamente.');
+      alert(this.language.text("Preencha os campos obrigatórios corretamente."));
       return;
     }
     if (this.activeModal === 'operator') {
       if (this.operadorForm.invalid) {
-        alert('Preencha os campos obrigatórios corretamente.');
+        alert(this.language.text("Preencha os campos obrigatórios corretamente."));
         return;
       }
       const formValue = this.operadorForm.value;
       if (formValue.senha !== formValue.confirmarSenha) {
-        alert('As senhas não conferem.');
+        alert(this.language.text("As senhas não conferem."));
         return;
       }
 
@@ -485,14 +488,14 @@ export class SupervisorDashboardComponent implements OnInit {
           }, 5000);
         },
         error: (err) => {
-          alert('Erro ao cadastrar operador: ' + (err.error?.message || 'Erro desconhecido'));
+          alert(this.language.text("Erro ao cadastrar operador:") + " " + (err.error?.message || this.language.text("Erro desconhecido")));
         }
       });
 
       return;
     }
     if (this.activeModal === 'client' && this.clienteForm.invalid) {
-      alert('Preencha os campos obrigatórios corretamente.');
+      alert(this.language.text("Preencha os campos obrigatórios corretamente."));
       return;
     }
 

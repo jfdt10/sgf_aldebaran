@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -14,6 +16,7 @@ import { LucideAngularModule, User, FileText, Phone, Mail, MapPin, Save, X, Arro
   styleUrl: './clientes-form.component.scss'
 })
 export class ClientesFormComponent implements OnInit {
+  private readonly language = inject(LanguageService);
   form = {
     id: null,
     nome: '',
@@ -51,7 +54,7 @@ export class ClientesFormComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        alert('Erro ao carregar cliente.');
+        alert(this.language.text("Erro ao carregar cliente."));
         this.router.navigate(['/admin/clientes']);
       }
     });
@@ -59,7 +62,7 @@ export class ClientesFormComponent implements OnInit {
 
   salvar() {
     if (!this.form.nome || !this.form.documento || !this.form.email) {
-      alert('Preencha os campos obrigatórios (*)');
+      alert(this.language.text("Preencha os campos obrigatórios (*)"));
       return;
     }
 
@@ -70,12 +73,12 @@ export class ClientesFormComponent implements OnInit {
 
     request.subscribe({
       next: () => {
-        alert('Cliente salvo com sucesso!');
+        alert(this.language.text("Cliente salvo com sucesso!"));
         this.router.navigate(['/admin/clientes']);
       },
       error: (err) => {
         console.error(err);
-        alert(err.error?.message || 'Erro ao salvar.');
+        alert(err.error?.message || this.language.text("Erro ao salvar."));
         this.loading = false;
       }
     });

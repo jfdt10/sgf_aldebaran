@@ -10,7 +10,7 @@
 
     <aside class="config-sidebar">
       <div class="sidebar-group">
-        <h4 class="group-title">SISTEMA</h4>
+        <h4 class="group-title">{{ "SISTEMA" | tr }}</h4>
         <nav class="sidebar-nav">
           <button *ngFor="let tab of tabs" class="nav-item" [class.active]="currentTab === tab.id"
             (click)="setTab(tab.id)">
@@ -26,17 +26,17 @@
 
         <div class="header-section">
           <h2>{{ "Configurações Gerais" | tr }}</h2>
-          <p>Gerencie as informações básicas da filial e aparência do sistema.</p>
+          <p>{{ "Gerencie as informações básicas da filial e aparência do sistema." | tr }}</p>
         </div>
 
         <hr class="divider">
 
         <div class="settings-group">
-          <h3>Identidade</h3>
+          <h3>{{ "Identidade" | tr }}</h3>
           <div class="form-row">
             <div class="form-field mix-width">
-              <label>Nome da Filial</label>
-              <input type="text" formControlName="nomeFilial" [placeholder]="selectedFilialId ? 'Digite o novo nome' : 'Selecione uma filial específica para editar'">
+              <label>{{ "Nome da Filial" | tr }}</label>
+              <input type="text" formControlName="nomeFilial" [placeholder]='selectedFilialId ? ("Digite o novo nome" | tr) : ("Selecione uma filial específica para editar" | tr)'>
             </div>
             <div class="form-field mix-width">
               <label>{{ "Fuso Horário" | tr }}</label>
@@ -52,12 +52,12 @@
         </div>
 
         <div class="settings-group mt-32">
-          <h3>Preferências</h3>
+          <h3>{{ "Preferências" | tr }}</h3>
 
           <div class="setting-row">
             <div class="setting-info">
-              <h4>Modo Escuro Automático</h4>
-              <p>Alternar tema baseado no horário do sistema.</p>
+              <h4>{{ "Modo Escuro Automático" | tr }}</h4>
+              <p>{{ "Alternar tema baseado no horário do sistema." | tr }}</p>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" formControlName="modoEscuro">
@@ -69,8 +69,8 @@
 
           <div class="setting-row">
             <div class="setting-info">
-              <h4>Sons de Alerta</h4>
-              <p>Reproduzir som quando um novo usuário/cliente entrar na fila.</p>
+              <h4>{{ "Sons de Alerta" | tr }}</h4>
+              <p>{{ "Reproduzir som quando um novo usuário/cliente entrar na fila." | tr }}</p>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" formControlName="sonsAlerta">
@@ -79,7 +79,7 @@
           </div>
 
           <div *ngIf="configForm.get('sonsAlerta')?.value" class="expandable-section" style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-top: 16px;">
-            <h4 style="font-size: 0.9rem; margin-bottom: 12px; color: #334155;">Emitir som para as categorias:</h4>
+            <h4 style="font-size: 0.9rem; margin-bottom: 12px; color: #334155;">{{ "Emitir som para as categorias:" | tr }}</h4>
             <div style="display: flex; flex-direction: column; gap: 10px;">
               <label *ngFor="let servico of servicosDisponiveis" style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #475569; cursor: pointer;">
                 <input type="checkbox" 
@@ -95,8 +95,8 @@
 
           <div class="setting-row">
             <div class="setting-info">
-              <h4>Impressão Automática de Senha</h4>
-              <p>Imprimir ticket assim que o cadastro for concluído.</p>
+              <h4>{{ "Impressão Automática de Senha" | tr }}</h4>
+              <p>{{ "Imprimir ticket assim que o cadastro for concluído." | tr }}</p>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" formControlName="impressaoAutomatica">
@@ -108,40 +108,40 @@
 
         <div class="danger-zone mt-32">
           <div class="danger-info">
-            <h4 class="text-red">Reiniciar Numeração da Fila</h4>
-            <p class="text-red-light">Esta ação irá zerar o contador de senhas do dia. Não pode ser desfeito.</p>
+            <h4 class="text-red">{{ "Reiniciar Numeração da Fila" | tr }}</h4>
+            <p class="text-red-light">{{ "Esta ação irá zerar o contador de senhas do dia. Não pode ser desfeito." | tr }}</p>
           </div>
-          <button type="button" class="btn-danger" (click)="zerarFila()">Zerar Fila</button>
+          <button type="button" class="btn-danger" (click)="zerarFila()">{{ "Zerar Fila" | tr }}</button>
         </div>
 
         <div class="form-actions mt-32">
-          <button type="button" class="btn-solid-blue" (click)="salvarConfiguracoes()">Salvar Configurações</button>
+          <button type="button" class="btn-solid-blue" (click)="salvarConfiguracoes()">{{ "Salvar Configurações" | tr }}</button>
         </div>
       </form>
 
       <form [formGroup]="configForm" *ngIf="currentTab === 'regras'" class="tab-content config-form-container">
         <div class="header-section">
-          <h2>Regras da Fila</h2>
-          <p>Defina limites de tempo e prioridades de atendimento.</p>
+          <h2>{{ "Regras da Fila" | tr }}</h2>
+          <p>{{ "Defina limites de tempo e prioridades de atendimento." | tr }}</p>
         </div>
         <hr class="divider">
 
         <div class="settings-group">
-          <h3>Tempos e Limites</h3>
+          <h3>{{ "Tempos e Limites" | tr }}</h3>
           <div class="form-row">
             <div class="form-field mix-width">
-              <label>Tempo de Tolerância (Atrasos)</label>
+              <label>{{ "Tempo de Tolerância (Atrasos)" | tr }}</label>
               <div class="input-with-suffix">
                 <input type="number" formControlName="tempoTolerancia">
-                <span class="suffix">minutos</span>
+                <span class="suffix">{{ "minutos" | tr }}</span>
               </div>
             </div>
             <div class="form-field mix-width">
-              <label>Limite Atendimentos/Dia</label>
+              <label>{{ "Limite Atendimentos/Dia" | tr }}</label>
               <input type="number" formControlName="limiteAtendimentos">
             </div>
             <div class="form-field mix-width">
-              <label>Meta de Eficiência Mínima: <strong class="text-teal" style="color: #0ea5e9;">{{ configForm.get('eficienciaMinima')?.value || 90 }}%</strong></label>
+              <label>{{ "Meta de Eficiência Mínima:" | tr }} <strong class="text-teal" style="color: #0ea5e9;">{{ configForm.get('eficienciaMinima')?.value || 90 }}%</strong></label>
               <div class="slider-container" style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
                 <span style="font-size: 0.8rem; color: #64748b;">50%</span>
                 <input type="range" min="50" max="100" step="5" formControlName="eficienciaMinima" style="flex: 1; accent-color: #0ea5e9; cursor: pointer; height: 6px; border-radius: 4px;">
@@ -152,11 +152,11 @@
         </div>
 
         <div class="settings-group mt-32">
-          <h3>Prioridades</h3>
+          <h3>{{ "Prioridades" | tr }}</h3>
           <div class="setting-row">
             <div class="setting-info">
-              <h4>Prioridade Automática (PCD / Idosos)</h4>
-              <p>Mover automaticamente para o topo da fila em sua categoria.</p>
+              <h4>{{ "Prioridade Automática (PCD / Idosos)" | tr }}</h4>
+              <p>{{ "Mover automaticamente para o topo da fila em sua categoria." | tr }}</p>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" formControlName="prioridadePcdIdoso">
@@ -166,8 +166,8 @@
           <hr class="light-divider">
           <div class="setting-row">
             <div class="setting-info">
-              <h4>Redirecionar Ausentes</h4>
-              <p>Mover clientes não comparecidos para o final da fila em vez de cancelar.</p>
+              <h4>{{ "Redirecionar Ausentes" | tr }}</h4>
+              <p>{{ "Mover clientes não comparecidos para o final da fila em vez de cancelar." | tr }}</p>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" formControlName="redirecionarAusentes">
@@ -177,23 +177,23 @@
         </div>
 
         <div class="form-actions mt-32">
-          <button type="button" class="btn-solid-blue" (click)="salvarRegras()">Salvar Regras</button>
+          <button type="button" class="btn-solid-blue" (click)="salvarRegras()">{{ "Salvar Regras" | tr }}</button>
         </div>
       </form>
 
       <form [formGroup]="configForm" *ngIf="currentTab === 'notificacoes'" class="tab-content config-form-container">
         <div class="header-section">
           <h2>{{ "Notificações" | tr }}</h2>
-          <p>Gerencie como a filial e os clientes recebem avisos.</p>
+          <p>{{ "Gerencie como a filial e os clientes recebem avisos." | tr }}</p>
         </div>
         <hr class="divider">
 
         <div class="settings-group">
-          <h3>Canais de Contato</h3>
+          <h3>{{ "Canais de Contato" | tr }}</h3>
           <div class="setting-row">
             <div class="setting-info">
-              <h4>Notificar por E-mail</h4>
-              <p>Enviar resumo diário e alertas críticos para os supervisores.</p>
+              <h4>{{ "Notificar por E-mail" | tr }}</h4>
+              <p>{{ "Enviar resumo diário e alertas críticos para os supervisores." | tr }}</p>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" formControlName="notificarEmail">
@@ -203,8 +203,8 @@
           <hr class="light-divider">
           <div class="setting-row">
             <div class="setting-info">
-              <h4>Notificar por WhatsApp</h4>
-              <p>Avisar clientes quando sua vez estiver próxima.</p>
+              <h4>{{ "Notificar por WhatsApp" | tr }}</h4>
+              <p>{{ "Avisar clientes quando sua vez estiver próxima." | tr }}</p>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" formControlName="notificarWhatsapp">
@@ -213,31 +213,31 @@
           </div>
         </div>
         <div class="form-actions mt-32">
-          <button type="button" class="btn-solid-blue" (click)="salvarNotificacoes()">Salvar Notificações</button>
+          <button type="button" class="btn-solid-blue" (click)="salvarNotificacoes()">{{ "Salvar Notificações" | tr }}</button>
         </div>
       </form>
 
       <div *ngIf="currentTab === 'usuarios'" class="tab-content config-form-container">
         <div class="users-header">
           <div class="header-section">
-            <h2>Gestão de Usuários</h2>
-            <p>Gerencie quem tem acesso ao sistema da filial.</p>
+            <h2>{{ "Gestão de Usuários" | tr }}</h2>
+            <p>{{ "Gerencie quem tem acesso ao sistema da filial." | tr }}</p>
           </div>
           <button class="btn-solid-blue btn-add-user" (click)="abrirModalUsuario()">
-            <lucide-icon [img]="icons.plus" size="18"></lucide-icon> Novo Usuário
+            <lucide-icon [img]="icons.plus" size="18"></lucide-icon> {{ "Novo Usuário" | tr }}
           </button>
         </div>
 
         <div class="users-controls">
           <div class="search-box">
             <lucide-icon [img]="icons.search" size="18" class="text-sec"></lucide-icon>
-            <input type="text" placeholder="Buscar por nome, login ou e-mail..." [(ngModel)]="filtroUsuario" (input)="aplicarFiltros()">
+            <input type="text" [placeholder]='"Buscar por nome, login ou e-mail..." | tr' [(ngModel)]="filtroUsuario" (input)="aplicarFiltros()">
           </div>
 
           <div class="filter-box custom-select">
             <select [(ngModel)]="perfilFiltro" (change)="aplicarFiltros()">
               <option value="">{{ "Todos os Perfis" | tr }}</option>
-              <option value="ADMIN">Administrador</option>
+              <option value="ADMIN">{{ "Administrador" | tr }}</option>
               <option value="SUPERVISOR">Supervisor</option>
               <option value="OPERADOR">{{ "Operador" | tr }}</option>
             </select>
@@ -248,11 +248,11 @@
           <table class="users-table">
             <thead>
               <tr>
-                <th>NOME / E-MAIL</th>
+                <th>{{ "NOME / E-MAIL" | tr }}</th>
                 <th>LOGIN</th>
-                <th>PERFIL</th>
+                <th>{{ "PERFIL" | tr }}</th>
                 <th>STATUS</th>
-                <th class="text-right">AÇÕES</th>
+                <th class="text-right">{{ "AÇÕES" | tr }}</th>
               </tr>
             </thead>
             <tbody>
@@ -267,36 +267,36 @@
                   </div>
                 </td>
                 <td>{{ u.login }}</td>
-                <td><span class="badge badge-role">{{ u.perfil }}</span></td>
+                <td><span class="badge badge-role">{{ (u.perfil) | tr }}</span></td>
                 <td>
-                  <span class="badge" [ngClass]="u.ativo ? 'badge-green' : 'badge-gray'">{{ u.ativo ? 'Ativo' : 'Inativo' }}</span>
+                  <span class="badge" [ngClass]="u.ativo ? 'badge-green' : 'badge-gray'">{{ u.ativo ? ("Ativo" | tr) : ("Inativo" | tr) }}</span>
                 </td>
                 <td class="text-right">
                   <ng-container *ngIf="u.perfil !== 'ADMIN'; else adminActions">
                     <button class="action-btn text-blue" [title]='"Editar" | tr' (click)="abrirModalUsuario(u)"><lucide-icon [img]="icons.edit" size="16"></lucide-icon></button>
-                    <button class="action-btn text-teal" title="Ativar/Inativar" (click)="alternarStatus(u.id, u.ativo)"><lucide-icon [img]="icons.check" size="16"></lucide-icon></button>
+                    <button class="action-btn text-teal" [title]='"Ativar/Inativar" | tr' (click)="alternarStatus(u.id, u.ativo)"><lucide-icon [img]="icons.check" size="16"></lucide-icon></button>
                     <button class="action-btn text-red" [title]='"Excluir" | tr' (click)="excluirUsuario(u.id, u.nome)"><lucide-icon [img]="icons.trash" size="16"></lucide-icon></button>
                   </ng-container>
                   <ng-template #adminActions>
-                    <button class="action-btn" style="color: #cbd5e1; cursor: not-allowed; opacity: 0.6;" title="Não é permitido alterar administradores" disabled><lucide-icon [img]="icons.edit" size="16"></lucide-icon></button>
-                    <button class="action-btn" style="color: #cbd5e1; cursor: not-allowed; opacity: 0.6;" title="Não é permitido alterar administradores" disabled><lucide-icon [img]="icons.check" size="16"></lucide-icon></button>
-                    <button class="action-btn" style="color: #cbd5e1; cursor: not-allowed; opacity: 0.6;" title="Não é permitido alterar administradores" disabled><lucide-icon [img]="icons.trash" size="16"></lucide-icon></button>
+                    <button class="action-btn" style="color: #cbd5e1; cursor: not-allowed; opacity: 0.6;" [title]='"Não é permitido alterar administradores" | tr' disabled><lucide-icon [img]="icons.edit" size="16"></lucide-icon></button>
+                    <button class="action-btn" style="color: #cbd5e1; cursor: not-allowed; opacity: 0.6;" [title]='"Não é permitido alterar administradores" | tr' disabled><lucide-icon [img]="icons.check" size="16"></lucide-icon></button>
+                    <button class="action-btn" style="color: #cbd5e1; cursor: not-allowed; opacity: 0.6;" [title]='"Não é permitido alterar administradores" | tr' disabled><lucide-icon [img]="icons.trash" size="16"></lucide-icon></button>
                   </ng-template>
                 </td>
               </tr>
               <tr *ngIf="filteredUsuarios.length === 0">
-                <td colspan="5" class="empty-row">Nenhum usuário encontrado.</td>
+                <td colspan="5" class="empty-row">{{ "Nenhum usuário encontrado." | tr }}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <div class="pagination">
-          <span class="page-info">Mostrando 1 a 3 de 3 registros</span>
+          <span class="page-info">{{ "Mostrando 1 a 3 de 3 registros" | tr }}</span>
           <div class="page-controls">
-            <button class="btn-page" disabled>Anterior</button>
+            <button class="btn-page" disabled>{{ "Anterior" | tr }}</button>
             <button class="btn-page active">1</button>
-            <button class="btn-page" disabled>Próxima</button>
+            <button class="btn-page" disabled>{{ "Próxima" | tr }}</button>
           </div>
         </div>
       </div>
@@ -304,19 +304,19 @@
       <div *ngIf="currentTab === 'legal'" class="tab-content config-form-container">
         <div class="header-section">
           <h2>Legal</h2>
-          <p>Consulte os documentos legais do sistema administrativo.</p>
+          <p>{{ "Consulte os documentos legais do sistema administrativo." | tr }}</p>
         </div>
         <hr class="divider">
 
         <app-settings-section-card title="Legal" eyebrow="Documentos">
           <app-settings-link-item
-            title="Termos de Uso"
+            [title]='"Termos de Uso" | tr'
             description="Consulte os termos e condições de uso do sistema"
             (itemClick)="openLegalDocument('terms')"
           ></app-settings-link-item>
 
           <app-settings-link-item
-            title="Política de Privacidade"
+            [title]='"Política de Privacidade" | tr'
             description="Entenda como seus dados são coletados, utilizados e protegidos pelo sistema"
             (itemClick)="openLegalDocument('privacy')"
           ></app-settings-link-item>
@@ -330,7 +330,7 @@
               <div class="modal-icon-container">
                 <lucide-icon [img]="isEditingUsuario ? icons.edit : icons.plus" size="24"></lucide-icon>
               </div>
-              <h2>{{ isEditingUsuario ? 'Editar Usuário' : 'Novo Usuário' }}</h2>
+              <h2>{{ isEditingUsuario ? ("Editar Usuário" | tr) : ("Novo Usuário" | tr) }}</h2>
             </div>
             <button class="close-btn-ghost" (click)="fecharModalUsuario()">
               <lucide-icon [img]="icons.x" size="20"></lucide-icon>
@@ -342,7 +342,7 @@
               <div class="settings-group">
                 <div class="form-field mb-16">
                   <label>{{ "Nome Completo" | tr }}</label>
-                  <input type="text" formControlName="nome" placeholder="Digite o nome completo">
+                  <input type="text" formControlName="nome" [placeholder]='"Digite o nome completo" | tr'>
                 </div>
 
                 <div class="form-field mb-16">
@@ -351,11 +351,11 @@
                 </div>
 
                 <div class="form-field mb-16">
-                  <label>Perfil de Acesso</label>
+                  <label>{{ "Perfil de Acesso" | tr }}</label>
                   <div class="select-wrapper">
                     <select formControlName="perfil">
-                      <option value="" disabled>Selecione um perfil...</option>
-                      <option *ngIf="isEditingUsuario && usuarioEmEdicao?.perfil === 'ADMIN'" value="ADMIN">Administrador</option>
+                      <option value="" disabled>{{ "Selecione um perfil..." | tr }}</option>
+                      <option *ngIf="isEditingUsuario && usuarioEmEdicao?.perfil === 'ADMIN'" value="ADMIN">{{ "Administrador" | tr }}</option>
                       <option value="SUPERVISOR">Supervisor</option>
                       <option value="OPERADOR">{{ "Operador" | tr }}</option>
                     </select>
@@ -363,9 +363,9 @@
                 </div>
 
                 <div class="form-field">
-                  <label>Senha Temporária</label>
+                  <label>{{ "Senha Temporária" | tr }}</label>
                   <input type="password" formControlName="senha" placeholder="••••••••">
-                  <span class="text-sm mt-4 text-sec">O usuário deverá criar uma nova senha no primeiro acesso.</span>
+                  <span class="text-sm mt-4 text-sec">{{ "O usuário deverá criar uma nova senha no primeiro acesso." | tr }}</span>
                 </div>
               </div>
             </form>
@@ -386,16 +386,16 @@
     <div class="modal-c redesign-modal">
       <div class="modal-header-gradient">
         <div class="modal-title-area">
-          <h2 style="color: #e11d48;">Deseja zerar a fila?</h2>
+          <h2 style="color: #e11d48;">{{ "Deseja zerar a fila?" | tr }}</h2>
         </div>
         <button class="close-btn-ghost" (click)="cancelarZerar()">
           <lucide-icon [img]="icons.x" size="20"></lucide-icon>
         </button>
       </div>
       <div class="modal-body">
-        <p style="margin-bottom:1rem;">Esta ação removerá todas as senhas aguardando sem agendamento e reiniciará a numeração do dia. Não pode ser desfeito.</p>
-        <p style="margin-bottom:0.5rem;">Para confirmar, digite <strong>ZERAR</strong> abaixo:</p>
-        <input type="text" [(ngModel)]="zerarInput" placeholder="Digite ZERAR para confirmar"
+        <p style="margin-bottom:1rem;">{{ "Esta ação removerá todas as senhas aguardando sem agendamento e reiniciará a numeração do dia. Não pode ser desfeito." | tr }}</p>
+        <p style="margin-bottom:0.5rem;">{{ "Para confirmar, digite" | tr }} <strong>ZERAR</strong> {{ "abaixo:" | tr }}</p>
+        <input type="text" [(ngModel)]="zerarInput" [placeholder]='"Digite ZERAR para confirmar" | tr'
           style="width:100%;padding:0.5rem;border:1px solid #e2e8f0;border-radius:8px;">
       </div>
       <div class="modal-footer-gradient">
@@ -412,7 +412,7 @@
         <lucide-icon [img]="icons.check" size="48" color="#22c55e"></lucide-icon>
       </div>
       <h2>{{ "Sucesso!" | tr }}</h2>
-      <p>{{ successMessage }}</p>
+      <p>{{ successMessage | tr }}</p>
       <button class="btn-solid-teal w-full" (click)="fecharSuccessModal()">{{ "OK, Entendi" | tr }}</button>
     </div>
   </div>

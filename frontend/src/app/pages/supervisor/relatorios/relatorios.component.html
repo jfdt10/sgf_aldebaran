@@ -7,19 +7,19 @@
       </button>
       <div class="header-titles">
         <h1>{{ "Relatórios" | tr }}</h1>
-        <span class="header-subtitle">{{ selectedFilialNome }}</span>
+        <span class="header-subtitle">{{ selectedFilialNome | tr }}</span>
       </div>
     </div>
     <div class="header-right">
       <div class="date-pills">
-        <button [class.active]="periodoAtivo === 'hoje'" (click)="selecionarPeriodo('hoje')">Hoje</button>
-        <button [class.active]="periodoAtivo === 'semana'" (click)="selecionarPeriodo('semana')">Semana</button>
+        <button [class.active]="periodoAtivo === 'hoje'" (click)="selecionarPeriodo('hoje')">{{ "Hoje" | tr }}</button>
+        <button [class.active]="periodoAtivo === 'semana'" (click)="selecionarPeriodo('semana')">{{ "Semana" | tr }}</button>
         <button [class.active]="periodoAtivo !== 'hoje' && periodoAtivo !== 'semana'" (click)="selecionarPeriodo('mes')">
           <ng-container *ngIf="periodoAtivo !== 'hoje' && periodoAtivo !== 'semana' && periodoAtivo !== 'mes'">
-            Mês: {{ formatarMes(periodoAtivo) }}
+            {{ "Mês:" | tr }} {{ formatarMes(periodoAtivo) }}
           </ng-container>
           <ng-container *ngIf="periodoAtivo === 'mes' || (periodoAtivo === 'hoje' || periodoAtivo === 'semana')">
-            Mês
+            {{ "Mês" | tr }}
           </ng-container>
         </button>
         <div class="dropdown-container">
@@ -34,14 +34,14 @@
                {{ formatarMes(mes) }}
              </div>
              <div class="dropdown-item empty" *ngIf="mesesDisponiveis.length === 0">
-               Nenhum mês anterior
+               {{ "Nenhum mês anterior" | tr }}
              </div>
           </div>
         </div>
       </div>
       <button class="btn-solid-teal" (click)="gerarPDF()">
         <lucide-icon [img]="icons.download" size="16"></lucide-icon>
-        Exportar PDF
+        {{ "Exportar PDF" | tr }}
       </button>
     </div>
   </div>
@@ -54,28 +54,28 @@
         </div>
         <div class="kpi-info">
            <strong class="kpi-value">{{ totalAtendidos }}</strong>
-           <span class="kpi-label">Total Atendidos</span>
+           <span class="kpi-label">{{ "Total Atendidos" | tr }}</span>
         </div>
       </div>
       <div class="kpi-card">
         <div class="kpi-indicator bg-red-light"></div>
         <div class="kpi-info">
            <strong class="kpi-value">{{ tempoMedioEsperaGeral }}</strong>
-           <span class="kpi-label">Tempo Médio de Espera</span>
+           <span class="kpi-label">{{ "Tempo Médio de Espera" | tr }}</span>
         </div>
       </div>
       <div class="kpi-card">
         <div class="kpi-indicator bg-green-light"></div>
         <div class="kpi-info">
            <strong class="kpi-value">{{ tempoMedioAtendimentoStr }}</strong>
-           <span class="kpi-label">Tempo Médio Atendimento</span>
+           <span class="kpi-label">{{ "Tempo Médio Atendimento" | tr }}</span>
         </div>
       </div>
       <div class="kpi-card">
         <div class="kpi-indicator bg-purple-light"></div>
         <div class="kpi-info">
            <strong class="kpi-value">{{ horarioPico }}</strong>
-           <span class="kpi-label">Horário de Pico</span>
+           <span class="kpi-label">{{ "Horário de Pico" | tr }}</span>
         </div>
       </div>
     </div>
@@ -83,7 +83,7 @@
     <div class="charts-grid mt-24">
 
       <div class="chart-card fill-h">
-        <h3 class="chart-title">Histórico da Fila (Qtd)</h3>
+        <h3 class="chart-title">{{ "Histórico da Fila (Qtd)" | tr }}</h3>
 
         <ng-container *ngIf="graficosPorHora.length > 0; else semDadosFila">
           <div class="bar-chart teal-bars">
@@ -99,12 +99,12 @@
           </div>
         </ng-container>
         <ng-template #semDadosFila>
-          <div class="chart-empty-state">Sem dados para o período selecionado</div>
+          <div class="chart-empty-state">{{ "Sem dados para o período selecionado" | tr }}</div>
         </ng-template>
       </div>
 
       <div class="chart-card fill-h">
-        <h3 class="chart-title">Tempo Médio de Espera (min)</h3>
+        <h3 class="chart-title">{{ "Tempo Médio de Espera (min)" | tr }}</h3>
 
         <ng-container *ngIf="graficosPorHora.length > 0; else semDadosEspera">
           <div class="bar-chart orange-bars">
@@ -120,12 +120,12 @@
           </div>
         </ng-container>
         <ng-template #semDadosEspera>
-          <div class="chart-empty-state">Sem dados para o período selecionado</div>
+          <div class="chart-empty-state">{{ "Sem dados para o período selecionado" | tr }}</div>
         </ng-template>
       </div>
 
       <div class="chart-card fill-h">
-        <h3 class="chart-title">Tempo Médio Atend. (min)</h3>
+        <h3 class="chart-title">{{ "Tempo Médio Atend. (min)" | tr }}</h3>
 
         <ng-container *ngIf="graficosPorHora.length > 0; else semDadosAtend">
           <div class="bar-chart green-bars">
@@ -141,34 +141,34 @@
           </div>
         </ng-container>
         <ng-template #semDadosAtend>
-          <div class="chart-empty-state">Sem dados para o período selecionado</div>
+          <div class="chart-empty-state">{{ "Sem dados para o período selecionado" | tr }}</div>
         </ng-template>
       </div>
 
       <div class="chart-card performance-card w-2col">
-         <h3 class="chart-title">Desempenho por Categoria</h3>
+         <h3 class="chart-title">{{ "Desempenho por Categoria" | tr }}</h3>
          <div class="category-list" *ngIf="categorias && categorias.length > 0; else semCategorias">
             <div class="cat-item" *ngFor="let cat of categorias">
                <div class="cat-color" [style.background-color]="cat.cor"></div>
                <div class="cat-info">
                   <strong>{{ cat.nome }}</strong>
-                  <span>Espera: {{ cat.avgEsperaStr }} | Atend: {{ cat.avgAtendimentoStr }}</span>
+                  <span>{{ "Espera:" | tr }} {{ cat.avgEsperaStr }} {{ "| Atend:" | tr }} {{ cat.avgAtendimentoStr }}</span>
                </div>
-               <div class="cat-value"><strong>{{ cat.totalAtendidos }}</strong><span>Atendidos</span></div>
+               <div class="cat-value"><strong>{{ cat.totalAtendidos }}</strong><span>{{ "Atendidos" | tr }}</span></div>
             </div>
          </div>
          <ng-template #semCategorias>
-            <div class="chart-empty-state">Sem dados para o período selecionado</div>
+            <div class="chart-empty-state">{{ "Sem dados para o período selecionado" | tr }}</div>
          </ng-template>
       </div>
     </div>
 
     <div class="bottom-grid mt-24">
       <div class="chart-card">
-        <h3 class="chart-title">Desempenho dos Operadores</h3>
+        <h3 class="chart-title">{{ "Desempenho dos Operadores" | tr }}</h3>
 
         <div class="chart-empty-state" *ngIf="carregandoOperadores && operadores.length === 0">
-          Carregando operadores...
+          {{ "Carregando operadores..." | tr }}
         </div>
 
         <div class="operator-list" *ngIf="!carregandoOperadores || operadores.length > 0">
@@ -198,14 +198,14 @@
                   [class.eff-high]="op.efficiency >= 70"
                   [class.eff-mid]="op.efficiency >= 40 && op.efficiency < 70"
                   [class.eff-low]="op.efficiency < 40">
-                  {{ op.efficiency }}% efic.
+                  {{ op.efficiency }}{{ "% efic." | tr }}
                 </span>
               </div>
             </div>
           </ng-container>
           <ng-template #semOperadores>
             <div class="chart-empty-state">
-              Nenhum atendimento registrado no período.
+              {{ "Nenhum atendimento registrado no período." | tr }}
             </div>
           </ng-template>
         </div>
@@ -218,7 +218,7 @@
                 *ngFor="let insight of insights"
                 [ngClass]="'alert-' + insight.type">
                <lucide-icon [img]="icons.alert" size="16"></lucide-icon>
-               <span>{{ insight.text }}</span>
+               <span>{{ insight.text | tr }}</span>
            </div>
         </div>
       </div>
@@ -234,7 +234,7 @@
              <lucide-icon *ngIf="activeModal === 'detalhes'" [img]="icons.fileText" size="24"></lucide-icon>
              <lucide-icon *ngIf="activeModal === 'justificativa'" [img]="icons.clock" size="24"></lucide-icon>
           </div>
-          <h2 *ngIf="activeModal === 'detalhes'">Detalhes do Atendimento</h2>
+          <h2 *ngIf="activeModal === 'detalhes'">{{ "Detalhes do Atendimento" | tr }}</h2>
           <h2 *ngIf="activeModal === 'justificativa'">{{ "Justificar Demora" | tr }}</h2>
         </div>
         <button class="close-btn-ghost" (click)="fecharModal()">
@@ -268,43 +268,43 @@
         </div>
 
         <div class="timeline-section mt-24">
-           <h4>Auditoria de Tempos</h4>
+           <h4>{{ "Auditoria de Tempos" | tr }}</h4>
            <div class="timeline">
               <div class="t-item">
                 <div class="t-dot bg-blue-light text-blue"><lucide-icon [img]="icons.check" size="12"></lucide-icon></div>
                 <div class="t-content">
-                  <span>Chegada na Filial (Totem)</span>
+                  <span>{{ "Chegada na Filial (Totem)" | tr }}</span>
                   <strong>14:30:00</strong>
                 </div>
               </div>
               <div class="t-item">
                 <div class="t-dot bg-blue-light text-blue"><lucide-icon [img]="icons.check" size="12"></lucide-icon></div>
                 <div class="t-content">
-                  <span>Chamado para Baia</span>
+                  <span>{{ "Chamado para Baia" | tr }}</span>
                   <strong>14:45:00</strong>
                 </div>
-                <div class="t-time-elapsed text-red">Espera: {{ selectedTicket?.espera }}</div>
+                <div class="t-time-elapsed text-red">{{ "Espera:" | tr }} {{ selectedTicket?.espera }}</div>
               </div>
               <div class="t-item">
                 <div class="t-dot bg-blue-light text-blue"><lucide-icon [img]="icons.check" size="12"></lucide-icon></div>
                 <div class="t-content">
-                  <span>Início do Atendimento</span>
+                  <span>{{ "Início do Atendimento" | tr }}</span>
                   <strong>14:46:00</strong>
                 </div>
               </div>
               <div class="t-item">
                 <div class="t-dot bg-blue-light text-blue"><lucide-icon [img]="icons.check" size="12"></lucide-icon></div>
                 <div class="t-content">
-                  <span>Fim do Atendimento</span>
+                  <span>{{ "Fim do Atendimento" | tr }}</span>
                   <strong>14:58:00</strong>
                 </div>
-                <div class="t-time-elapsed text-green">Atendimento: {{ selectedTicket?.atendimento }}</div>
+                <div class="t-time-elapsed text-green">{{ "Atendimento:" | tr }} {{ selectedTicket?.atendimento }}</div>
               </div>
            </div>
         </div>
 
         <div class="eval-section mt-24" *ngIf="selectedTicket?.avaliacao !== '-'">
-           <h4>Avaliação do Cliente</h4>
+           <h4>{{ "Avaliação do Cliente" | tr }}</h4>
            <div class="stars">
               <lucide-icon [img]="icons.star" size="24" color="#fbbf24" [class.fill-yellow]="true"></lucide-icon>
               <lucide-icon [img]="icons.star" size="24" color="#fbbf24" [class.fill-yellow]="true"></lucide-icon>
@@ -319,29 +319,29 @@
         <div class="alert-box bg-red-light mb-16">
           <lucide-icon [img]="icons.clock" size="20" class="text-red"></lucide-icon>
           <div>
-            <strong class="text-red">Tempo Excedido!</strong>
-            <p class="text-red text-sm">O tempo de espera deste ticket foi de {{ selectedTicket?.espera }}.</p>
+            <strong class="text-red">{{ "Tempo Excedido!" | tr }}</strong>
+            <p class="text-red text-sm">{{ "O tempo de espera deste ticket foi de" | tr }} {{ selectedTicket?.espera }}.</p>
           </div>
         </div>
 
         <form [formGroup]="justificativaForm">
           <div class="form-group full-width">
-            <label>Motivo do Atraso <span>*</span></label>
+            <label>{{ "Motivo do Atraso" | tr }} <span>*</span></label>
              <div class="input-with-icon select-wrapper">
                 <select formControlName="motivo">
                   <option value="" disabled selected>{{ "Selecione um motivo..." | tr }}</option>
-                  <option value="Sistema Lento">Problema no Sistema / Lentidão</option>
-                  <option value="Falta Documento">Falta de Documentação do Cliente</option>
-                  <option value="Alta Demanda">Alta Demanda / Poucos Operadores</option>
-                  <option value="Outros">Outros Motivos</option>
+                  <option value="Sistema Lento">{{ "Problema no Sistema / Lentidão" | tr }}</option>
+                  <option value="Falta Documento">{{ "Falta de Documentação do Cliente" | tr }}</option>
+                  <option value="Alta Demanda">{{ "Alta Demanda / Poucos Operadores" | tr }}</option>
+                  <option value="Outros">{{ "Outros Motivos" | tr }}</option>
                 </select>
                 <lucide-icon [img]="icons.chevronDown" size="16" class="field-icon-right text-sec"></lucide-icon>
             </div>
           </div>
           <div class="form-group full-width mt-16">
-            <label>Observações Adicionais</label>
+            <label>{{ "Observações Adicionais" | tr }}</label>
             <div class="input-with-icon">
-              <textarea formControlName="observacoes" placeholder="Descreva os fatores que levaram a este atraso..."></textarea>
+              <textarea formControlName="observacoes" [placeholder]='"Descreva os fatores que levaram a este atraso..." | tr'></textarea>
             </div>
           </div>
         </form>
@@ -355,7 +355,7 @@
 
       <div class="modal-footer-gradient" *ngIf="activeModal === 'justificativa'">
         <button class="btn-ghost" (click)="fecharModal()">{{ "Cancelar" | tr }}</button>
-        <button class="btn-solid-blue" (click)="salvarJustificativa()">Salvar Justificativa</button>
+        <button class="btn-solid-blue" (click)="salvarJustificativa()">{{ "Salvar Justificativa" | tr }}</button>
       </div>
     </div>
   </div>
@@ -365,8 +365,8 @@
       <div class="s-icon bg-green-light">
         <lucide-icon [img]="icons.check" size="48" color="#22c55e"></lucide-icon>
       </div>
-      <h2>Justificativa Salva!</h2>
-      <p>A justificativa para o atraso foi registrada com sucesso no sistema.</p>
+      <h2>{{ "Justificativa Salva!" | tr }}</h2>
+      <p>{{ "A justificativa para o atraso foi registrada com sucesso no sistema." | tr }}</p>
       
       <button class="btn-solid-blue w-full" (click)="fecharModal()">OK</button>
     </div>

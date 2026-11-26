@@ -15,7 +15,7 @@
       </a>
       <a routerLink="/client/agendar" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="fechar()" class="nav-item">
         <lucide-angular [img]="icons.calendar" size="20"></lucide-angular>
-        Agendar
+        {{ "Agendar" | tr }}
       </a>
       <a routerLink="/client/meus-agendamentos" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="fechar()" class="nav-item">
         <lucide-angular [img]="icons.file" size="20"></lucide-angular>
@@ -23,7 +23,7 @@
       </a>
       <a routerLink="/client/perfil" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }" (click)="fechar()" class="nav-item">
         <lucide-angular [img]="icons.user" size="20"></lucide-angular>
-        Minha Conta
+        {{ "Minha Conta" | tr }}
       </a>
       <a routerLink="/client/configuracoes" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="fechar()" class="nav-item">
         <lucide-angular [img]="icons.settings" size="20"></lucide-angular>
@@ -34,7 +34,7 @@
     <div class="menu-footer">
       <button class="logout-btn" (click)="logout()">
         <lucide-angular [img]="icons.logout" size="20"></lucide-angular>
-        Sair da Conta
+        {{ "Sair da Conta" | tr }}
       </button>
     </div>
 

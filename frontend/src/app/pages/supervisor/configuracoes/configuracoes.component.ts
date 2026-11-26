@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -20,6 +22,7 @@ import { SettingsSectionCardComponent } from '../../client/configuracoes/compone
   styleUrls: ['./configuracoes.component.scss']
 })
 export class SupervisorConfiguracoesComponent implements OnInit {
+  private readonly language = inject(LanguageService);
   currentTab = 'geral';
   configForm!: FormGroup;
   novoUsuarioForm!: FormGroup;
@@ -225,7 +228,7 @@ export class SupervisorConfiguracoesComponent implements OnInit {
         this.filialService.setSelectedFilial(this.selectedFilialId);
         this.cdr.detectChanges();
       },
-      error: (err) => alert('Erro ao salvar configurações')
+      error: (err) => alert(this.language.text("Erro ao salvar configurações"))
     });
   }
 
@@ -266,7 +269,7 @@ export class SupervisorConfiguracoesComponent implements OnInit {
         },
         error: (err) => {
           console.error('Erro ao zerar fila', err);
-          alert('Erro ao zerar fila. Tente novamente.');
+          alert(this.language.text("Erro ao zerar fila. Tente novamente."));
         }
       });
     }
@@ -347,20 +350,20 @@ export class SupervisorConfiguracoesComponent implements OnInit {
 
     if (!this.isEditingUsuario) {
       if (!val.senha || val.senha.length < 8) {
-        alert('A senha é obrigatória e deve ter no mínimo 8 caracteres.');
+        alert(this.language.text("A senha é obrigatória e deve ter no mínimo 8 caracteres."));
         return;
       }
       if (val.senha !== val.confirmarSenha) {
-        alert('As senhas não coincidem.');
+        alert(this.language.text("As senhas não coincidem."));
         return;
       }
     } else {
       if (val.senha && val.senha.length < 8) {
-        alert('A senha deve ter no mínimo 8 caracteres.');
+        alert(this.language.text("A senha deve ter no mínimo 8 caracteres."));
         return;
       }
       if (val.senha && val.senha !== val.confirmarSenha) {
-        alert('As senhas não coincidem.');
+        alert(this.language.text("As senhas não coincidem."));
         return;
       }
     }
@@ -395,7 +398,7 @@ export class SupervisorConfiguracoesComponent implements OnInit {
               next: () => finish(`Usuário "${val.nome}" atualizado com sucesso!`),
               error: (err) => {
                 console.error('Erro ao atualizar senha', err);
-                alert(err.error?.message || 'Erro ao atualizar senha.');
+                alert(err.error?.message || this.language.text("Erro ao atualizar senha."));
               }
             });
           } else {
@@ -404,7 +407,7 @@ export class SupervisorConfiguracoesComponent implements OnInit {
         },
         error: (err) => {
           console.error('Erro ao atualizar usuário', err);
-          alert(err.error?.message || 'Erro ao atualizar usuário.');
+          alert(err.error?.message || this.language.text("Erro ao atualizar usuário."));
         }
       });
     } else {
@@ -415,7 +418,7 @@ export class SupervisorConfiguracoesComponent implements OnInit {
         next: () => finish(`Usuário "${val.nome}" criado com sucesso!`),
         error: (err) => {
           console.error('Erro ao criar usuário', err);
-          alert(err.error?.message || 'Erro ao criar usuário.');
+          alert(err.error?.message || this.language.text("Erro ao criar usuário."));
         }
       });
     }
@@ -434,7 +437,7 @@ export class SupervisorConfiguracoesComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao alterar status do usuário', err);
-        alert('Erro ao alterar status do usuário.');
+        alert(this.language.text("Erro ao alterar status do usuário."));
       }
     });
   }
@@ -454,7 +457,7 @@ export class SupervisorConfiguracoesComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao excluir usuário', err);
-        alert(err.error?.message || 'Erro ao excluir usuário.');
+        alert(err.error?.message || this.language.text("Erro ao excluir usuário."));
       }
     });
   }

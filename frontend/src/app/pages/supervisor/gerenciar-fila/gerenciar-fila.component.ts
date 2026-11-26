@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -17,6 +19,7 @@ import { environment } from '../../../../environments/environment';
   styleUrls: ['./gerenciar-fila.component.scss']
 })
 export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
+  private readonly language = inject(LanguageService);
   icons = { search: Search, clock: Clock, user: User, alert: AlertCircle, up: ArrowUpCircle, check: CheckCircle, users: Users, arrowLeft: ArrowLeft, plus: Plus, x: X, mail: Mail, moreVertical: MoreVertical, trash: Trash2 };
   currentTab = 'espera';
 
@@ -247,7 +250,7 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
     const guicheDisponivel = this.guiches.find(g => g.status === 'disponivel');
     
     if (!guicheDisponivel) {
-      alert('Nenhum guichê disponível no momento.');
+      alert(this.language.text("Nenhum guichê disponível no momento."));
       return;
     }
 
@@ -262,7 +265,7 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error(err);
-        alert('Erro ao chamar a senha.');
+        alert(this.language.text("Erro ao chamar a senha."));
       }
     });
   }
@@ -329,7 +332,7 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error(err);
-        alert('Erro ao cancelar a senha.');
+        alert(this.language.text("Erro ao cancelar a senha."));
       }
     });
   }
@@ -371,7 +374,7 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Erro ao salvar configurações:', err);
-          alert('Erro ao salvar configurações.');
+          alert(this.language.text("Erro ao salvar configurações."));
         }
       });
     }
@@ -456,7 +459,7 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error(err);
-        alert(err.error?.message || 'Erro ao chamar próximo.');
+        alert(err.error?.message || this.language.text("Erro ao chamar próximo."));
       }
     });
   }
@@ -465,7 +468,7 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
     if (guiche.status === 'ocupado') {
       if (confirm(`Deseja encerrar o atendimento ${guiche.ticket} no Guichê ${guiche.displayLabel || guiche.nome || guiche.numero}?`)) {
         if (!guiche.senhaId) {
-          alert('ID do atendimento não encontrado. Atualize a página e tente novamente.');
+          alert(this.language.text("ID do atendimento não encontrado. Atualize a página e tente novamente."));
           return;
         }
         this.guicheService.encerrarAtendimento(guiche.senhaId).subscribe({
@@ -474,7 +477,7 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
           },
           error: (err) => {
              console.error(err);
-             alert(err.error?.message || 'Erro ao encerrar atendimento.');
+             alert(err.error?.message || this.language.text("Erro ao encerrar atendimento."));
           }
         });
       }
@@ -494,12 +497,12 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
 
   salvarNovoOperador() {
     if (this.operadorForm.invalid) {
-      alert('Preencha os campos obrigatórios corretamente.');
+      alert(this.language.text("Preencha os campos obrigatórios corretamente."));
       return;
     }
     const formValue = this.operadorForm.value;
     if (formValue.senha !== formValue.confirmarSenha) {
-      alert('As senhas não conferem.');
+      alert(this.language.text("As senhas não conferem."));
       return;
     }
 
@@ -524,7 +527,7 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
         this.carregarOperadores();
       },
       error: (err) => {
-        alert('Erro ao cadastrar operador: ' + (err.error?.message || 'Erro desconhecido'));
+        alert(this.language.text("Erro ao cadastrar operador:") + " " + (err.error?.message || this.language.text("Erro desconhecido")));
       }
     });
   }
@@ -616,7 +619,7 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error(err);
-          alert('Erro ao remover o operador.');
+          alert(this.language.text("Erro ao remover o operador."));
         }
       });
     } else {

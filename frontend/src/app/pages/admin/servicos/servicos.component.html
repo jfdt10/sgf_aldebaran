@@ -4,8 +4,8 @@
     <div class="title-group">
       <lucide-icon [img]="icons.settings" size="24" class="title-icon"></lucide-icon>
       <div>
-        <h1>Configurar Serviços</h1>
-        <p>Gerencie as filas do totem.</p>
+        <h1>{{ "Configurar Serviços" | tr }}</h1>
+        <p>{{ "Gerencie as filas do totem." | tr }}</p>
       </div>
     </div>
   </div>
@@ -14,13 +14,13 @@
     <div class="form-header">
       <span class="inline-title"><lucide-icon [img]="icons.plus" size="18"></lucide-icon> {{ editando ? ("Editar" | tr) :
         'Novo' }}</span>
-      <button *ngIf="editando" class="btn-cancel" (click)="limpar()">Cancelar Edição</button>
+      <button *ngIf="editando" class="btn-cancel" (click)="limpar()">{{ "Cancelar Edição" | tr }}</button>
     </div>
 
     <div class="inline-form">
       <div class="form-group flex-2">
         <label>NOME</label>
-        <input type="text" [(ngModel)]="form.nome" placeholder="Ex: Prioritário">
+        <input type="text" [(ngModel)]="form.nome" [placeholder]='"Ex: Prioritário" | tr'>
       </div>
 
       <div class="form-group flex-1">
@@ -30,7 +30,7 @@
 
       <div class="form-actions">
         <button class="btn-add" [disabled]="loading" (click)="salvar()">
-          {{ editando ? 'Atualizar' : 'Adicionar' }} <lucide-icon *ngIf="loading" [img]="icons.settings"
+          {{ editando ? ("Atualizar" | tr) : ("Adicionar" | tr) }} <lucide-icon *ngIf="loading" [img]="icons.settings"
             class="spin"></lucide-icon>
         </button>
       </div>
@@ -43,16 +43,16 @@
             <th>STATUS</th>
             <th>NOME</th>
             <th>SIGLA</th>
-            <th class="text-right">AÇÕES</th>
+            <th class="text-right">{{ "AÇÕES" | tr }}</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let s of servicos">
             <td>
               <span class="status-pill" [class.ativo]="s.ativo" [class.inativo]="!s.ativo" (click)="toggleStatus(s)"
-                style="cursor: pointer;" title="Clique para alternar status">
+                style="cursor: pointer;" [title]='"Clique para alternar status" | tr'>
                 <lucide-icon [img]="icons.power" size="14"></lucide-icon>
-                {{ s.ativo ? 'ATIVO' : 'INATIVO' }}
+                {{ s.ativo ? 'ATIVO' : ("INATIVO" | tr) }}
               </span>
             </td>
             <td class="primary-text">{{ s.nome }}</td>
@@ -61,14 +61,14 @@
               <button class="action-btn edit" [title]='"Editar" | tr' (click)="editar(s)">
                 <lucide-icon [img]="icons.edit" size="16"></lucide-icon>
               </button>
-              <button class="action-btn danger" title="Remover" (click)="excluir(s.id)">
+              <button class="action-btn danger" [title]='"Remover" | tr' (click)="excluir(s.id)">
                 <lucide-icon [img]="icons.trash" size="16"></lucide-icon>
               </button>
             </td>
           </tr>
 
           <tr *ngIf="servicos.length === 0 && !loading">
-            <td colspan="4" class="empty-row text-center">Nenhum serviço configurado.</td>
+            <td colspan="4" class="empty-row text-center">{{ "Nenhum serviço configurado." | tr }}</td>
           </tr>
         </tbody>
       </table>

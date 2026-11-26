@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../../../services/translate.pipe';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -15,6 +17,7 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./regras-fila.component.scss']
 })
 export class RegrasFilaComponent implements OnInit {
+  private readonly language = inject(LanguageService);
   servicos: any[] = [];
   configs: any = {
     MODIFICADOR_AGENDAMENTO: 'A',
@@ -131,7 +134,7 @@ export class RegrasFilaComponent implements OnInit {
       error: (err) => {
         console.error("Erro ao salvar:", err);
         this.loading = false;
-        alert("Erro ao salvar. Tente novamente em instantes.");
+        alert(this.language.text("Erro ao salvar. Tente novamente em instantes."));
         this.cdr.detectChanges();
       }
     });
@@ -159,7 +162,7 @@ export class RegrasFilaComponent implements OnInit {
       error: (err) => {
         console.error('Erro ao calibrar SLA:', err);
         this.calibrando = false;
-        alert('Erro ao calibrar SLA. Verifique se há dados suficientes.');
+        alert(this.language.text("Erro ao calibrar SLA. Verifique se há dados suficientes."));
         this.cdr.detectChanges();
       }
     });

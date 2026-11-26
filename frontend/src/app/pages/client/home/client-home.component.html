@@ -1,15 +1,15 @@
 <div class="client-page">
   <main class="content-container">
     <div class="greeting-section animate-up">
-      <h1>Olá, {{ usuario.nome }}</h1>
-      <p class="section-label">Seu próximo agendamento</p>
+      <h1>{{ "Olá," | tr }} {{ usuario.nome }}</h1>
+      <p class="section-label">{{ "Seu próximo agendamento" | tr }}</p>
     </div>
 
     <div class="next-appointment-card animate-up delay-1" *ngIf="proximoAgendamento">
       <div class="card-main">
         <div class="date-badge">
           <span class="day">{{ proximoAgendamento.day }}</span>
-          <span class="month">{{ proximoAgendamento.month }}</span>
+          <span class="month">{{ proximoAgendamento.month | tr }}</span>
         </div>
 
         <div class="appointment-info">
@@ -18,7 +18,7 @@
             class="appointment-status"
             [ngClass]="proximoAgendamento.statusColorClass"
             *ngIf="proximoAgendamento.statusLabel">
-            {{ proximoAgendamento.statusLabel }}
+            {{ proximoAgendamento.statusLabel | tr }}
           </div>
           <div class="info-row">
             <lucide-icon [img]="icons.clock" size="14"></lucide-icon>
@@ -37,7 +37,7 @@
       </button>
 
       <button class="btn-cancel" *ngIf="proximoAgendamento && proximoAgendamento.podeCancelar" (click)="cancelarAgendamento()">
-        Cancelar este agendamento
+        {{ "Cancelar este agendamento" | tr }}
       </button>
     </div>
 
@@ -45,13 +45,13 @@
       <div class="empty-icon-wrap">
         <lucide-icon [img]="icons.calendar" size="48"></lucide-icon>
       </div>
-      <h3>Nenhum agendamento para hoje</h3>
-      <p>Você não possui atendimentos agendados. Deseja realizar um novo agendamento?</p>
-      <button class="btn-primary-home" routerLink="/client/agendar">Agendar Novo Horário</button>
+      <h3>{{ "Nenhum agendamento para hoje" | tr }}</h3>
+      <p>{{ "Você não possui atendimentos agendados. Deseja realizar um novo agendamento?" | tr }}</p>
+      <button class="btn-primary-home" routerLink="/client/agendar">{{ "Agendar Novo Horário" | tr }}</button>
     </div>
 
     <div class="quick-actions-section animate-up delay-2">
-      <p class="section-label">Ações rápidas</p>
+      <p class="section-label">{{ "Ações rápidas" | tr }}</p>
 
       <div class="actions-grid">
         <button class="action-card" routerLink="/client/agendar">
@@ -59,8 +59,8 @@
             <lucide-icon [img]="icons.plus" size="24"></lucide-icon>
           </div>
           <div class="action-details">
-            <h3>Novo Agendamento</h3>
-            <span>Agende um novo horário</span>
+            <h3>{{ "Novo Agendamento" | tr }}</h3>
+            <span>{{ "Agende um novo horário" | tr }}</span>
           </div>
         </button>
 
@@ -70,7 +70,7 @@
           </div>
           <div class="action-details">
             <h3>{{ "Meus Agendamentos" | tr }}</h3>
-            <span>Consulte atendimentos passados</span>
+            <span>{{ "Consulte atendimentos passados" | tr }}</span>
           </div>
         </button>
       </div>
@@ -82,13 +82,13 @@
       <div class="warning-icon-wrap">
         <lucide-icon [img]="icons.help" size="40"></lucide-icon>
       </div>
-      <h2>Deseja mesmo cancelar?</h2>
-      <p>Esta ação não pode ser desfeita e seu horário será liberado para outros clientes.</p>
+      <h2>{{ "Deseja mesmo cancelar?" | tr }}</h2>
+      <p>{{ "Esta ação não pode ser desfeita e seu horário será liberado para outros clientes." | tr }}</p>
       <p class="cancel-error" *ngIf="cancelError">{{ cancelError }}</p>
 
       <div class="cancel-actions">
-        <button class="btn-confirm-cancel" (click)="confirmarCancelamento()">Sim, cancelar</button>
-        <button class="btn-keep" (click)="fecharCancelModal()">Não, manter agendamento</button>
+        <button class="btn-confirm-cancel" (click)="confirmarCancelamento()">{{ "Sim, cancelar" | tr }}</button>
+        <button class="btn-keep" (click)="fecharCancelModal()">{{ "Não, manter agendamento" | tr }}</button>
       </div>
     </div>
   </div>
@@ -100,17 +100,17 @@
           <lucide-icon [img]="icons.qrcode" size="32"></lucide-icon>
         </div>
         <div>
-          <h2>Voucher de Check-in</h2>
-          <p>Confira os dados antes de confirmar sua chegada.</p>
+          <h2>{{ "Voucher de Check-in" | tr }}</h2>
+          <p>{{ "Confira os dados antes de confirmar sua chegada." | tr }}</p>
         </div>
       </div>
 
       <div class="voucher-loading" *ngIf="voucherLoading">
-        Carregando voucher...
+        {{ "Carregando voucher..." | tr }}
       </div>
 
       <div class="voucher-error" *ngIf="voucherError && !voucherLoading">
-        {{ voucherError }}
+        {{ voucherError | tr }}
       </div>
 
       <ng-container *ngIf="voucher && !voucherLoading">
@@ -120,9 +120,9 @@
               <lucide-icon [img]="icons.success" size="30"></lucide-icon>
             </div>
             <div>
-              <span>{{ voucher.checkinRealizado ? 'Check-in realizado' : (voucher.statusLabel || 'Check-in realizado') }}</span>
+              <span>{{ voucher.checkinRealizado ? ("Check-in realizado" | tr) : ((voucher.statusLabel | tr) || ("Check-in realizado" | tr)) }}</span>
               <strong>
-                {{ checkinSuccess ? 'Você entrou na fila de atendimento' : 'Seu check-in já foi confirmado' }}
+                {{ checkinSuccess ? ("Você entrou na fila de atendimento" | tr) : ("Seu check-in já foi confirmado" | tr) }}
               </strong>
             </div>
           </div>
@@ -134,28 +134,28 @@
 
           <div class="queue-summary" *ngIf="ticket && (ticket.posicao || ticket.estimativa)">
             <div *ngIf="ticket.posicao">
-              <span>Posição</span>
+              <span>{{ "Posição" | tr }}</span>
               <strong>{{ ticket.posicao }}</strong>
             </div>
             <div *ngIf="ticket.estimativa">
-              <span>Estimativa</span>
+              <span>{{ "Estimativa" | tr }}</span>
               <strong>{{ ticket.estimativa }} min</strong>
             </div>
           </div>
 
           <p class="checkin-guidance">
-            Seu check-in já foi confirmado. Acompanhe sua senha e aguarde ser chamado.
+            {{ "Seu check-in já foi confirmado. Acompanhe sua senha e aguarde ser chamado." | tr }}
           </p>
         </div>
 
         <div class="voucher-code" [class.secondary]="ticket">
-          <span>Código do voucher</span>
+          <span>{{ "Código do voucher" | tr }}</span>
           <strong>{{ voucher.codigo }}</strong>
         </div>
 
         <div class="voucher-details">
           <div>
-            <span>Serviço</span>
+            <span>{{ "Serviço" | tr }}</span>
             <strong>{{ voucher.categoriaNome }}</strong>
           </div>
           <div>
@@ -163,7 +163,7 @@
             <strong>{{ voucher.filialNome }}</strong>
           </div>
           <div>
-            <span>Data</span>
+            <span>{{ "Data" | tr }}</span>
             <strong>{{ voucher.data }}</strong>
           </div>
           <div>
@@ -174,21 +174,21 @@
 
         <div class="checkin-ux-alert too-early" *ngIf="!voucher.checkinRealizado && !ticket && checkinStatus === 'too-early'">
           <lucide-icon [img]="icons.clock" size="18"></lucide-icon>
-          <span>Seu check-in será liberado em <strong>{{ minutosParaLiberar }}</strong>.</span>
+          <span>{{ "Seu check-in será liberado em" | tr }} <strong>{{ minutosParaLiberar }}</strong>.</span>
         </div>
 
         <div class="checkin-ux-alert ready" *ngIf="!voucher.checkinRealizado && !ticket && checkinStatus === 'ready'">
           <lucide-icon [img]="icons.success" size="18"></lucide-icon>
-          <span>Seu horário está próximo! <strong>Check-in liberado</strong>.</span>
+          <span>{{ "Seu horário está próximo!" | tr }} <strong>{{ "Check-in liberado" | tr }}</strong>.</span>
         </div>
 
         <div class="checkin-ux-alert expired" *ngIf="!voucher.checkinRealizado && !ticket && checkinStatus === 'expired'">
           <lucide-icon [img]="icons.help" size="18"></lucide-icon>
-          <span>Prazo para check-in expirado (limite de 15 minutos após o horário agendado).</span>
+          <span>{{ "Prazo para check-in expirado (limite de 15 minutos após o horário agendado)." | tr }}</span>
         </div>
 
         <div class="ticket-type-selector" *ngIf="!voucher.checkinRealizado && !ticket">
-          <span class="selector-label">Tipo de Atendimento:</span>
+          <span class="selector-label">{{ "Tipo de Atendimento:" | tr }}</span>
           <div class="selector-options">
             <button 
               type="button" 
@@ -212,7 +212,7 @@
           *ngIf="!voucher.checkinRealizado && !ticket"
           [disabled]="checkinLoading || checkinStatus !== 'ready'"
           (click)="confirmarCheckin()">
-          {{ checkinLoading ? 'Confirmando...' : 'Confirmar check-in' }}
+          {{ checkinLoading ? ("Confirmando..." | tr) : ("Confirmar check-in" | tr) }}
         </button>
 
         <button class="btn-keep" *ngIf="voucher.checkinRealizado || ticket" (click)="fecharVoucher()">

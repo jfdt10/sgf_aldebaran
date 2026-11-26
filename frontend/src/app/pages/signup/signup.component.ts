@@ -1,3 +1,4 @@
+import { LanguageSwitchComponent } from '../../components/language-switch.component';
 import { TranslatePipe } from '../../services/translate.pipe';
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -9,7 +10,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [TranslatePipe, CommonModule, FormsModule, RouterLink, LucideAngularModule],
+  imports: [LanguageSwitchComponent, TranslatePipe, CommonModule, FormsModule, RouterLink, LucideAngularModule],
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.scss']
 })

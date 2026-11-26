@@ -1,3 +1,4 @@
+import { LanguageSwitchComponent } from '../../../components/language-switch.component';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit } from '@angular/core';
 import { environment } from '../../../../environments/environment';
@@ -8,7 +9,7 @@ import { TotemService, Ticket } from '../../../services/totem.service';
 @Component({
   selector: 'app-totem-senha',
   standalone: true,
-  imports: [TranslatePipe, CommonModule],
+  imports: [LanguageSwitchComponent, TranslatePipe, CommonModule],
   templateUrl: './totem-senha.component.html',
   styles: [`
     :host {
@@ -31,7 +32,8 @@ import { TotemService, Ticket } from '../../../services/totem.service';
 
     .ticket-card {
       background: white;
-      width: 380px;
+      width: min(100% - 2rem, 460px);
+      box-sizing: border-box;
       padding: 40px;
       border-radius: 20px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.15);
@@ -109,6 +111,7 @@ import { TotemService, Ticket } from '../../../services/totem.service';
     }
 
     @media print {
+      .receipt-language { display: none; }
       body * { visibility: hidden; }
       
       .totem-container, .totem-container * {

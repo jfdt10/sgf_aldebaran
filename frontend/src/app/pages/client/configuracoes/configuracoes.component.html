@@ -5,7 +5,7 @@
         <p class="page-eyebrow">{{ "Portal do Cliente" | tr }}</p>
         <h2 id="client-settings-title">{{ "Configurações" | tr }}</h2>
         <p class="page-description">
-          Ajuste preferências da sua conta e acompanhe opções legais do portal.
+          {{ "Ajuste preferências da sua conta e acompanhe opções legais do portal." | tr }}
         </p>
       </div>
     </header>
@@ -20,12 +20,12 @@
         [img]="feedback.type === 'success' ? icons.success : icons.error"
         size="18"
       ></lucide-icon>
-      <span>{{ feedback.message }}</span>
+      <span>{{ feedback.message | tr }}</span>
     </div>
 
     <div class="loading-state" *ngIf="loading">
       <lucide-icon [img]="icons.loader" size="24" class="spin"></lucide-icon>
-      <span>Carregando configurações...</span>
+      <span>{{ "Carregando configurações..." | tr }}</span>
     </div>
 
     <div class="settings-content" *ngIf="!loading">

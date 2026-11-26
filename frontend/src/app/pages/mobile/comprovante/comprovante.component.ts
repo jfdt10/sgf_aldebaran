@@ -1,3 +1,6 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
+import { LanguageSwitchComponent } from '../../../components/language-switch.component';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -20,11 +23,12 @@ import * as QRCode from 'qrcode';
 @Component({
   selector: 'app-comprovante',
   standalone: true,
-  imports: [TranslatePipe, CommonModule, RouterLink, LucideAngularModule],
+  imports: [LanguageSwitchComponent, TranslatePipe, CommonModule, RouterLink, LucideAngularModule],
   templateUrl: './comprovante.component.html',
   styleUrl: './comprovante.component.scss'
 })
 export class ComprovanteComponent implements OnInit, OnDestroy {
+  readonly language = inject(LanguageService);
   dados: any = null;
   agendamentoId: number | null = null;
   loading = true;
@@ -184,7 +188,7 @@ export class ComprovanteComponent implements OnInit, OnDestroy {
   getDataFormatada(): string {
     if (!this.dados?.data) return '-';
     const data = new Date(`${this.dados.data}T12:00:00`);
-    return data.toLocaleDateString('pt-BR', {
+    return data.toLocaleDateString(this.language.locale(), {
       day: '2-digit',
       month: 'short',
       year: 'numeric',

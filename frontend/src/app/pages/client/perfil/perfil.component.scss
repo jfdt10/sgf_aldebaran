@@ -46,19 +46,6 @@
   font-weight: 800;
 }
 
-.profile-language-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border: 1px solid #dbe7ef;
-  border-radius: 999px;
-  background: #fff;
-  color: #475569;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
-  font-size: 0.9rem;
-  font-weight: 700;
-}
 
 .profile-grid {
   display: grid;
@@ -299,9 +286,6 @@
     align-items: stretch;
   }
 
-  .profile-language-chip {
-    width: fit-content;
-  }
 
   .profile-summary-card,
   .profile-actions-panel {

@@ -1,11 +1,12 @@
 <div class="setup-container">
   <div class="setup-card animate-pop">
+    <app-language-switch class="page-language" />
     <div class="setup-header">
       <div class="icon-circle">
         <lucide-icon [img]="icons.monitor" size="32" color="white"></lucide-icon>
       </div>
-      <h2>Configuracao do Painel</h2>
-      <p>Selecione a filial vinculada a este painel de TV.</p>
+      <h2>{{ "Configuracao do Painel" | tr }}</h2>
+      <p>{{ "Selecione a filial vinculada a este painel de TV." | tr }}</p>
     </div>
 
     <div class="setup-body">
@@ -20,14 +21,14 @@
             <lucide-icon [img]="icons.check" size="14"></lucide-icon>
           </div>
           <span class="filial-name">{{ f.nome }}</span>
-          <span class="filial-address">{{ f.endereco || 'Sem endereco cadastrado' }}</span>
+          <span class="filial-address">{{ f.endereco || ("Sem endereco cadastrado" | tr) }}</span>
         </div>
       </div>
 
-      <div *ngIf="loading" class="loading-state">Carregando unidades...</div>
+      <div *ngIf="loading" class="loading-state">{{ "Carregando unidades..." | tr }}</div>
 
       <div *ngIf="!loading && filiais.length === 0" class="error-state">
-        Nenhuma filial ativa encontrada no sistema.
+        {{ "Nenhuma filial ativa encontrada no sistema." | tr }}
       </div>
     </div>
 
@@ -37,7 +38,7 @@
         [disabled]="!selectedFilialId || loading"
         (click)="confirmarConfiguracao()"
       >
-        Confirmar Configuracao
+        {{ "Confirmar Configuracao" | tr }}
         <lucide-icon [img]="icons.arrow" size="18"></lucide-icon>
       </button>
     </div>

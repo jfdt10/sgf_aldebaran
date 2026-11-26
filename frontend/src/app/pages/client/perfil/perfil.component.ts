@@ -1,10 +1,8 @@
-import { LanguageService } from '../../../services/language.service';
-import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { LucideAngularModule, ChevronRight, Languages, LogOut, Mail, Phone, Settings, SquarePen } from 'lucide-angular';
+import { LucideAngularModule, ChevronRight, LogOut, Mail, Phone, Settings, SquarePen } from 'lucide-angular';
 import { AuthService, AuthenticatedUser } from '../../../services/auth.service';
 
 interface ClientProfile {
@@ -31,7 +29,6 @@ interface ProfileActionItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ClientPerfilComponent implements OnInit {
-  readonly language = inject(LanguageService);
   protected readonly icons = {
     email: Mail,
     phone: Phone,
@@ -39,7 +36,7 @@ export class ClientPerfilComponent implements OnInit {
     settings: Settings,
     logout: LogOut,
     chevron: ChevronRight,
-    languages: Languages,
+
   };
 
   protected profile: ClientProfile = {

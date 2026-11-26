@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -14,6 +16,7 @@ import { StatusItem, TaskItem, Priority } from '../../../models/task-management.
   styleUrls: ['./task-modal.component.scss']
 })
 export class TaskModalComponent implements OnInit {
+  private readonly language = inject(LanguageService);
   @Input() task?: TaskItem;
   @Input() statusId?: number;
   @Input() statusList: StatusItem[] = [];
@@ -100,7 +103,7 @@ export class TaskModalComponent implements OnInit {
   }
 
   deleteTask() {
-    if (!this.task || !confirm('Tem certeza que deseja excluir esta tarefa?')) return;
+    if (!this.task || !confirm(this.language.text("Tem certeza que deseja excluir esta tarefa?"))) return;
 
     this.loading = true;
     this.taskService.deleteTask(this.task.id).subscribe({

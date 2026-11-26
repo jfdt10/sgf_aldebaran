@@ -2,24 +2,24 @@
     <div class="list-card">
         <div class="list-card-header">
             <div class="titles">
-                <h2>Usuários do Sistema</h2>
+                <h2>{{ "Usuários do Sistema" | tr }}</h2>
             </div>
             <button class="btn-primary" (click)="abrirModalNovo()">
                 <lucide-icon [img]="icons.plus" size="18"></lucide-icon>
-                Novo Usuário
+                {{ "Novo Usuário" | tr }}
             </button>
         </div>
 
         <div class="list-card-search" *ngIf="usuarios.length > 0 || filtro">
             <div class="search-input-wrapper">
                 <lucide-icon [img]="icons.search" size="18" class="search-icon"></lucide-icon>
-                <input type="text" placeholder="Buscar por Nome, E-mail ou Login..." [(ngModel)]="filtro"
+                <input type="text" [placeholder]='"Buscar por Nome, E-mail ou Login..." | tr' [(ngModel)]="filtro"
                     (keyup.enter)="buscar()">
             </div>
         </div>
 
         <div class="skeleton-loader" *ngIf="loading" style="padding: 2rem;">
-            Aguarde, carregando...
+            {{ "Aguarde, carregando..." | tr }}
         </div>
 
         <div class="table-responsive" *ngIf="!loading && usuarios.length > 0">
@@ -28,7 +28,7 @@
                     <tr>
                         <th>{{ "Nome" | tr }}</th>
                         <th>{{ "E-mail" | tr }}</th>
-                        <th>Função</th>
+                        <th>{{ "Função" | tr }}</th>
                         <th>Status</th>
                         <th>{{ "Ações" | tr }}</th>
                     </tr>
@@ -46,7 +46,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td>{{ u.email || 'Não informado' }}</td>
+                        <td>{{ u.email || ("Não informado" | tr) }}</td>
                         <td>
                             <span class="badge" [ngClass]="{
                                 'badge-admin': u.perfil === 'ADMIN',
@@ -55,13 +55,13 @@
                             }">
                                 <lucide-icon [img]="icons.shield" size="12" *ngIf="u.perfil === 'ADMIN'"></lucide-icon>
                                 <lucide-icon [img]="icons.users" size="12" *ngIf="u.perfil !== 'ADMIN'"></lucide-icon>
-                                {{ u.perfil }}
+                                {{ (u.perfil) | tr }}
                             </span>
                         </td>
                         <td>
                             <div class="status-badge" [ngClass]="u.ativo ? 'active' : 'inactive'">
                                 <lucide-icon [img]="u.ativo ? icons.checkCircle : icons.userX" size="14"></lucide-icon>
-                                {{ u.ativo ? 'Ativo' : 'Inativo' }}
+                                {{ u.ativo ? ("Ativo" | tr) : ("Inativo" | tr) }}
                             </div>
                         </td>
                         <td>
@@ -74,10 +74,10 @@
                                 </button>
                                 <button class="btn-toggle" [ngClass]="u.ativo ? 'deactivate' : 'activate'" 
                                     (click)="alternarStatus(u.id, u.ativo)"
-                                    [title]="u.ativo ? 'Inativar' : 'Ativar'">
+                                    [title]='u.ativo ? ("Inativar" | tr) : ("Ativar" | tr)'>
                                     <lucide-icon [img]="u.ativo ? icons.userX : icons.checkCircle" size="14"></lucide-icon>
                                 </button>
-                                <button class="btn-delete" (click)="excluirUsuario(u.id, u.nome)" title="Excluir Permanentemente">
+                                <button class="btn-delete" (click)="excluirUsuario(u.id, u.nome)" [title]='"Excluir Permanentemente" | tr'>
                                     <lucide-icon [img]="icons.trash2" size="14"></lucide-icon>
                                 </button>
                             </div>
@@ -91,12 +91,12 @@
             <div class="icon-circle empty">
                 <lucide-icon [img]="icons.users" size="40"></lucide-icon>
             </div>
-            <h3>Nenhum usuário encontrado</h3>
-            <p>O banco está vazio ou a busca não retornou resultados.</p>
+            <h3>{{ "Nenhum usuário encontrado" | tr }}</h3>
+            <p>{{ "O banco está vazio ou a busca não retornou resultados." | tr }}</p>
         </div>
 
         <div class="list-card-footer" *ngIf="!loading && usuarios.length > 0">
-            <span>Total: {{ usuarios.length }} usuário(s)</span>
+            <span>{{ "Total:" | tr }} {{ usuarios.length }} {{ "usuário(s)" | tr }}</span>
         </div>
     </div>
 
@@ -105,7 +105,7 @@
             <div class="modal-header">
                 <h2>
                     <lucide-icon [img]="icons.user" size="20"></lucide-icon>
-                    {{ isEditing ? 'Editar Usuário' : 'Novo Usuário' }}
+                    {{ isEditing ? ("Editar Usuário" | tr) : ("Novo Usuário" | tr) }}
                 </h2>
                 <button class="close-btn" (click)="fecharModal()">
                     <lucide-icon [img]="icons.x" size="20"></lucide-icon>
@@ -114,8 +114,8 @@
 
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Nome Completo *</label>
-                    <input type="text" [(ngModel)]="usuarioForm.nome" placeholder="Nome do colaborador">
+                    <label>{{ "Nome Completo *" | tr }}</label>
+                    <input type="text" [(ngModel)]="usuarioForm.nome" [placeholder]='"Nome do colaborador" | tr'>
                 </div>
 
                 <div class="form-row">
@@ -124,29 +124,29 @@
                         <input type="email" [(ngModel)]="usuarioForm.email" placeholder="email@empresa.com">
                     </div>
                     <div class="form-group flex-1">
-                        <label>Login *</label>
-                        <input type="text" [(ngModel)]="usuarioForm.login" placeholder="Ex: joao.silva">
+                        <label>{{ "Login *" | tr }}</label>
+                        <input type="text" [(ngModel)]="usuarioForm.login" [placeholder]='"Ex: joao.silva" | tr'>
                     </div>
                 </div>
 
                 <div class="form-group" *ngIf="!isEditing">
-                    <label>Senha Provisória *</label>
+                    <label>{{ "Senha Provisória *" | tr }}</label>
                     <input type="password" [(ngModel)]="usuarioForm.senha" [placeholder]='"Mínimo 6 caracteres" | tr'>
                 </div>
 
                 <div class="form-group">
-                    <label>Perfil de Acesso *</label>
+                    <label>{{ "Perfil de Acesso *" | tr }}</label>
                     <select [(ngModel)]="usuarioForm.perfil">
-                        <option value="OPERADOR">OPERADOR - Acesso apenas ao painel de atendimento</option>
-                        <option value="SUPERVISOR">SUPERVISOR - Acesso ao dashboard e monitoramento</option>
-                        <option value="ADMIN">ADMINISTRADOR - Acesso total ao sistema e cadastros</option>
+                        <option value="OPERADOR">{{ "OPERADOR - Acesso apenas ao painel de atendimento" | tr }}</option>
+                        <option value="SUPERVISOR">{{ "SUPERVISOR - Acesso ao dashboard e monitoramento" | tr }}</option>
+                        <option value="ADMIN">{{ "ADMINISTRADOR - Acesso total ao sistema e cadastros" | tr }}</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label>Filial de Atuação *</label>
+                    <label>{{ "Filial de Atuação *" | tr }}</label>
                     <select [(ngModel)]="usuarioForm.filial_id" [disabled]="isRestricted">
-                        <option *ngIf="!isRestricted" [ngValue]="null">Geral (Todas as Unidades / Sem Filial)</option>
+                        <option *ngIf="!isRestricted" [ngValue]="null">{{ "Geral (Todas as Unidades / Sem Filial)" | tr }}</option>
                         <option *ngFor="let fil of filiais" [ngValue]="fil.id">{{ fil.nome }}</option>
                     </select>
                 </div>
@@ -176,11 +176,10 @@
 
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Nova Senha *</label>
+                    <label>{{ "Nova Senha *" | tr }}</label>
                     <input type="password" [(ngModel)]="novaSenhaForm.senha" [placeholder]='"Mínimo 6 caracteres" | tr'>
                     <small
-                        style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 4px;">Esta
-                        senha substituirá a senha atual do usuário.</small>
+                        style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 4px;">{{ "Esta senha substituirá a senha atual do usuário." | tr }}</small>
                 </div>
             </div>
 
@@ -188,7 +187,7 @@
                 <button class="btn-outline" (click)="fecharModal()">{{ "Cancelar" | tr }}</button>
                 <button class="btn-primary" (click)="salvarNovaSenha()">
                     <lucide-icon [img]="icons.checkCircle" size="18"></lucide-icon>
-                    Salvar Nova Senha
+                    {{ "Salvar Nova Senha" | tr }}
                 </button>
             </div>
         </div>
@@ -204,7 +203,7 @@
                     </div>
                 </div>
                 <h2>{{ "Sucesso!" | tr }}</h2>
-                <p>{{ successMessage }}</p>
+                <p>{{ successMessage | tr }}</p>
                 <button class="btn-success-ok" (click)="fecharModal()">{{ "OK, Entendi" | tr }}</button>
             </div>
         </div>

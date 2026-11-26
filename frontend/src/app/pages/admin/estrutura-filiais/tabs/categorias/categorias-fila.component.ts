@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../../../services/translate.pipe';
 import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -14,6 +16,7 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./categorias-fila.component.scss']
 })
 export class CategoriasFilaComponent implements OnInit {
+  private readonly language = inject(LanguageService);
   categorias: any[] = [];
   loading = false;
   
@@ -126,7 +129,7 @@ export class CategoriasFilaComponent implements OnInit {
   }
 
   salvarCategoria() {
-    if (!this.formCategoria.nome) return alert("O nome da categoria é obrigatório.");
+    if (!this.formCategoria.nome) return alert(this.language.text("O nome da categoria é obrigatório."));
     
     this.loading = true;
     const payload = {
@@ -152,7 +155,7 @@ export class CategoriasFilaComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        alert("Erro: " + (err.error?.message || "Erro desconhecido"));
+        alert(this.language.text("Erro:") + " " + (err.error?.message || this.language.text("Erro desconhecido")));
         this.loading = false;
         this.cdr.detectChanges();
       }

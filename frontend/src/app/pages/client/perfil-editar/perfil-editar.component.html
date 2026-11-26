@@ -3,16 +3,16 @@
     <header class="edit-profile-header">
       <div>
         <p class="page-eyebrow">{{ "Portal do Cliente" | tr }}</p>
-        <h2>Editar Dados</h2>
+        <h2>{{ "Editar Dados" | tr }}</h2>
         <p class="page-description">
-          Atualize os dados cadastrais da sua conta e gerencie sua senha com seguranca.
+          {{ "Atualize os dados cadastrais da sua conta e gerencie sua senha com seguranca." | tr }}
         </p>
       </div>
     </header>
 
     <div class="loading-state" *ngIf="loadingProfile">
       <lucide-icon [img]="icons.loader" size="24" class="spin"></lucide-icon>
-      <span>Carregando dados do perfil...</span>
+      <span>{{ "Carregando dados do perfil..." | tr }}</span>
     </div>
 
     <div class="edit-profile-grid" *ngIf="!loadingProfile">
@@ -22,8 +22,8 @@
             <lucide-icon [img]="icons.user" size="20"></lucide-icon>
           </div>
           <div>
-            <h3>Dados cadastrais</h3>
-            <p>Edite apenas os campos permitidos para o seu tipo de cadastro.</p>
+            <h3>{{ "Dados cadastrais" | tr }}</h3>
+            <p>{{ "Edite apenas os campos permitidos para o seu tipo de cadastro." | tr }}</p>
           </div>
         </div>
 
@@ -36,33 +36,33 @@
             [img]="profileFeedback.type === 'success' ? icons.success : icons.error"
             size="18"
           ></lucide-icon>
-          <span>{{ profileFeedback.message }}</span>
+          <span>{{ profileFeedback.message | tr }}</span>
         </div>
 
         <div class="form-frame form-frame--profile">
           <form class="form-grid" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
             <div class="form-field form-field--full">
-              <label>{{ nameLabel }}</label>
+              <label>{{ nameLabel | tr }}</label>
               <input type="text" formControlName="nomeExibicao" />
               <small class="field-error" *ngIf="fieldInvalid('profile', 'nomeExibicao')">
-                {{ getFieldError('profile', 'nomeExibicao') }}
+                {{ getFieldError('profile', 'nomeExibicao') | tr }}
               </small>
             </div>
 
             <div class="form-field">
               <label>{{ documentLabel }}</label>
               <input type="text" formControlName="documento" readonly />
-              <small class="field-help">Este documento nao pode ser alterado.</small>
+              <small class="field-help">{{ "Este documento nao pode ser alterado." | tr }}</small>
             </div>
 
             <div class="form-field">
-              <label>{{ isPessoaJuridica ? 'E-mail comercial' : ("E-mail" | tr) }}</label>
+              <label>{{ (isPessoaJuridica ? 'E-mail comercial' : 'E-mail') | tr }}</label>
               <div class="input-with-icon">
                 <lucide-icon [img]="icons.mail" size="18"></lucide-icon>
                 <input type="email" formControlName="email" />
               </div>
               <small class="field-error" *ngIf="fieldInvalid('profile', 'email')">
-                {{ getFieldError('profile', 'email') }}
+                {{ getFieldError('profile', 'email') | tr }}
               </small>
             </div>
 
@@ -73,7 +73,7 @@
                 <input type="text" formControlName="telefone" placeholder="(00) 00000-0000" />
               </div>
               <small class="field-error" *ngIf="fieldInvalid('profile', 'telefone')">
-                {{ getFieldError('profile', 'telefone') }}
+                {{ getFieldError('profile', 'telefone') | tr }}
               </small>
             </div>
 
@@ -84,7 +84,7 @@
                   size="18"
                   [class.spin]="savingProfile"
                 ></lucide-icon>
-                <span>{{ profileSubmitLabel }}</span>
+                <span>{{ profileSubmitLabel | tr }}</span>
               </button>
             </div>
           </form>
@@ -97,8 +97,8 @@
             <lucide-icon [img]="icons.security" size="20"></lucide-icon>
           </div>
           <div>
-            <h3>Alterar senha</h3>
-            <p>Use um fluxo separado para atualizar sua senha com validacoes de seguranca.</p>
+            <h3>{{ "Alterar senha" | tr }}</h3>
+            <p>{{ "Use um fluxo separado para atualizar sua senha com validacoes de seguranca." | tr }}</p>
           </div>
         </div>
 
@@ -111,46 +111,46 @@
             [img]="passwordFeedback.type === 'success' ? icons.success : icons.error"
             size="18"
           ></lucide-icon>
-          <span>{{ passwordFeedback.message }}</span>
+          <span>{{ passwordFeedback.message | tr }}</span>
         </div>
 
         <div class="form-frame form-frame--security">
           <form class="form-grid form-grid--security" [formGroup]="passwordForm" (ngSubmit)="changePassword()">
             <div class="form-field form-field--full">
-              <label>Senha atual</label>
+              <label>{{ "Senha atual" | tr }}</label>
               <div class="input-with-icon">
                 <lucide-icon [img]="icons.key" size="18"></lucide-icon>
                 <input type="password" formControlName="senhaAtual" />
               </div>
               <small class="field-error" *ngIf="fieldInvalid('password', 'senhaAtual')">
-                {{ getFieldError('password', 'senhaAtual') }}
+                {{ getFieldError('password', 'senhaAtual') | tr }}
               </small>
             </div>
 
             <div class="form-field form-field--full">
-              <label>Nova senha</label>
+              <label>{{ "Nova senha" | tr }}</label>
               <div class="input-with-icon">
                 <lucide-icon [img]="icons.key" size="18"></lucide-icon>
                 <input type="password" formControlName="novaSenha" />
               </div>
               <small class="field-error" *ngIf="fieldInvalid('password', 'novaSenha')">
-                {{ getFieldError('password', 'novaSenha') }}
+                {{ getFieldError('password', 'novaSenha') | tr }}
               </small>
             </div>
 
             <div class="form-field form-field--full">
-              <label>Confirmar nova senha</label>
+              <label>{{ "Confirmar nova senha" | tr }}</label>
               <div class="input-with-icon">
                 <lucide-icon [img]="icons.key" size="18"></lucide-icon>
                 <input type="password" formControlName="confirmarNovaSenha" />
               </div>
               <small class="field-error" *ngIf="fieldInvalid('password', 'confirmarNovaSenha')">
-                {{ getFieldError('password', 'confirmarNovaSenha') }}
+                {{ getFieldError('password', 'confirmarNovaSenha') | tr }}
               </small>
             </div>
 
             <small class="field-error field-error--group" *ngIf="passwordGroupError">
-              {{ passwordGroupError }}
+              {{ passwordGroupError | tr }}
             </small>
 
             <div class="form-actions">
@@ -160,7 +160,7 @@
                   size="18"
                   [class.spin]="savingPassword"
                 ></lucide-icon>
-                <span>{{ passwordSubmitLabel }}</span>
+                <span>{{ passwordSubmitLabel | tr }}</span>
               </button>
             </div>
           </form>

@@ -336,26 +336,26 @@ export class EscolhaGuiches implements OnInit, OnDestroy {
     if (event) event.preventDefault();
 
     if (!this.operadorForm.nome || !this.operadorForm.email || !this.operadorForm.login) {
-      alert('Por favor, preencha os campos obrigatórios (Nome, E-mail e Login).');
+      alert(this.language.text("Por favor, preencha os campos obrigatórios (Nome, E-mail e Login)."));
       return;
     }
 
     if (this.operadorForm.senha) {
       if (this.operadorForm.senha.length < 8) {
-        alert('A nova senha deve ter no mínimo 8 caracteres.');
+        alert(this.language.text("A nova senha deve ter no mínimo 8 caracteres."));
         return;
       }
       if (this.operadorForm.senha !== this.operadorForm.confirmarSenha) {
-        alert('A nova senha e a confirmação não conferem.');
+        alert(this.language.text("A nova senha e a confirmação não conferem."));
         return;
       }
     }
 
     const salvo = localStorage.getItem('usuario_sgf');
-    if (!salvo) { alert('Erro: operador não encontrado.'); return; }
+    if (!salvo) { alert(this.language.text("Erro: operador não encontrado.")); return; }
 
     let user: any;
-    try { user = JSON.parse(salvo); } catch { alert('Erro ao processar dados da sessão.'); return; }
+    try { user = JSON.parse(salvo); } catch { alert(this.language.text("Erro ao processar dados da sessão.")); return; }
 
     const payload = {
       nome: this.operadorForm.nome,
@@ -387,21 +387,21 @@ export class EscolhaGuiches implements OnInit, OnDestroy {
           this.api.patch<any>(`/usuarios/${user.id}/senha`, { senha: this.operadorForm.senha }).subscribe({
             next: () => {
               this.fecharModal();
-              alert('Perfil e senha atualizados com sucesso!');
+              alert(this.language.text("Perfil e senha atualizados com sucesso!"));
               this.cdr.markForCheck();
             },
             error: (err) => {
-              alert('Perfil atualizado, mas houve erro ao salvar nova senha: ' + (err.error?.message || 'Erro desconhecido'));
+              alert(this.language.text("Perfil atualizado, mas houve erro ao salvar nova senha:") + " " + (err.error?.message || this.language.text("Erro desconhecido")));
             }
           });
         } else {
           this.fecharModal();
-          alert('Perfil atualizado com sucesso!');
+          alert(this.language.text("Perfil atualizado com sucesso!"));
           this.cdr.markForCheck();
         }
       },
       error: (err) => {
-        alert('Erro ao atualizar perfil: ' + (err.error?.message || 'Erro desconhecido'));
+        alert(this.language.text("Erro ao atualizar perfil:") + " " + (err.error?.message || this.language.text("Erro desconhecido")));
       }
     });
   }

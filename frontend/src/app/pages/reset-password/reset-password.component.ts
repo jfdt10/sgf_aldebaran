@@ -1,3 +1,6 @@
+import { LanguageService } from '../../services/language.service';
+import { inject } from '@angular/core';
+import { LanguageSwitchComponent } from '../../components/language-switch.component';
 import { TranslatePipe } from '../../services/translate.pipe';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -10,11 +13,12 @@ import { environment } from '../../../environments/environment';
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [TranslatePipe, CommonModule, FormsModule, RouterLink, LucideAngularModule],
+  imports: [LanguageSwitchComponent, TranslatePipe, CommonModule, FormsModule, RouterLink, LucideAngularModule],
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.scss']
 })
 export class ResetPasswordComponent implements OnInit {
+  private readonly language = inject(LanguageService);
   
   step: 'FORM' | 'SUCCESS' = 'FORM';
   token: string = '';
@@ -42,7 +46,7 @@ export class ResetPasswordComponent implements OnInit {
 
   redefinir() {
     if (this.novaSenha !== this.confirmarSenha) {
-      alert('As senhas não coincidem.');
+      alert(this.language.text("As senhas não coincidem."));
       return;
     }
 
@@ -60,7 +64,7 @@ export class ResetPasswordComponent implements OnInit {
       error: (err) => {
         console.error('Erro:', err);
         this.carregando = false;
-        alert('Erro ao redefinir senha. O link pode ter expirado.');
+        alert(this.language.text("Erro ao redefinir senha. O link pode ter expirado."));
         
         this.cd.detectChanges();
       }

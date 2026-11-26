@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../../../services/translate.pipe';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChevronRight, LucideAngularModule } from 'lucide-angular';
@@ -5,7 +6,7 @@ import { ChevronRight, LucideAngularModule } from 'lucide-angular';
 @Component({
   selector: 'app-settings-link-item',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, LucideAngularModule],
   templateUrl: './settings-link-item.component.html',
   styleUrl: './settings-link-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

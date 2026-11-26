@@ -1,12 +1,12 @@
 <div class="regras-container animate-up">
     <header class="section-header">
-        <h1>Regras e Controle de Filas</h1>
-        <p>Gerencie categorias base e regras lógicas de prioridade</p>
+        <h1>{{ "Regras e Controle de Filas" | tr }}</h1>
+        <p>{{ "Gerencie categorias base e regras lógicas de prioridade" | tr }}</p>
     </header>
 
     <div class="card-premium mb-8">
-        <h2 class="card-title">1. Categorias de Atendimento (Físicas)</h2>
-        <p class="card-subtitle">Categorias geradas no Quiosque/Totem presencial</p>
+        <h2 class="card-title">{{ "1. Categorias de Atendimento (Físicas)" | tr }}</h2>
+        <p class="card-subtitle">{{ "Categorias geradas no Quiosque/Totem presencial" | tr }}</p>
 
         <div class="categories-list">
             <div *ngFor="let s of servicos" class="category-item-card">
@@ -16,24 +16,24 @@
                     </div>
                     <div class="cat-name-box">
                         <h3>{{ s.nome }}</h3>
-                        <span>Categoria Física</span>
+                        <span>{{ "Categoria Física" | tr }}</span>
                     </div>
                 </div>
 
                 <div class="cat-fields">
                     <div class="input-group-premium">
-                        <label>PREFIXO</label>
+                        <label>{{ "PREFIXO" | tr }}</label>
                         <input type="text" [(ngModel)]="s.prefixo" placeholder="Ex: {{ s.sigla }}">
-                        <small>Ex: {{ s.prefixo || s.sigla }}-001</small>
+                        <small>{{ "Ex:" | tr }} {{ s.prefixo || s.sigla }}-001</small>
                     </div>
                     
                     <div class="input-group-premium">
-                        <label>PRIORIDADE</label>
+                        <label>{{ "PRIORIDADE" | tr }}</label>
                         <input type="number" [(ngModel)]="s.prioridadePeso" placeholder="1">
                     </div>
 
                     <div class="sla-group">
-                        <label>METAS DE TEMPO (SLA)</label>
+                        <label>{{ "METAS DE TEMPO (SLA)" | tr }}</label>
                         <div class="sla-inputs">
                             <div class="sla-item">
                                 <div class="sla-input-wrapper">
@@ -49,7 +49,7 @@
                                     <input type="number" [(ngModel)]="s.metaAtendimento" [style.width.ch]="(s.metaAtendimento?.toString()?.length || 1) + 1">
                                     <span>min</span>
                                 </div>
-                                <span class="sla-label">Atend.</span>
+                                <span class="sla-label">{{ "Atend." | tr }}</span>
                             </div>
                         </div>
                     </div>
@@ -59,69 +59,69 @@
     </div>
 
     <div class="card-premium scheduling-logic mb-8">
-        <h2 class="card-title">2. Lógica de Agendamento (Web/App)</h2>
-        <p class="card-subtitle">Modificador aplicado em senhas geradas online</p>
+        <h2 class="card-title">{{ "2. Lógica de Agendamento (Web/App)" | tr }}</h2>
+        <p class="card-subtitle">{{ "Modificador aplicado em senhas geradas online" | tr }}</p>
 
         <div class="logic-settings">
             <div class="logic-field-card">
-                <label>MODIFICADOR VISUAL</label>
+                <label>{{ "MODIFICADOR VISUAL" | tr }}</label>
                 <div class="logic-input">
                     <input type="text" [(ngModel)]="configs.MODIFICADOR_AGENDAMENTO" maxlength="2">
                 </div>
-                <small>Letra adicionada ao prefixo (Ex: CM<strong>{{ configs.MODIFICADOR_AGENDAMENTO }}</strong>045)</small>
+                <small>{{ "Letra adicionada ao prefixo (Ex: CM" | tr }}<strong>{{ configs.MODIFICADOR_AGENDAMENTO }}</strong>045)</small>
             </div>
 
             <div class="logic-field-card">
-                <label>BÔNUS DE PRIORIDADE</label>
+                <label>{{ "BÔNUS DE PRIORIDADE" | tr }}</label>
                 <div class="logic-input">
                     <input type="text" [(ngModel)]="configs.BONUS_PRIORIDADE_AGENDAMENTO">
                 </div>
-                <small>Quantos níveis de prioridade o agendamento ganha</small>
+                <small>{{ "Quantos níveis de prioridade o agendamento ganha" | tr }}</small>
             </div>
         </div>
 
         <div class="logic-diagram">
             <div class="diagram-step">
-                <span class="step-label">Categoria Original</span>
+                <span class="step-label">{{ "Categoria Original" | tr }}</span>
                 <div class="badge-base cat-orig">RP</div>
-                <span class="step-name">Retirada Pesada</span>
+                <span class="step-name">{{ "Retirada Pesada" | tr }}</span>
             </div>
             <div class="diagram-operator">+</div>
             <div class="diagram-step">
-                <span class="step-label">Modificador</span>
+                <span class="step-label">{{ "Modificador" | tr }}</span>
                 <div class="badge-base mod-box">{{ configs.MODIFICADOR_AGENDAMENTO }}</div>
-                <span class="step-name">Agendado +{{ configs.BONUS_PRIORIDADE_AGENDAMENTO }}</span>
+                <span class="step-name">{{ "Agendado +" | tr }}{{ configs.BONUS_PRIORIDADE_AGENDAMENTO }}</span>
             </div>
             <div class="diagram-operator">
                 <lucide-icon [img]="iconsArr.arrowRight" size="24" color="#0ea5e9"></lucide-icon>
             </div>
             <div class="diagram-step">
-                <span class="step-label">Senha Gerada</span>
+                <span class="step-label">{{ "Senha Gerada" | tr }}</span>
                 <div class="badge-final">RP-{{ configs.MODIFICADOR_AGENDAMENTO }}045</div>
-                <span class="step-name">Senha com prioridade aumentada</span>
+                <span class="step-name">{{ "Senha com prioridade aumentada" | tr }}</span>
             </div>
         </div>
 
         <div class="info-box-blue">
-            <p>Quando um cliente agenda online, a senha recebe o modificador "{{ configs.MODIFICADOR_AGENDAMENTO }}" e ganha +{{ configs.BONUS_PRIORIDADE_AGENDAMENTO }} de prioridade na fila, sendo chamada mais rápido que senhas normais da mesma categoria.</p>
+            <p>{{ "Quando um cliente agenda online, a senha recebe o modificador \"" | tr }}{{ configs.MODIFICADOR_AGENDAMENTO }}{{ "\" e ganha +" | tr }}{{ configs.BONUS_PRIORIDADE_AGENDAMENTO }} {{ "de prioridade na fila, sendo chamada mais rápido que senhas normais da mesma categoria." | tr }}</p>
         </div>
     </div>
 
     <div class="card-premium mb-24 section-global">
-        <h2 class="card-title">3. Configurações Globais</h2>
-        <p class="card-subtitle">Controle do ciclo de vida e limpeza do sistema</p>
+        <h2 class="card-title">{{ "3. Configurações Globais" | tr }}</h2>
+        <p class="card-subtitle">{{ "Controle do ciclo de vida e limpeza do sistema" | tr }}</p>
 
         <div class="global-settings-grid">
             <div class="global-setting-card">
-                <label>Horário de Reset</label>
+                <label>{{ "Horário de Reset" | tr }}</label>
                 <input type="time" [(ngModel)]="configs.HORARIO_RESET" class="reset-input">
-                <small>Horário em que as senhas serão resetadas automaticamente</small>
+                <small>{{ "Horário em que as senhas serão resetadas automaticamente" | tr }}</small>
             </div>
 
             <div class="global-setting-card flex-row justify-between items-center">
                 <div class="setting-info">
-                    <label>Limpeza Automática</label>
-                    <p>Remover automaticamente senhas expiradas e canceladas do banco de dados</p>
+                    <label>{{ "Limpeza Automática" | tr }}</label>
+                    <p>{{ "Remover automaticamente senhas expiradas e canceladas do banco de dados" | tr }}</p>
                 </div>
                 <label class="toggle-switch">
                     <input
@@ -141,30 +141,30 @@
                 <lucide-icon [img]="iconsArr.zap" size="22" color="white"></lucide-icon>
             </div>
             <div>
-                <h2 class="card-title" style="margin-bottom:4px">4. Calibração Inteligente de SLA</h2>
-                <p class="card-subtitle">Aprende com os dados reais de atendimento (P75 de espera + mediana de serviço)</p>
+                <h2 class="card-title" style="margin-bottom:4px">{{ "4. Calibração Inteligente de SLA" | tr }}</h2>
+                <p class="card-subtitle">{{ "Aprende com os dados reais de atendimento (P75 de espera + mediana de serviço)" | tr }}</p>
             </div>
         </div>
 
         <div class="calib-body">
             <div class="calib-info-box">
-                <p>O sistema analisa os últimos <strong>30+ atendimentos concluídos</strong> por categoria e calibra automaticamente as metas de tempo, usando o <strong>percentil 75</strong> para espera e a <strong>mediana aparada</strong> para atendimento. Valores são limitados entre 5 e 60 minutos.</p>
+                <p>{{ "O sistema analisa os últimos" | tr }} <strong>{{ "30+ atendimentos concluídos" | tr }}</strong> {{ "por categoria e calibra automaticamente as metas de tempo, usando o" | tr }} <strong>{{ "percentil 75" | tr }}</strong> {{ "para espera e a" | tr }} <strong>{{ "mediana aparada" | tr }}</strong> {{ "para atendimento. Valores são limitados entre 5 e 60 minutos." | tr }}</p>
             </div>
 
             <div class="calib-status" *ngIf="calibracaoResultado">
                 <div class="calib-result" *ngFor="let r of calibracaoResultado">
                     <span class="calib-name">{{ r.nome }}</span>
-                    <span class="calib-meta" *ngIf="r.metaEsperaNova">Espera: <strong>{{ r.metaEsperaNova }}min</strong></span>
-                    <span class="calib-meta" *ngIf="r.metaAtendimentoNova">Atend: <strong>{{ r.metaAtendimentoNova }}min</strong></span>
-                    <span class="calib-samples">({{ r.amostrasEspera }} amostras)</span>
+                    <span class="calib-meta" *ngIf="r.metaEsperaNova">{{ "Espera:" | tr }} <strong>{{ r.metaEsperaNova }}min</strong></span>
+                    <span class="calib-meta" *ngIf="r.metaAtendimentoNova">{{ "Atend:" | tr }} <strong>{{ r.metaAtendimentoNova }}min</strong></span>
+                    <span class="calib-samples">({{ r.amostrasEspera }} {{ "amostras)" | tr }}</span>
                 </div>
-                <p *ngIf="calibracaoResultado.length === 0" class="calib-empty">Nenhuma categoria com amostras suficientes (mín. 30).</p>
+                <p *ngIf="calibracaoResultado.length === 0" class="calib-empty">{{ "Nenhuma categoria com amostras suficientes (mín. 30)." | tr }}</p>
             </div>
 
             <button class="btn-calib" (click)="calibrarSLAs()" [disabled]="calibrando">
                 <span *ngIf="calibrando" class="spinner"></span>
                 <lucide-icon *ngIf="!calibrando" [img]="iconsArr.zap" size="16"></lucide-icon>
-                {{ calibrando ? 'Calibrando...' : 'Calibrar SLAs Agora' }}
+                {{ calibrando ? ("Calibrando..." | tr) : ("Calibrar SLAs Agora" | tr) }}
             </button>
         </div>
     </div>
@@ -187,7 +187,7 @@
                 </div>
             </div>
             <h2>{{ "Sucesso!" | tr }}</h2>
-            <p>As configurações foram salvas e aplicadas em todo o sistema.</p>
+            <p>{{ "As configurações foram salvas e aplicadas em todo o sistema." | tr }}</p>
             <button class="btn-success-ok" (click)="fecharSucesso()">{{ "OK, Entendi" | tr }}</button>
         </div>
     </div>

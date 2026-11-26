@@ -1,3 +1,6 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, ChangeDetectorRef, OnDestroy, Optional } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,12 +16,13 @@ import { AdminLayoutComponent } from '../../../layouts/admin-layout/admin-layout
 @Component({
   selector: 'app-logs',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, FormsModule, LucideAngularModule],
   providers: [DatePipe],
   templateUrl: './logs.html',
   styleUrls: ['./logs.scss']
 })
 export class Logs implements OnInit, OnDestroy {
+  private readonly language = inject(LanguageService);
   logs: any[] = [];
   loading = false;
   total = 0;
@@ -246,7 +250,7 @@ export class Logs implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error(err);
-        alert("Erro ao gerar PDF");
+        alert(this.language.text("Erro ao gerar PDF"));
         this.loading = false;
         this.cdr.detectChanges();
       }

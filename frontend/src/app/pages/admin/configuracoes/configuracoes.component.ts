@@ -40,19 +40,18 @@ export class ConfiguracoesComponent implements OnInit, OnDestroy {
   activeTab: 'geral' | 'notificacoes' | 'integracoes' | 'seguranca' | 'tv' | 'templates' = 'geral';
 
   diasDaSemanaLabels = [
-    { id: 1, label: 'S', full: 'Segunda-feira' },
-    { id: 2, label: 'T', full: 'Terça-feira' },
-    { id: 3, label: 'Q', full: 'Quarta-feira' },
-    { id: 4, label: 'Q', full: 'Quinta-feira' },
-    { id: 5, label: 'S', full: 'Sexta-feira' },
-    { id: 6, label: 'S', full: 'Sábado' },
-    { id: 0, label: 'D', full: 'Domingo' }
+    { id: 1, short: 'Seg', full: 'Segunda-feira' },
+    { id: 2, short: 'Ter', full: 'Terça-feira' },
+    { id: 3, short: 'Qua', full: 'Quarta-feira' },
+    { id: 4, short: 'Qui', full: 'Quinta-feira' },
+    { id: 5, short: 'Sex', full: 'Sexta-feira' },
+    { id: 6, short: 'Sáb', full: 'Sábado' },
+    { id: 0, short: 'Dom', full: 'Domingo' }
   ];
 
   form: any = {
     UNIDADE_NOME: '',
     FUSO_HORARIO: 'America/Sao_Paulo',
-    IDIOMA_SISTEMA: 'PT',
     TOTEM_HORARIO_INICIO: '08:00',
     TOTEM_HORARIO_FIM: '18:00',
     TOTEM_DIAS: [1, 2, 3, 4, 5],
@@ -157,7 +156,7 @@ export class ConfiguracoesComponent implements OnInit, OnDestroy {
     const file = event.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        alert('O arquivo é muito grande! Limite de 2MB.');
+        alert(this.language.text("O arquivo é muito grande! Limite de 2MB."));
         return;
       }
       const reader = new FileReader();
@@ -213,7 +212,6 @@ export class ConfiguracoesComponent implements OnInit, OnDestroy {
     this.form = {
       UNIDADE_NOME: '',
       FUSO_HORARIO: 'America/Sao_Paulo',
-      IDIOMA_SISTEMA: 'PT',
       TOTEM_HORARIO_INICIO: '08:00',
       TOTEM_HORARIO_FIM: '18:00',
       TOTEM_DIAS: [1, 2, 3, 4, 5],
@@ -278,7 +276,7 @@ export class ConfiguracoesComponent implements OnInit, OnDestroy {
         console.error('Erro ao salvar', err);
         this.salvando = false;
         this.cd.detectChanges();
-        alert('Erro ao salvar configurações: ' + (err.message || 'Verifique sua conexão.'));
+        alert(this.language.text("Erro ao salvar configurações:") + " " + (err.message || 'Verifique sua conexão.'));
       },
       complete: () => {
         this.salvando = false;
