@@ -99,7 +99,6 @@ $cyan-dark: #0891b2;
   margin: 0;
 }
 
-/* CUSTOM TABS */
 .custom-tabs {
   display: flex;
   gap: 32px;
@@ -137,7 +136,6 @@ $cyan-dark: #0891b2;
   }
 }
 
-/* QUEUE LIST */
 .queue-list {
   display: flex;
   flex-direction: column;
@@ -220,7 +218,6 @@ $cyan-dark: #0891b2;
   }
 }
 
-/* BAIAS GRID */
 .baias-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -334,7 +331,6 @@ $cyan-dark: #0891b2;
     }
   }
 }
-/* GUICHÊS GRID */
 .guiches-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -627,7 +623,6 @@ $cyan-dark: #0891b2;
   }
 }
 
-/* CONFIG TAB */
 .placeholder-box {
   background: white; border: 1px dashed #d1d5db; border-radius: 12px; padding: 48px; text-align: center;
   h2 { font-size: 1.25rem; color: $text-main; margin-bottom: 8px; }
@@ -636,7 +631,6 @@ $cyan-dark: #0891b2;
   .btn-outline-red { background: transparent; border: 2px solid #ef4444; color: #ef4444; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; transition: 0.2s; &:hover { background: #fef2f2; } }
 }
 
-/* CONFIG FORM STYLES (imported from configuracoes) */
 .config-form-container {
   display: flex;
   flex-direction: column;
@@ -727,7 +721,6 @@ $cyan-dark: #0891b2;
   }
 }
 
-/* MODAL SUCESSO COPIADO */
 .modal-backdrop {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(31, 41, 55, 0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);
 }
@@ -740,7 +733,6 @@ $cyan-dark: #0891b2;
 }
 @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-/* MODAL SELEÇÃO DE OPERADOR */
 .operadores-list {
   display: flex;
   flex-direction: column;
@@ -855,7 +847,6 @@ $cyan-dark: #0891b2;
 .bg-red-500 { background-color: #ef4444 !important; }
 .text-red-500 { color: #dc2626 !important; }
 
-/* QUEUE LIST HEADER */
 .queue-list-header {
   display: flex;
   justify-content: space-between;
@@ -869,7 +860,6 @@ $cyan-dark: #0891b2;
   }
 }
 
-/* BOTÃO ZERAR FILA */
 .btn-zerar-fila {
   display: inline-flex;
   align-items: center;
@@ -898,7 +888,6 @@ $cyan-dark: #0891b2;
   }
 }
 
-/* EMPTY QUEUE STATE */
 .empty-queue-state {
   text-align: center;
   padding: 56px 24px;
@@ -922,7 +911,6 @@ $cyan-dark: #0891b2;
   }
 }
 
-/* MODAL DANGER (Zerar Fila) */
 .modal-danger {
   border-top: 4px solid #ef4444;
 
@@ -976,7 +964,6 @@ $cyan-dark: #0891b2;
   }
 }
 
-/* RESULT STATE (sucesso/erro no modal) */
 .result-state {
   display: flex;
   flex-direction: column;
@@ -1019,7 +1006,6 @@ $cyan-dark: #0891b2;
   }
 }
 
-/* BOTÕES GERAIS DO MODAL */
 .btn-solid-gray {
   padding: 10px 20px;
   border: none;
@@ -1050,7 +1036,6 @@ $cyan-dark: #0891b2;
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
-/* Estado CHAMANDO no card de guichê */
 .guiche-card.chamando {
   border-color: #fbbf24 !important;
   background: #fffbeb !important;

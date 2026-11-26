@@ -17,11 +17,12 @@ import {
 import { MotoristaService } from './motorista.service';
 import { Prisma } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { StaffGuard } from '../auth/account-role.guards';
 import { LogService } from '../log/log.service';
 import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
 @Controller('motoristas')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, StaffGuard)
 export class MotoristaController {
   constructor(
     private readonly motoristaService: MotoristaService,

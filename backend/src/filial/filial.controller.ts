@@ -1,5 +1,6 @@
 import {
   Controller,
+  ForbiddenException,
   Get,
   Post,
   Body,
@@ -12,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { FilialService } from './filial.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AccountManagementGuard, AdminGuard, StaffGuard } from '../auth/account-role.guards';
 import { LogService } from '../log/log.service';
 import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 import { CreateFilialDto } from './dto/create-filial.dto';
@@ -35,7 +37,7 @@ export class FilialController {
     return this.filialService.findAllPublic();
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @Post()
   async create(
     @Body() createFilialDto: CreateFilialDto,
@@ -51,7 +53,7 @@ export class FilialController {
     return res;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Get()
   findAll(@Request() req: AuthenticatedRequest, @Query('filialId') filialId?: string) {
     return this.filialService.findAll(
@@ -60,19 +62,20 @@ export class FilialController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Get(':id')
   findOne(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return this.filialService.findOne(+id, req.user.filial_id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AccountManagementGuard)
   @Patch(':id')
   async update(
     @Param('id') id: string,
     @Body() updateFilialDto: UpdateFilialDto,
     @Request() req: AuthenticatedRequest,
   ) {
+    if (req.user.perfil === 'SUPERVISOR' && Number(id) !== req.user.filial_id) throw new ForbiddenException();
     const res = await this.filialService.update(+id, updateFilialDto, req.user.filial_id);
     const acao = updateFilialDto.ativo === false ? 'Inativação' : 'Atualização';
     await this.logService.logAction(
@@ -84,7 +87,7 @@ export class FilialController {
     return res;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @Delete(':id')
   async remove(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     const filial = await this.filialService.findOne(+id, req.user.filial_id);

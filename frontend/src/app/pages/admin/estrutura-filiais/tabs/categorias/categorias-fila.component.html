@@ -14,7 +14,6 @@
         <div class="categories-grid">
     <div class="category-card fade-in" *ngFor="let c of categorias">
         <div class="card-inner">
-            <!-- Header section: Icon + Info + Badge -->
             <div class="card-top">
                 <div class="category-icon-box" [style.background-color]="c.cor || '#0099ab'">
                     <lucide-icon
@@ -32,7 +31,6 @@
                 </div>
             </div>
 
-            <!-- Type Section -->
             <div class="card-middle">
                 <p class="tipo" *ngIf="c.tipo">
                     Tipo: 
@@ -44,7 +42,6 @@
                 </p>
             </div>
 
-            <!-- Actions Section -->
             <div class="category-actions">
                 <button class="btn-edit-fill" (click)="abrirModalCategoria(c)">
                     <lucide-icon [img]="icons.edit" size="16"></lucide-icon>
@@ -65,7 +62,6 @@
     </div>
 </div>
 
-<!-- Modal: Nova/Editar Categoria -->
 <div class="modal-overlay" *ngIf="showCategoriaModal">
     <div class="modal-card category-modal">
         <div class="modal-header category-gradient-header">
@@ -130,7 +126,6 @@
     </div>
 </div>
 
-<!-- Modal: Confirmação de Exclusão -->
 <div class="modal-overlay refined-overlay" *ngIf="showConfirmDelete">
     <div class="modal-card mini-modal refined-card">
         <div class="modal-body text-center">
@@ -151,7 +146,6 @@
     </div>
 </div>
 
-<!-- Modal: Sucesso -->
 <div class="modal-overlay refined-overlay" *ngIf="showSuccessModal">
     <div class="modal-card mini-modal refined-card">
         <div class="modal-body text-center">

@@ -1,15 +1,11 @@
 <div class="escolha-container">
-  <!-- Header -->
   <header class="header-top">
     <div class="header-content">
-      <!-- Logo -->
       <div class="logo">
         <img src="/assets/logo-aldebaran.png" alt="Aldebaran" class="logo-img">
       </div>
 
-      <!-- Center Content (Filial + Language) -->
       <div class="header-center">
-        <!-- Filial Selector (Supervisor-style) -->
         <div class="info-group">
           <span class="info-label">Filial</span>
           <div class="filial-glass-selector">
@@ -22,7 +18,6 @@
           </div>
         </div>
 
-        <!-- Language Selector -->
         <div class="info-group language-selector">
           <span class="info-label">Idioma</span>
           <div class="language-buttons">
@@ -42,7 +37,6 @@
         </div>
       </div>
 
-      <!-- User Profile Dropdown -->
       <div class="profile-dropdown-container user-profile" (click)="$event.stopPropagation()">
         <div class="profile-trigger" (click)="toggleProfileMenu($event)" [class.active]="showProfileMenu">
           <div class="profile-info">
@@ -54,7 +48,6 @@
           </div>
         </div>
 
-        <!-- Dropdown Menu -->
         <div class="profile-menu profile-dropdown" *ngIf="showProfileMenu" (click)="$event.stopPropagation()">
           <div class="dropdown-header">
             <span class="m-name">{{ operadorNome }}</span>
@@ -92,13 +85,11 @@
     </div>
 
     <div *ngIf="!carregando && guiches.length > 0" class="guiches-grid">
-      <!-- Card para cada guichê -->
       <div *ngFor="let guiche of guiches" 
            class="guiche-card" 
            [class.ocupado]="guiche.ocupado"
            [class.disponivel]="!guiche.ocupado">
         
-        <!-- Header do Card: Número + Badge Status -->
         <div class="card-header">
           <span class="guiche-numero">{{ formatarTituloGuiche(guiche.numero) }}</span>
           <span class="status-badge" 
@@ -108,7 +99,6 @@
           </span>
         </div>
 
-        <!-- Corpo do Card: Info do Operador (se ocupado) -->
         <div *ngIf="guiche.ocupado" class="card-body">
           <div class="operador-info">
             <div class="avatar-icon">
@@ -124,7 +114,6 @@
           </div>
         </div>
 
-        <!-- Corpo do Card: Ícone (se disponível) -->
         <div *ngIf="!guiche.ocupado" class="card-body disponivel-body">
           <div class="icon-monitor">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -135,7 +124,6 @@
           <p class="pronto-texto">Pronto para uso</p>
         </div>
 
-        <!-- Footer do Card: Código de Atendimento (ocupado) ou Botão Selecionar (disponível) -->
         <div class="card-footer">
           <div *ngIf="guiche.ocupado" class="atendimento-info">
             <small>
@@ -160,7 +148,6 @@
   </div>
 </div>
 
-<!-- MODAL: Editar Perfil -->
 <div class="modal-overlay" *ngIf="modalAberto === 'editar-perfil'" (click)="fecharModal()">
   <div class="modal-content redesign-modal modal-profile-edit" style="max-width: 500px;" (click)="$event.stopPropagation()">
     <div class="modal-header-gradient">
@@ -224,7 +211,6 @@
   </div>
 </div>
 
-<!-- Modal Sair -->
 <div *ngIf="modalAberto === 'sair'" class="modal-overlay">
   <div class="modal-content logout-modal-redesign">
     <div class="modal-body-centered">

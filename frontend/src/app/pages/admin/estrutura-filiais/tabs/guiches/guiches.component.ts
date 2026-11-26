@@ -59,7 +59,6 @@ export class GuichesComponent implements OnInit {
       }
     }
 
-    // Escuta mudanças de queryParams em toda a rota (inclusive no pai)
     this.route.queryParamMap.subscribe(params => {
       if (!this.isRestricted) {
         const fid = params.get('filialId');

@@ -1,5 +1,4 @@
 <div class="admin-container">
-  <!-- SIDEBAR (Light Theme) -->
   <aside class="sidebar" [class.closed]="!sidebarOpen">
     <div class="logo-area" (click)="toggleSidebar()" style="cursor: pointer;">
       <div class="logo-wrapper" *ngIf="sidebarOpen">
@@ -28,7 +27,6 @@
       </ng-container>
     </nav>
 
-    <!-- BOTTOM PERFIL -->
     <div class="sidebar-user" (click)="toggleProfileMenu($event)" [class.active]="showProfileMenu">
       <div class="avatar">{{ userInitials }}</div>
       <div class="text">
@@ -39,7 +37,6 @@
         <lucide-icon [img]="showProfileMenu ? icons['chevronUp'] : icons['chevronDown']" size="18"></lucide-icon>
       </button>
 
-      <!-- Profile Context Menu -->
       <div class="profile-menu sidebar-user-menu" *ngIf="showProfileMenu" (click)="$event.stopPropagation()">
         <div class="menu-header">
           <span class="m-name">{{ usuario?.nome || userName }}</span>
@@ -64,12 +61,9 @@
     </div>
   </aside>
 
-  <!-- CONTEÚDO -->
   <div class="main-content-wrapper" [class.expanded]="!sidebarOpen">
-    <!-- TOP BAR -->
     <header class="top-bar" [class.supervisor-mode]="userRole === 'Supervisor'">
       
-      <!-- MODO ADMIN / OUTROS -->
       <ng-container *ngIf="userRole !== 'Supervisor'">
         <div class="top-bar-left">
           <div class="breadcrumb-area">
@@ -93,7 +87,6 @@
               <span class="dot" *ngIf="hasUnreadNotifications"></span>
             </button>
 
-            <!-- Notifications Dropdown -->
             <div class="notifications-dropdown" *ngIf="showNotifications" (click)="$event.stopPropagation()">
               <div class="dropdown-header">
                 <h3>Notificações</h3>
@@ -119,11 +112,9 @@
         </div>
       </ng-container>
 
-      <!-- MODO SUPERVISOR (Dropdown de Filial Funcional) -->
       <ng-container *ngIf="userRole === 'Supervisor'">
         <div class="supervisor-nav-full">
            <div class="nav-left">
-             <!-- Logo removed per user request: only sidebar logo remains -->
            </div>
            
            <div class="nav-right">
@@ -172,7 +163,6 @@
                 </div>
               </div>
 
-              <!-- Supervisor Profile Menu Dropdown -->
               <div class="profile-menu supervisor-menu" *ngIf="showSupervisorProfileMenu" (click)="$event.stopPropagation()">
                 <div class="menu-header" style="padding: 1rem; border-bottom: 1px solid #eee;">
                   <span class="m-name" style="font-weight: 600; display: block;">{{ usuario?.nome || userName }}</span>
@@ -202,7 +192,6 @@
     </main>
   </div>
 
-  <!-- Logout Confirmation Modal -->
   <div class="modal-backdrop" *ngIf="showLogoutModal">
     <div class="modal-content text-center scale-up">
       <div class="logout-icon-wrapper">

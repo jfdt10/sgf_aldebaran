@@ -3,7 +3,6 @@
     flex-direction: column;
 }
 
-// Seletor de Filial (Glassmorphism)
 .filial-selector-wrapper {
     margin-bottom: 2rem;
     max-width: 450px;
@@ -120,7 +119,6 @@
     }
 }
 
-/* Alert Banner */
 .alert-banner {
     background: rgba(14, 165, 233, 0.05);
     border: 1px solid rgba(14, 165, 233, 0.1);
@@ -135,7 +133,6 @@
     font-weight: 500;
 }
 
-/* List Card & Structure */
 .list-card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -218,7 +215,6 @@
     }
 }
 
-/* Premium Table */
 .table-container {
     overflow-x: auto;
 }
@@ -290,7 +286,6 @@
   }
 }
 
-/* Badges */
 .action-badge {
     padding: 6px 12px;
     border-radius: 100px;
@@ -317,7 +312,6 @@
     &.erro { background: #fee2e2; color: #b91c1c; }
 }
 
-/* Pagination */
 .table-footer {
     display: flex;
     justify-content: space-between;
@@ -351,7 +345,6 @@
     }
 }
 
-/* Empty State */
 .empty-state {
     padding: 60px 0;
     display: flex;

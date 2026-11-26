@@ -12,11 +12,12 @@ import {
 } from '@nestjs/common';
 import { GuicheService } from './guiche.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { StaffGuard } from '../auth/account-role.guards';
 import { LogService } from '../log/log.service';
 import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
 @Controller('guiches')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, StaffGuard)
 export class GuicheController {
   constructor(
     private readonly guicheService: GuicheService,

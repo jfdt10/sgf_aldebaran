@@ -14,6 +14,8 @@ import {
 import { ClientService } from './client.service';
 import { CreateClienteDto } from './dto/create-client.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AdminGuard, StaffGuard } from '../auth/account-role.guards';
+import { PasswordDto } from '../auth/password.dto';
 import { LogService } from '../log/log.service';
 
 @Controller('clientes')
@@ -23,7 +25,6 @@ export class ClienteController {
     private readonly logService: LogService,
   ) {}
 
-  // US-0001: Rota Pública - Autocadastro
   @Post('autocadastro')
   async createPublic(@Body() createClienteDto: CreateClienteDto) {
     const res = await this.clienteService.createPublic(createClienteDto);
@@ -36,8 +37,7 @@ export class ClienteController {
     return res;
   }
 
-  // US-0002: Rota Protegida - Cadastro Operacional (Admin/Totem/Operador)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Post()
   async createOperacional(
     @Body() createClienteDto: any,
@@ -54,16 +54,16 @@ export class ClienteController {
     return res;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Get()
-  findAll(@Query('filialId') filialId?: string, @Query('busca') busca?: string) {
+  findAll(@Request() req: any, @Query('filialId') filialId?: string, @Query('busca') busca?: string) {
     return this.clienteService.findAll(
-      filialId ? +filialId : undefined,
+      req.user.filial_id ?? (filialId ? +filialId : undefined),
       busca?.trim() || undefined,
     );
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Get('check')
   check(
     @Query('cpf') cpf?: string,
@@ -73,20 +73,20 @@ export class ClienteController {
     return this.clienteService.checkExists(cpf, cnpj, email);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.clienteService.findOne(id);
+  findOne(@Param('id') id: string, @Request() req: any) {
+    return this.clienteService.findOne(id, req.user.filial_id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Put(':id')
   async update(
     @Param('id') id: string,
     @Body() updateClienteDto: any,
     @Request() req: any,
   ) {
-    const res = await this.clienteService.update(id, updateClienteDto);
+    const res = await this.clienteService.update(id, updateClienteDto, req.user.filial_id);
     const userId = req.user?.userId ?? req.user?.id;
     await this.logService.logAction(
       'Atualização',
@@ -97,10 +97,10 @@ export class ClienteController {
     return res;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Patch(':id/status')
   async toggleStatus(@Param('id') id: string, @Request() req: any) {
-    const res = await this.clienteService.toggleStatus(id);
+    const res = await this.clienteService.toggleStatus(id, req.user.filial_id);
     const userId = req.user?.userId ?? req.user?.id;
     const acao = res.deletedAt ? 'Inativação' : 'Ativação';
     await this.logService.logAction(
@@ -112,14 +112,14 @@ export class ClienteController {
     return res;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @Patch(':id/senha')
   async resetPassword(
     @Param('id') id: string,
-    @Body() body: { senha: string },
+    @Body() body: PasswordDto,
     @Request() req: any,
   ) {
-    const res = await this.clienteService.resetPassword(id, body.senha);
+    const res = await this.clienteService.resetPassword(id, body.senha, req.user.filial_id);
     const userId = req.user?.userId ?? req.user?.id;
     await this.logService.logAction(
       'Reset de Senha',

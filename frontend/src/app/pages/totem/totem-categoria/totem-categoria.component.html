@@ -35,15 +35,12 @@
       </div>
     </div>
 
-    <!-- Tela do Contador de Garrafões (Design Figma) -->
     <div class="garrafoes-wrapper" *ngIf="categoriaSelecionada">
 
       <div class="garrafoes-card">
-        <!-- Título Superior -->
         <h2 class="garrafoes-main-title">Selecione a Quantidade desejada de Garrafões de 20 L:</h2>
 
         <div class="garrafoes-content">
-          <!-- Lado Esquerdo -->
           <div class="garrafoes-left">
             <div class="img-garrafoes-bg">
               <img src="assets/garrafoes.svg" alt="Garrafões" class="img-garrafoes">
@@ -52,10 +49,8 @@
             <p class="garrafoes-desc">Clique nos Seletores ao Lado para Aumentar ou Diminuir a<br>Quantidade de Garrafões</p>
           </div>
 
-          <!-- Divisor -->
           <div class="garrafoes-divider"></div>
 
-          <!-- Lado Direito -->
           <div class="garrafoes-right">
             <div class="garrafoes-selector-container">
               <div class="garrafoes-selector">
@@ -74,7 +69,6 @@
         </div>
       </div>
 
-      <!-- Botão Voltar Inferior -->
       <button class="btn-voltar-bottom" (click)="cancelar()">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">      
           <path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>

@@ -46,7 +46,6 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   notificacoes: any[] = [];
   hasUnreadNotifications = false;
 
-  // Contador para badges do Supervisor
   atendimentoCount = 0;
   agendamentoCount = 0;
 
@@ -159,7 +158,6 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
         this.userInitials = fallbackName.length >= 2 ? fallbackName.substring(0, 2).toUpperCase() : 'AD';
       }
 
-      // Determinar Perfil e Role
       const p = (this.usuario.perfil || '').toUpperCase();
       const t = (this.usuario.tipo || '').toUpperCase();
 
@@ -174,7 +172,6 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
         this.userRole = this.usuario.perfil || 'Usuário';
       }
 
-      // Sincronização de Filiais (Global)
       this.filialService.selectedFilial$.subscribe((id: number | null) => {
         this.selectedFilialId = id;
         this.carregarContadores();
@@ -196,7 +193,6 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       this.updateActivePageTitle();
       this.carregarFiliais();
 
-      // Poll contadores every 5 seconds
       setInterval(() => {
         this.carregarContadores();
       }, 5000);
@@ -210,15 +206,14 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   private updateActivePageTitle() {
     const url = this.router.url;
 
-    // Default
     this.activePageGroup = '';
 
     if (url.includes('/admin/dashboard')) {
       this.activePageTitle = 'Dashboard';
-      this.activePageGroup = ''; // Home > Dashboard removed
+      this.activePageGroup = '';
     } else if (url.includes('/admin/servicos')) {
       this.activePageTitle = 'Estrutura & Filiais';
-      this.activePageGroup = ''; // Removed Gestão >
+      this.activePageGroup = '';
     } else if (url.includes('/admin/cadastros')) {
       if (url.includes('/usuarios')) {
         this.activePageTitle = 'Operadores';
@@ -238,10 +233,10 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       }
     } else if (url.includes('/admin/logs')) {
       this.activePageTitle = 'Logs e Auditoria';
-      this.activePageGroup = ''; // Just "Logs e Auditoria"
+      this.activePageGroup = '';
     } else if (url.includes('/admin/configuracoes')) {
       this.activePageTitle = 'Configurações';
-      this.activePageGroup = ''; // Just "Configurações"
+      this.activePageGroup = '';
     } else if (url.includes('/admin/meu-perfil')) {
       this.activePageTitle = 'Meu Perfil';
       this.activePageGroup = 'Conta';
@@ -380,10 +375,8 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     this.carregarContadores();
     this.carregarConfiguracoesAlertas();
 
-    // Opcional: Feedback visual ou recarregar dados da página atual se necessário
     if (this.selectedFilialId) {
       const filial = this.filiais.find(f => f.id === this.selectedFilialId);
-      // Silent: removed verbose console logging for production
     }
   }
 
@@ -414,12 +407,10 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   }
 
   carregarContadores() {
-    // Apenas para Supervisor
     if (this.userRole !== 'Supervisor') return;
 
     this.dashboardService.getSupervisorOverview(this.selectedFilialId || undefined).subscribe({
       next: (res) => {
-        // --- Agendamentos ---
         const activeAgendamentos = res.agendamentos.filter((a: any) => {
           return a.status === 'PENDENTE' || a.status === 'CONFIRMADO';
         });
@@ -448,7 +439,6 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
           this.agendamentoCount = activeAgendamentos.filter((a: any) => !seenAgendIds.map(Number).includes(Number(a.id))).length;
         }
 
-        // --- Atendimentos ---
         const activeAtendimentos = res.atendimentos;
         const seenAtendIdsStr = localStorage.getItem('seenAtendimentoIdsSupervisor') || '[]';
         let seenAtendIds: string[] = [];

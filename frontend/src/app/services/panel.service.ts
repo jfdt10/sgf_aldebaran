@@ -16,22 +16,18 @@ export interface TicketCall {
 export class PanelService {
   private socket: Socket | null = null;
   
-  // Usando Signals do Angular para reatividade ultra-eficiente
   public history = signal<TicketCall[]>([]);
   public isOnline = signal<boolean>(false);
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Inicializa a conexão com Jitter e Sincronização.
-   */
   public connect(panelType: 'DOCA' | 'SAGUAO', token: string) {
     if (this.socket) return;
 
     this.socket = io(environment.apiUrl, {
       auth: { token },
       query: { panelType },
-      reconnectionDelay: 1000 + Math.random() * 2000, // Defesa: Jitter
+      reconnectionDelay: 1000 + Math.random() * 2000,
       reconnectionAttempts: Infinity,
       transports: ['websocket']
     });
@@ -51,13 +47,9 @@ export class PanelService {
     });
   }
 
-  /**
-   * Processa novo ticket com Idempotência.
-   */
   private handleNewTicket(payload: TicketCall, playSound: boolean) {
     const current = this.history();
     
-    // Evita duplicatas (Idempotência)
     if (current.some(t => t.ticketId === payload.ticketId)) return;
 
     const next = [payload, ...current].slice(0, 5);
@@ -68,9 +60,6 @@ export class PanelService {
     }
   }
 
-  /**
-   * Sincronização Ativa (Reconciliation).
-   */
   private fetchReconciliationState(panelType: string, token: string) {
     const url = `${environment.apiUrl}/api/tickets/history?sala=${panelType}`;
     
@@ -78,7 +67,6 @@ export class PanelService {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (data) => {
-        // Injeta o histórico silenciosamente
         data.reverse().forEach(t => this.handleNewTicket(t, false));
       },
       error: (err) => console.error('[PanelService] Erro na reconciliação', err)

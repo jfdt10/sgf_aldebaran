@@ -1,7 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 require('dotenv').config();
 
-// Mocking NestJS Injectable
 class DashboardService {
   constructor(prisma) { this.prisma = prisma; }
   
@@ -39,15 +38,12 @@ async function test() {
   const prisma = new PrismaClient();
   const service = new DashboardService(prisma);
   
-  // Test with Filial 1 (Aldebaran)
   const res1 = await service.getSupervisorOverview('1');
   console.log('Result for Filial 1:', res1);
 
-  // Test with Filial 2
   const res2 = await service.getSupervisorOverview('2');
   console.log('Result for Filial 2:', res2);
 
-  // Test without Filial
   const resGlobal = await service.getSupervisorOverview(undefined);
   console.log('Result Global:', resGlobal);
 }

@@ -20,6 +20,7 @@ import { NotificacaoModule } from './notificacao/notificacao.module';
 import { TaskManagementModule } from './task-management/task-management.module';
 import { AgendamentoModule } from './agendamento/agendamento.module';
 import { SenhaModule } from './senha/senha.module';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -47,7 +48,7 @@ import { SenhaModule } from './senha/senha.module';
     AgendamentoModule,
     SenhaModule,
   ],
-  controllers: [],
+  controllers: [HealthController],
   providers: [],
 })
 export class AppModule {}

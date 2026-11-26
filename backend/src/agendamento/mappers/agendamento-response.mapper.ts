@@ -61,8 +61,44 @@ export function toAgendamentoResponse(
   };
 }
 
-export function buildAgendamentoDate(data: string, hora: string): Date {
-  return new Date(`${data}T${normalizeTime(hora)}:00`);
+export function buildAgendamentoDate(data: string, hora: string, timezone: string = 'America/Sao_Paulo'): Date {
+  if (timezone.match(/^[+-]\d{2}:\d{2}$/)) {
+    return new Date(`${data}T${normalizeTime(hora)}:00${timezone}`);
+  }
+
+  try {
+    const tempDate = new Date(`${data}T${normalizeTime(hora)}:00Z`);
+    const formatterUTC = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'UTC',
+      year: 'numeric', month: 'numeric', day: 'numeric',
+      hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false
+    });
+    const formatterTZ = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      year: 'numeric', month: 'numeric', day: 'numeric',
+      hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false
+    });
+
+    const parseParts = (parts: Intl.DateTimeFormatPart[]) => {
+      const map = new Map(parts.map(p => [p.type, p.value]));
+      return new Date(Date.UTC(
+        parseInt(map.get('year')!, 10),
+        parseInt(map.get('month')!, 10) - 1,
+        parseInt(map.get('day')!, 10),
+        parseInt(map.get('hour')!, 10),
+        parseInt(map.get('minute')!, 10),
+        parseInt(map.get('second')!, 10)
+      ));
+    };
+
+    const utcDate = parseParts(formatterUTC.formatToParts(tempDate));
+    const tzDate = parseParts(formatterTZ.formatToParts(tempDate));
+    const offset = utcDate.getTime() - tzDate.getTime();
+
+    return new Date(tempDate.getTime() + offset);
+  } catch (e) {
+    return new Date(`${data}T${normalizeTime(hora)}:00-03:00`);
+  }
 }
 
 export function normalizeTime(hora: string): string {

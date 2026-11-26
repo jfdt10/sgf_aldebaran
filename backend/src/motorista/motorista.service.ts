@@ -36,7 +36,6 @@ export class MotoristaService {
       data: createData,
     });
 
-    // Notificação de novo motorista
     await this.notificacaoService.criar({
       titulo: 'Novo Motorista',
       mensagem: `Motorista ${motorista.nome} cadastrado.`,
@@ -85,9 +84,8 @@ export class MotoristaService {
   }
 
   async update(id: number, data: Prisma.motoristaUpdateInput, requestingUserFilialId?: number) {
-    await this.findOne(id, requestingUserFilialId); // Ensure it exists and is not logically deleted
+    await this.findOne(id, requestingUserFilialId);
 
-    // Sanitize data
     const {
       id: _,
       caminhoes,
@@ -101,7 +99,6 @@ export class MotoristaService {
       updateData.filial_id = Number(updateData.filial_id);
     }
 
-    // RN03: Imutabilidade de chave. Ensure CPF isn't being modified
     if (updateData.cpf) {
       delete updateData.cpf;
     }
@@ -114,7 +111,6 @@ export class MotoristaService {
       },
     });
 
-    // Notificação de atualização
     await this.notificacaoService.criar({
       titulo: 'Motorista Atualizado',
       mensagem: `Dados do motorista ${motorista.nome} foram alterados.`,

@@ -17,11 +17,12 @@ import {
 import { CaminhaoService } from './caminhao.service';
 import { Prisma } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { StaffGuard } from '../auth/account-role.guards';
 import { LogService } from '../log/log.service';
 import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
 @Controller('caminhoes')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, StaffGuard)
 export class CaminhaoController {
   constructor(
     private readonly caminhaoService: CaminhaoService,
@@ -57,7 +58,6 @@ export class CaminhaoController {
     @Body() createCaminhaoDto: Prisma.caminhaoCreateInput,
     @Request() req: AuthenticatedRequest,
   ) {
-    // RN02 — Cadastro Operacional Simplificado: Operador e Supervisor não vinculam motoristas.
     if (createCaminhaoDto.motorista) {
       delete createCaminhaoDto.motorista;
     }

@@ -6,8 +6,10 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { allowApplicationOrigin } from '../common/cors';
+import { JwtService } from '@nestjs/jwt';
+import { JwtStrategy } from '../auth/jwt.strategy';
 
-// Tipagem estrita do Payload
 export interface TicketCallPayload {
   ticketId: string;
   category: string;
@@ -17,28 +19,37 @@ export interface TicketCallPayload {
 
 @WebSocketGateway({
   cors: {
-    origin: '*', // Em produção, restringir ao painel
+    origin: allowApplicationOrigin,
   },
 })
 export class NotificacaoGateway
   implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(private readonly jwt: JwtService, private readonly strategy: JwtStrategy) {}
+
   @WebSocketServer()
   server: Server;
 
-  /**
-   * Validação e Inscrição em Salas (Rooms).
-   */
-  handleConnection(client: Socket) {
+  async handleConnection(client: Socket) {
     const token = client.handshake.auth?.token;
-
-    // Simulação de segurança (No fluxo real, validar JWT)
     if (token && token !== process.env.WS_SECRET_TOKEN) {
-      console.warn(`[Security] WS: Token inválido de ${client.id}`);
-      client.disconnect(true);
-      return;
+      try {
+        const payload = await this.jwt.verifyAsync(token, { algorithms: ['HS256'] });
+        const user = await this.strategy.validate(payload);
+        if (typeof user.userId === 'string') {
+          await client.join('notification:client:' + user.userId);
+        } else if (['ADMIN', 'SUPERVISOR', 'OPERADOR'].includes(user.perfil)) {
+          await client.join(['notification:staff', 'notification:user:' + user.userId]);
+        }
+        const remaining = Number(payload.exp) * 1000 - Date.now();
+        const expiry = setTimeout(() => client.disconnect(true), Math.max(0, Math.min(remaining, 2_147_483_647)));
+        client.once('disconnect', () => clearTimeout(expiry));
+        return;
+      } catch {
+        client.disconnect(true);
+        return;
+      }
     }
 
-    // Identifica o tipo de painel via query string
     const panelType = client.handshake.query?.panelType as string;
 
     if (panelType === 'DOCA') {
@@ -58,10 +69,6 @@ export class NotificacaoGateway
     console.log(`[WS] Terminal desconectado: ${client.id}`);
   }
 
-  /**
-   * Roteamento de Habilidade (Skill-based Routing).
-   * Dispara apenas para os painéis interessados na categoria.
-   */
   public broadcastTicket(payload: TicketCallPayload) {
     const normalizedCategory = (payload.category || '')
       .normalize('NFD')
@@ -76,7 +83,6 @@ export class NotificacaoGateway
       normalizedCategory.includes('DOCA') ||
       normalizedCategory.includes('BAIA');
 
-    // Roteamento condicional
     const targetRoom = isHeavyLoad ? 'room_docas' : 'room_saguao';
 
     if (this.server) {
@@ -85,15 +91,18 @@ export class NotificacaoGateway
     }
   }
 
-  enviarParaTodos(evento: string, data: any) {
-    if (this.server) {
-      this.server.emit(evento, data);
-    }
+  enviarNotificacao(data: { usuario_id: number | null; cliente_id: string | null; servico_id?: number }) {
+    const rooms: string[] = [];
+    if (data.cliente_id) rooms.push('notification:client:' + data.cliente_id);
+    if (data.usuario_id) rooms.push('notification:user:' + data.usuario_id);
+    if (!rooms.length) rooms.push('notification:staff');
+    this.server?.to(rooms).emit('nova_notificacao', data);
   }
 
-  /**
-   * Força os terminais a apenas recarregarem a lista sem disparar alarmes.
-   */
+  avisarFilaZerada(filialId: number | null) {
+    this.server?.emit('fila_zerada', { filialId });
+  }
+
   public broadcastRefresh() {
     if (this.server) {
       this.server.to('room_general').emit('ticket_called', null);

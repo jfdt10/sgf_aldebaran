@@ -16,7 +16,6 @@ async function seedToday() {
     return;
   }
 
-  // Create a senha for today
   const senha = await prisma.senha.create({
     data: {
       numeroDisplay: 'REAL-001',
@@ -28,7 +27,6 @@ async function seedToday() {
   });
   console.log('Created ticket for today:', senha.numeroDisplay);
   
-  // Create an agendamento for today
   const agendamento = await prisma.agendamento.create({
     data: {
       nomeCliente: 'Cliente Teste Real',

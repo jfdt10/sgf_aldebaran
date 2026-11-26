@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; // <--- 1. Importe ChangeDetectorRef
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -27,13 +27,12 @@ export class ResetPasswordComponent implements OnInit {
     private route: ActivatedRoute,
     private authService: AuthService,
     private router: Router,
-    private cd: ChangeDetectorRef // <--- 2. Injete o detector aqui
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       this.token = params['token'];
-      // Se não tiver token, volta pro recover
       if (!this.token) {
         this.router.navigate(['/recover']);
       }
@@ -52,11 +51,9 @@ export class ResetPasswordComponent implements OnInit {
       next: (res) => {
         if (!environment.production) console.log('Senha alterada:', res);
         
-        // Atualiza o estado
         this.carregando = false;
         this.step = 'SUCCESS';
         
-        // <--- 3. O PULO DO GATO: Força a tela a atualizar AGORA
         this.cd.detectChanges();
       },
       error: (err) => {
@@ -64,7 +61,6 @@ export class ResetPasswordComponent implements OnInit {
         this.carregando = false;
         alert('Erro ao redefinir senha. O link pode ter expirado.');
         
-        // Força a tela a atualizar (para destravar o botão)
         this.cd.detectChanges();
       }
     });

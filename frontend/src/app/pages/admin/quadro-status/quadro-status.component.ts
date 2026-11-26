@@ -17,7 +17,6 @@ export class QuadroStatusComponent implements OnInit {
   statusList: StatusItem[] = [];
   loading = true;
   
-  // Modal state
   showModal = false;
   currentTask?: TaskItem;
   currentStatusId?: number;
@@ -53,7 +52,6 @@ export class QuadroStatusComponent implements OnInit {
   onTaskDrop(event: CdkDragDrop<TaskItem[]>, statusId: number) {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-      // Aqui poderíamos atualizar a ordem no backend se necessário
     } else {
       const task = event.previousContainer.data[event.previousIndex];
       transferArrayItem(
@@ -63,7 +61,6 @@ export class QuadroStatusComponent implements OnInit {
         event.currentIndex
       );
       
-      // Atualizar status no backend
       this.taskService.moveTask(task.id, statusId, event.currentIndex).subscribe();
     }
   }

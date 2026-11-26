@@ -11,7 +11,6 @@
       </button>
     </div>
 
-    <!-- Filtros -->
     <div class="list-card-search">
       <div class="search-row">
         <div class="search-input-wrapper flex-2">
@@ -42,7 +41,6 @@
       <p>Carregando agendamentos...</p>
     </div>
 
-    <!-- Tabela -->
     <div class="table-responsive" *ngIf="!loading && agendamentosFiltrados.length > 0">
       <table class="list-table">
         <thead>
@@ -100,7 +98,6 @@
       </table>
     </div>
 
-    <!-- Empty State -->
     <div class="empty-state" *ngIf="!loading && agendamentosFiltrados.length === 0">
       <div class="icon-circle empty">
         <lucide-icon [img]="icons.calendar" size="40"></lucide-icon>
@@ -115,7 +112,6 @@
   </div>
 </div>
 
-<!-- Modal Novo Agendamento -->
 <div class="modal-overlay" *ngIf="showModal" (click)="showModal = false">
   <div class="modal-content large animate-pop" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -130,7 +126,6 @@
 
     <div class="modal-body">
       <div class="form-grid">
-        <!-- Coluna Esquerda: Dados -->
         <div class="form-column">
           <div class="form-group">
             <label>CLIENTE *</label>
@@ -165,7 +160,6 @@
           </div>
         </div>
 
-        <!-- Coluna Direita: Horários -->
         <div class="form-column slots-column">
           <label>HORÁRIOS DISPONÍVEIS *</label>
           

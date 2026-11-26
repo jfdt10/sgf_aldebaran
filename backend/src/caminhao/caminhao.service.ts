@@ -31,7 +31,6 @@ export class CaminhaoService {
       data: createData,
     });
 
-    // Notificação de novo caminhão
     await this.notificacaoService.criar({
       titulo: 'Novo Caminhão',
       mensagem: `Caminhão placa ${caminhao.placa} cadastrado.`,
@@ -84,7 +83,6 @@ export class CaminhaoService {
   async update(id: number, data: Prisma.caminhaoUpdateInput, requestingUserFilialId?: number) {
     await this.findOne(id, requestingUserFilialId);
 
-    // Sanitize data
     const {
       id: _,
       motorista,
@@ -100,7 +98,7 @@ export class CaminhaoService {
     if (updateData.motorista_id) updateData.motorista_id = Number(updateData.motorista_id);
 
     if (updateData.placa) {
-      delete updateData.placa; // RN01: Placa única; Placa não pode ser alterada após cadastro.
+      delete updateData.placa;
     }
 
     const caminhao = await this.prisma.caminhao.update({
@@ -112,7 +110,6 @@ export class CaminhaoService {
       include: { motorista: true },
     });
 
-    // Notificação de atualização
     await this.notificacaoService.criar({
       titulo: 'Caminhão Atualizado',
       mensagem: `Dados do caminhão ${caminhao.placa} foram alterados.`,
@@ -157,7 +154,6 @@ export class CaminhaoService {
   async vincularMotorista(id: number, motoristaId: number | null) {
     await this.findOne(id);
 
-    // We accept null to unbind
     return this.prisma.caminhao.update({
       where: { id },
       data: {

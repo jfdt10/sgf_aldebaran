@@ -1,5 +1,4 @@
 <div class="page-container">
-  <!-- Branch Selector Header -->
   <div class="settings-header-actions">
     <div class="filial-selector-wrapper">
       <lucide-icon [img]="icons.building" size="18" class="text-blue"></lucide-icon>
@@ -16,7 +15,6 @@
     </div>
   </div>
 
-  <!-- Tabs Navigation -->
   <div class="settings-tabs">
     <button class="tab-btn" [class.active]="activeTab === 'geral'" (click)="activeTab = 'geral'" type="button">
       <lucide-icon [img]="icons.settings" size="20"></lucide-icon>
@@ -46,7 +44,6 @@
 
   <div class="tab-content" [ngSwitch]="activeTab">
     
-    <!-- GERAL -->
     <div *ngSwitchCase="'geral'" class="tab-pane fade-in">
       <div class="pane-header">
         <h2>Configurações Gerais</h2>
@@ -54,7 +51,6 @@
       </div>
 
       <div class="settings-grid">
-        <!-- Dados da Filial -->
         <div class="settings-card">
           <div class="card-header">
             <lucide-icon [img]="icons.building" size="18" class="text-blue"></lucide-icon>
@@ -79,7 +75,6 @@
           </div>
         </div>
 
-        <!-- Identidade Visual -->
         <div class="settings-card">
           <div class="card-header">
             <lucide-icon [img]="icons.layout" size="18" class="text-blue"></lucide-icon>
@@ -106,7 +101,6 @@
           </div>
         </div>
 
-        <!-- Horário de Funcionamento (Totem) -->
         <div class="settings-card full-width totem-card">
           <div class="card-header">
             <lucide-icon [img]="icons.clock" size="18" class="text-blue"></lucide-icon>
@@ -166,7 +160,6 @@
           </div>
         </div>
 
-        <!-- Manutenção -->
         <div class="settings-card full-width">
           <div class="card-header">
             <lucide-icon [img]="icons.database" size="18" class="text-blue"></lucide-icon>
@@ -210,7 +203,6 @@
         </div>
       </div>
 
-    <!-- NOTIFICAÇÕES -->
     <div *ngSwitchCase="'notificacoes'" class="tab-pane fade-in">
       <div class="pane-header">
         <h2>Notificações e Mensagens</h2>
@@ -292,7 +284,6 @@
       </div>
     </div>
 
-    <!-- INTEGRAÇÕES -->
     <div *ngSwitchCase="'integracoes'" class="tab-pane fade-in">
       <div class="pane-header">
         <h2>Integrações Externas</h2>
@@ -324,7 +315,6 @@
       </div>
     </div>
 
-    <!-- SEGURANÇA -->
     <div *ngSwitchCase="'seguranca'" class="tab-pane fade-in">
       <div class="pane-header">
         <h2>Segurança e Privacidade</h2>
@@ -352,7 +342,6 @@
       </div>
     </div>
 
-    <!-- TV -->
     <div *ngSwitchCase="'tv'" class="tab-pane fade-in">
         <div class="pane-header">
           <h2>Gestão de TV/Dispositivos</h2>
@@ -392,7 +381,6 @@
         </div>
     </div>
 
-    <!-- TEMPLATES -->
     <div *ngSwitchCase="'templates'" class="tab-pane fade-in">
         <div class="pane-header">
           <h2>Template de Mensagens</h2>
@@ -422,7 +410,6 @@
     </button>
   </div>
 
-  <!-- Toast de Sucesso - POSICIONADO FORA DO CONTEÚDO TRANSFORMADO -->
   <div class="success-toast" *ngIf="mostrarSucesso" [class.show]="mostrarSucesso">
     <div class="toast-icon-wrapper">
       <lucide-icon [img]="icons.check" class="toast-icon"></lucide-icon>

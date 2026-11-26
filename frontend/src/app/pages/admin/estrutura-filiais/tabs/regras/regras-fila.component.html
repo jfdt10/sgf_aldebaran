@@ -1,11 +1,9 @@
 <div class="regras-container animate-up">
-    <!-- Header -->
     <header class="section-header">
         <h1>Regras e Controle de Filas</h1>
         <p>Gerencie categorias base e regras lógicas de prioridade</p>
     </header>
 
-    <!-- 1. Categorias de Atendimento (Físicas) -->
     <div class="card-premium mb-8">
         <h2 class="card-title">1. Categorias de Atendimento (Físicas)</h2>
         <p class="card-subtitle">Categorias geradas no Quiosque/Totem presencial</p>
@@ -60,7 +58,6 @@
         </div>
     </div>
 
-    <!-- 2. Lógica de Agendamento (Web/App) -->
     <div class="card-premium scheduling-logic mb-8">
         <h2 class="card-title">2. Lógica de Agendamento (Web/App)</h2>
         <p class="card-subtitle">Modificador aplicado em senhas geradas online</p>
@@ -83,7 +80,6 @@
             </div>
         </div>
 
-        <!-- Diagrama Visual -->
         <div class="logic-diagram">
             <div class="diagram-step">
                 <span class="step-label">Categoria Original</span>
@@ -111,7 +107,6 @@
         </div>
     </div>
 
-    <!-- 3. Configurações Globais -->
     <div class="card-premium mb-24 section-global">
         <h2 class="card-title">3. Configurações Globais</h2>
         <p class="card-subtitle">Controle do ciclo de vida e limpeza do sistema</p>
@@ -140,7 +135,6 @@
         </div>
     </div>
 
-    <!-- 4. Calibração Inteligente de SLA -->
     <div class="card-premium mb-8 sla-calib-card">
         <div class="calib-header">
             <div class="calib-icon-box">
@@ -175,7 +169,6 @@
         </div>
     </div>
 
-    <!-- Floating Action Button -->
     <div class="fab-container">
         <button class="fab-save" (click)="salvarAlteracoes()" [disabled]="loading">
             <lucide-icon *ngIf="!loading" [img]="iconsArr.save" size="20"></lucide-icon>
@@ -185,7 +178,6 @@
     </div>
 </div>
 
-<!-- Modal de Sucesso -->
 <div class="modal-overlay" *ngIf="showSuccessModal" (click)="fecharSucesso()">
     <div class="modal-content animate-pop success-modal-small" (click)="$event.stopPropagation()">
         <div class="success-view">

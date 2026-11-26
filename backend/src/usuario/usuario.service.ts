@@ -51,7 +51,6 @@ export class UsuarioService {
       },
     });
 
-    // Criar notificação para novo operador
     if (novoUsuario.perfil === 'OPERADOR') {
       await this.notificacaoService.criar({
         titulo: 'Novo operador cadastrado',
@@ -67,7 +66,7 @@ export class UsuarioService {
 
   async validarLogin(login: string, senha: string) {
     const usuario = await this.prisma.usuario.findUnique({
-      where: { login },
+      where: { login, deletadoEm: null },
     });
 
     if (!usuario || !usuario.ativo) {
@@ -112,7 +111,7 @@ export class UsuarioService {
 
   async findOne(id: number, requestingUserFilialId?: number) {
     const usuario = await this.prisma.usuario.findUnique({
-      where: { id },
+      where: { id, deletadoEm: null },
       select: {
         id: true,
         nome: true,
@@ -133,15 +132,14 @@ export class UsuarioService {
   }
 
   async update(id: number, dados: any, requestingUserFilialId?: number) {
-    await this.findOne(id, requestingUserFilialId); // Check existence and permission
+    await this.findOne(id, requestingUserFilialId);
 
     const { login, email } = dados;
 
-    // Check if login or email is already taken by another user
     const existe = await this.prisma.usuario.findFirst({
       where: {
         id: { not: id },
-        OR: [{ login }, { email: email || undefined }],
+        OR: [{ login }, ...(email ? [{ email }] : [])],
       },
     });
 
@@ -159,7 +157,7 @@ export class UsuarioService {
         login: dados.login,
         perfil: dados.perfil,
         ativo: dados.ativo,
-        filial_id: requestingUserFilialId ?? (dados.filial_id ? +dados.filial_id : null),
+        filial_id: requestingUserFilialId ?? (dados.filial_id === undefined ? undefined : dados.filial_id ? +dados.filial_id : null),
         atualizadoEm: new Date(),
       },
       select: {
@@ -173,7 +171,6 @@ export class UsuarioService {
       },
     });
 
-    // Notificação de alteração de usuário
     await this.notificacaoService.criar({
       titulo: 'Usuário Atualizado',
       mensagem: `Dados do usuário ${usuario.nome} foram alterados.`,

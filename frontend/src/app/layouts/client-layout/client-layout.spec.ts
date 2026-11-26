@@ -1,18 +1,29 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
+import { NotificationService } from '../../services/notification.service';
 
-import { ClientLayout } from './client-layout';
+import { ClientLayoutComponent } from './client-layout';
 
-describe('ClientLayout', () => {
-  let component: ClientLayout;
-  let fixture: ComponentFixture<ClientLayout>;
+describe('ClientLayoutComponent', () => {
+  let component: ClientLayoutComponent;
+  let fixture: ComponentFixture<ClientLayoutComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ClientLayout]
+      imports: [ClientLayoutComponent],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: NotificationService, useValue: { notifications$: of([]), fetchNotifications() {} } },
+      ],
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ClientLayout);
+    fixture = TestBed.createComponent(ClientLayoutComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

@@ -1,8 +1,6 @@
 <div class="page-container">
   
-  <!-- Header Superior (Azul) -->
   <header class="top-header-blue">
-    <!-- Barra de Abas -->
     <div class="tabs-container">
       <button 
         class="tab-btn" 
@@ -24,7 +22,6 @@
       {{ errorMessage }}
     </div>
 
-    <!-- Skeleton Loading (Premium) -->
     <div class="appointments-list skeleton-list" *ngIf="loading">
       <div class="card-appointment skeleton-card" *ngFor="let i of [1,2,3]">
         <div class="card-body">
@@ -41,7 +38,6 @@
         </div>
       </div>
     </div>
-    <!-- Lista de Próximos -->
     <div class="appointments-list" *ngIf="activeTab === 'proximos' && !loading">
       <div class="card-appointment" *ngFor="let a of proximos" [ngClass]="a.statusKey.toLowerCase()">
         <div class="card-body">
@@ -88,7 +84,6 @@
         </div>
       </div>
 
-      <!-- Empty State Próximos -->
       <div class="empty-state" *ngIf="proximos.length === 0">
         <img src="assets/empty_calendar.png" alt="Sem agendamentos" class="empty-illustration animate-float">
         <h3>Nada por aqui...</h3>
@@ -97,7 +92,6 @@
       </div>
     </div>
 
-    <!-- Lista de Histórico -->
     <div class="appointments-list" *ngIf="activeTab === 'historico' && !loading">
       <div class="card-appointment" *ngFor="let a of historico">
         <div class="card-body">
@@ -129,22 +123,18 @@
         </div>
       </div>
 
-      <!-- Empty State Histórico -->
       <div class="empty-state" *ngIf="historico.length === 0">
         <p>Nenhum histórico encontrado.</p>
       </div>
     </div>
 
-    <!-- Loading Overlay Removido (Usando Skeletons) -->
 
   </main>
 
-  <!-- FAB (Floating Action Button) -->
   <button class="fab-btn animate-pop" routerLink="/client/agendar" title="Novo Agendamento" *ngIf="activeTab === 'proximos'">
     <lucide-angular [img]="icons.plus" size="28"></lucide-angular>
   </button>
 
-  <!-- Menu Sidebar -->
   <app-client-menu *ngIf="menuAberto" (close)="toggleMenu()"></app-client-menu>
 
   <app-cliente-success-modal

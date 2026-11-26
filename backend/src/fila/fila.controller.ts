@@ -11,6 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AccountManagementGuard, StaffGuard } from '../auth/account-role.guards';
 import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 import { ValidarCheckinDto } from './dto/validar-checkin.dto';
 import { FilaService } from './fila.service';
@@ -19,7 +20,6 @@ import { FilaService } from './fila.service';
 export class FilaController {
   constructor(private readonly filaService: FilaService) { }
 
-  // Totem
   @Post('totem/senha')
   solicitarSenhaTotem(
     @Body()
@@ -42,9 +42,16 @@ export class FilaController {
 
   @Post('checkin/validar')
   validarCheckin(@Body() body: ValidarCheckinDto) {
-    return this.filaService.validarCheckin(body.codigo, body.filialId, body.tipo, body.ignorarRegras);
+    return this.filaService.validarCheckin(body.codigo, body.filialId, body.tipo);
   }
 
+  @UseGuards(JwtAuthGuard, StaffGuard)
+  @Post('checkin/operacional')
+  validarCheckinOperacional(@Body() body: ValidarCheckinDto, @Request() req: AuthenticatedRequest) {
+    return this.filaService.validarCheckin(body.codigo, req.user.filial_id ?? body.filialId, body.tipo, body.ignorarRegras);
+  }
+
+  @UseGuards(JwtAuthGuard, AccountManagementGuard)
   @Get('dashboard-stats')
   getDashboardStats() {
     return this.filaService.getDashboardData();
@@ -63,9 +70,13 @@ export class FilaController {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('agendamento')
-  criarAgendamento(@Body() body: any) {
-    return this.filaService.criarAgendamento(body);
+  criarAgendamento(@Body() body: any, @Request() req: AuthenticatedRequest) {
+    const dados = req.user.tipo === 'CLIENTE'
+      ? { ...body, documento: req.user.email }
+      : { ...body, filial_id: req.user.filial_id ?? body.filial_id };
+    return this.filaService.criarAgendamento(dados);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -80,9 +91,10 @@ export class FilaController {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('agendamento/:id')
-  buscarAgendamento(@Param('id') id: string) {
-    return this.filaService.buscarAgendamento(+id);
+  buscarAgendamento(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    return this.filaService.buscarAgendamento(+id, req.user);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -94,7 +106,7 @@ export class FilaController {
     return this.filaService.excluirAgendamento(+id, req.user);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Post('agendamento/:id/resgatar')
   resgatarAgendamento(
     @Param('id') id: string,
@@ -102,7 +114,7 @@ export class FilaController {
     return this.filaService.resgatarAgendamento(+id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Post('senha/:id/resgatar')
   resgatarSenha(
     @Param('id') id: string,
@@ -110,6 +122,7 @@ export class FilaController {
     return this.filaService.resgatarSenha(+id);
   }
 
+  @UseGuards(JwtAuthGuard, AccountManagementGuard)
   @Post('servicos')
   criarServico(@Body() body: { nome: string; sigla: string }) {
     return this.filaService.criarServico(body.nome, body.sigla);
@@ -120,52 +133,57 @@ export class FilaController {
     return this.filaService.listarServicos();
   }
 
+  @UseGuards(JwtAuthGuard, AccountManagementGuard)
   @Patch('servicos/:id')
   atualizarServico(@Param('id') id: string, @Body() body: any) {
     return this.filaService.atualizarServico(+id, body);
   }
 
+  @UseGuards(JwtAuthGuard, AccountManagementGuard)
   @Delete('servicos/:id')
   excluirServico(@Param('id') id: string) {
     return this.filaService.excluirServico(+id);
   }
 
-  // Operação de Fila
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Post('solicitar_senha')
   solicitarSenha(@Body() body: { servico_id: number }) {
     return this.filaService.solicitarSenha(body.servico_id);
   }
 
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Post('chamar_proximo')
   chamarProximo(@Body() body: { guiche: number; repetir?: boolean }) {
     return this.filaService.chamarProximo(body.guiche, !!body.repetir);
   }
 
+  @UseGuards(JwtAuthGuard, AccountManagementGuard)
   @Post('zerar')
-  zerarFila(@Body() body: { filialId?: number }) {
-    return this.filaService.zerarFila(body.filialId);
+  zerarFila(@Body() body: { filialId?: number }, @Request() req: AuthenticatedRequest) {
+    return this.filaService.zerarFila(req.user.filial_id ?? body.filialId);
   }
 
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Post('chamar_especifico')
   chamarEspecifico(@Body() body: { guiche: number; senhaId: number }) {
     return this.filaService.chamarEspecifico(body.guiche, body.senhaId);
   }
 
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Patch('senha/:id/cancelar')
   cancelarSenha(@Param('id') id: string) {
     return this.filaService.cancelarSenha(+id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Get('operador/proximas')
   async listarProximas(@Request() req: any) {
-    // Busca os guiches do operador para saber a filial
     const guicheId = Number(req.headers['x-guiche-id']);
     if (!guicheId) return [];
     return this.filaService.listarProximas(guicheId);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Get('operador/atual')
   async buscarAtendimentoAtual(@Request() req: any) {
     const guicheId = Number(req.headers['x-guiche-id']);
@@ -173,7 +191,7 @@ export class FilaController {
     return this.filaService.buscarAtendimentoAtual(guicheId);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Get('operador/atendimentos')
   listarAtendimentosOperador(
     @Request() req: AuthenticatedRequest,
@@ -184,7 +202,7 @@ export class FilaController {
     return this.filaService.listarAtendimentosOperador(req.user.userId, fid, data);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AccountManagementGuard)
   @Get('supervisor/atendimentos')
   listarAtendimentosSupervisor(
     @Request() req: AuthenticatedRequest,
@@ -195,17 +213,19 @@ export class FilaController {
     return this.filaService.listarAtendimentosSupervisor(fid, data);
   }
 
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Post('iniciar_atendimento')
   iniciarAtendimento(@Body() body: { senhaId: number }) {
     return this.filaService.iniciarAtendimento(body.senhaId);
   }
 
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Post('finalizar_atendimento')
   finalizarAtendimento(@Body() body: { senhaId: number }) {
     return this.filaService.finalizarAtendimento(body.senhaId);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Patch('senha/:id/cliente')
   vincularCliente(
     @Param('id') id: string,
@@ -214,7 +234,7 @@ export class FilaController {
     return this.filaService.vincularCliente(+id, body.nome, body.documento, body.clienteId);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Patch('senha/:id/garrafoes')
   atualizarGarrafoes(
     @Param('id') id: string,
@@ -223,12 +243,13 @@ export class FilaController {
     return this.filaService.atualizarGarrafoes(+id, body.qtdeGarrafoes);
   }
 
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Post('nao_compareceu')
   naoCompareceu(@Body() body: { senhaId: number }) {
     return this.filaService.naoCompareceu(body.senhaId);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Post('transferir')
   transferirAtendimento(
     @Request() req: AuthenticatedRequest,
@@ -258,6 +279,7 @@ export class FilaController {
     return this.filaService.consultarPosicao(+id);
   }
 
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Patch('atendimento/:id/justificar')
   justificarDemora(
     @Param('id') id: string,
@@ -266,6 +288,7 @@ export class FilaController {
     return this.filaService.justificarDemora(+id, body);
   }
 
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Get('historico')
   getHistorico(@Query('sala') sala: string) {
     return this.filaService.getHistorico(sala);

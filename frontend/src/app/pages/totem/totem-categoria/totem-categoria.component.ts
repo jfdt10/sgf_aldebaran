@@ -9,7 +9,7 @@ import { TotemConfigService } from '../../../services/totem-config.service';
 interface Categoria {
   id?: number;
   nome: string;
-  icone: any; // MUDANÇA: Agora recebe o objeto do ícone
+  icone: any;
   descricao: string;
 }
 
@@ -23,7 +23,6 @@ interface Categoria {
 export class TotemCategoriaComponent implements OnInit {
 
   categorias: Categoria[] = [];  
-  // Controle de estÃ¡gio para quantidade
   categoriaSelecionada: Categoria | null = null;
   quantidadeGarrafoes: number = 0;
   readonly icons: any = { Truck, Package, Zap, Box, Clock, User, Building };
@@ -51,7 +50,6 @@ export class TotemCategoriaComponent implements OnInit {
     this.api.get<any[]>(`/servicos/public/list${query}`).subscribe({
 
       next: (dados) => {
-        // Filter only active services and map to the Totem layout
         this.categorias = dados
           .filter(s => s.ativo)
           .map(s => {
@@ -71,7 +69,6 @@ export class TotemCategoriaComponent implements OnInit {
               descricao = s.sigla ? `Fila: ${s.sigla}` : descricao;
             }
 
-            // Mapeamento de ícone string -> objeto lucide
             let iconeObjeto = this.icons.Zap;
             const iconeLower = icone.toLowerCase();
 
@@ -96,9 +93,8 @@ export class TotemCategoriaComponent implements OnInit {
   }
 
   selecionarCategoria(cat: Categoria) {
-    // Se a categoria for especifica de garrafoes, ou como regra padrao
     this.categoriaSelecionada = cat;
-    this.quantidadeGarrafoes = 0; // zera e mostra o passo
+    this.quantidadeGarrafoes = 0;
   }
 
   aumentarQtde() {

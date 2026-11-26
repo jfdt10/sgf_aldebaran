@@ -7,7 +7,7 @@
       <h1 class="animate-up delay-1">Recupere seu Acesso</h1>
       <p class="subtitle animate-up delay-2">Não se preocupe, vamos ajudar você a voltar.</p>
       
-      <div class="stats-row animate-up delay-3">
+      <div *ngIf="!manualRecovery" class="stats-row animate-up delay-3">
         <div class="stat-item">
           <span class="stat-val">Seguro</span>
           <span class="stat-label">Processo</span>
@@ -38,7 +38,7 @@
         <h2>Esqueceu a senha?</h2>
         <p class="desc-text">Digite seu e-mail cadastrado e enviaremos um link para você redefinir suas credenciais.</p>
 
-        <form (ngSubmit)="enviar()">
+        <form *ngIf="!manualRecovery" (ngSubmit)="enviar()">
           
           <div class="input-group">
             <label>E-MAIL CADASTRADO</label>

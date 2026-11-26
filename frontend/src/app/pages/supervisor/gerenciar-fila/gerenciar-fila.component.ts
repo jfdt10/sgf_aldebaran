@@ -113,24 +113,20 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
       this.carregarConfiguracoes();
     });
 
-    // Buscar estatística de tempo médio do dia e atualizar constantemente
     this.carregarDadosTempoMedio();
     this.relatoriosTimer = setInterval(() => {
       this.carregarDadosTempoMedio();
     }, 10000);
 
-    // Timer da Fila (atualiza a cada 5 segundos para renderização em tempo real)
     this.filaTimer = setInterval(() => {
       this.carregarFilaEspera();
     }, 5000);
 
-    // Inscrever aos dados de guichês do serviço
     this.guicheService.guiches$.subscribe((guiches: any[]) => {
       this.guiches = guiches;
       this.aplicarFiltroFila();
     });
 
-    // Timer for baia occupancy countdowns
     this.baiasTimer = setInterval(() => {
       this.baias.forEach(baia => {
         if (baia.status === 'ocupada' && baia.startTime) {
@@ -239,7 +235,6 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (dados: any) => {
-        // O endpoint retorna { kpis: { mediaAtendimentoMinutos: X } }
         const rawMinutos = dados?.kpis?.mediaAtendimentoMinutos || 0;
         this.tempoMedioAtendimentoGeral = Math.round(rawMinutos);
         this.cdr.detectChanges();
@@ -261,7 +256,6 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
       { headers: { Authorization: `Bearer ${token}` } }
     ).subscribe({
       next: () => {
-        // Atualizar lista e guichês
         this.carregarFilaEspera();
         this.guicheService.refreshGuiches(this.selectedFilialId || undefined);
       },
@@ -282,7 +276,6 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
     this.showCancelModal = false;
   }
 
-  // --- Zerar Fila ---
   abrirModalZerarFila() {
     this.zerarFilaResultado = null;
     this.showZerarFilaModal = true;
@@ -389,7 +382,6 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
     this.showSuccessModal = false;
   }
 
-  // --- Operators Management ---
   abrirModalAdicionarOperador(guiche: any) {
     this.guicheAtual = guiche;
     this.showOperadorModal = true;
@@ -399,25 +391,19 @@ export class SupervisorGerenciarFilaComponent implements OnInit, OnDestroy {
   }
 
   carregarOperadores() {
-    // Bug fix 1: Não filtrar por filialId — operadores cadastrados sem filial_id
-    // ficam invisiveis quando o filtro é aplicado no backend (WHERE filial_id = X).
-    // Bug fix 2: Incluir Authorization header — o endpoint é protegido por JwtAuthGuard.
     const token = localStorage.getItem('token') || '';
     this.http.get<any[]>(`${this.apiUrl}/usuarios`, {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe(
       (usuarios: any[]) => {
-        // Filtrar apenas usuários com perfil 'OPERADOR' e ativos
         let operadoresFiltrados = usuarios.filter(
           u => u.perfil === 'OPERADOR' && u.ativo
         );
 
-        // Obter nomes dos operadores já atribuídos a guichês ativos
         const operadoresAtribuidos = this.guiches
           .filter(g => g.status !== 'vazio' && g.operador)
           .map(g => g.operador);
 
-        // Remover operadores já atribuídos da lista disponível
         operadoresFiltrados = operadoresFiltrados.filter(
           op => !operadoresAtribuidos.includes(op.nome)
         );

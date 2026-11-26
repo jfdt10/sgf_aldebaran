@@ -180,7 +180,6 @@
   gap: 10px;
 }
 
-/* Action Buttons */
 .nav-btn {
   display: flex;
   align-items: center;
@@ -246,7 +245,6 @@
   align-items: center;
 }
 
-/* Profile Trigger */
 .profile-trigger {
   display: flex;
   align-items: center;
@@ -1123,7 +1121,6 @@
   font-size: 14px;
 }
 
-/* Modals */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -1169,7 +1166,6 @@
   border: 0; background: #ef4444; color: #fff; border-radius: 10px; height: 44px; font-weight: 600; cursor: pointer;
 }
 
-/* Modal Transferir */
 .transferir-header {
   display: flex;
   align-items: center;
@@ -1388,7 +1384,6 @@
   cursor: not-allowed;
 }
 
-/* Modal Transferir Sucesso */
 .modal-transferencia-sucesso {
   max-width: 420px;
   padding: 28px 24px;
@@ -1468,7 +1463,6 @@
   cursor: pointer;
 }
 
-/* Modais de Cadastro */
 .modal-cadastro {
   max-width: 680px;
   border-radius: 16px;
@@ -1646,7 +1640,6 @@
   box-shadow: none;
 }
 
-/* ACTIVE TICKET STYLES */
 .input-with-icon {
   position: relative;
   display: flex;
@@ -1899,7 +1892,7 @@
 }
 .btn-finalizar { background: transparent; border: 1px solid #cbd5e1; color: #94a3b8; }
 .btn-finalizar:not([disabled]) {
-  background: #10b981; /* Verde do Figma quando ativo */
+  background: #10b981;
   color: #ffffff;
   border-color: #10b981;
 }
@@ -2038,7 +2031,6 @@
 }
 
 
-/* --- REDESIGN MODAL SAIR (PREMIUM) --- */
 .logout-modal-redesign {
   background: white;
   border-radius: 24px;
@@ -2145,7 +2137,6 @@
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* Fix para o Guichê NaN e ajustes finos */
 .profile-info .guiche {
   font-weight: 600;
   color: #0ea5e9;
@@ -2155,9 +2146,6 @@
   display: inline-block;
 }
 
-// =======================================================
-// MODAIS REDESIGN — copiado pixel-perfect do supervisor
-// =======================================================
 
 $text-main: #1f2937;
 $text-secondary: #6b7280;
@@ -2253,26 +2241,25 @@ $teal-main: #14b8a6;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
-    /* Distribuição de larguras específica para cada modal */
     &.table-meus-atendimentos {
       min-width: 850px;
-      th:nth-child(1), td:nth-child(1) { width: 14%; } /* Senha */
-      th:nth-child(2), td:nth-child(2) { width: 22%; } /* Cliente */
-      th:nth-child(3), td:nth-child(3) { width: 16%; } /* Categoria */
-      th:nth-child(4), td:nth-child(4) { width: 10%; } /* Galões */
-      th:nth-child(5), td:nth-child(5) { width: 10%; } /* Espera */
-      th:nth-child(6), td:nth-child(6) { width: 16%; } /* Status */
-      th:last-child, td:last-child { width: 15%; text-align: center; overflow: visible; } /* Ações */
+      th:nth-child(1), td:nth-child(1) { width: 14%; }
+      th:nth-child(2), td:nth-child(2) { width: 22%; }
+      th:nth-child(3), td:nth-child(3) { width: 16%; }
+      th:nth-child(4), td:nth-child(4) { width: 10%; }
+      th:nth-child(5), td:nth-child(5) { width: 10%; }
+      th:nth-child(6), td:nth-child(6) { width: 16%; }
+      th:last-child, td:last-child { width: 15%; text-align: center; overflow: visible; }
     }
 
     &.table-agendamentos-dia {
       min-width: 750px;
-      th:nth-child(1), td:nth-child(1) { width: 16%; } /* Senha */
-      th:nth-child(2), td:nth-child(2) { width: 22%; } /* Cliente */
-      th:nth-child(3), td:nth-child(3) { width: 12%; } /* Horário */
-      th:nth-child(4), td:nth-child(4) { width: 10%; } /* Galões */
-      th:nth-child(5), td:nth-child(5) { width: 18%; overflow: visible; text-overflow: unset; } /* Status */
-      th:last-child, td:last-child { width: 22%; text-align: center; overflow: visible; } /* Ações */
+      th:nth-child(1), td:nth-child(1) { width: 16%; }
+      th:nth-child(2), td:nth-child(2) { width: 22%; }
+      th:nth-child(3), td:nth-child(3) { width: 12%; }
+      th:nth-child(4), td:nth-child(4) { width: 10%; }
+      th:nth-child(5), td:nth-child(5) { width: 18%; overflow: visible; text-overflow: unset; }
+      th:last-child, td:last-child { width: 22%; text-align: center; overflow: visible; }
     }
 
     tr:last-child td { border-bottom: 0; }
@@ -2297,7 +2284,7 @@ $teal-main: #14b8a6;
 
     .actions-cell {
       display: flex; 
-      flex-direction: row; /* Garante alinhamento horizontal */
+      flex-direction: row;
       gap: 8px; 
       align-items: center; 
       justify-content: center;
@@ -2305,7 +2292,6 @@ $teal-main: #14b8a6;
   }
 }
 
-/* Estilização para o seletor de tipo de atendimento no check-in */
 .tipo-atendimento-options {
   display: flex;
   gap: 16px;
@@ -2351,7 +2337,6 @@ $teal-main: #14b8a6;
   }
 }
 
-// Detalhe do Atendimento
 .detalhe-atend {
   .detalhe-row {
     display: flex; justify-content: space-between; align-items: center;
@@ -2366,7 +2351,6 @@ $teal-main: #14b8a6;
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-// Modal Detalhes do Cliente customizado
 .cliente-profile-section {
   display: flex;
   flex-direction: column;
@@ -2473,7 +2457,6 @@ $teal-main: #14b8a6;
   }
 }
 
-/* Filtro de Data do Modal */
 .modal-filter-bar {
   margin-bottom: 20px;
   display: flex;

@@ -28,7 +28,6 @@ export class ServicoService {
       },
     });
 
-    // Notificação de nova categoria de fila
     await this.notificacaoService.criar({
       titulo: 'Novo Serviço/Categoria',
       mensagem: `Categoria de fila ${servico.nome} criada.`,
@@ -51,11 +50,12 @@ export class ServicoService {
     }
 
     if (finalFilialId) {
-      where.filial_id = finalFilialId;
+      where.OR = [
+        { filial_id: finalFilialId },
+        { filial_id: null }
+      ];
     }
 
-    // Filtro de Tipo: Se informado, traz o tipo específico OU os sem tipo (Geral)
-    // Para fluxos de totem (Convencional/Preferencial), não devemos filtrar as categorias específicas
     if (tipo && tipo.toLowerCase() !== 'convencional' && tipo.toLowerCase() !== 'preferencial') {
       const tipoFilter = {
         OR: [
@@ -65,7 +65,6 @@ export class ServicoService {
         ]
       };
 
-      // Se já houver um OR (da filial), precisamos combinar usando AND
       if (where.OR) {
         const branchOR = where.OR;
         delete where.OR;
@@ -96,7 +95,6 @@ export class ServicoService {
 
   async update(id: number, updateServicoDto: any, requestingUserFilialId?: number) {
     await this.findOne(id, requestingUserFilialId);
-    // Sanitize data to avoid updating immutable or relation fields
     const {
       id: _,
       criadoEm,
@@ -119,7 +117,6 @@ export class ServicoService {
       data: dataToUpdate,
     });
 
-    // Notificação de atualização
     await this.notificacaoService.criar({
       titulo: 'Serviço Atualizado',
       mensagem: `A categoria ${servico.nome} foi atualizada.`,

@@ -260,7 +260,7 @@ export class ClientHomeComponent implements OnInit, OnDestroy {
     this.pararTimer();
     this.timerId = setInterval(() => {
       this.atualizarEstadoCheckin();
-    }, 10000); // Check status every 10 seconds
+    }, 10000);
   }
 
   pararTimer() {

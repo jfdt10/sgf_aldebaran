@@ -64,7 +64,7 @@ export class ClientesFormComponent implements OnInit {
 
     this.loading = true;
     const request = this.modoEdicao
-      ? this.api.patch(`/clientes/${this.form.id}`, this.form)
+      ? this.api.put(`/clientes/${this.form.id}`, this.form)
       : this.api.post('/clientes', this.form);
 
     request.subscribe({
@@ -84,16 +84,15 @@ export class ClientesFormComponent implements OnInit {
     this.router.navigate(['/admin/clientes']);
   }
 
-  // --- MÁSCARAS INTELIGENTES ---
 
   mascaraDocumento(event: any) {
     let v = event.target.value.replace(/\D/g, '');
     
-    if (v.length <= 11) { // CPF
+    if (v.length <= 11) {
       v = v.replace(/(\d{3})(\d)/, '$1.$2');
       v = v.replace(/(\d{3})(\d)/, '$1.$2');
       v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    } else { // CNPJ
+    } else {
       v = v.substring(0, 14);
       v = v.replace(/^(\d{2})(\d)/, '$1.$2');
       v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
@@ -107,9 +106,9 @@ export class ClientesFormComponent implements OnInit {
     let v = event.target.value.replace(/\D/g, '');
     v = v.substring(0, 11);
     
-    if (v.length > 10) { // Celular (9 digitos)
+    if (v.length > 10) {
       v = v.replace(/^(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-    } else if (v.length > 5) { // Fixo ou incompleto
+    } else if (v.length > 5) {
       v = v.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
     } else if (v.length > 2) {
       v = v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');

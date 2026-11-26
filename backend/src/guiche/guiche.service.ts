@@ -42,7 +42,6 @@ export class GuicheService {
     data = this.normalizarDadosGuiche(data);
     const filialId = requestingUserFilialId ?? (data.filial_id ? +data.filial_id : null);
 
-    // `numero` é único por filial no schema; valida considerando filial_id.
     const guicheExistente = await this.prisma.guiche.findFirst({
       where: { numero: data.numero, filial_id: filialId },
     });
@@ -55,7 +54,6 @@ export class GuicheService {
         throw new BadRequestException(`Número de guichê "${data.numero}" já existe nesta filial.`);
       }
 
-      // Ressuscita o guichê excluído logicamente
       guiche = await this.prisma.guiche.update({
         where: { id: guicheExistente.id },
         data: {
@@ -171,7 +169,6 @@ export class GuicheService {
 
   async update(id: number, data: any, requestingUserFilialId?: number) {
     await this.findOne(id, requestingUserFilialId);
-    // Pegar apenas os dados permitidos para update
     const updateDataRaw: any = {};
     if (data.numero !== undefined) updateDataRaw.numero = data.numero;
     if (data.nome !== undefined) updateDataRaw.nome = data.nome;
@@ -197,7 +194,6 @@ export class GuicheService {
       include: { filial: true },
     });
 
-    // Notificação de atualização
     await this.notificacaoService.criar({
       titulo: 'Guichê Atualizado',
       mensagem: `Dados do guichê ${guiche.numero} (${guiche.filial?.nome}) foram alterados.`,
@@ -262,7 +258,6 @@ export class GuicheService {
       throw new BadRequestException('Guichê já está ocupado por outro operador');
     }
 
-    // Libera qualquer outro guichê que o operador possa estar usando
     const atual = await this.findCurrentByOperator(operatorId);
     if (atual && atual.id !== guicheId) {
       await this.releaseGuiche(operatorId);

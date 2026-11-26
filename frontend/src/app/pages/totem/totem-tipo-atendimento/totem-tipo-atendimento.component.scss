@@ -1,5 +1,3 @@
-// Font imports removed due to build failures with angular-css-inline-fonts-plugin.
-// Global typography handles this.
 
 * {
   box-sizing: border-box;
@@ -11,7 +9,6 @@
   min-height: 100vh;
 }
 
-// Cores do Projeto
 $bg-gradient-start: #F8FAFC;
 $bg-gradient-end: #E0F2FE;
 $text-dark: #1E293B;
@@ -19,8 +16,8 @@ $text-gray: #64748B;
 $card-white: #FFFFFF;
 $primary-blue: #0099CC;
 $icon-bg: #E0F7FA;
-$badge-bg: #FEF3C7; // Amarelo Fundo
-$badge-text: #D97706; // Laranja Texto
+$badge-bg: #FEF3C7;
+$badge-text: #D97706;
 
 .totem-container {
   width: 100%;
@@ -33,7 +30,6 @@ $badge-text: #D97706; // Laranja Texto
   overflow-y: auto;
 }
 
-/* --- HEADER --- */
 header {
   display: flex;
   justify-content: space-between;
@@ -86,7 +82,6 @@ header {
   }
 }
 
-/* --- MAIN CONTENT --- */
 .main-content {
   flex-grow: 1;
   display: flex;
@@ -125,7 +120,6 @@ header {
   }
 }
 
-/* --- CARDS --- */
 .cards-row {
   display: flex;
   flex-wrap: wrap;
@@ -190,17 +184,15 @@ header {
     justify-content: center;
     margin-bottom: 25px;
 
-    // Regra para o SVG do card convencional
     svg {
       width: 60%;
       height: 60%;
     }
 
-    // NOVA REGRA: Para a sua imagem PNG
     .icon-img {
-      width: 70%; // Um pouco maior que o SVG para preencher bem
+      width: 70%;
       height: 70%;
-      object-fit: contain; // Garante que a imagem não distorça
+      object-fit: contain;
     }
   }
 
@@ -232,7 +224,6 @@ header {
   }
 }
 
-/* --- BOTÃO VOLTAR --- */
 .footer-action {
   margin-top: 50px;
 

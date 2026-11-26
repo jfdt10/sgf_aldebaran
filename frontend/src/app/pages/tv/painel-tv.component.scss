@@ -87,7 +87,7 @@
   grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
   gap: var(--tv-panel-gap);
   padding: var(--tv-outer-gap);
-  min-height: 0; /* Evita que o container quebre os tamanhos */
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -112,7 +112,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* Centraliza todo o conteúdo garantindo que caiba */
+  justify-content: center;
   text-align: center;
   padding: clamp(8px, 1.4vh, 16px);
   overflow: hidden;
@@ -213,7 +213,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  min-height: 0; /* Previne overflow */
+  min-height: 0;
 }
 
 .tv-panel h3 {
@@ -224,7 +224,7 @@
 }
 
 .tv-call-item {
-  flex: 1; /* Distribui o espaço uniformemente */
+  flex: 1;
   min-height: 0;
   border-radius: clamp(10px, 1.2vw, 14px);
   background: rgba(255, 255, 255, 0.05);
@@ -262,7 +262,6 @@
   white-space: nowrap;
 }
 
-/* Identificadores Categorias */
 .servico-caminhao {
   background: #00bba7;
 }
@@ -309,9 +308,6 @@
   flex-shrink: 0;
 }
 
-/* ============================================================== */
-/* ESTADOS DA TV E ANIMAÇÕES INLINE                               */
-/* ============================================================== */
 
 .tv-start-overlay {
   position: fixed;
@@ -432,7 +428,6 @@
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0); }
 }
 
-/* Quando chamado, piscar o conteúdo principal em vez de popup */
 .alerta-piscar {
   animation: pulse-border 1.5s infinite ease-in-out;
   border: 4px solid rgba(255, 255, 255, 0.8) !important;

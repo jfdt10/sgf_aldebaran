@@ -13,7 +13,6 @@ export class TaskManagementService {
 
   constructor(private http: HttpClient) {}
 
-  // STATUS
   getStatusItems(): Observable<StatusItem[]> {
     return this.http.get<StatusItem[]>(this.statusUrl);
   }
@@ -34,7 +33,6 @@ export class TaskManagementService {
     return this.http.post<void>(`${this.statusUrl}/reorder`, ids);
   }
 
-  // TASKS
   getTasks(): Observable<TaskItem[]> {
     return this.http.get<TaskItem[]>(this.taskUrl);
   }

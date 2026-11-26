@@ -1,6 +1,4 @@
-/* admin-layout.component.scss */
 
-// Local Variables for Premium Feel
 $sidebar-width: 260px;
 $sidebar-collapsed-width: 80px;
 $top-bar-height: 90px;
@@ -16,9 +14,6 @@ $glass-border: rgba(255, 255, 255, 0.3);
   background-color: var(--bg-body);
 }
 
-/* ============================================================
-   SIDEBAR
-   ============================================================ */
 .sidebar {
   width: $sidebar-width;
   background: var(--bg-card);
@@ -53,15 +48,15 @@ $glass-border: rgba(255, 255, 255, 0.3);
   }
 
   .logo-area {
-    height: 90px; // Larger for better breathing room
+    height: 90px;
     display: flex;
     align-items: center;
-    justify-content: center; // Center the logo
+    justify-content: center;
     padding: 0 1.5rem;
     border-bottom: 1px solid var(--border-color);
 
     .logo-full {
-      height: 52px; // Clearly visible
+      height: 52px;
       width: auto;
     }
 
@@ -117,7 +112,6 @@ $glass-border: rgba(255, 255, 255, 0.3);
     }
   }
 
-  /* SIDEBAR USER SECTION */
   .sidebar-user {
     padding: 1rem 1.5rem;
     border-top: 1px solid var(--border-color);
@@ -172,25 +166,19 @@ $glass-border: rgba(255, 255, 255, 0.3);
   }
 }
 
-/* ============================================================
-   MAIN CONTENT WRAPPER
-   ============================================================ */
 .main-content-wrapper {
   flex: 1;
   margin-left: $sidebar-width;
   transition: margin-left $transition-speed cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
-  min-width: 0; // Fixes flexbox overflow
+  min-width: 0;
 
   &.expanded {
     margin-left: $sidebar-collapsed-width;
   }
 }
 
-/* ============================================================
-   TOP BAR (共通)
-   ============================================================ */
 .top-bar {
   height: $top-bar-height;
   background: var(--bg-card);
@@ -210,7 +198,6 @@ $glass-border: rgba(255, 255, 255, 0.3);
   }
 }
 
-/* --- ADMIN MODE TOP BAR --- */
 .top-bar-left {
   .page-title {
     font-size: 1.25rem;
@@ -234,7 +221,7 @@ $glass-border: rgba(255, 255, 255, 0.3);
 .top-bar-right {
   display: flex;
   align-items: center;
-  gap: 4.5rem; // significantly increased to ensure separation
+  gap: 4.5rem;
   justify-content: flex-end;
 
   .notification-container {
@@ -242,7 +229,7 @@ $glass-border: rgba(255, 255, 255, 0.3);
     align-items: center;
     position: relative;
     flex-shrink: 0;
-    margin-left: 20px; // Extra guarantee
+    margin-left: 20px;
   }
 
   .search-box {
@@ -260,12 +247,12 @@ $glass-border: rgba(255, 255, 255, 0.3);
     input {
       background: var(--bg-body);
       border: 1px solid var(--border-color);
-      padding: 0.65rem 1rem 0.65rem 2.5rem; // Slightly more padding
+      padding: 0.65rem 1rem 0.65rem 2.5rem;
       border-radius: 50px;
       font-size: 0.9rem;
       width: 100%;
       transition: all 0.2s;
-      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02); // Better polish
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
 
       &:focus {
         background: white;
@@ -309,9 +296,6 @@ $glass-border: rgba(255, 255, 255, 0.3);
   }
 }
 
-/* ============================================================
-   SUPERVISOR MODE HEADER (Premium)
-   ============================================================ */
 .supervisor-nav-full {
   width: 100%;
   display: flex;
@@ -320,7 +304,7 @@ $glass-border: rgba(255, 255, 255, 0.3);
   
   .nav-left {
     .supervisor-logo {
-      height: 55px; // Larger logo
+      height: 55px;
       width: auto;
     }
   }
@@ -354,7 +338,6 @@ $glass-border: rgba(255, 255, 255, 0.3);
   }
 }
 
-/* Glass Selector for Filial */
 .filial-glass-selector {
   display: flex;
   align-items: center;
@@ -397,7 +380,6 @@ $glass-border: rgba(255, 255, 255, 0.3);
   &.loading { opacity: 0.6; pointer-events: none; }
 }
 
-/* Language Toggle Switch */
 .language-toggle {
   display: flex;
   background: var(--bg-body);
@@ -424,7 +406,6 @@ $glass-border: rgba(255, 255, 255, 0.3);
   }
 }
 
-/* Action Buttons with Badge Counts */
 .nav-btn {
   display: flex;
   align-items: center;
@@ -466,7 +447,6 @@ $glass-border: rgba(255, 255, 255, 0.3);
   }
 }
 
-/* Supervisor Profile Trigger */
 .profile-trigger {
   display: flex;
   align-items: center;
@@ -515,9 +495,6 @@ $glass-border: rgba(255, 255, 255, 0.3);
   }
 }
 
-/* ============================================================
-   DROPDOWNS & MENUS
-   ============================================================ */
 .profile-menu {
   position: absolute;
   top: 100%;
@@ -569,7 +546,6 @@ $glass-border: rgba(255, 255, 255, 0.3);
     }
   }
 
-  /* Toggle Dark Mode Switch */
   .toggle-switch {
     margin-left: auto;
     width: 36px;
@@ -600,15 +576,14 @@ $glass-border: rgba(255, 255, 255, 0.3);
 
   &.sidebar-user-menu {
     top: auto;
-    bottom: calc(100% + 15px); // Opens upwards
+    bottom: calc(100% + 15px);
     left: 10px;
     right: 10px;
     width: auto;
-    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.15); // Shadow on bottom to indicate floating
+    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.15);
   }
 }
 
-/* NOTIFICATIONS DROPDOWN */
 .notifications-dropdown {
   position: absolute;
   top: calc(100% + 10px);
@@ -674,9 +649,6 @@ $glass-border: rgba(255, 255, 255, 0.3);
   }
 }
 
-/* ============================================================
-   PAGE CONTENT
-   ============================================================ */
 .page-content {
   flex: 1;
   padding: 2rem;
@@ -684,9 +656,6 @@ $glass-border: rgba(255, 255, 255, 0.3);
   max-width: 100%;
 }
 
-/* ============================================================
-   LOGOUT MODAL
-   ============================================================ */
 .modal-backdrop {
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
@@ -729,9 +698,6 @@ $glass-border: rgba(255, 255, 255, 0.3);
   }
 }
 
-/* ============================================================
-   KEYFRAMES
-   ============================================================ */
 @keyframes slideInUp {
   from { transform: translateY(10px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
@@ -747,9 +713,6 @@ $glass-border: rgba(255, 255, 255, 0.3);
   to { transform: scale(1); opacity: 1; }
 }
 
-/* ============================================================
-   RESPONSIVE DESIGN
-   ============================================================ */
 @media (max-width: 1024px) {
   .sidebar {
     width: $sidebar-collapsed-width;

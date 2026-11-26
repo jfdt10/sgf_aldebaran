@@ -31,7 +31,6 @@ export class SenhaService {
       'BONUS_PRIORIDADE_AGENDAMENTO',
       filialId,
     );
-    // Base priority: servico.prioridadePeso; agendamento adds BONUS_PRIORIDADE_AGENDAMENTO.
     const bonus = Number(configBonus?.valor) || 2;
 
     const hoje = new Date();

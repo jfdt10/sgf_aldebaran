@@ -1,4 +1,3 @@
-// Variáveis
 $primary: #0099BD;
 $text-dark: #1F2937;
 $bg-white: #ffffff;
@@ -8,8 +7,8 @@ $border: #E5E7EB;
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5); // Fundo escuro transparente
-  z-index: 999; // Fica acima de tudo
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
   display: flex;
 }
 

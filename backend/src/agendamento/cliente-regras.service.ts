@@ -15,7 +15,8 @@ export class ClienteRegrasService {
     now?: Date;
   }): Promise<void> {
     const configs = await this.getConfigMap(params.filialId);
-    const dataHora = buildAgendamentoDate(params.data, params.hora);
+    const timezone = configs['FUSO_HORARIO'] || 'America/Sao_Paulo';
+    const dataHora = buildAgendamentoDate(params.data, params.hora, timezone);
     const now = params.now || new Date();
 
     this.validarDiaAtivo(params.data, configs);
@@ -30,7 +31,8 @@ export class ClienteRegrasService {
     now?: Date;
   }): Promise<void> {
     const configs = await this.getConfigMap(params.filialId);
-    const dataHora = buildAgendamentoDate(params.data, params.hora);
+    const timezone = configs['FUSO_HORARIO'] || 'America/Sao_Paulo';
+    const dataHora = buildAgendamentoDate(params.data, params.hora, timezone);
     const now = params.now || new Date();
 
     this.validarDiaAtivo(params.data, configs);
@@ -91,7 +93,7 @@ export class ClienteRegrasService {
     const minimoMs = antecedenciaMinutos * 60 * 1000;
 
     if (dataHora.getTime() < now.getTime() + minimoMs) {
-      if (antecedenciaMinutos === 0) return; // Permite agendamento sem antecedência (imediato)
+      if (antecedenciaMinutos === 0) return;
 
       const horas = antecedenciaMinutos / 60;
       const desc = horas % 1 === 0 

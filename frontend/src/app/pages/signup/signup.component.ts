@@ -48,7 +48,6 @@ export class SignupComponent {
     private cd: ChangeDetectorRef
   ) { }
 
-  // ─── Máscaras ────────────────────────────────────────────────────────────────
 
   aplicarMascaraCPF(valor: string): string {
     return valor
@@ -72,12 +71,10 @@ export class SignupComponent {
   aplicarMascaraTelefone(valor: string): string {
     const digits = valor.replace(/\D/g, '').substring(0, 11);
     if (digits.length <= 10) {
-      // Telefone fixo: (XX) XXXX-XXXX
       return digits
         .replace(/(\d{2})(\d)/, '($1) $2')
         .replace(/(\d{4})(\d{1,4})$/, '$1-$2');
     }
-    // Celular: (XX) XXXXX-XXXX
     return digits
       .replace(/(\d{2})(\d)/, '($1) $2')
       .replace(/(\d{5})(\d{1,4})$/, '$1-$2');
@@ -101,7 +98,6 @@ export class SignupComponent {
     el.value = this.dados.telefone;
   }
 
-  // ─── Validações ──────────────────────────────────────────────────────────────
 
   validarCPF(cpf: string): boolean {
     const digits = cpf.replace(/\D/g, '');
@@ -180,7 +176,6 @@ export class SignupComponent {
         if (!this.dados.senha) erros['senha'] = 'Senha obrigatória.';
         else if (this.dados.senha.length < 8) erros['senha'] = 'Mínimo 8 caracteres.';
         else delete erros['senha'];
-        // re-validar confirmar quando a senha muda
         if (this.dados.confirmarSenha) {
           if (this.dados.confirmarSenha !== this.dados.senha)
             erros['confirmarSenha'] = 'As senhas não coincidem.';
@@ -212,10 +207,8 @@ export class SignupComponent {
     return true;
   }
 
-  // ─── Submissão ───────────────────────────────────────────────────────────────
 
   criar() {
-    // Dispara validação de todos os campos obrigatórios
     const campos = this.tipo === 'PF'
       ? ['nome', 'cpf', 'email', 'telefone', 'senha', 'confirmarSenha']
       : ['razao', 'cnpj', 'email', 'telefone', 'senha', 'confirmarSenha'];

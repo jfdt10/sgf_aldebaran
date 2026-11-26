@@ -10,7 +10,6 @@
   min-height: 100vh;
 }
 
-// Cores
 $bg-gradient-start: #F8FAFC; 
 $bg-gradient-end: #E0F2FE;   
 $text-dark: #1E293B;
@@ -30,7 +29,6 @@ $icon-bg: #E0F7FA;
   overflow-y: auto;
 }
 
-/* --- HEADER --- */
 header {
   display: flex;
   justify-content: space-between;
@@ -94,16 +92,14 @@ header {
   }
 }
 
-/* --- MAIN CONTENT --- */
 .main-content {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; // Mantém o texto no topo
+  justify-content: flex-start;
   width: 100%;
   
-  // Distância do topo para o texto "Bem-vindo"
   padding-top: 8vh; 
   padding-bottom: 20px;
 }
@@ -112,7 +108,6 @@ header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  // Gap reduzido aqui pois vamos controlar a distância no cards-row
   gap: 10px; 
   width: 100%;
   max-width: 1200px;
@@ -159,7 +154,6 @@ header {
   }
 }
 
-/* --- CARDS (BOTÕES) --- */
 .cards-row {
   display: flex;
   flex-wrap: wrap; 
@@ -168,9 +162,6 @@ header {
   width: 100%;
   padding: 10px;
   
-  // Responsive layout logic
-  // Empurra SOMENTE os cartões para baixo, longe do texto.
-  // Se quiser mais longe, aumente para 100px. Se menos, diminua para 50px.
   margin-top: 80px; 
 }
 

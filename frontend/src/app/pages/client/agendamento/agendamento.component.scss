@@ -1,4 +1,3 @@
-/* --- Variáveis --- */
 $primary: #00a2d3;
 $primary-dark: #008f78;
 $bg-page: #f2f5f8;
@@ -11,18 +10,16 @@ $shadow-soft: 0 4px 15px rgba(0,0,0,0.05);
   min-height: calc(100vh - 90px);
   font-family: 'Inter', 'Roboto', sans-serif;
   padding: 0;
-  display: block; /* Normal flow */
+  display: block;
 }
 
-/* FORM CONTAINER */
 .form-container {
   padding: 32px 20px;
-  max-width: 680px; /* Better desk width, still nice for mobile */
+  max-width: 680px;
   margin: 0 auto;
   width: 100%;
 }
 
-/* INPUT GROUPS - CARD STYLE */
 .input-group {
   margin-bottom: 16px;
   
@@ -81,7 +78,6 @@ $shadow-soft: 0 4px 15px rgba(0,0,0,0.05);
   }
 }
 
-/* QUANTITY COUNTER CARD */
 .counter-box {
   background: white;
   border-radius: 12px;
@@ -152,7 +148,6 @@ $shadow-soft: 0 4px 15px rgba(0,0,0,0.05);
   }
 }
 
-/* CALENDAR STYLING */
 .calendar-section {
   background: white;
   border-radius: 16px;
@@ -249,7 +244,6 @@ $shadow-soft: 0 4px 15px rgba(0,0,0,0.05);
   }
 }
 
-/* TIME GRID STYLING */
 .time-section {
   margin-bottom: 20px;
   
@@ -344,22 +338,21 @@ $shadow-soft: 0 4px 15px rgba(0,0,0,0.05);
   }
 }
 
-/* CONFIRM BUTTON */
 .bottom-bar {
   position: sticky;
-  bottom: 20px; /* Floating slightly above bottom */
+  bottom: 20px;
   width: 100%;
-  background: transparent; /* Remove background to avoid "cut" look */
+  background: transparent;
   padding: 0;
   border: none;
   z-index: 50;
   display: flex;
   justify-content: center;
   margin-top: 40px;
-  pointer-events: none; /* Let clicks pass through except on the button */
+  pointer-events: none;
 
   .btn-confirm {
-    pointer-events: auto; /* Re-enable clicks for the button */
+    pointer-events: auto;
     width: 90%;
     max-width: 450px;
     background: #0099BD;
@@ -397,7 +390,6 @@ $shadow-soft: 0 4px 15px rgba(0,0,0,0.05);
   }
 }
 
-/* ANIMATIONS */
 .animate-up {
   animation: slideUp 0.4s ease-out forwards;
   opacity: 0;
@@ -407,8 +399,6 @@ $shadow-soft: 0 4px 15px rgba(0,0,0,0.05);
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* SUCCESS MODAL PREMIUM STYLE */
-/* SUCCESS MODAL REDESIGN */
 .success-modal-overlay {
   position: fixed;
   inset: 0;

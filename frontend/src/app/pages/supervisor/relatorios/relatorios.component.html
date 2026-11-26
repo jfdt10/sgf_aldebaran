@@ -47,7 +47,6 @@
   </div>
 
   <div class="page-content">
-    <!-- Top Cards -->
     <div class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-indicator bg-blue-light">
@@ -81,10 +80,8 @@
       </div>
     </div>
 
-    <!-- Middle Grid — Gráficos por Hora -->
     <div class="charts-grid mt-24">
 
-      <!-- Histórico da Fila -->
       <div class="chart-card fill-h">
         <h3 class="chart-title">Histórico da Fila (Qtd)</h3>
 
@@ -106,7 +103,6 @@
         </ng-template>
       </div>
 
-      <!-- Tempo Médio de Espera -->
       <div class="chart-card fill-h">
         <h3 class="chart-title">Tempo Médio de Espera (min)</h3>
 
@@ -128,7 +124,6 @@
         </ng-template>
       </div>
 
-      <!-- Tempo Médio de Atendimento -->
       <div class="chart-card fill-h">
         <h3 class="chart-title">Tempo Médio Atend. (min)</h3>
 
@@ -168,17 +163,14 @@
       </div>
     </div>
 
-    <!-- Bottom Lists -->
     <div class="bottom-grid mt-24">
       <div class="chart-card">
         <h3 class="chart-title">Desempenho dos Operadores</h3>
 
-        <!-- Carregando -->
         <div class="chart-empty-state" *ngIf="carregandoOperadores && operadores.length === 0">
           Carregando operadores...
         </div>
 
-        <!-- Lista real de operadores -->
         <div class="operator-list" *ngIf="!carregandoOperadores || operadores.length > 0">
           <ng-container *ngIf="operadores.length > 0; else semOperadores">
             <div class="op-item" *ngFor="let op of operadores">
@@ -234,7 +226,6 @@
 
   </div>
 
-  <!-- Modais -->
   <div class="modal-backdrop" *ngIf="activeModal">
     <div class="modal-c redesign-modal">
       <div class="modal-header-gradient" [ngClass]="activeModal">
@@ -251,7 +242,6 @@
         </button>
       </div>
 
-      <!-- DETALHES -->
       <div class="modal-body modal-detalhes" *ngIf="activeModal === 'detalhes'">
         <div class="ticket-header">
            <span class="ticket-badge bg-teal-light text-teal">{{ selectedTicket?.categoria }}</span>
@@ -273,7 +263,7 @@
           </div>
           <div class="info-box">
              <span class="info-label">Guichê</span>
-             <strong>01</strong> <!-- Mock -->
+             <strong>01</strong>
           </div>
         </div>
 
@@ -325,7 +315,6 @@
         </div>
       </div>
 
-      <!-- JUSTIFICATIVA -->
       <div class="modal-body modal-justificativa" *ngIf="activeModal === 'justificativa'">
         <div class="alert-box bg-red-light mb-16">
           <lucide-icon [img]="icons.clock" size="20" class="text-red"></lucide-icon>
@@ -371,7 +360,6 @@
     </div>
   </div>
 
-  <!-- Modal Sucesso -->
   <div class="modal-backdrop" *ngIf="successModal">
     <div class="modal-c success-modal">
       <div class="s-icon bg-green-light">

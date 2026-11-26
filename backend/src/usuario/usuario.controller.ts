@@ -13,6 +13,8 @@ import {
   UploadedFile,
   Request,
   Query,
+  ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -20,7 +22,9 @@ import { extname } from 'path';
 import { UsuarioService } from './usuario.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { LogService } from '../log/log.service';
-import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
+import { AuthenticatedRequest, AuthenticatedUser } from '../common/interfaces/authenticated-request.interface';
+import { AccountManagementGuard, StaffGuard, canManageAccounts } from '../auth/account-role.guards';
+import { PasswordDto } from '../auth/password.dto';
 
 @Controller('usuarios')
 export class UsuarioController {
@@ -34,10 +38,10 @@ export class UsuarioController {
     return this.usuarioService.validarLogin(body.login, body.senha);
   }
 
-  // Endpoints protegidos por JWT
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AccountManagementGuard)
   @Post()
   async criarUsuario(@Body() body: any, @Request() req: AuthenticatedRequest) {
+    this.assertAssignableRole(req.user, body.perfil);
     const res = await this.usuarioService.criar(body, req.user.filial_id);
     await this.logService.logAction(
       'Criação',
@@ -50,7 +54,7 @@ export class UsuarioController {
     return res;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AccountManagementGuard)
   @Get()
   findAll(@Query('filialId') filialId?: string, @Request() req?: AuthenticatedRequest) {
     return this.usuarioService.findAll(
@@ -59,20 +63,26 @@ export class UsuarioController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number, @Request() req: AuthenticatedRequest) {
+  async findOne(@Param('id', ParseIntPipe) id: number, @Request() req: AuthenticatedRequest) {
+    await this.assertAccountAccess(id, req.user, true);
     return this.usuarioService.findOne(id, req.user.filial_id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Put(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: any,
     @Request() req: AuthenticatedRequest,
   ) {
-    const res = await this.usuarioService.update(id, body, req.user.filial_id);
+    await this.assertAccountAccess(id, req.user, true);
+    const ownProfile = req.user.userId === id && req.user.perfil !== 'ADMIN';
+    if (!ownProfile) this.assertAssignableRole(req.user, body.perfil);
+    const { nome, email, login } = body;
+    const changes = ownProfile ? { nome, email, login } : body;
+    const res = await this.usuarioService.update(id, changes, req.user.filial_id);
     const userId = req.user.userId;
     await this.logService.logAction(
       'Atualização',
@@ -85,9 +95,10 @@ export class UsuarioController {
     return res;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AccountManagementGuard)
   @Patch(':id/status')
   async toggleStatus(@Param('id', ParseIntPipe) id: number, @Request() req: AuthenticatedRequest) {
+    await this.assertAccountAccess(id, req.user);
     const res = await this.usuarioService.toggleStatus(id, req.user.filial_id);
     const userId = req.user.userId;
     const acao = res.ativo ? 'Ativação' : 'Inativação';
@@ -100,13 +111,14 @@ export class UsuarioController {
     return res;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Patch(':id/senha')
-  resetPassword(
+  async resetPassword(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { senha: string },
+    @Body() body: PasswordDto,
     @Request() req: AuthenticatedRequest,
   ) {
+    await this.assertAccountAccess(id, req.user, true);
     return this.usuarioService.resetPassword(id, body.senha, req.user.filial_id).then(async (res) => {
       const userId = req.user.userId;
       await this.logService.logAction(
@@ -119,10 +131,18 @@ export class UsuarioController {
     });
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Post(':id/foto')
   @UseInterceptors(
     FileInterceptor('file', {
+      limits: { fileSize: 2 * 1024 * 1024 },
+      fileFilter: (req, file, callback) => {
+        const user = (req as AuthenticatedRequest).user;
+        if (String(user.userId) !== req.params.id) return callback(new ForbiddenException(), false);
+        const format = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp' }[file.mimetype];
+        return callback(null, !!format && (format === extname(file.originalname).toLowerCase() ||
+          (format === '.jpg' && extname(file.originalname).toLowerCase() === '.jpeg')));
+      },
       storage: diskStorage({
         destination: './uploads/perfil',
         filename: (req, file, cb) => {
@@ -139,6 +159,7 @@ export class UsuarioController {
     @UploadedFile() file: Express.Multer.File,
     @Request() req: any,
   ) {
+    if (!file) throw new BadRequestException('Selecione uma imagem JPEG, PNG ou WebP.');
     const fotoUrl = `/uploads/perfil/${file.filename}`;
     return this.usuarioService.updateFoto(id, fotoUrl).then(async (res) => {
       const userId = req.user?.userId ?? req.user?.id;
@@ -152,9 +173,10 @@ export class UsuarioController {
     });
   }
   
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AccountManagementGuard)
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number, @Request() req: AuthenticatedRequest) {
+    await this.assertAccountAccess(id, req.user);
     const res = await this.usuarioService.softDelete(id, req.user.filial_id);
     const userId = req.user.userId;
     const nome = res?.nome ? res.nome : `ID ${id}`;
@@ -165,5 +187,20 @@ export class UsuarioController {
       'Usuário',
     );
     return res;
+  }
+
+  private async assertAccountAccess(id: number, actor: AuthenticatedUser, allowSelf = false) {
+    if (allowSelf && actor.userId === id) return;
+    if (!canManageAccounts(actor)) throw new ForbiddenException();
+    if (actor.perfil !== 'ADMIN') {
+      const target = await this.usuarioService.findOne(id, actor.filial_id);
+      if (target.perfil.toUpperCase() === 'ADMIN') throw new ForbiddenException();
+    }
+  }
+
+  private assertAssignableRole(actor: AuthenticatedUser, role: unknown) {
+    if (role === undefined) return;
+    const allowed = actor.perfil === 'ADMIN' ? ['ADMIN', 'SUPERVISOR', 'OPERADOR'] : ['SUPERVISOR', 'OPERADOR'];
+    if (typeof role !== 'string' || !allowed.includes(role)) throw new ForbiddenException();
   }
 }

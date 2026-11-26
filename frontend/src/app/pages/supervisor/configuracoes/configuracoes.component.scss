@@ -47,7 +47,6 @@ $red-dark: #b91c1c;
   align-items: stretch;
 }
 
-/* SIDEBAR */
 .config-sidebar {
   width: 250px;
   background: white;
@@ -99,7 +98,6 @@ $red-dark: #b91c1c;
   }
 }
 
-/* MAIN CONTENT */
 .config-main {
   flex: 1;
   display: flex;
@@ -151,7 +149,6 @@ $red-dark: #b91c1c;
 
 .mt-32 { margin-top: 32px; }
 
-/* FORMS */
 .settings-group {
   h3 {
     font-size: 1.1rem;
@@ -216,7 +213,6 @@ $red-dark: #b91c1c;
   }
 }
 
-/* TOGGLE ROWS */
 .setting-row {
   display: flex;
   justify-content: space-between;
@@ -279,7 +275,6 @@ $red-dark: #b91c1c;
   }
 }
 
-/* DANGER ZONE */
 .danger-zone {
   background-color: $red-bg;
   border-radius: 12px;
@@ -322,7 +317,6 @@ $red-dark: #b91c1c;
   }
 }
 
-/* REGRAS E NOTIFICACOES EXTRAS */
 .input-with-suffix {
   display: flex;
   align-items: center;
@@ -380,7 +374,6 @@ $red-dark: #b91c1c;
   justify-content: flex-end;
 }
 
-/* GESTAO DE USUARIOS */
 .users-header {
   display: flex;
   justify-content: space-between;
@@ -586,7 +579,6 @@ $red-dark: #b91c1c;
   }
 }
 
-/* --- MODAIS --- */
 .modal-backdrop {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   background: rgba(31, 41, 55, 0.5); 
@@ -657,7 +649,6 @@ $red-dark: #b91c1c;
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* Success Modal */
 .success-modal {
   background: white;
   border-radius: 20px;

@@ -16,7 +16,6 @@ export class CategoriasFilaComponent implements OnInit {
   categorias: any[] = [];
   loading = false;
   
-  // Modais State
   showCategoriaModal = false;
   editandoCategoria = false;
   showConfirmDelete = false;
@@ -27,7 +26,6 @@ export class CategoriasFilaComponent implements OnInit {
   isRestricted = false;
   usuarioLogado: any = null;
 
-  // Modal Form (Categoria)
   formCategoria: any = {
     id: null,
     nome: '',

@@ -1,8 +1,7 @@
-/* --- Cores --- */
 $primary-gradient: linear-gradient(90deg, #00a0e9, #008f78);
 $text-dark: #1a1a1a;
 $text-grey: #666;
-$bg-page: #f8f9fa; /* Fundo cinza claro */
+$bg-page: #f8f9fa;
 
 .client-page {
   background: $bg-page;
@@ -11,7 +10,6 @@ $bg-page: #f8f9fa; /* Fundo cinza claro */
   padding-bottom: 40px;
 }
 
-/* --- HEADER --- */
 .top-bar {
   display: flex;
   justify-content: space-between;
@@ -29,7 +27,7 @@ $bg-page: #f8f9fa; /* Fundo cinza claro */
   }
 
   .logo-area img {
-    height: 40px; /* Logo tamanho app */
+    height: 40px;
   }
 
   .right-actions {
@@ -46,10 +44,9 @@ $bg-page: #f8f9fa; /* Fundo cinza claro */
   }
 }
 
-/* --- LAYOUT CONTEÚDO --- */
 .content-container {
   padding: 20px;
-  max-width: 1000px; /* Limite para PC */
+  max-width: 1000px;
   margin: 0 auto;
 }
 
@@ -68,7 +65,6 @@ $bg-page: #f8f9fa; /* Fundo cinza claro */
   letter-spacing: 0.5px;
 }
 
-/* NEXT APPOINTMENT CARD */
 .next-appointment-card {
   background: white;
   border-radius: 28px;
@@ -176,7 +172,6 @@ $bg-page: #f8f9fa; /* Fundo cinza claro */
   }
 }
 
-/* NO APPOINTMENTS CARD */
 .no-appointments-card {
   background: white;
   border-radius: 28px;
@@ -218,7 +213,6 @@ $bg-page: #f8f9fa; /* Fundo cinza claro */
   }
 }
 
-/* QUICK ACTIONS SECTION */
 .actions-grid {
   display: flex;
   flex-direction: column;
@@ -265,7 +259,6 @@ $bg-page: #f8f9fa; /* Fundo cinza claro */
   }
 }
 
-/* CANCEL MODAL */
 .cancel-modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -700,7 +693,6 @@ $bg-page: #f8f9fa; /* Fundo cinza claro */
     }
   }
 
-  /* --- CHECKIN UX ALERTS (PREMIUM) --- */
   .checkin-ux-alert {
     display: flex;
     align-items: center;
@@ -759,7 +751,6 @@ $bg-page: #f8f9fa; /* Fundo cinza claro */
   }
 }
 
-/* ANIMATIONS */
 .animate-up { animation: slideUp 0.5s ease-out forwards; opacity: 0; }
 .delay-1 { animation-delay: 0.1s; }
 .delay-2 { animation-delay: 0.2s; }

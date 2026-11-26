@@ -22,12 +22,10 @@ export class MotoristasComponent implements OnInit, OnDestroy {
     loading = false;
     selectedFilialId: number | null = null;
 
-    // Modal state
     showModal = false;
     showSuccessModal = false;
     isEditing = false;
 
-    // Form Model
     motoristaForm = {
         id: null as number | null,
         nome: '',

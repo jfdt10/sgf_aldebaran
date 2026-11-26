@@ -1,8 +1,6 @@
 <div class="admin-container">
-  <!-- Backdrop for mobile sidebar closing -->
   <div class="sidebar-backdrop" *ngIf="sidebarOpen" (click)="sidebarOpen = false"></div>
 
-  <!-- On mobile, sidebarOpen true adds mobile-open class -->
   <aside class="sidebar" [class.closed]="!sidebarOpen" [class.mobile-open]="sidebarOpen">
     <div class="logo-area" (click)="toggleSidebar()" style="cursor: pointer;">
       <div class="logo-wrapper" *ngIf="sidebarOpen">

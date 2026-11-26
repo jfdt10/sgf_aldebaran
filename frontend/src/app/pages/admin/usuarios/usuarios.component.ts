@@ -30,14 +30,12 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     isRestricted = false;
     usuarioLogado: any = null;
 
-    // Modal state
     showModal = false;
     showPasswordResetModal = false;
     showSuccessModal = false;
     successMessage = '';
     isEditing = false;
 
-    // Form Model
     usuarioForm = {
         id: null as number | null,
         nome: '',
@@ -166,7 +164,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
             nome: usu.nome,
             email: usu.email,
             login: usu.login,
-            senha: '', // Senha goes blank on edit unless resetting
+            senha: '',
             perfil: usu.perfil,
             filial_id: usu.filial_id
         };
@@ -203,7 +201,6 @@ export class UsuariosComponent implements OnInit, OnDestroy {
         }
 
         if (this.isEditing) {
-            // Update
             const payload = {
                 nome: this.usuarioForm.nome,
                 email: this.usuarioForm.email,
@@ -222,7 +219,6 @@ export class UsuariosComponent implements OnInit, OnDestroy {
                 error: (err) => alert('Erro ao atualizar: ' + (err.error?.message || 'Erro desconhecido'))
             });
         } else {
-            // Create
             this.api.post('/usuarios', this.usuarioForm).subscribe({
                 next: () => {
                     this.showModal = false;
@@ -236,8 +232,8 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     }
 
     salvarNovaSenha() {
-        if (!this.novaSenhaForm.senha || this.novaSenhaForm.senha.length < 6) {
-            alert('A nova senha deve ter no mínimo 6 caracteres.');
+        if (!this.novaSenhaForm.senha || this.novaSenhaForm.senha.length < 8) {
+            alert('A nova senha deve ter no mínimo 8 caracteres.');
             return;
         }
 

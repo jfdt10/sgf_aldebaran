@@ -28,12 +28,11 @@ export class ClientesComponent implements OnInit, OnDestroy {
   showSuccessModal = false;
   isEditing = false;
 
-  // US-0002 Fields
   clienteForm = {
     id: null as number | null,
     nome: '',
     email: '',
-    tipo: 'PF', // PF ou PJ
+    tipo: 'PF',
     cpf: '',
     cnpj: '',
     telefone: '',
@@ -133,7 +132,7 @@ export class ClientesComponent implements OnInit, OnDestroy {
 
   abrirModalEditar(cliente: any) {
     this.isEditing = true;
-    this.clienteForm = { ...cliente, senha: '' }; // Don't bind password on edit
+    this.clienteForm = { ...cliente, senha: '' };
     if (!this.clienteForm.tipo) this.clienteForm.tipo = (cliente.cnpj) ? 'PJ' : 'PF';
     this.showModal = true;
   }
@@ -151,7 +150,6 @@ export class ClientesComponent implements OnInit, OnDestroy {
   }
 
   salvar() {
-    // Basic validation
     if (!this.clienteForm.nome || !this.clienteForm.email) {
       alert('Nome e E-mail são obrigatórios!');
       return;
@@ -163,7 +161,6 @@ export class ClientesComponent implements OnInit, OnDestroy {
       alert('CNPJ é obrigatório para Pessoa Jurídica.'); return;
     }
 
-    // Build Payload depending on Type to prevent duplicate fields sending
     const payload: any = {
       nome: this.clienteForm.nome,
       email: this.clienteForm.email,
@@ -176,7 +173,6 @@ export class ClientesComponent implements OnInit, OnDestroy {
     if (this.clienteForm.tipo === 'PF') payload.cpf = this.clienteForm.cpf;
     if (this.clienteForm.tipo === 'PJ') payload.cnpj = this.clienteForm.cnpj;
 
-    // Only send password if we are creating and it's filled, if empty Backend uses Default 
     if (!this.isEditing && this.clienteForm.senha) {
       payload.senha = this.clienteForm.senha;
     }

@@ -1,11 +1,10 @@
 $primary: #0099BD;
 $primary-dark: #007A97;
-$bg-light: #F8FAFC; // Um cinza mais claro e moderno
-$text-main: #0F172A; // Um azul escuro quase preto
+$bg-light: #F8FAFC;
+$text-main: #0F172A;
 $text-secondary: #64748B;
 $white: #FFFFFF;
 
-// Cores de status do cliente
 $status-blue: #0ea5e9;
 $status-purple: #8b5cf6;
 $status-orange: #f59e0b;
@@ -23,20 +22,18 @@ $status-gray: #475569;
   flex-direction: column;
 }
 
-/* Header Section */
 .top-header-blue {
   background: linear-gradient(135deg, $primary 0%, $primary-dark 100%);
-  padding: 24px 20px 20px; // Retornando ao compacto padrão
+  padding: 24px 20px 20px;
   color: white;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border-radius: 0; // Removendo o arredondamento para padrão retangular
+  border-radius: 0;
 
-  /* Tabs Bar */
   .tabs-container {
     display: flex;
     max-width: 400px;
     margin: 0 auto;
-    background: rgba(0, 0, 0, 0.15); // Glass effect
+    background: rgba(0, 0, 0, 0.15);
     backdrop-filter: blur(10px);
     border-radius: 16px;
     padding: 6px;
@@ -63,13 +60,12 @@ $status-gray: #475569;
   }
 }
 
-/* Main Content */
 .main-content {
   flex: 1;
   width: 100%;
-  max-width: 680px; // Harmonizado com a página de agendamento
+  max-width: 680px;
   margin: 0 auto;
-  padding: 32px 20px 40px; // Aumentado padding superior para não ter sobreposição
+  padding: 32px 20px 40px;
 }
 
 .feedback-error {
@@ -86,14 +82,13 @@ $status-gray: #475569;
 .appointments-list {
   display: flex;
   flex-direction: column;
-  gap: 16px; // Harmonizado com o padrão do projeto
-  padding-top: 25px; // Espaçamento padrão abaixo do header
+  gap: 16px;
+  padding-top: 25px;
 }
 
-/* Appointment Card */
 .card-appointment {
   background: $white;
-  border-radius: 28px; // Mais arredondado como na imagem
+  border-radius: 28px;
   padding: 25px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
   animation: slideUp 0.4s ease-out;
@@ -212,7 +207,7 @@ $status-gray: #475569;
   .btn-evaluate {
     background: none;
     border: none;
-    color: #F59E0B; // Mais vibrante como na imagem
+    color: #F59E0B;
     font-size: 0.8rem;
     font-weight: 800;
     display: flex;
@@ -273,7 +268,6 @@ $status-gray: #475569;
     }
   }
 
-  // Estilos "Dimmed" para agendamentos que ainda podem ser gerenciados.
   &.confirmado,
   &.aguardando_checkin {
     .btn-outline {
@@ -326,7 +320,6 @@ $status-gray: #475569;
   }
 }
 
-/* Empty State */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -334,14 +327,14 @@ $status-gray: #475569;
   padding: 40px 30px;
   text-align: center;
   background: $white;
-  border-radius: 16px; // Harmonizado com select-wrapper da tela agendar
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); // Harmonizado com shadow-soft
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   border: 1px solid #f1f5f9;
-  margin-top: 0; // Removendo a sobreposição para fluxos sequenciais
+  margin-top: 0;
   animation: slideUp 0.6s ease-out;
 
   .empty-illustration {
-    width: 180px; // Escala reduzida para melhor proporcionalidade
+    width: 180px;
     height: auto;
     margin-bottom: 25px;
     mix-blend-mode: multiply;
@@ -367,7 +360,6 @@ $status-gray: #475569;
   }
 }
 
-/* Skeleton Loading */
 .skeleton-list {
   padding-top: 25px;
 }
@@ -402,7 +394,6 @@ $status-gray: #475569;
   }
 }
 
-/* Floating Action Button */
 .fab-btn {
   position: fixed;
   bottom: 30px;
@@ -425,7 +416,6 @@ $status-gray: #475569;
   &:active { transform: scale(0.95); }
 }
 
-/* Animations */
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
@@ -445,7 +435,7 @@ $status-gray: #475569;
 .animate-pop { animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
 .loading-overlay {
-  display: none; // Removido em favor dos skeletons
+  display: none;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
