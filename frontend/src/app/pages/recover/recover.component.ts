@@ -16,6 +16,7 @@ import { environment } from '../../../environments/environment';
 export class RecoverComponent {
 
   step: 'FORM' | 'SUCCESS' = 'FORM';
+  readonly manualRecovery = environment.production;
   email: string = '';
   carregando: boolean = false;
   erro: boolean = false;

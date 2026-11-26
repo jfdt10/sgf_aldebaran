@@ -272,6 +272,13 @@ export class AgendamentoService {
     };
   }
 
+  async verificarDonoDoAgendamento(clienteId: string, agendamento: { documento: string | null }) {
+    const cliente = await this.buscarClienteAutenticado(clienteId);
+    if (!this.isAgendamentoDoCliente(agendamento, cliente)) {
+      throw new ForbiddenException('Voc? n?o tem permiss?o para acessar este agendamento');
+    }
+  }
+
   async cancelarMeuAgendamento(
     clienteId: string,
     agendamentoId: number,

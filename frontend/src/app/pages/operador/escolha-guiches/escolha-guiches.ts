@@ -337,8 +337,8 @@ export class EscolhaGuiches implements OnInit, OnDestroy {
     }
 
     if (this.operadorForm.senha) {
-      if (this.operadorForm.senha.length < 6) {
-        alert('A nova senha deve ter no mínimo 6 caracteres.');
+      if (this.operadorForm.senha.length < 8) {
+        alert('A nova senha deve ter no mínimo 8 caracteres.');
         return;
       }
       if (this.operadorForm.senha !== this.operadorForm.confirmarSenha) {

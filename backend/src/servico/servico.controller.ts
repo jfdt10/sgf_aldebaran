@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { ServicoService } from './servico.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AccountManagementGuard, StaffGuard } from '../auth/account-role.guards';
 import { LogService } from '../log/log.service';
 import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
@@ -22,7 +23,7 @@ export class ServicoController {
     private readonly logService: LogService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AccountManagementGuard)
   @Post()
   async create(@Body() createServicoDto: any, @Request() req: AuthenticatedRequest) {
     const res = await this.servicoService.create(createServicoDto, req.user.filial_id);
@@ -49,7 +50,7 @@ export class ServicoController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Get()
   findAll(
     @Query('filialId') filialId?: string,
@@ -64,13 +65,13 @@ export class ServicoController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, StaffGuard)
   @Get(':id')
   findOne(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return this.servicoService.findOne(+id, req.user.filial_id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AccountManagementGuard)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -89,7 +90,7 @@ export class ServicoController {
     return res;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AccountManagementGuard)
   @Delete(':id')
   async remove(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     const s = await this.servicoService.findOne(+id, req.user.filial_id);

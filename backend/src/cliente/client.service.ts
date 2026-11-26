@@ -149,6 +149,8 @@ export class ClientService {
           `SELECT id, nome, email, tipo, cpf, cnpj, telefone, "createdAt", "deletedAt", "filial_id"
            FROM clientes
            WHERE "deletedAt" IS NULL
+             AND ($2::integer IS NULL OR filial_id IS NULL OR filial_id = $2)
+             AND ($3::integer IS NULL OR filial_id IS NULL OR filial_id = $3)
              AND (
                unaccent(nome) ILIKE unaccent($1)
                OR unaccent(email) ILIKE unaccent($1)
@@ -157,7 +159,8 @@ export class ClientService {
                OR regexp_replace(COALESCE(telefone, ''), '\\D', '', 'g') ILIKE $2
              )`,
           sqlBusca,
-          sqlDigits
+          sqlDigits,
+          filialId ?? null
         );
       } else {
         query = this.prisma.$queryRawUnsafe<any[]>(
@@ -168,7 +171,8 @@ export class ClientService {
                unaccent(nome) ILIKE unaccent($1)
                OR unaccent(email) ILIKE unaccent($1)
              )`,
-          sqlBusca
+          sqlBusca,
+          filialId ?? null
         );
       }
       return await query;
@@ -197,10 +201,11 @@ export class ClientService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, filialId?: number) {
     const cliente = await this.prisma.clientes.findUnique({
       where: {
-        id
+        id,
+        ...(filialId ? { OR: [{ filial_id: filialId }, { filial_id: null }] } : {}),
       },
       select: {
         id: true,
@@ -219,8 +224,8 @@ export class ClientService {
     return cliente;
   }
 
-  async update(id: string, data: any) {
-    await this.findOne(id);
+  async update(id: string, data: any, filialId?: number) {
+    await this.findOne(id, filialId);
 
     const { cpf, cnpj, email } = data;
 
@@ -241,15 +246,18 @@ export class ClientService {
       );
     }
 
-    const { senha, ...safeData } = data;
-
     const client = await this.prisma.clientes.update({
       where: {
         id
       },
       data: {
-        ...safeData,
-        filial_id: safeData.filial_id ? +safeData.filial_id : undefined,
+        nome: data.nome,
+        email,
+        cpf,
+        cnpj,
+        telefone: data.telefone,
+        tipo: data.tipo,
+        filial_id: filialId ?? (data.filial_id ? +data.filial_id : undefined),
         updatedAt: new Date(),
       },
       select: {
@@ -273,8 +281,8 @@ export class ClientService {
     return client;
   }
 
-  async toggleStatus(id: string) {
-    const cliente = await this.findOne(id);
+  async toggleStatus(id: string, filialId?: number) {
+    const cliente = await this.findOne(id, filialId);
     const isDeleted = !!cliente.deletedAt;
 
     return await this.prisma.clientes.update({
@@ -304,8 +312,8 @@ export class ClientService {
     return { exists: !!existe };
   }
 
-  async resetPassword(id: string, novaSenha: string) {
-    await this.findOne(id);
+  async resetPassword(id: string, novaSenha: string, filialId?: number) {
+    await this.findOne(id, filialId);
     const senhaHash = await bcrypt.hash(novaSenha, 12);
 
     return await this.prisma.clientes.update({

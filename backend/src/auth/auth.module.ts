@@ -14,7 +14,7 @@ import { JwtStrategy } from './jwt.strategy';
     LogModule,
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_SECRET || 'FALLBACK_SECRET_INSEGURO',
+      secret: process.env.JWT_SECRET,
       signOptions: {
         expiresIn: process.env.JWT_EXPIRY
           ? parseInt(process.env.JWT_EXPIRY)
@@ -24,5 +24,6 @@ import { JwtStrategy } from './jwt.strategy';
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
+  exports: [JwtStrategy],
 })
 export class AuthModule {}

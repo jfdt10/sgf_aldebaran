@@ -373,7 +373,7 @@ export class SupervisorDashboardComponent implements OnInit {
       ignorarRegras: true
     };
 
-    this.api.post<any>('/fila/checkin/validar', payload).subscribe({
+    this.api.post<any>('/fila/checkin/operacional', payload).subscribe({
       next: () => {
         this.fecharModalCheckin();
         this.carregarAgendamentos();

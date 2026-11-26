@@ -64,7 +64,7 @@ export class ClientesFormComponent implements OnInit {
 
     this.loading = true;
     const request = this.modoEdicao
-      ? this.api.patch(`/clientes/${this.form.id}`, this.form)
+      ? this.api.put(`/clientes/${this.form.id}`, this.form)
       : this.api.post('/clientes', this.form);
 
     request.subscribe({

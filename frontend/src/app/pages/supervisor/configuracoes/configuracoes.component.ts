@@ -83,7 +83,7 @@ export class SupervisorConfiguracoesComponent implements OnInit {
       nome: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       perfil: ['OPERADOR', Validators.required],
-      senha: ['', Validators.minLength(6)],
+      senha: ['', Validators.minLength(8)],
       confirmarSenha: ['']
     }, { validators: this.senhasIguais });
 
@@ -345,8 +345,8 @@ export class SupervisorConfiguracoesComponent implements OnInit {
     const val = this.novoUsuarioForm.value;
 
     if (!this.isEditingUsuario) {
-      if (!val.senha || val.senha.length < 6) {
-        alert('A senha é obrigatória e deve ter no mínimo 6 caracteres.');
+      if (!val.senha || val.senha.length < 8) {
+        alert('A senha é obrigatória e deve ter no mínimo 8 caracteres.');
         return;
       }
       if (val.senha !== val.confirmarSenha) {
@@ -354,8 +354,8 @@ export class SupervisorConfiguracoesComponent implements OnInit {
         return;
       }
     } else {
-      if (val.senha && val.senha.length < 6) {
-        alert('A senha deve ter no mínimo 6 caracteres.');
+      if (val.senha && val.senha.length < 8) {
+        alert('A senha deve ter no mínimo 8 caracteres.');
         return;
       }
       if (val.senha && val.senha !== val.confirmarSenha) {
@@ -383,7 +383,7 @@ export class SupervisorConfiguracoesComponent implements OnInit {
     };
 
     if (this.isEditingUsuario && this.usuarioEmEdicao) {
-      this.http.patch(`${environment.apiUrl}/usuarios/${this.usuarioEmEdicao.id}`, payload, {
+      this.http.put(`${environment.apiUrl}/usuarios/${this.usuarioEmEdicao.id}`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       }).subscribe({
         next: () => {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificacaoGateway } from './notificacao.gateway';
 
@@ -31,10 +31,7 @@ export class NotificacaoService {
       },
     });
 
-    this.gateway.enviarParaTodos('nova_notificacao', {
-      ...notificacao,
-      servico_id: dados.servico_id,
-    });
+    this.gateway.enviarNotificacao({ ...notificacao, servico_id: dados.servico_id });
 
     return notificacao;
   }
@@ -49,11 +46,13 @@ export class NotificacaoService {
     });
   }
 
-  async marcarComoLida(id: number) {
-    return this.prisma.notificacao.update({
-      where: { id },
+  async marcarComoLida(id: number, usuarioId?: number, clienteId?: string) {
+    const result = await this.prisma.notificacao.updateMany({
+      where: { id, OR: this.buildFiltroDestinatario(usuarioId, clienteId) },
       data: { lida: true },
     });
+    if (!result.count) throw new NotFoundException('Notifica??o n?o encontrada.');
+    return { count: result.count };
   }
 
   async marcarTodasComoLidas(usuario_id?: number, cliente_id?: string) {
@@ -78,9 +77,6 @@ export class NotificacaoService {
       filtros.push({ cliente_id });
     }
 
-    if (!usuario_id && !cliente_id) {
-      filtros.push({ usuario_id: null, cliente_id: null });
-    }
 
     return filtros;
   }

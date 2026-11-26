@@ -400,12 +400,17 @@ export class FilaService {
     });
   }
 
-  async buscarAgendamento(id: number) {
+  async buscarAgendamento(id: number, actor?: AuthenticatedUser) {
     const agendamento = await this.prisma.agendamento.findUnique({
       where: { id },
       include: { servico: true, filial: true },
     });
-    if (!agendamento) throw new NotFoundException();
+    if (!agendamento || (actor?.filial_id && agendamento.filial_id !== actor.filial_id)) {
+      throw new NotFoundException();
+    }
+    if (actor?.tipo === 'CLIENTE') {
+      await this.agendamentoService.verificarDonoDoAgendamento(String(actor.userId), agendamento);
+    }
     return agendamento;
   }
 
@@ -419,7 +424,7 @@ export class FilaService {
       return res;
     }
 
-    await this.buscarAgendamento(id);
+    await this.buscarAgendamento(id, authUser);
     const result = await this.prisma.agendamento.update({
       where: { id },
       data: { status: 'CANCELADO' },
@@ -524,7 +529,7 @@ export class FilaService {
       });
     }
 
-    this.notificacaoGateway.enviarParaTodos('fila_zerada', { filialId: fId });
+    this.notificacaoGateway.avisarFilaZerada(fId);
 
     return { message: 'Fila zerada com sucesso', removidas: deleted.count };
   }
@@ -1641,7 +1646,7 @@ export class FilaService {
   async consultarPosicao(id: number) {
     const senha = await this.prisma.senha.findUnique({
       where: { id },
-      include: { servico: true },
+      select: { id: true, numeroDisplay: true, status: true, servico_id: true },
     });
 
     if (!senha) throw new NotFoundException();

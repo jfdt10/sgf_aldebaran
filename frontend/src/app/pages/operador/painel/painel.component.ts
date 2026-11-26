@@ -990,8 +990,8 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
         }
 
         if (this.operadorForm.senha) {
-            if (this.operadorForm.senha.length < 6) {
-                alert('A nova senha deve ter no mínimo 6 caracteres.');
+            if (this.operadorForm.senha.length < 8) {
+                alert('A nova senha deve ter no mínimo 8 caracteres.');
                 return;
             }
             if (this.operadorForm.senha !== this.operadorForm.confirmarSenha) {
@@ -1190,7 +1190,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
             ignorarRegras: true
         };
 
-        this.api.post<any>('/fila/checkin/validar', payload).subscribe({
+        this.api.post<any>('/fila/checkin/operacional', payload).subscribe({
             next: () => {
                 this.fecharModalCheckin();
                 this.carregarResumos();

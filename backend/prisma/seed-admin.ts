@@ -1,71 +1,39 @@
 import 'dotenv/config';
-import { Pool } from 'pg';
-import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcrypt';
-
-const connectionString = process.env.DATABASE_URL!;
-const isProduction =
-  process.env.NODE_ENV === 'production' ||
-  (!connectionString.includes('localhost') && !connectionString.includes('127.0.0.1'));
-
-const pool = new Pool({
-  connectionString,
-  ssl: isProduction ? { rejectUnauthorized: false } : undefined,
-});
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+import { PrismaService } from '../src/prisma/prisma.service';
 
 async function main() {
-    const adminEmail = 'admin@aldebaran.com';
-    const adminLogin = 'admin';
-    const adminPassword = '123';
+  const login = process.env.ADMIN_LOGIN?.trim() || 'admin';
+  const email = process.env.ADMIN_EMAIL?.trim() || undefined;
+  const password = process.env.ADMIN_PASSWORD;
+  if (!password || password.length < 12 || Buffer.byteLength(password, 'utf8') > 72) {
+    throw new Error('Configure ADMIN_PASSWORD com pelo menos 12 caracteres e at? 72 bytes.');
+  }
 
-    const existingAdmin = await prisma.usuario.findFirst({
-        where: {
-            OR: [
-                { email: adminEmail },
-                { login: adminLogin }
-            ]
-        }
+  const prisma = new PrismaService();
+  try {
+    const existing = await prisma.usuario.findFirst({
+      where: { OR: [{ login }, ...(email ? [{ email }] : [])] },
+      select: { login: true, perfil: true },
     });
-
-    const hashedPassword = await bcrypt.hash(adminPassword, 12);
-
-    if (existingAdmin) {
-        await prisma.usuario.update({
-            where: { id: existingAdmin.id },
-            data: { senha: hashedPassword, perfil: 'ADMIN' }
-        });
-        console.log(`✅ Usuário Admin '${adminLogin}' já existia. A senha foi redefinida para '${adminPassword}'.`);
+    if (existing) {
+      if (existing.login === login && existing.perfil === 'ADMIN') {
+        console.log('O administrador j? existe.');
         return;
+      }
+      throw new Error('Login ou e-mail j? est? em uso.');
     }
 
-    const admin = await prisma.usuario.create({
-        data: {
-            nome: 'Administrador Master',
-            email: adminEmail,
-            login: adminLogin,
-            senha: hashedPassword,
-            perfil: 'ADMIN',
-            ativo: true
-        }
+    await prisma.usuario.create({
+      data: { login, email, senha: await bcrypt.hash(password, 12), nome: 'Administrador', perfil: 'ADMIN' },
     });
-
-    console.log('🚀 Usuário Admin criado com sucesso!');
-    console.log('==================================');
-    console.log(` Login: ${adminLogin} `);
-    console.log(` Senha: ${adminPassword} `);
-    console.log(` E-mail: ${adminEmail} `);
-    console.log('==================================');
+    console.log('Administrador criado.');
+  } finally {
+    await prisma.onModuleDestroy();
+  }
 }
 
-main()
-    .catch(e => {
-        console.error('❌ Erro ao criar Admin:', e);
-        process.exit(1);
-    })
-    .finally(async () => {
-        await prisma.$disconnect();
-        await pool.end();
-    });
+main().catch(() => {
+  console.error('Falha ao criar administrador. Verifique a configura??o e a disponibilidade do banco.');
+  process.exitCode = 1;
+});

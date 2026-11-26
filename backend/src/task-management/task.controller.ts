@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Req, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AdminGuard } from '../auth/account-role.guards';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 import { LogService } from '../log/log.service';
 
 @Controller('task-items')
+@UseGuards(JwtAuthGuard, AdminGuard)
 export class TaskController {
   constructor(
     private readonly taskService: TaskService,

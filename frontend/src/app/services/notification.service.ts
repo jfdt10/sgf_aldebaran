@@ -22,6 +22,7 @@ export interface Notificacao {
 })
 export class NotificationService {
   private socket: Socket;
+  private socketToken?: string;
   private notificationsSubject = new BehaviorSubject<Notificacao[]>([]);
   public notifications$ = this.notificationsSubject.asObservable();
 
@@ -29,7 +30,7 @@ export class NotificationService {
     private api: ApiService,
     private ngZone: NgZone
   ) {
-    this.socket = io(environment.apiUrl);
+    this.socket = io(environment.apiUrl, { autoConnect: false });
 
     this.socket.on('connect', () => {
       this.ngZone.run(() => {
@@ -82,6 +83,7 @@ export class NotificationService {
   private isClientSession(): boolean {
     if (typeof window !== 'undefined' && window.location && window.location.pathname) {
       const path = window.location.pathname;
+      if (/^\/(admin|supervisor|operador|totem)(\/|$)/.test(path)) return false;
       if (path.includes('/client') || path.includes('/mobile')) {
         return true;
       }
@@ -111,6 +113,16 @@ export class NotificationService {
   }
 
   fetchNotifications(usuario_id?: number | string) {
+    const token = this.isClientSession()
+      ? localStorage.getItem('client_token') || localStorage.getItem('token')
+      : localStorage.getItem('token');
+    if (token && (token !== this.socketToken || !this.socket.active)) {
+      this.socket.disconnect();
+      this.socketToken = token;
+      this.socket.auth = { token };
+      this.socket.connect();
+      this.notificationsSubject.next([]);
+    }
     let resolvedId = usuario_id;
     if (!resolvedId && this.isClientSession()) {
       resolvedId = localStorage.getItem('usuario_id') || '';

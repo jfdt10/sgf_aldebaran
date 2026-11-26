@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { allowApplicationOrigin } from './common/cors';
 
 if (!global.crypto) {
   global.crypto = require('crypto');
@@ -27,10 +28,14 @@ async function bootstrap() {
     console.log('💡 Usando adaptador WebSocket padrão (In-memory)');
   }
 
+  app.use((_, response, next) => {
+    response.setHeader('X-Content-Type-Options', 'nosniff');
+    next();
+  });
+
   app.enableCors({
-    origin: true,
+    origin: allowApplicationOrigin,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true,
   });
 
   app.useGlobalPipes(

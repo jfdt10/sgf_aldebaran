@@ -9,11 +9,12 @@ import {
 } from '@nestjs/common';
 import { ConfiguracaoService } from './configuracao.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AccountManagementGuard, StaffGuard } from '../auth/account-role.guards';
 import { LogService } from '../log/log.service';
 import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
 @Controller('configuracoes')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, StaffGuard)
 export class ConfiguracaoController {
   constructor(
     private readonly configuracaoService: ConfiguracaoService,
@@ -25,6 +26,7 @@ export class ConfiguracaoController {
     return this.configuracaoService.findAllList(filialId, req?.user?.filial_id);
   }
 
+  @UseGuards(AccountManagementGuard)
   @Post('bulk')
   async updateBulk(
     @Request() req: AuthenticatedRequest,
@@ -43,6 +45,7 @@ export class ConfiguracaoController {
     return res;
   }
 
+  @UseGuards(AccountManagementGuard)
   @Post('calibrar-sla')
   async calibrarSla(
     @Request() req: AuthenticatedRequest,
@@ -50,6 +53,7 @@ export class ConfiguracaoController {
   ) {
     return this.configuracaoService.calibrarSla({
       ...body,
+      filialId: req.user.filial_id ?? body.filialId,
       usuarioId: req.user.userId,
     });
   }

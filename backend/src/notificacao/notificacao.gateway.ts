@@ -6,6 +6,9 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { allowApplicationOrigin } from '../common/cors';
+import { JwtService } from '@nestjs/jwt';
+import { JwtStrategy } from '../auth/jwt.strategy';
 
 export interface TicketCallPayload {
   ticketId: string;
@@ -16,21 +19,35 @@ export interface TicketCallPayload {
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: allowApplicationOrigin,
   },
 })
 export class NotificacaoGateway
   implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(private readonly jwt: JwtService, private readonly strategy: JwtStrategy) {}
+
   @WebSocketServer()
   server: Server;
 
-  handleConnection(client: Socket) {
+  async handleConnection(client: Socket) {
     const token = client.handshake.auth?.token;
-
     if (token && token !== process.env.WS_SECRET_TOKEN) {
-      console.warn(`[Security] WS: Token inválido de ${client.id}`);
-      client.disconnect(true);
-      return;
+      try {
+        const payload = await this.jwt.verifyAsync(token, { algorithms: ['HS256'] });
+        const user = await this.strategy.validate(payload);
+        if (typeof user.userId === 'string') {
+          await client.join('notification:client:' + user.userId);
+        } else if (['ADMIN', 'SUPERVISOR', 'OPERADOR'].includes(user.perfil)) {
+          await client.join(['notification:staff', 'notification:user:' + user.userId]);
+        }
+        const remaining = Number(payload.exp) * 1000 - Date.now();
+        const expiry = setTimeout(() => client.disconnect(true), Math.max(0, Math.min(remaining, 2_147_483_647)));
+        client.once('disconnect', () => clearTimeout(expiry));
+        return;
+      } catch {
+        client.disconnect(true);
+        return;
+      }
     }
 
     const panelType = client.handshake.query?.panelType as string;
@@ -74,10 +91,16 @@ export class NotificacaoGateway
     }
   }
 
-  enviarParaTodos(evento: string, data: any) {
-    if (this.server) {
-      this.server.emit(evento, data);
-    }
+  enviarNotificacao(data: { usuario_id: number | null; cliente_id: string | null; servico_id?: number }) {
+    const rooms: string[] = [];
+    if (data.cliente_id) rooms.push('notification:client:' + data.cliente_id);
+    if (data.usuario_id) rooms.push('notification:user:' + data.usuario_id);
+    if (!rooms.length) rooms.push('notification:staff');
+    this.server?.to(rooms).emit('nova_notificacao', data);
+  }
+
+  avisarFilaZerada(filialId: number | null) {
+    this.server?.emit('fila_zerada', { filialId });
   }
 
   public broadcastRefresh() {

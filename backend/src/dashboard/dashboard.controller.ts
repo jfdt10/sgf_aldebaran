@@ -1,54 +1,58 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Request, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AccountManagementGuard } from '../auth/account-role.guards';
+import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 import { DashboardService } from './dashboard.service';
 
 @Controller('dashboard')
+@UseGuards(JwtAuthGuard, AccountManagementGuard)
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
   @Get('metrics')
-  getMetrics(@Query('filialId') filialId: string) {
-    return this.dashboardService.getMetrics(filialId);
+  getMetrics(@Request() req: AuthenticatedRequest, @Query('filialId') filialId: string) {
+    return this.dashboardService.getMetrics((req.user.filial_id?.toString() ?? filialId));
   }
 
   @Get('relatorios')
-  getRelatorios(
+  getRelatorios(@Request() req: AuthenticatedRequest,
     @Query('periodo') periodo: string,
     @Query('filialId') filialId: string,
   ) {
-    return this.dashboardService.getRelatorios(periodo || 'mes', filialId);
+    return this.dashboardService.getRelatorios(periodo || 'mes', (req.user.filial_id?.toString() ?? filialId));
   }
 
   @Get('supervisor')
-  getSupervisorOverview(
+  getSupervisorOverview(@Request() req: AuthenticatedRequest,
     @Query('filialId') filialId: string,
     @Query('data') data?: string,
   ) {
-    return this.dashboardService.getSupervisorOverview(filialId, data);
+    return this.dashboardService.getSupervisorOverview((req.user.filial_id?.toString() ?? filialId), data);
   }
 
   @Get('graficos-por-hora')
-  getGraficosPorHora(
+  getGraficosPorHora(@Request() req: AuthenticatedRequest,
     @Query('periodo') periodo: string,
     @Query('filialId') filialId: string,
   ) {
-    return this.dashboardService.getGraficosPorHora(periodo || 'dia', filialId);
+    return this.dashboardService.getGraficosPorHora(periodo || 'dia', (req.user.filial_id?.toString() ?? filialId));
   }
 
   @Get('operadores')
-  getDesempenhoOperadores(
+  getDesempenhoOperadores(@Request() req: AuthenticatedRequest,
     @Query('periodo') periodo: string,
     @Query('filialId') filialId: string,
   ) {
-    return this.dashboardService.getDesempenhoOperadores(periodo || 'dia', filialId);
+    return this.dashboardService.getDesempenhoOperadores(periodo || 'dia', (req.user.filial_id?.toString() ?? filialId));
   }
 
   @Get('meses-disponiveis')
-  getMesesDisponiveis(@Query('filialId') filialId: string) {
-    return this.dashboardService.getMesesDisponiveis(filialId);
+  getMesesDisponiveis(@Request() req: AuthenticatedRequest, @Query('filialId') filialId: string) {
+    return this.dashboardService.getMesesDisponiveis((req.user.filial_id?.toString() ?? filialId));
   }
 
   @Get('fila-espera')
-  getFilaEspera(@Query('filialId') filialId: string) {
-    return this.dashboardService.getFilaEspera(filialId);
+  getFilaEspera(@Request() req: AuthenticatedRequest, @Query('filialId') filialId: string) {
+    return this.dashboardService.getFilaEspera((req.user.filial_id?.toString() ?? filialId));
   }
 }
