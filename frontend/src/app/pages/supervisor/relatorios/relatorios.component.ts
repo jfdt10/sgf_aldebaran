@@ -16,10 +16,10 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 export interface GraficoHora {
-  horaLabel: string;     // e.g. "08:00"
-  historicoFila: number; // contagem de atendimentos
-  tempoEsperaMedio: number;      // minutos
-  tempoAtendimentoMedio: number; // minutos
+  horaLabel: string;
+  historicoFila: number;
+  tempoEsperaMedio: number;
+  tempoAtendimentoMedio: number;
 }
 
 export interface OperadorDesempenho {
@@ -28,8 +28,8 @@ export interface OperadorDesempenho {
   iniciais: string;
   avatarColor: string;
   totalAtendidos: number;
-  avgServiceTimeStr: string; // "MM:SS"
-  efficiency: number;        // 0–100
+  avgServiceTimeStr: string;
+  efficiency: number;
 }
 
 @Component({
@@ -64,16 +64,13 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
   justificativaForm: FormGroup;
   selectedTicket: any = null;
 
-  // Dados dos gráficos por hora — preenchidos pela API
   graficosPorHora: GraficoHora[] = [];
   maxHistoricoFila = 0;
   maxTempoEspera = 0;
   maxTempoAtendimento = 0;
 
-  // Horário de pico calculado a partir dos dados
   horarioPico = '—';
 
-  // KPIs
   totalAtendidos = 0;
   tempoMedioEsperaGeral = 0;
   mediaAtendimentoMinutos = 0;
@@ -85,10 +82,8 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
   
   private callsPending = 0;
 
-  // Período ativo para os filtros (pode ser 'hoje', 'semana', 'mes', ou 'YYYY-MM')
   periodoAtivo: string = 'hoje';
 
-  // Tempo médio calculado a partir do backend
   tempoMedioAtendimentoStr = '0 min';
 
   selectedFilialId: number | null = null;
@@ -96,7 +91,7 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
 
   operadores: OperadorDesempenho[] = [];
   carregandoOperadores = false;
-  categorias: any[] = []; // Variável para armazenar as categorias
+  categorias: any[] = [];
 
   insights: any[] = [];
 
@@ -130,7 +125,6 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
       this.carregarTudo();
     });
 
-    // Atualização a cada 5 segundos (constante)
     this.updateTimer = setInterval(() => {
       this.carregarTudo();
     }, 5000);
@@ -182,11 +176,9 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Dispara todas as chamadas de API em paralelo */
   carregarTudo() {
     this.carregarMesesDisponiveis();
     
-    // Total of 5 async methods that affect insights
     this.callsPending = 5;
     this.carregarDadosApi();
     this.carregarGraficosPorHora();
@@ -224,7 +216,6 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
     const filialParam = this.selectedFilialId ? `?filialId=${this.selectedFilialId}` : '';
     const token = localStorage.getItem('token') || '';
 
-    // Chamada dupla para filaAtual e guichesAtivos
     this.http.get<any>(`${this.apiUrl}/supervisor-overview${filialParam}`, { headers: { Authorization: `Bearer ${token}` } }).subscribe({
       next: (res) => {
         if (res && res.kpis) {
@@ -245,7 +236,6 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Formats a minutes value: shows seconds if < 1 min, otherwise minutes */
   private formatarMinutos(minutos: number): string {
     if (minutos < 1) {
       return `${Math.round(minutos * 60)} seg`;
@@ -256,12 +246,10 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
   calcularInsights() {
     const novosInsights: any[] = [];
 
-    // 7. Dia/período sem movimento
     if (this.totalAtendidos === 0) {
       novosInsights.push({ text: 'ℹ️ Nenhum atendimento registrado no período selecionado.', type: 'gray', severidade: 5 });
     } else {
 
-      // 1. Alta demanda por horário
       if (this.graficosPorHora.length > 0) {
         const mediaHoraria = this.totalAtendidos / this.graficosPorHora.length;
         const pico = this.graficosPorHora.reduce((acc, cur) => cur.historicoFila > acc.historicoFila ? cur : acc);
@@ -271,36 +259,30 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
            novosInsights.push({ text: `⚠️ Alta demanda detectada entre ${pico.horaLabel}-${horaFim}:00. Considere alocar mais operadores nesse horário.`, type: 'red', severidade: 1 });
         }
 
-        // 8. Pico fora do horário comercial
         const horaPico = parseInt(this.horarioPico.split(':')[0], 10);
         if (!isNaN(horaPico) && (horaPico < 8 || horaPico >= 18)) {
            novosInsights.push({ text: `⚠️ Pico de atendimentos fora do horário comercial (${this.horarioPico}). Revisar escala.`, type: 'yellow', severidade: 2 });
         }
       }
 
-      // 2. Operadores com baixa eficiência
       const opsBaixaEficiencia = this.operadores.filter(op => op.efficiency < this.eficienciaMinima);
       if (opsBaixaEficiencia.length > 0) {
         novosInsights.push({ text: `⚠️ ${opsBaixaEficiencia.length} operador(es) com eficiência abaixo de ${this.eficienciaMinima}%. Revisar processos.`, type: 'yellow', severidade: 2 });
       }
 
-      // 6. Operador destaque
       const opDestaque = this.operadores.filter(op => op.efficiency >= 95).sort((a, b) => b.totalAtendidos - a.totalAtendidos)[0];
       if (opDestaque && opDestaque.totalAtendidos > 0) {
         novosInsights.push({ text: `⭐ Operador ${opDestaque.nome} se destacou com ${opDestaque.totalAtendidos} atendimentos e ${opDestaque.efficiency}% de eficiência.`, type: 'green', severidade: 4 });
       }
 
-      // 3. Fila crescendo sem operadores disponíveis
       if (this.filaAtual > 10 && this.guichesAtivos > 0) {
         novosInsights.push({ text: `⚠️ Fila elevada com todos os guichês ocupados. Considere abrir mais guichês.`, type: 'red', severidade: 1 });
       }
 
-      // 4. Tempo médio de atendimento acima do normal
       if (this.mediaAtendimentoMinutos > this.historicoAtendimentoMinutos * 1.3 && this.historicoAtendimentoMinutos > 0) {
         novosInsights.push({ text: `📈 Tempo médio de atendimento acima do histórico. Verifique gargalos operacionais.`, type: 'yellow', severidade: 2 });
       }
 
-      // 5. Categoria com maior tempo de espera
       if (this.categorias.length > 0) {
          const piorCat = this.categorias.reduce((acc, cur) => cur.avgEsperaMins > acc.avgEsperaMins ? cur : acc);
          if (piorCat.avgEsperaMins > 0) {
@@ -313,7 +295,6 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
       novosInsights.push({ text: '✅ Nenhum alerta para o período selecionado.', type: 'green', severidade: 4 });
     }
 
-    // Ordenar por severidade (1 = max, 5 = min)
     novosInsights.sort((a, b) => a.severidade - b.severidade);
     this.insights = novosInsights;
     this.cdr.detectChanges();
@@ -321,7 +302,7 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
 
   carregarDadosApi() {
     const periodMap: Record<string, string> = { hoje: 'dia', semana: 'semana', mes: 'mes' };
-    const p = periodMap[this.periodoAtivo] || this.periodoAtivo; // Se não estiver no map, envia a string crua ('YYYY-MM')
+    const p = periodMap[this.periodoAtivo] || this.periodoAtivo;
     const filialParam = this.selectedFilialId ? `&filialId=${this.selectedFilialId}` : '';
     const token = localStorage.getItem('token') || '';
 
@@ -361,12 +342,10 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.graficosPorHora = res.graficos || [];
 
-        // Calcula os máximos para normalizar as alturas das barras
         this.maxHistoricoFila = Math.max(1, ...this.graficosPorHora.map(g => g.historicoFila));
         this.maxTempoEspera = Math.max(1, ...this.graficosPorHora.map(g => g.tempoEsperaMedio));
         this.maxTempoAtendimento = Math.max(1, ...this.graficosPorHora.map(g => g.tempoAtendimentoMedio));
 
-        // Horário de pico = hora com mais atendimentos
         if (this.graficosPorHora.length > 0) {
           const pico = this.graficosPorHora.reduce((acc, cur) =>
             cur.historicoFila > acc.historicoFila ? cur : acc
@@ -413,9 +392,8 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Retorna a altura percentual de uma barra para CSS */
   getAlturaBarra(valor: number, max: number): string {
-    if (!max || max === 0 || !valor) return '4px'; // mínimo visual 4px
+    if (!max || max === 0 || !valor) return '4px';
     const percent = Math.max(4, Math.floor((valor / max) * 100));
     return `${percent}%`;
   }
@@ -452,7 +430,6 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
     const dataGeracao = today.toLocaleDateString('pt-BR');
     const horaGeracao = today.toLocaleTimeString('pt-BR');
     
-    // Título dinâmico
     let tituloStr = '';
     let nomeArquivo = `relatorio_`;
     
@@ -473,7 +450,6 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
       nomeArquivo += `${this.periodoAtivo}_${dataGeracao.replace(/\//g, '-')}.pdf`;
     }
     
-    // Cabeçalho
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
     doc.text('Aldebaran - Sistema de Gestao de Filas', 14, 20);
@@ -484,7 +460,6 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
     doc.text(`Periodo: ${tituloStr}`, 14, 34);
     doc.text(`Gerado em: ${dataGeracao} as ${horaGeracao}`, 14, 40);
     
-    // 2. Resumo Geral
     doc.setFontSize(13);
     doc.setFont("helvetica", "bold");
     doc.text('Resumo Geral', 14, 52);
@@ -499,10 +474,9 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
         this.horarioPico
       ]],
       theme: 'grid',
-      headStyles: { fillColor: [13, 148, 136] } // teal-600
+      headStyles: { fillColor: [13, 148, 136] }
     });
     
-    // 3. Desempenho por Categoria
     let finalY = (doc as any).lastAutoTable.finalY || 56;
     
     doc.setFontSize(13);
@@ -525,7 +499,6 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
     
     finalY = (doc as any).lastAutoTable.finalY;
     
-    // 4. Desempenho dos Operadores
     doc.text('Desempenho dos Operadores', 14, finalY + 12);
     
     const opBody = this.operadores.map(op => [

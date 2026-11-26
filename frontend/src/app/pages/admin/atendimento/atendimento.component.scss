@@ -38,7 +38,6 @@
   }
 }
 
-/* Central Station: Left */
 .station-card {
   background: var(--bg-card);
   border-radius: 20px;
@@ -128,7 +127,6 @@
   }
 }
 
-/* Active Attendance Station */
 .active-atend {
   flex: 1;
   display: flex;
@@ -175,7 +173,6 @@
   }
 }
 
-/* Side Info: Right */
 .side-info {
   display: flex;
   flex-direction: column;

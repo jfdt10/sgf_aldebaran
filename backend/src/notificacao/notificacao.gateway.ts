@@ -7,7 +7,6 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-// Tipagem estrita do Payload
 export interface TicketCallPayload {
   ticketId: string;
   category: string;
@@ -17,7 +16,7 @@ export interface TicketCallPayload {
 
 @WebSocketGateway({
   cors: {
-    origin: '*', // Em produção, restringir ao painel
+    origin: '*',
   },
 })
 export class NotificacaoGateway
@@ -25,20 +24,15 @@ export class NotificacaoGateway
   @WebSocketServer()
   server: Server;
 
-  /**
-   * Validação e Inscrição em Salas (Rooms).
-   */
   handleConnection(client: Socket) {
     const token = client.handshake.auth?.token;
 
-    // Simulação de segurança (No fluxo real, validar JWT)
     if (token && token !== process.env.WS_SECRET_TOKEN) {
       console.warn(`[Security] WS: Token inválido de ${client.id}`);
       client.disconnect(true);
       return;
     }
 
-    // Identifica o tipo de painel via query string
     const panelType = client.handshake.query?.panelType as string;
 
     if (panelType === 'DOCA') {
@@ -58,10 +52,6 @@ export class NotificacaoGateway
     console.log(`[WS] Terminal desconectado: ${client.id}`);
   }
 
-  /**
-   * Roteamento de Habilidade (Skill-based Routing).
-   * Dispara apenas para os painéis interessados na categoria.
-   */
   public broadcastTicket(payload: TicketCallPayload) {
     const normalizedCategory = (payload.category || '')
       .normalize('NFD')
@@ -76,7 +66,6 @@ export class NotificacaoGateway
       normalizedCategory.includes('DOCA') ||
       normalizedCategory.includes('BAIA');
 
-    // Roteamento condicional
     const targetRoom = isHeavyLoad ? 'room_docas' : 'room_saguao';
 
     if (this.server) {
@@ -91,9 +80,6 @@ export class NotificacaoGateway
     }
   }
 
-  /**
-   * Força os terminais a apenas recarregarem a lista sem disparar alarmes.
-   */
   public broadcastRefresh() {
     if (this.server) {
       this.server.to('room_general').emit('ticket_called', null);

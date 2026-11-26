@@ -21,7 +21,6 @@ async function main() {
     const adminLogin = 'admin';
     const adminPassword = '123';
 
-    // Verifica se já existe
     const existingAdmin = await prisma.usuario.findFirst({
         where: {
             OR: [
@@ -31,7 +30,6 @@ async function main() {
         }
     });
 
-    // Gera o hash da senha
     const hashedPassword = await bcrypt.hash(adminPassword, 12);
 
     if (existingAdmin) {

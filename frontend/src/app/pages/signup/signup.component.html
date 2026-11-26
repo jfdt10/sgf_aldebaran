@@ -51,7 +51,6 @@
 
         <form (ngSubmit)="criar()">
 
-          <!-- Pessoa Física -->
           <ng-container *ngIf="tipo === 'PF'">
             <div class="input-group" [class.has-error]="erros['nome']">
               <label>NOME COMPLETO</label>
@@ -82,7 +81,6 @@
             </div>
           </ng-container>
 
-          <!-- Pessoa Jurídica -->
           <ng-container *ngIf="tipo === 'PJ'">
             <div class="input-group" [class.has-error]="erros['razao']">
               <label>RAZÃO SOCIAL</label>
@@ -113,7 +111,6 @@
             </div>
           </ng-container>
 
-          <!-- Campos comuns -->
           <div class="input-group" [class.has-error]="erros['email']">
             <label>E-MAIL</label>
             <div class="input-wrapper">

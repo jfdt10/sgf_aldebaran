@@ -34,7 +34,6 @@ export class CronService {
       const localMinStr = localTime.getMinutes().toString().padStart(2, '0');
       const localTimeStr = `${localHourStr}:${localMinStr}`;
 
-      // Reset diario (exclui/cancela senhas pendentes com inatividade >= 30 min)
       if (localTimeStr === horarioReset) {
         this.logger.log(
           `[CronService] Iniciando reset diário para filial ${filial.nome} (${filial.id}) às ${horarioReset} no fuso ${timezone}...`,
@@ -80,7 +79,6 @@ export class CronService {
         }
       }
 
-      // Timeout de chamada excedida (CHAMADO -> NAO_COMPARECEU)
       const chamados = await this.prisma.senha.findMany({
         where: {
           filial_id: filial.id,

@@ -172,7 +172,6 @@
           </div>
         </div>
 
-        <!-- Mensagens de UX Progressiva de Check-in -->
         <div class="checkin-ux-alert too-early" *ngIf="!voucher.checkinRealizado && !ticket && checkinStatus === 'too-early'">
           <lucide-icon [img]="icons.clock" size="18"></lucide-icon>
           <span>Seu check-in será liberado em <strong>{{ minutosParaLiberar }}</strong>.</span>

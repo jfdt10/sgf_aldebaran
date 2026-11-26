@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Mail, Lock } from 'lucide-angular';
-// Importe o Service que conecta no Backend
 import { ClientAuthService } from '../../../services/client-auth.service';
 
 @Component({
@@ -21,12 +20,11 @@ export class ClientLoginComponent {
 
   constructor(
     private router: Router,
-    private authService: ClientAuthService, // Injeção do Service
-    private cd: ChangeDetectorRef // Para atualizar a tela se precisar
+    private authService: ClientAuthService,
+    private cd: ChangeDetectorRef
   ) {}
 
   fazerLogin() {
-    // Validação básica
     if (!this.email || !this.senha) {
       alert('Preencha e-mail e senha.');
       return;
@@ -34,12 +32,10 @@ export class ClientLoginComponent {
 
     this.carregando = true;
 
-    // Chamada REAL ao Backend
     this.authService.login(this.email, this.senha).subscribe({
       next: (res: any) => {
         this.carregando = false;
         
-        // Salva o token
         if (res.access_token) {
            localStorage.setItem('client_token', res.access_token);
            if (res.user) {
@@ -53,7 +49,6 @@ export class ClientLoginComponent {
            }
         }
 
-        // Redireciona para a Home (conforme criamos no passo anterior)
         this.router.navigate(['/client/home']);
         
         this.cd.detectChanges();

@@ -51,7 +51,6 @@ export class UsuarioService {
       },
     });
 
-    // Criar notificação para novo operador
     if (novoUsuario.perfil === 'OPERADOR') {
       await this.notificacaoService.criar({
         titulo: 'Novo operador cadastrado',
@@ -133,11 +132,10 @@ export class UsuarioService {
   }
 
   async update(id: number, dados: any, requestingUserFilialId?: number) {
-    await this.findOne(id, requestingUserFilialId); // Check existence and permission
+    await this.findOne(id, requestingUserFilialId);
 
     const { login, email } = dados;
 
-    // Check if login or email is already taken by another user
     const existe = await this.prisma.usuario.findFirst({
       where: {
         id: { not: id },
@@ -173,7 +171,6 @@ export class UsuarioService {
       },
     });
 
-    // Notificação de alteração de usuário
     await this.notificacaoService.criar({
       titulo: 'Usuário Atualizado',
       mensagem: `Dados do usuário ${usuario.nome} foram alterados.`,

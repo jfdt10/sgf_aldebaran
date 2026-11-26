@@ -23,7 +23,6 @@ export interface Ticket {
 export class TotemService {
   private apiUrl = `${environment.apiUrl}/fila`;
 
-  // MUDANÇA: Agora guardamos o TIPO, não a categoria
   private tipoSelecionado: string = '';
 
   constructor(
@@ -32,14 +31,12 @@ export class TotemService {
     private configService: TotemConfigService
   ) { }
 
-  // PASSO 1: Guarda o TIPO (Preferencial/Convencional) e vai para Categorias
   escolherTipo(tipo: string) {
     if (!environment.production) console.log('1. Tipo selecionado:', tipo);
     this.tipoSelecionado = tipo;
     this.router.navigate(['/totem/categoria']);
   }
 
-  // PASSO 2: Recebe a CATEGORIA, junta com o TIPO e gera a senha
   solicitarSenha(categoria: string, categoriaId?: number, qtdeGarrafoes: number = 0) {
     if (!this.tipoSelecionado) {
       alert('Erro: Fluxo incorreto. Voltando ao inÃcio.');

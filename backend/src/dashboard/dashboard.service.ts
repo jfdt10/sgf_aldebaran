@@ -158,7 +158,6 @@ export class DashboardService {
 
     const atendimentosRecentes = todosAtendimentos.slice(0, 20);
 
-    // Agrupar por categoria (serviço)
     const metricasPorCategoria = new Map<number, {
       nome: string;
       cor: string;
@@ -171,7 +170,6 @@ export class DashboardService {
 
     for (const a of todosAtendimentos) {
       if (!a.senha || !a.senha.servico) continue;
-      // Conta apenas finalizados
       if (!a.fimAtendimento) continue;
 
       const servico = a.senha.servico;
@@ -180,7 +178,7 @@ export class DashboardService {
       if (!metricasPorCategoria.has(id)) {
         metricasPorCategoria.set(id, {
           nome: servico.nome,
-          cor: servico.cor || '#14b8a6', // Fallback color
+          cor: servico.cor || '#14b8a6',
           totalAtendidos: 0,
           somaEsperaMinutos: 0,
           somaAtendimentoMinutos: 0,
@@ -221,7 +219,6 @@ export class DashboardService {
       };
     }).sort((a, b) => b.totalAtendidos - a.totalAtendidos);
 
-    // --- Média Histórica (Últimos 30 dias) ---
     const data30DiasAtras = new Date();
     data30DiasAtras.setDate(data30DiasAtras.getDate() - 30);
     const historico30 = await this.prisma.atendimento.findMany({
@@ -263,10 +260,6 @@ export class DashboardService {
     };
   }
 
-  /**
-   * Agrupa os atendimentos do período por hora do dia.
-   * Retorna para cada hora: quantidade, tempo médio de espera, tempo médio de atendimento.
-   */
   async getGraficosPorHora(periodo: string, filialId?: string) {
     const fid = filialId && !isNaN(+filialId) ? +filialId : undefined;
     const { dataInicio, dataFim } = this.parsePeriodo(periodo);
@@ -340,7 +333,6 @@ export class DashboardService {
     const targetDateStr = startOfTarget.toISOString().split('T')[0];
     const fid = filialId && !isNaN(+filialId) ? +filialId : undefined;
 
-    // Atendimentos no dia de referência
     const todosAtendimentos = await this.prisma.atendimento.findMany({
       where: {
         inicioAtendimento: {
@@ -446,7 +438,6 @@ export class DashboardService {
         alertaSla: tAtendMin > metaEspera || atendimentosQueue.some(s => Math.floor((new Date().getTime() - s.dataCriacao.getTime()) / 60000) > metaEspera),
       },
       agendamentos: agendamentos.map((a) => {
-        // Map the generated ticket display number if checked in, else fallback to a.codigo
         const activeTicket = a.senha && a.senha.length > 0 ? a.senha[a.senha.length - 1] : null;
         return {
           id: a.id,
@@ -485,18 +476,10 @@ export class DashboardService {
     };
   }
 
-  /**
-   * Calcula o desempenho de cada operador no período informado.
-   * Usa atendimento.operadorId (gravado no momento do encerramento) para
-   * associar cada atendimento ao seu operador real. Atendimentos sem
-   * operadorId (histórico anterior à feature ou atendimentos em andamento)
-   * são ignorados neste cálculo.
-   */
   async getDesempenhoOperadores(periodo: string, filialId?: string) {
     const fid = filialId && !isNaN(+filialId) ? +filialId : undefined;
     const { dataInicio, dataFim } = this.parsePeriodo(periodo);
 
-    // Busca somente atendimentos CONCLUÍDOS no período, com operadorId preenchido
     const atendimentos = await this.prisma.atendimento.findMany({
       where: {
         fimAtendimento: { gte: dataInicio, ...(dataFim ? { lt: dataFim } : {}) },
@@ -520,8 +503,6 @@ export class DashboardService {
     });
 
     if (atendimentos.length === 0) {
-      // Fallback: tenta a resolução via guiche.operadorAtualId para atendimentos
-      // históricos sem operadorId (antes da feature ser implantada)
       return this.getDesempenhoOperadoresFallback(periodo, fid, dataInicio, dataFim);
     }
 
@@ -539,7 +520,6 @@ export class DashboardService {
       '#ef4444', '#22c55e', '#6366f1', '#ec4899',
     ];
 
-    // Calcula média geral do período para referência de eficiência
     let somaGeralMinutos = 0;
     for (const a of atendimentos) {
       const dur = (new Date(a.fimAtendimento!).getTime() - new Date(a.inicioAtendimento).getTime()) / 60000;
@@ -547,7 +527,6 @@ export class DashboardService {
     }
     const mediaGeralMinutos = atendimentos.length > 0 ? somaGeralMinutos / atendimentos.length : 0;
 
-    // Agrega métricas por operadorId
     const metricasPorOp = new Map<number, {
       somaMinutos: number;
       totalCompletados: number;
@@ -605,10 +584,6 @@ export class DashboardService {
     return { operadores: resultado };
   }
 
-  /**
-   * Fallback para atendimentos históricos sem operadorId.
-   * Usa a mesma lógica antiga (sessão + operadorAtualId do guichê).
-   */
   private async getDesempenhoOperadoresFallback(periodo: string, fid: number | undefined, dataInicio: Date, dataFim?: Date) {
     const atendimentos = await this.prisma.atendimento.findMany({
       where: {
@@ -724,16 +699,12 @@ export class DashboardService {
     return { operadores: resultado };
   }
 
-  /**
-   * Helper para interpretar o parâmetro 'periodo' que pode ser "hoje", "semana", "mes" ou "YYYY-MM".
-   * Retorna os filtros de data gte (inclusive) e opcionalmente lt (exclusivo).
-   */
   private parsePeriodo(periodo: string): { dataInicio: Date; dataFim?: Date } {
     const now = new Date();
     const dataInicio = new Date();
     let dataFim: Date | undefined;
 
-    if (/^\d{4}-\d{2}$/.test(periodo)) { // Formato YYYY-MM
+    if (/^\d{4}-\d{2}$/.test(periodo)) {
       const [ano, mes] = periodo.split('-');
       dataInicio.setFullYear(parseInt(ano, 10));
       dataInicio.setMonth(parseInt(mes, 10) - 1, 1);
@@ -756,16 +727,9 @@ export class DashboardService {
     return { dataInicio, dataFim };
   }
 
-  /**
-   * Retorna a lista de meses distintos em que existem atendimentos encerrados.
-   * Usado para preencher o dropdown de filtros de meses passados.
-   * Formato de retorno: ["2026-03", "2026-02", "2026-01"]
-   */
   async getMesesDisponiveis(filialId?: string) {
     const fid = filialId && !isNaN(+filialId) ? +filialId : undefined;
 
-    // Em PostgreSQL, isso poderia ser uma query nativa ou com GROUP BY.
-    // Usando Prisma com select distinct formatado:
     const atendimentos = await this.prisma.atendimento.findMany({
       where: {
         fimAtendimento: { not: null },
@@ -777,7 +741,6 @@ export class DashboardService {
 
     const mesesSet = new Set<string>();
 
-    // Ignoramos o mês atual, pois a opção "Mês" (atual) já resolve isso no botão padrão
     const now = new Date();
     const currentMonthKey = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
 
@@ -791,7 +754,6 @@ export class DashboardService {
       }
     }
 
-    // Como já ordenamos por desc na busca, o iterador do Set manterá a ordem mais recente primeiro
     return Array.from(mesesSet);
   }
 
@@ -828,7 +790,7 @@ export class DashboardService {
         prioridadeStr = 'alta';
         prioridadeLabel = 'Preferencial';
       }
-      if (s.tipo === 'Urgente') { // Caso exista
+      if (s.tipo === 'Urgente') {
         prioridadeStr = 'alta';
         prioridadeLabel = 'Urgente';
       }

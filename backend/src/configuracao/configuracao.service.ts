@@ -9,7 +9,6 @@ export class ConfiguracaoService {
     private notificacaoService: NotificacaoService,
   ) {}
 
-  // Busca todas as configurações e mapeia num objeto { chave: valor } pro frontend (LEGADO)
   async findAll(filialId?: any, requestingUserFilialId?: number) {
     const finalFilialId = requestingUserFilialId ?? (
       filialId && filialId !== 'null' && filialId !== 'undefined'
@@ -27,7 +26,6 @@ export class ConfiguracaoService {
     return configMap;
   }
 
-  // Busca lista bruta de configurações
   async findAllList(filialId?: any, requestingUserFilialId?: number) {
     const finalFilialId = requestingUserFilialId ?? (
       filialId && filialId !== 'null' && filialId !== 'undefined'
@@ -47,7 +45,6 @@ export class ConfiguracaoService {
       orderBy: { filial_id: 'desc' },
     });
 
-    // De-duplicar preferendo a versão da filial
     const merged: any[] = [];
     const keys = new Set<string>();
 
@@ -61,7 +58,6 @@ export class ConfiguracaoService {
     return merged;
   }
 
-  // Atualização em lote (Bulk)
   async updateBulk(
     configs: { chave: string; valor: string }[],
     filialId?: any,
@@ -107,7 +103,6 @@ export class ConfiguracaoService {
       }
     }
 
-    // Notificação de alteração de configurações do sistema
     await this.notificacaoService.criar({
       titulo: 'Configurações Atualizadas',
       mensagem: `As configurações do sistema (${filialNome}) foram salvas.`,
@@ -118,7 +113,6 @@ export class ConfiguracaoService {
     return { message: 'Lote de configurações salvo com sucesso!', filialNome };
   }
 
-  // Recebe um objeto chave: valor do frontend e cria ou atualiza tudo (MANTIDO PARA COMPATIBILIDADE)
   async updateAll(configBody: Record<string, string>, filialId?: number) {
     const fId = filialId ? Number(filialId) : null;
     const operations: any[] = [];
@@ -192,7 +186,7 @@ export class ConfiguracaoService {
 
       let novaMetaEspera: number | null = null;
       let novaMetaAtendimento: number | null = null;
-      const alpha = 0.3; // Fator de suavização da média móvel exponencial
+      const alpha = 0.3;
 
       if (waitTimes.length >= 30) {
         waitTimes.sort((a, b) => a - b);

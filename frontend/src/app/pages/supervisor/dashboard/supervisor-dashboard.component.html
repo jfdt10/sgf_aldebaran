@@ -1,6 +1,5 @@
 <div class="supervisor-page">
 
-  <!-- Alert Banner (only on high demand) -->
   <div class="alert-banner" *ngIf="showAlertBanner">
     <div class="alert-content">
       <lucide-icon [img]="icons.alert" class="alert-icon" size="20"></lucide-icon>
@@ -13,19 +12,16 @@
 
   <main class="dashboard-content">
     
-    <!-- Header -->
     <header class="dashboard-header">
       <div class="header-titles">
         <h1 class="page-title">Painel do Supervisor</h1>
         <p class="page-subtitle">Monitore a fila e agendamentos em tempo real</p>
       </div>
     </header>
-    <!-- Visão Geral (KPIs) -->
     <section class="section">
       <h2 class="section-title">Visão Geral</h2>
       <div class="kpi-grid">
         
-        <!-- Total Hoje -->
         <div class="kpi-card">
           <div class="kpi-content">
             <div class="icon-box bg-blue-light text-blue">
@@ -38,7 +34,6 @@
           </div>
         </div>
 
-        <!-- Tempo Médio Diário -->
         <div class="kpi-card">
           <div class="kpi-content">
             <div class="icon-box bg-green-light text-green">
@@ -51,7 +46,6 @@
           </div>
         </div>
 
-        <!-- Guichês Ativos -->
         <div class="kpi-card">
           <div class="kpi-content">
             <div class="icon-box bg-green-light text-green">
@@ -64,7 +58,6 @@
           </div>
         </div>
 
-        <!-- Fila Atual -->
         <div class="kpi-card">
           <div class="kpi-content">
             <div class="icon-box bg-purple-light text-purple">
@@ -80,7 +73,6 @@
       </div>
     </section>
 
-    <!-- Status dos Guichês -->
     <section class="section">
       <h2 class="section-title">Status dos Guichês</h2>
       <div class="desk-grid">
@@ -148,7 +140,6 @@
       </div>
     </section>
 
-    <!-- Ações de Gerenciamento -->
     <section class="section actions-section">
       <h2 class="section-title">Ações de Gerenciamento</h2>
       <div class="actions-grid">
@@ -193,7 +184,6 @@
 
   </main>
 
-  <!-- Modais de Cadastro (Pixel-perfect com design) -->
   <div class="modal-backdrop" *ngIf="activeModal">
     <div class="modal-c redesign-modal">
       <div class="modal-header-gradient" [ngClass]="activeModal">
@@ -290,7 +280,6 @@
             <label>Filial <span>*</span></label>
             <div class="input-with-icon">
               <lucide-icon [img]="icons.building" size="18" class="field-icon"></lucide-icon>
-              <!-- Select doesn't align icons well natively without wrapper trick, using text input for visual purity of the mockup for now -->
               <input type="text" formControlName="filial" class="has-icon">
             </div>
           </div>
@@ -337,9 +326,7 @@
           </div>
         </form>
 
-        <!-- Tabela de Agendamentos (Imagem 13) -->
         <div *ngIf="activeModal === 'agendamentos'">
-          <!-- Local Date Filter inside Modal -->
           <div class="modal-filter-bar">
             <label for="agend-date">Filtrar Data:</label>
             <input 
@@ -416,9 +403,7 @@
           </div>
         </div>
 
-        <!-- Tabela de Atendimentos -->
         <div *ngIf="activeModal === 'atendimentos'">
-          <!-- Local Date Filter inside Modal -->
           <div class="modal-filter-bar">
             <label for="atend-date">Filtrar Data:</label>
             <input 
@@ -502,14 +487,12 @@
         <button class="btn-solid-blue" (click)="salvarCadastro()">Salvar</button>
       </div>
       
-      <!-- Rodapé para Agendamentos e Atendimentos: só Fechar -->
       <div class="modal-footer-gradient" *ngIf="activeModal === 'agendamentos' || activeModal === 'atendimentos'">
         <button class="btn-solid-cyan w-full" (click)="fecharModal()">Fechar</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Detalhe do Atendimento -->
   <div class="modal-backdrop" *ngIf="atendimentoSelecionado && !showJustificativaModal">
     <div class="modal-c redesign-modal">
       <div class="modal-header-gradient">
@@ -562,7 +545,6 @@
     </div>
   </div>
 
-  <!-- Modal: Justificar Demora -->
   <div class="modal-backdrop" *ngIf="showJustificativaModal">
     <div class="modal-c redesign-modal">
       <div class="modal-header-gradient">
@@ -602,7 +584,6 @@
     </div>
   </div>
 
-  <!-- Modal Sucesso -->
   <div class="modal-backdrop" *ngIf="successModal">
     <div class="modal-c success-modal">
       <div class="s-icon">
@@ -620,7 +601,6 @@
     </div>
   </div>
 
-  <!-- Modal Check-in Operador -->
   <div *ngIf="agendamentoParaCheckin" class="modal-backdrop">
     <div class="modal-c redesign-modal" style="max-width: 450px;">
       <div class="modal-header-gradient">
@@ -656,7 +636,6 @@
     </div>
   </div>
 
-  <!-- Modal Cancelar Agendamento -->
   <div *ngIf="agendamentoParaCancelar" class="modal-backdrop">
     <div class="modal-c modal-nao-compareceu" style="max-width: 400px; background: white; border-radius: 16px;">
       <div class="modal-body">
@@ -673,7 +652,6 @@
     </div>
   </div>
 
-  <!-- Modal Resgatar Agendamento -->
   <div *ngIf="agendamentoParaResgatar" class="modal-backdrop">
     <div class="modal-c modal-nao-compareceu" style="max-width: 400px; background: white; border-radius: 16px;">
       <div class="modal-body">

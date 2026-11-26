@@ -69,14 +69,12 @@ export class SupervisorConfiguracoesComponent implements OnInit {
       sonsAlerta: [true],
       impressaoAutomatica: [true],
 
-      // Regras da Fila
       tempoTolerancia: [15],
       limiteAtendimentos: [50],
       prioridadePcdIdoso: [true],
       redirecionarAusentes: [false],
       eficienciaMinima: [90],
 
-      // Notificações
       notificarEmail: [true],
       notificarWhatsapp: [false]
     });
@@ -129,7 +127,6 @@ export class SupervisorConfiguracoesComponent implements OnInit {
           if (c.chave === 'NOTIFICAR_WHATSAPP') patch.notificarWhatsapp = c.valor === 'true';
         });
 
-        // Carregar categorias (servicos)
         this.http.get<any[]>(`${environment.apiUrl}/servicos?filialId=${this.selectedFilialId}`, {
           headers: { Authorization: `Bearer ${token}` }
         }).subscribe(servicos => {
@@ -139,7 +136,6 @@ export class SupervisorConfiguracoesComponent implements OnInit {
           }
         });
 
-        // Carrega nome da filial
         this.filialService.getFiliais().subscribe((filiais: any[]) => {
           const f = filiais.find((fl: any) => fl.id === this.selectedFilialId);
           if (f) patch.nomeFilial = f.nome;

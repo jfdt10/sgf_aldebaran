@@ -1,6 +1,5 @@
 import 'dotenv/config';
 
-// Ensure crypto is available globally for Node.js < 19
 if (!global.crypto) {
   global.crypto = require('crypto');
 }
@@ -16,10 +15,10 @@ async function bootstrap() {
 
   app.enableShutdownHooks();
 
-  // 🔌 ADAPTADOR REDIS (Escalabilidade de Sockets)
   const redisIoAdapter = new RedisIoAdapter(app);
-  const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-  const isRedisConnected = await redisIoAdapter.connectToRedis(redisUrl);
+  const redisUrl = process.env.REDIS_URL ||
+    (process.env.NODE_ENV === 'production' ? undefined : 'redis://localhost:6379');
+  const isRedisConnected = redisUrl && await redisIoAdapter.connectToRedis(redisUrl);
 
   if (isRedisConnected) {
     app.useWebSocketAdapter(redisIoAdapter);
@@ -28,36 +27,22 @@ async function bootstrap() {
     console.log('💡 Usando adaptador WebSocket padrão (In-memory)');
   }
 
-  // 🔓 CONFIGURAÇÃO DE CORS
   app.enableCors({
     origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
 
-  // ✅ VALIDAÇÃO GLOBAL (Valida DTOs automaticamente)
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // Remove propriedades não definidas nos DTOs
-      forbidNonWhitelisted: true, // Retorna erro se houver propriedades extras
-      transform: true, // Transforma dados para os tipos dos DTOs
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
     }),
   );
 
-  try {
-    await app.listen(3000);
-    console.log('🚀 Backend rodando em http://localhost:3000');
-    console.log('🔓 CORS Habilitado');
-    console.log('✅ Validação Global Ativada');
-  } catch (error) {
-    const err = error as NodeJS.ErrnoException;
-    if (err.code === 'EADDRINUSE') {
-      console.error('❌ ERRO: A porta 3000 já está em uso!');
-      console.error('💡 Dica: Verifique se outro servidor já está rodando ou use: fuser -k 3000/tcp');
-      process.exit(1);
-    } else {
-      throw error;
-    }
-  }
+  const port = Number(process.env.PORT ?? 3000);
+  await app.listen(port, '0.0.0.0');
+  console.log('Backend escutando na porta', port);
 }
 bootstrap();

@@ -52,7 +52,7 @@ export class AgendamentoComponent implements OnInit {
   diasCalendario: (number | null)[] = [];
 
   horariosDisponiveis: any[] = [];
-  diasHabilitados: number[] = [1, 2, 3, 4, 5]; // Padrão Seg-Sex
+  diasHabilitados: number[] = [1, 2, 3, 4, 5];
   configCarregada = false;
   loadingHorarios = false;
 
@@ -104,7 +104,7 @@ export class AgendamentoComponent implements OnInit {
               const dateParts = ag.data.split('-');
               if (dateParts.length === 3) {
                 this.anoAtual = Number(dateParts[0]);
-                this.mesAtual = Number(dateParts[1]) - 1; // 0-based
+                this.mesAtual = Number(dateParts[1]) - 1;
                 this.form.data = Number(dateParts[2]);
               }
             }
@@ -192,7 +192,6 @@ export class AgendamentoComponent implements OnInit {
       
       this.configCarregada = true;
 
-      // Validação inicial
       if (this.form.data && !this.isDiaHabilitado(this.form.data)) {
         this.erroData = 'Esta filial não atende no dia selecionado.';
       } else {
@@ -251,12 +250,10 @@ export class AgendamentoComponent implements OnInit {
     
     this.diasCalendario = [];
     
-    // Espaços vazios no início
     for (let i = 0; i < primeiroDiaMes; i++) {
       this.diasCalendario.push(null);
     }
     
-    // Dias do mês
     for (let i = 1; i <= ultimoDiaMes; i++) {
       this.diasCalendario.push(i);
     }
@@ -322,7 +319,6 @@ export class AgendamentoComponent implements OnInit {
   isPassado(dia: number | null): boolean {
     if (!dia) return false;
     
-    // Para simplificar a lógica de comparação, usamos apenas as datas às 12:00
     const dataSelecionada = new Date(this.anoAtual, this.mesAtual, dia, 12, 0, 0);
     const hojeApenasData = new Date(this.hoje.getFullYear(), this.hoje.getMonth(), this.hoje.getDate(), 12, 0, 0);
     
@@ -357,7 +353,6 @@ export class AgendamentoComponent implements OnInit {
   confirmar() {
     this.erroAgendamento = null;
     this.agendamentoConfirmado = null;
-    // Fetch logged user data
     const userJson = localStorage.getItem('usuario_sgf');
     if (!userJson) {
       this.erroAgendamento = 'Usuário não identificado. Por favor, faça login novamente.';
@@ -366,11 +361,9 @@ export class AgendamentoComponent implements OnInit {
     }
     const user = JSON.parse(userJson);
 
-    // Format date for ISO standard
     const dataObj = new Date(this.anoAtual, this.mesAtual, this.form.data || 1);
     const dataFormatada = dataObj.toISOString().split('T')[0];
 
-    // Generate unique slot reference
     const codigo = Math.random().toString(36).substring(2, 8).toUpperCase();
     const filialSelecionada = this.filiais.find(x => Number(x.id) === Number(this.form.filialId));
     const categoriaSelecionada = this.categorias.find(x => Number(x.id) === Number(this.form.servicoId));
@@ -407,10 +400,9 @@ export class AgendamentoComponent implements OnInit {
       return;
     }
 
-    // Construct API payload
     const payload = {
       nome: user.nome,
-      documento: user.email, // Usando email como identificador (ou CPF se existir)
+      documento: user.email,
       data: dataFormatada,
       hora: this.form.hora,
       servico_id: this.form.servicoId,
@@ -419,7 +411,6 @@ export class AgendamentoComponent implements OnInit {
       codigo: codigo
     };
 
-    // Dispatch request
     this.api.post<any>('/fila/agendamento', payload).subscribe({
       next: (agendamento) => {
         this.agendamentoConfirmado = {

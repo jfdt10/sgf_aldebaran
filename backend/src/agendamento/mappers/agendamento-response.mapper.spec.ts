@@ -59,7 +59,7 @@ describe('buildAgendamentoDate', () => {
     const result = buildAgendamentoDate('2099-04-20', '10:00');
     expect(result).toBeInstanceOf(Date);
     expect(result.getFullYear()).toBe(2099);
-    expect(result.getMonth()).toBe(3); // abril = índice 3
+    expect(result.getMonth()).toBe(3);
     expect(result.getDate()).toBe(20);
   });
 

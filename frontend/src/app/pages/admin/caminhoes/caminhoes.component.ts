@@ -18,17 +18,15 @@ export class CaminhoesComponent implements OnInit, OnDestroy {
     icons = { search: Search, plus: Plus, edit2: Edit2, trash2: Trash2, x: X, truck: Truck, userCircle: UserCircle, hash: Hash, briefcase: Briefcase, users: Users, user: User, checkCircle: CheckCircle, check: Check };
 
     caminhoes: any[] = [];
-    motoristas: any[] = []; // for dropdown
+    motoristas: any[] = [];
     filtro = '';
     loading = false;
     selectedFilialId: number | null = null;
 
-    // Modal state
     showModal = false;
     showSuccessModal = false;
     isEditing = false;
 
-    // Form Model
     caminhaoForm = {
         id: null as number | null,
         placa: '',

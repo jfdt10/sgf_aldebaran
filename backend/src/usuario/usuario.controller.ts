@@ -34,7 +34,6 @@ export class UsuarioController {
     return this.usuarioService.validarLogin(body.login, body.senha);
   }
 
-  // Endpoints protegidos por JWT
   @UseGuards(JwtAuthGuard)
   @Post()
   async criarUsuario(@Body() body: any, @Request() req: AuthenticatedRequest) {

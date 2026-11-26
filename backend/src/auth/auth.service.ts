@@ -4,6 +4,7 @@ import {
   ConflictException,
   NotFoundException,
   BadRequestException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
@@ -16,9 +17,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  // User login logic
   async login(body: any) {
-    // O usuário pode tentar fazer login usando o email ou o username (login)
     const staff = await this.prisma.usuario.findFirst({
       where: {
         OR: [{ email: body.email }, { login: body.email }],
@@ -32,7 +31,6 @@ export class AuthService {
       if (!senhaValida)
         throw new UnauthorizedException('Credenciais incorretas.');
 
-      // Extrai Iniciais (ex: "Carlos Admin" -> "CA", "Administrador" -> "AD")
       const nomes = (staff.nome || '').trim().split(' ');
       let iniciais = '';
       if (nomes.length > 1) {
@@ -65,7 +63,6 @@ export class AuthService {
       };
     }
 
-    // Internal customers table check
     const cliente = await this.prisma.clientes.findUnique({
       where: { email: body.email },
     });
@@ -101,7 +98,6 @@ export class AuthService {
     throw new UnauthorizedException('Credenciais incorretas.');
   }
 
-  // Customer registration
   async register(dados: any) {
     const existe = await this.prisma.clientes.findFirst({
       where: {
@@ -116,7 +112,6 @@ export class AuthService {
         throw new ConflictException('Este CPF/CNPJ já está cadastrado.');
     }
 
-    // Hash da senha antes de armazenar
     const senhaHash = await bcrypt.hash(dados.senha, 12);
 
     const novo = await this.prisma.clientes.create({
@@ -136,31 +131,30 @@ export class AuthService {
     return { message: 'Criado com sucesso', id: novo.id };
   }
 
-  // Password recovery
   async recover(email: string) {
-    // 1. Verificar se é staff (usuario)
+    if (process.env.NODE_ENV === 'production') {
+      throw new ServiceUnavailableException('Recupera??o por e-mail indispon?vel.');
+    }
+
     const staff = await this.prisma.usuario.findFirst({
       where: { email, ativo: true, deletadoEm: null },
       select: { id: true, email: true, nome: true },
     });
 
     if (staff) {
-      // Gera JWT com expiração curta para reset (15 min)
       const token = this.jwtService.sign(
         { sub: staff.id, email: staff.email, isStaff: true },
-        { expiresIn: '15m' },
+        { expiresIn: '15m', audience: 'password-reset' },
       );
 
       const frontendUrl = process.env['FRONT_URL'] || 'http://localhost:4200';
       const link = `${frontendUrl}/reset-password?token=${token}`;
 
-      // TODO: Implementar envio real de e-mail (usar nodemailer, SendGrid, etc.)
       console.log(`📧 Reset link para staff ${email}: ${link}`);
 
       return { message: 'Link de recuperação enviado.' };
     }
 
-    // 2. Verificar se é cliente
     const cliente = await this.prisma.clientes.findUnique({
       where: { email },
       select: { id: true, email: true, nome: true },
@@ -170,30 +164,25 @@ export class AuthService {
       throw new NotFoundException('E-mail não encontrado.');
     }
 
-    // Gera JWT com expiração curta para reset (15 min)
     const token = this.jwtService.sign(
       { sub: cliente.id, email: cliente.email, isStaff: false },
-      { expiresIn: '15m' },
+      { expiresIn: '15m', audience: 'password-reset' },
     );
 
     const frontendUrl = process.env['FRONT_URL'] || 'http://localhost:4200';
     const link = `${frontendUrl}/reset-password?token=${token}`;
 
-    // TODO: Implementar envio real de e-mail (usar nodemailer, SendGrid, etc.)
     console.log(`📧 Reset link para cliente ${email}: ${link}`);
 
     return { message: 'Link de recuperação enviado.' };
   }
 
-  // Password reset
   async resetPassword(token: string, novaSenha: string) {
     try {
-      // Valida e decodifica o token JWT
-      const decoded = this.jwtService.verify(token);
+      const decoded = this.jwtService.verify(token, { audience: 'password-reset' });
       const userId = decoded.sub;
       const isStaff = decoded.isStaff;
 
-      // Hash da nova senha
       const senhaHash = await bcrypt.hash(novaSenha, 12);
 
       if (isStaff) {

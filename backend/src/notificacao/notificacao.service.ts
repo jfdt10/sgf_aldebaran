@@ -71,16 +71,13 @@ export class NotificacaoService {
 
     if (usuario_id) {
       filtros.push({ usuario_id });
-      // Usuários do sistema (operadores, supervisores, admins) veem notificações globais/administrativas
       filtros.push({ usuario_id: null, cliente_id: null });
     }
 
     if (cliente_id) {
-      // Clientes veem estritamente as suas próprias notificações direcionadas
       filtros.push({ cliente_id });
     }
 
-    // Fallback caso nenhum ID seja informado (garante compatibilidade)
     if (!usuario_id && !cliente_id) {
       filtros.push({ usuario_id: null, cliente_id: null });
     }

@@ -49,12 +49,9 @@ export class NotificationService {
             shouldKeep = false;
           }
         } else {
-          // Usuários do sistema (operadores, supervisores, admins)
           if (notificacao.cliente_id) {
-            // Notificações direcionadas a clientes não devem ir para usuários do sistema
             shouldKeep = false;
           } else if (notificacao.usuario_id) {
-            // Se for direcionada a um usuário do sistema específico, verifica se é este
             const userStr = localStorage.getItem('usuario_sgf');
             if (userStr) {
               try {
@@ -83,7 +80,6 @@ export class NotificationService {
   }
 
   private isClientSession(): boolean {
-    // 1. Check current URL/path (extremely reliable since only clients are in /client or /mobile routes)
     if (typeof window !== 'undefined' && window.location && window.location.pathname) {
       const path = window.location.pathname;
       if (path.includes('/client') || path.includes('/mobile')) {
@@ -91,12 +87,10 @@ export class NotificationService {
       }
     }
 
-    // 2. Check explicit client indicators in localStorage
     if (localStorage.getItem('client_user') || localStorage.getItem('client_token')) {
       return true;
     }
 
-    // 3. Check parsed user profile/type
     const userStr = localStorage.getItem('usuario_sgf');
     if (userStr) {
       try {
@@ -108,7 +102,6 @@ export class NotificationService {
       } catch { }
     }
 
-    // 4. Check if stored ID is a UUID (UUIDs are non-numeric strings, internal users have integer IDs)
     const usuarioIdStr = localStorage.getItem('usuario_id');
     if (usuarioIdStr && isNaN(Number(usuarioIdStr))) {
       return true;
@@ -157,7 +150,6 @@ export class NotificationService {
   }
 
   markAsRead(id: number) {
-    // Atualização otimista
     const current = this.notificationsSubject.value;
     const updated = current.map(n => n.id === id ? { ...n, lida: true } : n);
     this.notificationsSubject.next(updated);
@@ -171,7 +163,6 @@ export class NotificationService {
   }
 
   markAllAsRead(usuario_id?: number | string) {
-    // Atualização otimista no frontend
     const current = this.notificationsSubject.value;
     const updated = current.map(n => ({ ...n, lida: true }));
     this.notificationsSubject.next(updated);
@@ -184,7 +175,6 @@ export class NotificationService {
     this.api.post('/notificacoes/todas-lidas', this.buildDestinatarioParams(resolvedId)).subscribe({
       error: (err) => {
         console.error('Erro ao marcar todas como lidas:', err);
-        // Rollback opcional se necessário
         this.notificationsSubject.next(current);
       }
     });

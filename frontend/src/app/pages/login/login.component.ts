@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, OnInit } from '@angular/core'; // <--- 1. Importe o ChangeDetectorRef e OnInit
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -32,7 +32,7 @@ export class LoginComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private cd: ChangeDetectorRef // <--- 2. Injete o detector aqui
+    private cd: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
@@ -47,7 +47,7 @@ export class LoginComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao buscar contagem de filiais:', err);
-        this.quantidadeFiliais = 3; // Valor padrão em caso de erro
+        this.quantidadeFiliais = 3;
       }
     });
   }
@@ -63,10 +63,8 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(this.credenciais).subscribe({
       next: (resposta: any) => {
-        // Sucesso: Salva o token e redireciona
         localStorage.setItem('token', resposta.token);
 
-        // Se tiver o nome do usuário, pode salvar também
         if (resposta.usuario) {
           localStorage.setItem('usuario_nome', resposta.usuario.nome);
           localStorage.setItem('usuario_sgf', JSON.stringify(resposta.usuario));

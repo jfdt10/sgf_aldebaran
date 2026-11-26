@@ -1,6 +1,4 @@
-/* src/styles.scss */
 
-/* Global Variables */
 :root {
   --auth-gradient-start: #0EA5E9;
   --auth-gradient-end: #0F766E;
@@ -16,7 +14,6 @@
   --text-secondary: #64748b;
   --border-color: #e2e8f0;
   
-  /* Primary Action Gradient */
   --primary-gradient: linear-gradient(180deg, #029fe4 0%, #017c8b 100%);
   --primary-shadow: rgba(1, 124, 139, 0.25);
 }
@@ -52,7 +49,6 @@ body.dark-theme {
   color: var(--text-primary);
 }
 
-/* Base Reset */
 body {
   margin: 0;
   padding: 0;
@@ -62,25 +58,20 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
-/* Auth Layout */
 
-/* Container Principal (Split Screen) */
 .split-layout {
   display: flex;
   min-height: 100vh;
   width: 100%;
   background: white;
 
-  /* Responsividade: Empilha no celular/tablet */
   @media (max-width: 900px) {
     flex-direction: column;
   }
 }
 
-/* Hero Section */
 .hero-section {
   flex: 1;
-  /* GRADIENTE VERTICAL EXATO */
   background: linear-gradient(to bottom, var(--auth-gradient-start) 0%, var(--auth-gradient-end) 100%);
   color: white;
   display: flex;
@@ -89,7 +80,6 @@ body {
   position: relative;
   overflow: hidden;
 
-  /* Efeito de fundo sutil */
   &::before {
     content: '';
     position: absolute;
@@ -108,10 +98,8 @@ body {
 
     .logo-box {
       margin-bottom: 30px;
-      /* Sem fundo, logo flutuando */
     }
 
-    /* LOGO BRANCA PURA */
     .hero-logo-white {
       height: 90px;
       width: auto;
@@ -133,7 +121,6 @@ body {
       margin-bottom: 40px;
     }
 
-    /* Estatísticas */
     .stats-row {
       display: inline-flex;
       gap: 30px;
@@ -164,7 +151,6 @@ body {
     }
   }
 
-  /* Ajuste Mobile Hero */
   @media (max-width: 900px) {
     flex: none;
     min-height: 280px;
@@ -180,7 +166,6 @@ body {
   }
 }
 
-/* Form Section */
 .form-section {
   flex: 1;
   display: flex;
@@ -195,7 +180,6 @@ body {
     animation: fadeIn 0.5s ease-out;
   }
 
-  /* SELETOR DE IDIOMA (ESTILO TOTEM PÍLULA) */
   .lang-switch-container {
     display: flex;
     justify-content: flex-end;
@@ -233,7 +217,6 @@ body {
     }
   }
 
-  /* Textos do Cabeçalho */
   .header-text {
     margin-bottom: 30px;
 
@@ -256,7 +239,6 @@ body {
     }
   }
 
-  /* Inputs */
   .input-group {
     margin-bottom: 20px;
 
@@ -284,7 +266,6 @@ body {
         width: 100%;
         box-sizing: border-box;
         padding: 16px 16px 16px 45px;
-        /* Espaço pro ícone */
         border: 2px solid var(--auth-border);
         border-radius: 12px;
         font-size: 16px;
@@ -301,7 +282,6 @@ body {
     }
   }
 
-  /* Opções (Checkbox, Links) */
   .options {
     display: flex;
     justify-content: space-between;
@@ -330,7 +310,6 @@ body {
     }
   }
 
-  /* Botão Principal */
   .btn-primary {
     width: 100%;
     padding: 18px;
@@ -365,7 +344,6 @@ body {
     }
   }
 
-  /* Rodapé do Form */
   .footer-msg {
     margin-top: 30px;
     text-align: center;
@@ -380,9 +358,7 @@ body {
   }
 }
 
-/* Utility Classes */
 
-/* Abas (Pills) do Cadastro */
 .tabs-pills {
   display: flex;
   background: var(--auth-bg-light);
@@ -409,7 +385,6 @@ body {
   }
 }
 
-/* Tela de Sucesso */
 .success-view {
   text-align: center;
   padding: 10px 0;
@@ -479,7 +454,6 @@ body {
   }
 }
 
-/* Link Voltar */
 .back-link {
   display: inline-flex;
   align-items: center;
@@ -518,11 +492,9 @@ body {
   animation: fadeIn 0.3s ease;
 }
 
-/* List Card Design */
 .crud-page {
   animation: fadeIn 0.4s ease;
   padding: 1.5rem 0;
-  /* Ensures gap after tabs */
 }
 
 .list-card {
@@ -620,7 +592,6 @@ body {
     padding: 2rem;
   }
 
-  /* Tabela */
   .table-responsive {
     overflow-x: auto;
     width: 100%;
@@ -659,7 +630,6 @@ body {
     }
   }
 
-  /* Utilitários dentro da tabela */
   .tb-profile {
     display: flex;
     align-items: center;
@@ -692,7 +662,6 @@ body {
     margin-top: 2px;
   }
 
-  /* Badges */
   .badge {
     display: inline-flex;
     align-items: center;
@@ -733,7 +702,6 @@ body {
     }
   }
 
-  /* Botões de Ação na Tabela */
   .action-btns {
     display: flex;
     gap: 8px;
@@ -765,7 +733,6 @@ body {
     }
   }
 
-  /* Footer */
   .list-card-footer {
     padding: 1rem 1.5rem;
     border-top: 1px solid var(--border-color);
@@ -804,7 +771,6 @@ body {
   }
 }
 
-/* Modal Design */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -975,7 +941,6 @@ body {
   }
 }
 
-/* Modal specific elements */
 .segmented-control {
   display: flex;
   margin-bottom: 8px;
@@ -1018,7 +983,6 @@ body {
   margin-bottom: 24px;
 }
 
-/* Client Dark Mode Refinements */
 body.dark-theme {
   .admin-container,
   .client-page,
@@ -1501,7 +1465,6 @@ body.dark-theme {
   }
 }
 
-/* --- GLOBAL REDESIGN MODAL (DRY) --- */
 .redesign-modal {
   background: white;
   border-radius: 16px;
@@ -1699,7 +1662,6 @@ body.dark-theme {
   }
 }
 
-/* --- MODAL OVERLAYS AND ANIMATIONS --- */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -1722,7 +1684,6 @@ body.dark-theme {
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* --- OVERRIDE FOR PROFILE EDIT (NO SCROLLBAR) --- */
 .redesign-modal.modal-profile-edit {
   .modal-body {
     max-height: none !important;
@@ -1757,14 +1718,11 @@ body.dark-theme {
   }
 }
 
-/* --- DARK THEME CONTRAST OVERRIDES AND POLISH (ALL LAYOUTS) --- */
 body.dark-theme {
-  /* 1. Global / Reset Variables & Elements */
   input::placeholder, select::placeholder, textarea::placeholder {
     color: #64748b !important;
   }
 
-  /* 2. Admin & Supervisor Rules / Cards (regras-fila, categorias-fila) */
   .regras-container {
     background: transparent !important;
   }
@@ -1833,7 +1791,6 @@ body.dark-theme {
     }
   }
 
-  /* Modals globally (Admin, Supervisor, Operator, Client) */
   .modal-card, .refined-card, .category-modal, .redesign-modal {
     background: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
@@ -1877,7 +1834,6 @@ body.dark-theme {
     }
   }
 
-  /* Logout Confirmation Modals */
   .modal-backdrop {
     background: rgba(2, 6, 23, 0.68) !important;
     backdrop-filter: blur(10px) !important;
@@ -1897,7 +1853,6 @@ body.dark-theme {
     }
   }
 
-  /* Form controls in Admin/Supervisor/Client */
   .form-row-premium, .input-group-premium, .sla-input-wrapper {
     label {
       color: var(--text-secondary) !important;
@@ -1914,7 +1869,6 @@ body.dark-theme {
     }
   }
 
-  /* Client portal custom elements */
   .counter-box {
     background: var(--bg-card) !important;
     border-color: var(--border-color) !important;
@@ -1978,7 +1932,6 @@ body.dark-theme {
     }
   }
 
-  /* Supervisor Dashboard elements */
   .dashboard-header {
     background: var(--bg-card) !important;
     border-color: var(--border-color) !important;
@@ -2034,7 +1987,7 @@ body.dark-theme {
     border-color: var(--border-color) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
     color: var(--text-primary) !important;
-    opacity: 1 !important; /* Avoid opacity decrease for closed guichês in dark mode to keep it premium */
+    opacity: 1 !important;
 
     .desk-label, .operator, .detail-col, .detail-label, .time-pill {
       color: var(--text-secondary) !important;
@@ -2054,7 +2007,6 @@ body.dark-theme {
       }
     }
 
-    /* Desk card state indicators */
     &.atendendo {
       border-color: #60a5fa !important;
       background: rgba(59, 130, 246, 0.08) !important;
@@ -2078,7 +2030,6 @@ body.dark-theme {
     }
   }
 
-  /* 3. Operator Console (console-operador) Styles */
   .console-operador {
     --brand-1: #38a6c7;
     --brand-2: #0f6f75;
@@ -2154,7 +2105,6 @@ body.dark-theme {
       }
     }
 
-    /* Cards, Quick Actions, and Status Panels */
     .status-card,
     .quick-action-card,
     .search-container,
@@ -2182,7 +2132,6 @@ body.dark-theme {
       }
     }
 
-    /* Ticket containers in queue */
     .queue-container, .queue-item, .ticket-row, .ticket-box, .ticket-card {
       background: rgba(15, 23, 42, 0.4) !important;
       border-color: var(--line) !important;
@@ -2205,7 +2154,6 @@ body.dark-theme {
       background: transparent !important;
     }
 
-    /* Operator tables and history */
     .list-table, table {
       th {
         background: rgba(15, 23, 42, 0.5) !important;
@@ -2222,7 +2170,6 @@ body.dark-theme {
     }
   }
 
-  /* 4. Client / TV / Totem contrast overrides */
   .totem-page, .tv-page, .totem-container, .tv-container {
     background: var(--page) !important;
     color: var(--text-primary) !important;

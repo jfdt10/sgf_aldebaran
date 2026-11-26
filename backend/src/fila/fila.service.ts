@@ -26,7 +26,6 @@ export class FilaService {
     @Inject(forwardRef(() => ClienteRegrasService)) private clienteRegrasService: ClienteRegrasService,
   ) { }
 
-  // Totem ticket generation logic
   async solicitarSenhaTotem(
     tipoRaw: string,
     nomeCategoria?: string,
@@ -50,7 +49,6 @@ export class FilaService {
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
 
-    // Considerar DATA_ZERAR_FILA para reiniciar a numeração hoje
     const configZerar = await this.prisma.configuracao.findFirst({
       where: { chave: 'DATA_ZERAR_FILA', filial_id: filialId || null },
     });
@@ -447,7 +445,6 @@ export class FilaService {
       throw new BadRequestException('Nenhuma senha encontrada para este agendamento.');
     }
 
-    // Restaurar a senha para AGUARDANDO e com data/hora atuais
     await this.prisma.senha.update({
       where: { id: ticket.id },
       data: {
@@ -456,7 +453,6 @@ export class FilaService {
       },
     });
 
-    // Atualizar status do agendamento para CHECKIN_REALIZADO
     const result = await this.prisma.agendamento.update({
       where: { id },
       data: {
@@ -478,7 +474,6 @@ export class FilaService {
       throw new NotFoundException('Senha não encontrada.');
     }
 
-    // Restaurar a senha para AGUARDANDO e com data/hora atuais
     const result = await this.prisma.senha.update({
       where: { id },
       data: {
@@ -501,12 +496,10 @@ export class FilaService {
     return result;
   }
 
-  // Queue management and dashboard views
 
   async zerarFila(filialId?: number) {
     const fId = filialId ? +filialId : null;
 
-    // Remove senhas 'AGUARDANDO' que NÃO possuem agendamento_id
     const deleted = await this.prisma.senha.deleteMany({
       where: {
         status: 'AGUARDANDO',
@@ -515,7 +508,6 @@ export class FilaService {
       },
     });
 
-    // Salva o momento do "zerar" para reiniciar o contador a partir de agora
     const agoraStr = new Date().toISOString();
     const existingConfig = await this.prisma.configuracao.findFirst({
       where: { chave: 'DATA_ZERAR_FILA', filial_id: fId },
@@ -532,7 +524,6 @@ export class FilaService {
       });
     }
 
-    // Opcional: emitir para todos no WebSocket recarregarem a fila
     this.notificacaoGateway.enviarParaTodos('fila_zerada', { filialId: fId });
 
     return { message: 'Fila zerada com sucesso', removidas: deleted.count };
@@ -666,7 +657,6 @@ export class FilaService {
         );
       }
 
-      // Cap recalls to a maximum of 3 attempts based on existing atendimento record counts
       const countAtendimentos = await prismaClient.atendimento.count({
         where: { senha_id: senhaId },
       });
@@ -1339,7 +1329,6 @@ export class FilaService {
       where.guiche_rel = { filial_id: filialId };
     }
 
-    // Filtro por data
     if (dataStr) {
       const dataInicio = new Date(`${dataStr}T00:00:00.000`);
       const dataFim = new Date(`${dataStr}T23:59:59.999`);
@@ -1348,7 +1337,6 @@ export class FilaService {
         lte: dataFim,
       };
     } else {
-      // Se não enviou data, mostra os de hoje por padrão
       const hoje = new Date();
       const timezoneOffset = hoje.getTimezoneOffset() * 60000;
       const localHoje = new Date(hoje.getTime() - timezoneOffset);
@@ -1586,7 +1574,6 @@ export class FilaService {
   }
 
   async listarPainel(filialId?: number) {
-    // Buscar os últimos 20 atendimentos para extrair senhas únicas recém-chamadas
     const where: any = {};
     if (filialId) {
       where.guiche_rel = { filial_id: filialId };
@@ -1622,18 +1609,16 @@ export class FilaService {
       let valor = limpo;
 
       if (limpo) {
-        // Extrai possíveis prefixos para não duplicar e saber qual é
         const match = limpo.match(/^(Guich[êe]|Guiche|Baia|Doca|Mens[a|e]gem|Sala|Box)\s*(.*)$/i);
         if (match) {
           tipo = match[1].toUpperCase();
-          if (tipo === 'GUICHE') tipo = 'GUICHÊ'; // Normaliza acentuação
+          if (tipo === 'GUICHE') tipo = 'GUICHÊ';
           valor = match[2].trim() || '--';
         }
       } else {
         valor = '--';
       }
 
-      // Se o valor ficar vazio após remover o prefixo, usamos o limpo inteiro (fallback)
       if (!valor) valor = limpo;
 
       return {

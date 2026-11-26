@@ -2,14 +2,12 @@
 
   <div class="top-nav">
     <div class="logo-space">
-      <!-- The main layout probably has the logo, so we leave it empty or add the text if the layout doesn't cover this -->
     </div>
     <button class="btn-voltar" routerLink="/supervisor/dashboard">Voltar</button>
   </div>
 
   <div class="config-container">
 
-    <!-- MENU LATERAL -->
     <aside class="config-sidebar">
       <div class="sidebar-group">
         <h4 class="group-title">SISTEMA</h4>
@@ -22,7 +20,6 @@
       </div>
     </aside>
 
-    <!-- CONTEÚDO PRINCIPAL -->
     <main class="config-main">
 
       <form [formGroup]="configForm" *ngIf="currentTab === 'geral'" class="tab-content config-form-container">
@@ -54,7 +51,6 @@
           </div>
         </div>
 
-        <!-- Margin top for separation -->
         <div class="settings-group mt-32">
           <h3>Preferências</h3>
 
@@ -123,7 +119,6 @@
         </div>
       </form>
 
-      <!-- REGRAS DA FILA -->
       <form [formGroup]="configForm" *ngIf="currentTab === 'regras'" class="tab-content config-form-container">
         <div class="header-section">
           <h2>Regras da Fila</h2>
@@ -186,7 +181,6 @@
         </div>
       </form>
 
-      <!-- NOTIFICAÇÕES -->
       <form [formGroup]="configForm" *ngIf="currentTab === 'notificacoes'" class="tab-content config-form-container">
         <div class="header-section">
           <h2>Notificações</h2>
@@ -223,7 +217,6 @@
         </div>
       </form>
 
-      <!-- GESTÃO DE USUÁRIOS -->
       <div *ngIf="currentTab === 'usuarios'" class="tab-content config-form-container">
         <div class="users-header">
           <div class="header-section">
@@ -308,7 +301,6 @@
         </div>
       </div>
 
-      <!-- LEGAL -->
       <div *ngIf="currentTab === 'legal'" class="tab-content config-form-container">
         <div class="header-section">
           <h2>Legal</h2>
@@ -331,7 +323,6 @@
         </app-settings-section-card>
       </div>
 
-      <!-- MODAL NOVO USUARIO -->
       <div class="modal-backdrop" *ngIf="usuarioModal">
         <div class="modal-c redesign-modal">
           <div class="modal-header-gradient user-modal-header">
@@ -391,7 +382,6 @@
 
   </div>
 
-  <!-- Modal: Zerar Fila -->
   <div class="modal-backdrop" *ngIf="showZerarModal">
     <div class="modal-c redesign-modal">
       <div class="modal-header-gradient">
@@ -416,7 +406,6 @@
     </div>
   </div>
 
-  <!-- Modal: Sucesso -->
   <div class="modal-backdrop" *ngIf="showSuccessModal">
     <div class="modal-c success-modal">
       <div class="s-icon">

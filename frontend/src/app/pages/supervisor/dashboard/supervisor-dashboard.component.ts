@@ -51,7 +51,6 @@ export class SupervisorDashboardComponent implements OnInit {
   agendamentoParaCancelar: any = null;
   agendamentoParaResgatar: any = null;
 
-  // Ícones
   readonly icons: any = {
     alert: AlertTriangle, right: ChevronRight, trendingUp: TrendingUp,
     clock: Clock, activity: Activity, users: Users,
@@ -93,7 +92,7 @@ export class SupervisorDashboardComponent implements OnInit {
 
   activeModal: string | null = null;
   successModal: string | null = null;
-  showAlertBanner = false; // Set to true when high demand is detected
+  showAlertBanner = false;
 
   caminhaoForm: FormGroup;
   operadorForm: FormGroup;
@@ -147,7 +146,6 @@ export class SupervisorDashboardComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       if (params['modal']) {
         this.abrirModal(params['modal']);
-        // Limpa o query param da URL sem navegar de novo
         this.router.navigate([], { queryParams: {}, replaceUrl: true });
       }
     });
@@ -155,7 +153,6 @@ export class SupervisorDashboardComponent implements OnInit {
     const initialId = this.filialService.getSelectedFilialId();
     this.guicheService.carregarGuichesDaApi(initialId || undefined);
 
-    // Inscrever aos dados de guichês do serviço
     this.guicheService.guiches$.subscribe(guiches => {
       this.guiches = guiches;
       this.cdr.detectChanges();
@@ -170,10 +167,8 @@ export class SupervisorDashboardComponent implements OnInit {
       this.loadData();
     });
 
-    // Refresh data every 5 seconds
     setInterval(() => this.loadData(), 5000);
 
-    // Tick real-time seconds for waiting lists
     setInterval(() => {
       this.tickWaitTimes();
     }, 1000);
@@ -189,7 +184,6 @@ export class SupervisorDashboardComponent implements OnInit {
       try {
         const user = JSON.parse(userStr);
         this.filialId = user.filial_id;
-        // Se for a primeira vez e tiver filial no user, seleciona ela
         if (this.selectedFilialId === null) {
           this.selectedFilialId = this.filialId || null;
         }
@@ -233,13 +227,11 @@ export class SupervisorDashboardComponent implements OnInit {
   loadData() {
     this.dashboardService.getSupervisorOverview(this.selectedFilialId || undefined, this.selectedDate).subscribe({
       next: (res) => {
-        // Update KPIs
         this.visaoGeral[0].valor = res.kpis.totalHoje;
         this.visaoGeral[1].valor = res.kpis.tempoMedio;
-        this.visaoGeral[2].valor = res.kpis.totalHoje; // Usando totalHoje em vez de atendimentosDiarios
+        this.visaoGeral[2].valor = res.kpis.totalHoje;
         this.visaoGeral[3].valor = res.kpis.filaAtual;
 
-        // Atualiza as listas se o modal correspondente não estiver aberto, ou recarrega o modal para a data correta
         if (this.activeModal !== 'agendamentos') {
           this.agendamentos = res.agendamentos;
         } else {
@@ -260,7 +252,6 @@ export class SupervisorDashboardComponent implements OnInit {
 
         this.showAlertBanner = res.kpis.alertaSla;
 
-        // Sincroniza os guichês
         this.guicheService.refreshGuiches(this.selectedFilialId || undefined);
 
         this.cdr.detectChanges();
@@ -270,9 +261,9 @@ export class SupervisorDashboardComponent implements OnInit {
   }
 
   abrirModal(id: string) {
-    this.activeModal = id; // truck, operator, client, agendamentos, atendimentos
+    this.activeModal = id;
     localStorage.setItem('modalAbertoSupervisor', id);
-    this.cdr.detectChanges(); // Garante que a mudança no activeModal seja detectada imediatamente
+    this.cdr.detectChanges();
 
     if (id === 'agendamentos') {
       this.selectedDateAgendamentos = this.getLocalTodayString();
@@ -497,7 +488,7 @@ export class SupervisorDashboardComponent implements OnInit {
         }
       });
 
-      return; // Exit here since it's async
+      return;
     }
     if (this.activeModal === 'client' && this.clienteForm.invalid) {
       alert('Preencha os campos obrigatórios corretamente.');
@@ -512,7 +503,7 @@ export class SupervisorDashboardComponent implements OnInit {
       if (this.successModal === tipo) {
         this.fecharModal();
       }
-    }, 5000); // 5 segundos auto-return
+    }, 5000);
   }
 
   verAtendimento(atendimento: any) {

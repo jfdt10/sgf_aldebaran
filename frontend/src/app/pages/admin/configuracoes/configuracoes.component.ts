@@ -106,7 +106,6 @@ export class ConfiguracoesComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Escuta mudanças de filial via URL (Query Params) se não for restrito
     this.subs.add(
       this.route.queryParamMap.subscribe(params => {
         if (!this.isRestricted) {
@@ -117,7 +116,6 @@ export class ConfiguracoesComponent implements OnInit, OnDestroy {
       })
     );
 
-    // Carrega lista de filiais do serviço compartilhado
     this.subs.add(
       this.filialService.getFiliais().subscribe(data => {
         if (this.isRestricted) {
@@ -135,17 +133,14 @@ export class ConfiguracoesComponent implements OnInit, OnDestroy {
   }
 
   onFilialChange() {
-    // Notifica o serviço global sobre a mudança feita localmente nesta página
     this.filialService.setSelectedFilial(this.selectedFilialId);
     
-    // Atualiza a URL com o novo filialId
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { filialId: this.selectedFilialId },
       queryParamsHandling: 'merge'
     });
 
-    // Sugestão automática do nome da unidade baseada na filial selecionada
     if (this.selectedFilialId) {
       const filialObj = this.filiais.find((f: any) => f.id === this.selectedFilialId);
       if (filialObj && (!this.form.UNIDADE_NOME || this.form.UNIDADE_NOME.trim() === '')) {

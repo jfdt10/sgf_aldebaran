@@ -186,10 +186,8 @@ export class Logs implements OnInit, OnDestroy {
         return `O SLA do serviço <strong>${parsed.nomeServico}</strong> foi calibrado: Espera atualizada de ${parsed.metaEsperaAntiga} para <strong>${parsed.metaEsperaNova}min</strong> (${parsed.amostrasEspera} amostras). Atendimento atualizado de ${parsed.metaAtendimentoAntiga} para <strong>${parsed.metaAtendimentoNova}min</strong> (${parsed.amostrasAtendimento} amostras).`;
       }
 
-      // Se for JSON valido mas não conhecemos a ação, formatar bonito
       return `<pre style="margin: 0; font-size: 0.8rem; color: #64748b;">${JSON.stringify(parsed, null, 2)}</pre>`;
     } catch {
-      // Se não for JSON, retorna string limpa ou escapa o HTML (simplesmente text)
       return descricao;
     }
   }
@@ -198,7 +196,7 @@ export class Logs implements OnInit, OnDestroy {
     this.loading = true;
     const params = {
       page: 1,
-      limit: 1000, // Busca uma quantidade maior para o relatório
+      limit: 1000,
       ...this.filters
     };
 
@@ -207,9 +205,8 @@ export class Logs implements OnInit, OnDestroy {
         const doc = new jsPDF();
         const logsToExport = res.items;
 
-        // Cabeçalho do PDF
         doc.setFontSize(18);
-        doc.setTextColor(0, 153, 171); // #0099ab
+        doc.setTextColor(0, 153, 171);
         doc.text('Relatório de Logs e Auditoria', 14, 22);
 
         doc.setFontSize(10);

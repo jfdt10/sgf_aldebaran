@@ -15,11 +15,9 @@ import { environment } from '../../../../environments/environment';
 })
 export class TotemCheckinComponent {
 
-  // Controle de Visibilidade dos Modais
   mostrarModalCodigo: boolean = false;
   mostrarAjuda: boolean = false;
 
-  // Armazena o código digitado no input
   codigoDigitado: string = '';
   checkinPreferencial: boolean = false;
 
@@ -32,11 +30,10 @@ export class TotemCheckinComponent {
     private cdr: ChangeDetectorRef
   ) { }
 
-  // --- MODAL DE CÓDIGO ---
 
   abrirModalCodigo() {
     this.mostrarModalCodigo = true;
-    this.codigoDigitado = ''; // Limpa o campo ao abrir
+    this.codigoDigitado = '';
     this.checkinPreferencial = false;
     this.erroMensagem = null;
     this.loading = false;
@@ -83,7 +80,6 @@ export class TotemCheckinComponent {
     });
   }
 
-  // --- MODAL DE AJUDA ---
 
   abrirAjuda() {
     this.mostrarAjuda = true;
@@ -93,10 +89,8 @@ export class TotemCheckinComponent {
     this.mostrarAjuda = false;
   }
 
-  // CORREÇÃO AQUI: Mudamos 'KeyboardEvent' para 'any' para evitar o erro do TypeScript
   @HostListener('window:keydown.enter', ['$event'])
   handleEnter(event: any) {
-    // Se o modal de código estiver aberto, o Enter confirma
     if (this.mostrarModalCodigo) {
       this.confirmarCodigo();
     }

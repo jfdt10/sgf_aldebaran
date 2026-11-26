@@ -10,7 +10,6 @@
             </button>
         </div>
 
-        <!-- Se não houver usuários e não estiver carregando, mostrar estado vazio logo de cara? Mockup não especifica a barra de busca, mas vamos manter o padrão global -->
         <div class="list-card-search" *ngIf="usuarios.length > 0 || filtro">
             <div class="search-input-wrapper">
                 <lucide-icon [img]="icons.search" size="18" class="search-icon"></lucide-icon>
@@ -101,7 +100,6 @@
         </div>
     </div>
 
-    <!-- Modal de Cadastro / Edição -->
     <div class="modal-overlay" *ngIf="showModal" (click)="fecharModal()">
         <div class="modal-content" (click)="$event.stopPropagation()">
             <div class="modal-header">
@@ -145,7 +143,6 @@
                     </select>
                 </div>
 
-                <!-- Filial Selection (Mandatory) -->
                 <div class="form-group">
                     <label>Filial de Atuação *</label>
                     <select [(ngModel)]="usuarioForm.filial_id" [disabled]="isRestricted">
@@ -165,7 +162,6 @@
         </div>
     </div>
 
-    <!-- Modal de Redefinição de Senha -->
     <div class="modal-overlay" *ngIf="showPasswordResetModal" (click)="fecharModal()">
         <div class="modal-content" style="max-width: 400px;" (click)="$event.stopPropagation()">
             <div class="modal-header">
@@ -198,7 +194,6 @@
         </div>
     </div>
 
-    <!-- Modal de Sucesso -->
     <div class="modal-overlay" *ngIf="showSuccessModal" (click)="fecharModal()">
         <div class="modal-content" style="max-width: 380px; padding: 2rem; border-radius: 20px;"
             (click)="$event.stopPropagation()">

@@ -46,7 +46,6 @@ export class TaskService {
     const task = await this.prisma.taskItem.findUnique({ where: { id } });
     if (!task) throw new NotFoundException('Tarefa não encontrada');
 
-    // Convert string data to dates if necessary
     if (data.dataEntrega) data.dataEntrega = new Date(data.dataEntrega);
 
     return this.prisma.taskItem.update({

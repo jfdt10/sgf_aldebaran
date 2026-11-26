@@ -122,15 +122,11 @@ export class TotemLoginComponent {
     this.loading = true;
     this.error = '';
 
-    // Chamamos o endpoint de login através do ApiService
     this.api.post<any>('/auth/login', {
       email: this.credentials.login,
       senha: this.credentials.password
     }).subscribe({
       next: (res) => {
-        // O res contém { token, usuario, filialId }
-        // Garantir que user logado defina o token e fique no sessionStorage/localStorage
-        // Usar lógica padrão se necessário ou apenas setar o token e dados essenciais.
         if (res.usuario?.perfil === 'ADMIN' || res.usuario?.perfil === 'SUPERVISOR') {
           localStorage.setItem('token', res.access_token || res.token);
           localStorage.setItem('usuario_sgf', JSON.stringify(res.usuario));

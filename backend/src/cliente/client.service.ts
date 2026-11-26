@@ -15,7 +15,6 @@ export class ClientService {
     private notificacaoService: NotificacaoService,
   ) { }
 
-  // US-0001: Autocadastro Público (Exige Senha)
   async createPublic(data: any) {
     let whereClause: any = {};
     if (data.tipo === 'PF') {
@@ -68,7 +67,6 @@ export class ClientService {
       },
     });
 
-    // Notificação de autocadastro
     await this.notificacaoService.criar({
       titulo: 'Novo Autocadastro',
       mensagem: `${client.nome} se cadastrou pelo portal público.`,
@@ -79,7 +77,6 @@ export class ClientService {
     return client;
   }
 
-  // US-0002: Cadastro Operacional (Pelo Admin/Supervisor - Não exige senha inicial, ou usa senha padrão)
   async createOperacional(data: any) {
     let whereClause: any = {};
     if (data.tipo === 'PF') {
@@ -96,7 +93,6 @@ export class ClientService {
     if (existe)
       throw new ConflictException('Cliente já existe com este documento.');
 
-    // Check email uniqueness if provided
     if (data.email) {
       const emailExiste = await this.prisma.clientes.findUnique({
         where: {
@@ -106,7 +102,6 @@ export class ClientService {
       if (emailExiste) throw new ConflictException('E-mail já cadastrado.');
     }
 
-    // Senha padrão administrativa se não fornecida
     const senhaProvisoria = data.senha || 'Aldebaran@123';
     const senhaHash = await bcrypt.hash(senhaProvisoria, 12);
 
@@ -131,7 +126,6 @@ export class ClientService {
       },
     });
 
-    // Notificação de novo cliente (operacional)
     await this.notificacaoService.criar({
       titulo: 'Novo Cliente',
       mensagem: `Cliente ${client.nome} cadastrado via sistema.`,
@@ -142,7 +136,6 @@ export class ClientService {
     return client;
   }
 
-  // Listar todos (sem expor senhas)
   async findAll(filialId?: number, busca?: string) {
     if (busca) {
       const buscaTrim = busca.trim();
@@ -204,7 +197,6 @@ export class ClientService {
     });
   }
 
-  // Buscar um (sem expor senha)
   async findOne(id: string) {
     const cliente = await this.prisma.clientes.findUnique({
       where: {
@@ -227,12 +219,9 @@ export class ClientService {
     return cliente;
   }
 
-  // Atualizar (sem permitir mudança direta de senha aqui)
   async update(id: string, data: any) {
-    // Verifica se existe antes de tentar atualizar
     await this.findOne(id);
 
-    // Uniqueness checks
     const { cpf, cnpj, email } = data;
 
     const duplicate = await this.prisma.clientes.findFirst({
@@ -252,7 +241,6 @@ export class ClientService {
       );
     }
 
-    // Remove senha do payload de atualização
     const { senha, ...safeData } = data;
 
     const client = await this.prisma.clientes.update({
@@ -275,7 +263,6 @@ export class ClientService {
       },
     });
 
-    // Notificação de atualização
     await this.notificacaoService.criar({
       titulo: 'Cliente Atualizado',
       mensagem: `Dados do cliente ${client.nome} foram alterados.`,
@@ -286,7 +273,6 @@ export class ClientService {
     return client;
   }
 
-  // Alternar Status (Ativo/Inativo - Soft Delete)
   async toggleStatus(id: string) {
     const cliente = await this.findOne(id);
     const isDeleted = !!cliente.deletedAt;
@@ -318,7 +304,6 @@ export class ClientService {
     return { exists: !!existe };
   }
 
-  // Redefinir Senha
   async resetPassword(id: string, novaSenha: string) {
     await this.findOne(id);
     const senhaHash = await bcrypt.hash(novaSenha, 12);

@@ -62,7 +62,6 @@ export class CadastrosGerais implements OnInit {
     this.updateCurrentTab(this.router.url);
     this.carregarFiliais();
     
-    // Pegar filial dos query params no carregamento inicial se não for restrito
     this.route.queryParams.subscribe(params => {
       if (!this.isRestricted && params['filialId']) {
         this.selectedFilialId = +params['filialId'];

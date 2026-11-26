@@ -47,7 +47,6 @@ export class FilialService {
     );
   }
 
-  // Permite forçar recarregamento se necessário
   fetchFiliais(): Observable<Filial[]> {
     return this.apiService.get<Filial[]>('/filiais').pipe(
       tap(data => this.filiaisSubject.next(data))

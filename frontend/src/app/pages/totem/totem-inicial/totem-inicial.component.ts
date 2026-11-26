@@ -26,12 +26,10 @@ export class TotemInicialComponent implements OnInit {
     }
   }
 
-  // Ação do botão "Tenho Agendamento"
   navegarParaCheckin() {
     this.router.navigate(['/totem/checkin']);
   }
 
-  // Ação do botão "Retirar Senha"
   navegarParaSenha() {
     this.router.navigate(['/totem/tipo-atendimento']);
   }

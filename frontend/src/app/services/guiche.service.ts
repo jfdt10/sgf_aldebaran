@@ -196,7 +196,6 @@ export class GuicheService {
         const mapped = ativos.map(g => this.mapGuicheData(g, correntes));
 
         mapped.sort((a, b) => {
-          // Ordenar pelo nome configurado, mas tentar numericalmente primeiro
           const numA = parseInt(a.nome || a.numero, 10);
           const numB = parseInt(b.nome || b.numero, 10);
           if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
@@ -209,7 +208,7 @@ export class GuicheService {
     });
   }
 
-  private _tempoTolerancia: number = 15; // in minutos
+  private _tempoTolerancia: number = 15;
   private timer: any;
 
   refreshGuiches(filialId?: number) {
@@ -244,12 +243,10 @@ export class GuicheService {
 
   private iniciarTimer() {
     this.timer = setInterval(() => {
-      // Sync with server every 10 seconds
       if (Math.floor(Date.now() / 1000) % 10 === 0) {
         this.refreshGuiches(this.lastFilialId);
       }
 
-      // Smooth timer updates for the UI
       let needsUpdate = false;
       const guiches = this.guichesSubject.value.map(g => {
         if (g.status === 'ocupado' && g.startTime) {

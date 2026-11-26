@@ -83,7 +83,6 @@ export class RegrasFilaComponent implements OnInit {
     }).subscribe({
       next: (res) => {
         this.servicos = res.servicos;
-        // Transformar array do backend para o objeto esperado pelo form
         if (Array.isArray(res.configs)) {
           const configObj: any = {};
           res.configs.forEach((c: any) => configObj[c.chave] = c.valor);
@@ -105,7 +104,6 @@ export class RegrasFilaComponent implements OnInit {
   salvarAlteracoes() {
     this.loading = true;
     
-    // Prepare service observables
     const servicoRequests = this.servicos.map(s => 
       this.api.patch(`/servicos/${s.id}`, {
         prefixo: s.prefixo,
@@ -115,8 +113,6 @@ export class RegrasFilaComponent implements OnInit {
       })
     );
 
-    // Prepare configuration observables
-    // Transformar objeto local para array esperado pelo backend
     const configList = Object.keys(this.configs).map(chave => ({
       chave: chave,
       valor: String(this.configs[chave])
@@ -125,7 +121,6 @@ export class RegrasFilaComponent implements OnInit {
     const filialQuery = this.selectedFilialId ? `?filialId=${this.selectedFilialId}` : '';
     const configRequest = this.api.post(`/configuracoes/bulk${filialQuery}`, { configs: configList });
 
-    // Concurrent execution
     forkJoin([...servicoRequests, configRequest]).subscribe({
       next: () => {
         this.loading = false;
@@ -157,7 +152,7 @@ export class RegrasFilaComponent implements OnInit {
         this.calibrando = false;
         this.calibracaoResultado = res.resultados || [];
         this.showSuccessModal = true;
-        this.carregarDados(); // reload updated SLA values
+        this.carregarDados();
         this.cdr.detectChanges();
       },
       error: (err) => {

@@ -18,13 +18,11 @@ export class FiliaisComponent implements OnInit {
   usuarioLogado: any = null;
   selectedFilialId: number | null = null;
   
-  // Modais State
   showModal = false;
   editando = false;
   showConfirmDelete = false;
   showSuccessModal = false;
   
-  // Modal Form (Filial)
   form: any = {
     id: null,
     nome: '',

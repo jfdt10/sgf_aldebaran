@@ -13,7 +13,6 @@ export class LogController {
     return this.logService.findAll(query, req.user.filial_id);
   }
 
-  // Opcional: Rota POST manual caso o Front end precise gravar logs de erros (US-0099)
   @Post()
   create(
     @Body() body: { acao: string; descricao: string; usuario_id?: number },

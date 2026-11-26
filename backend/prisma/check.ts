@@ -11,7 +11,6 @@ async function check() {
     });
     console.log('Admins found:', users);
 
-    // Set all of them to ADMIN
     await prisma.usuario.updateMany({
         where: { OR: [{ login: 'admin' }, { email: 'admin@aldebaran.com' }] },
         data: { perfil: 'ADMIN' }

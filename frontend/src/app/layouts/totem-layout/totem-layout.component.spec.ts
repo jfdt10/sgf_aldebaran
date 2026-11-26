@@ -1,18 +1,28 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter, Router } from '@angular/router';
+import { vi } from 'vitest';
 
-import { TotemLayout } from './totem-layout';
+import { TotemLayoutComponent } from './totem-layout.component';
 
-describe('TotemLayout', () => {
-  let component: TotemLayout;
-  let fixture: ComponentFixture<TotemLayout>;
+describe('TotemLayoutComponent', () => {
+  let component: TotemLayoutComponent;
+  let fixture: ComponentFixture<TotemLayoutComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TotemLayout]
+      imports: [TotemLayoutComponent],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(TotemLayout);
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    fixture = TestBed.createComponent(TotemLayoutComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

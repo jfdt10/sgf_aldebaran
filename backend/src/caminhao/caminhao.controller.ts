@@ -57,7 +57,6 @@ export class CaminhaoController {
     @Body() createCaminhaoDto: Prisma.caminhaoCreateInput,
     @Request() req: AuthenticatedRequest,
   ) {
-    // RN02 — Cadastro Operacional Simplificado: Operador e Supervisor não vinculam motoristas.
     if (createCaminhaoDto.motorista) {
       delete createCaminhaoDto.motorista;
     }

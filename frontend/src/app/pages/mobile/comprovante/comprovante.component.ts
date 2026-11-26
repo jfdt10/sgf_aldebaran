@@ -121,7 +121,6 @@ export class ComprovanteComponent implements OnInit, OnDestroy {
           ? codigoCheckin
           : `#${codigoCheckin}`;
 
-        // QR do voucher representa o mesmo valor aceito no check-in manual.
         if (codigoCheckin !== this.qrTextoAtual) {
           this.qrTextoAtual = codigoCheckin;
           await this.gerarQR(codigoCheckin);
@@ -170,7 +169,6 @@ export class ComprovanteComponent implements OnInit, OnDestroy {
   private obterCodigoCheckin(dados: any): string {
     const codigo = String(dados?.codigo || '').trim().toUpperCase();
     if (codigo) return codigo;
-    // Compatibilidade para registros antigos sem codigo persistido.
     return `AGENDAMENTO:${dados?.id}`;
   }
 

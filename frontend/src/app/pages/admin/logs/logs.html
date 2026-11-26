@@ -1,6 +1,5 @@
 <div class="page-container animate-up">
     
-    <!-- Seletor de Filial (Glassmorphism) -->
     <div class="filial-selector-wrapper">
         <div class="filial-selector-glass">
             <div class="selector-content">
@@ -25,17 +24,13 @@
         </div>
     </div>
 
-    <!-- Header -->
 
-    <!-- Content Card -->
     <div class="list-card">
-        <!-- Alert Banner -->
         <div class="alert-banner">
             <lucide-icon [img]="icons.lock" size="18"></lucide-icon>
             <span>Acesso restrito a Administradores - Todos os logs são monitorados</span>
         </div>
 
-        <!-- Filters & Actions -->
         <div class="list-card-header mb-4">
             <div class="search-box">
                 <lucide-icon [img]="icons.search" size="18"></lucide-icon>
@@ -48,7 +43,6 @@
             </button>
         </div>
 
-        <!-- Advanced Filters Grid -->
         <div class="filters-grid">
             <div class="filter-item">
                 <label>Ação:</label>
@@ -74,7 +68,6 @@
             </div>
         </div>
 
-        <!-- Table Container -->
         <div class="table-container mt-4">
             <table class="premium-table">
                 <thead>
@@ -112,7 +105,6 @@
                 </tbody>
             </table>
 
-            <!-- Empty State -->
             <div *ngIf="logs.length === 0 && !loading" class="empty-state">
                 <div class="icon-halo">
                     <lucide-icon [img]="icons.fileText" size="32"></lucide-icon>
@@ -121,14 +113,12 @@
                 <p>Tente ajustar os filtros ou a busca por texto.</p>
             </div>
 
-            <!-- Loading State -->
             <div *ngIf="loading" class="empty-state">
                 <div class="spinner"></div>
                 <p>Carregando registros...</p>
             </div>
         </div>
 
-        <!-- Pagination -->
         <div class="table-footer" *ngIf="total > 0">
             <div class="page-info">
                 Mostrando {{ (page - 1) * limit + 1 }} a {{ Math.min(page * limit, total) }} de {{ total }} registros

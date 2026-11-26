@@ -23,7 +23,6 @@ export class ClienteController {
     private readonly logService: LogService,
   ) {}
 
-  // US-0001: Rota Pública - Autocadastro
   @Post('autocadastro')
   async createPublic(@Body() createClienteDto: CreateClienteDto) {
     const res = await this.clienteService.createPublic(createClienteDto);
@@ -36,7 +35,6 @@ export class ClienteController {
     return res;
   }
 
-  // US-0002: Rota Protegida - Cadastro Operacional (Admin/Totem/Operador)
   @UseGuards(JwtAuthGuard)
   @Post()
   async createOperacional(

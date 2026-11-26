@@ -59,12 +59,10 @@ export class SupervisorPerfilComponent implements OnInit {
         telefone: user.telefone || '(11) 98765-4321',
         departamento: user.departamento || 'Gestão'
       });
-      // Try to load photo if user object had it
       if (user.fotoPerfil) {
         this.fotoUrl = environment.apiUrl + user.fotoPerfil;
       }
     } else {
-       // Mock fallback
        this.perfilForm.patchValue({
         nome: 'Roberta Alves',
         email: 'roberta.alves@fila.com',

@@ -32,7 +32,6 @@ export class MeuPerfil implements OnInit {
   }
 
   salvarPerfil() {
-    // Basic mock save
     alert('Perfil atualizado com sucesso!');
   }
 }

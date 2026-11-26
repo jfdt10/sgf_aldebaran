@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
+import { vi } from 'vitest';
 
 import { TotemInicialComponent } from './totem-inicial.component';
 
@@ -8,10 +10,14 @@ describe('TotemInicial', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TotemInicialComponent]
+      imports: [TotemInicialComponent],
+      providers: [
+        provideRouter([]),
+      ],
     })
     .compileComponents();
 
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     fixture = TestBed.createComponent(TotemInicialComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();

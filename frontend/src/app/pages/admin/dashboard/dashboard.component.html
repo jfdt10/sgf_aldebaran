@@ -1,6 +1,5 @@
 <div class="page-container">
   
-  <!-- Seletor de Filial (Glassmorphism) -->
   <div class="filial-selector-wrapper">
     <div class="filial-selector-glass">
       <div class="selector-content">
@@ -27,7 +26,6 @@
   </div>
 
   <div class="dashboard-grid" *ngIf="!loading">
-    <!-- Card 1 -->
     <div class="stat-card">
       <div class="card-top">
         <div class="icon-wrapper cyan-bg">
@@ -38,7 +36,6 @@
       <div class="card-label">Filiais Ativas</div>
     </div>
 
-    <!-- Card 2 -->
     <div class="stat-card">
       <div class="card-top">
         <div class="icon-wrapper blue-bg">
@@ -49,7 +46,6 @@
       <div class="card-label">Guichês Ativos</div>
     </div>
 
-    <!-- Card 3 -->
     <div class="stat-card">
       <div class="card-top">
         <div class="icon-wrapper purple-bg">
@@ -60,7 +56,6 @@
       <div class="card-label">Atendimentos Hoje</div>
     </div>
 
-    <!-- Card 4 -->
     <div class="stat-card">
       <div class="card-top">
         <div class="icon-wrapper orange-bg">
@@ -82,7 +77,6 @@
           <div class="title">{{ item.titulo }}</div>
           <div class="location">{{ item.local }}</div>
         </div>
-        <!-- Simple color mapping based broadly on typeId -->
         <span class="tag"
           [ngClass]="{
             'cyan-tag': item.tipoId === 'Caminhão', 

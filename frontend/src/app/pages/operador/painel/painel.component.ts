@@ -124,9 +124,8 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
             return;
         }
         const filialIdNum = parseInt(this.filialSelecionada || '0', 10);
-        // Tentar enviar dados sem id (gerado pelo Prisma)
         const payload = {
-            placa: this.formCaminhao.placa.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7), // Remove traços, espaços e formata para 7 caracteres alfanuméricos
+            placa: this.formCaminhao.placa.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7),
             modelo: this.formCaminhao.modelo,
             transportadora: this.formCaminhao.transportadora,
             capacidade: this.formCaminhao.capacidade,
@@ -162,7 +161,6 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
     ociosoIniciadoEm: number | null = null;
     ociosoTimer: any;
 
-    // Ícones do sistema
     icons = {
         user: User, phone: Phone, briefcase: Briefcase, hash: Hash,
         play: Play, check: CheckCircle, close: X, recall: RotateCcw, rotateCcw: RotateCcw,
@@ -173,14 +171,11 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
         history: History, eye: Eye, x: X, lock: Lock, chevronDown: ChevronDown
     };
 
-    // Status de fila
     filaAguardando = 12;
     tempoMedio = '14 min';
 
-    // Lista de próximas senhas
     filaProximas: any[] = [];
 
-    // Ticket Atual
     ticketAtual: any = null;
     modalAberto: string | null = null;
     successModal: 'truck' | 'client' | null = null;
@@ -293,7 +288,6 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
 
     guichesLista: Array<{ id: string; nome: string; guiche: string; status: string; atendimento: string }> = [];
 
-    // Polling de sincronização
     private destroy$ = new Subject<void>();
 
     constructor(
@@ -359,21 +353,17 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
 
                     localStorage.setItem('guicheAtual', guicheAtual.numero);
 
-                    // Ajusta para mostrar "Guichê 01" via string ou pegar o número sem parse incorreto
                     this.numeroGuiche = guicheAtual.numero;
 
                     this.guicheAtualId = guicheAtual.id;
 
-                    // Inicia cronometro Ocioso (pois começou sem ticket)
                     this.iniciarCronometroOcioso();
                     this.cdr.markForCheck();
 
-                    // Carrega fila real e resumos
                     this.carregarFila();
                     this.carregarResumos();
                     this.carregarTicketAtual();
 
-                    // Inicia polling para detectar perda de guichê e lista de fila
                     this.iniciarPollingGuiche();
                 },
                 error: (err) => {
@@ -425,7 +415,6 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
         const id = this.filialSelecionada ? parseInt(this.filialSelecionada, 10) : null;
         this.filialService.setSelectedFilial(id);
 
-        // Ao mudar a filial, recarrega a fila e os resumos (agendamentos daquela filial)
         this.carregarFila();
         this.carregarResumos();
         this.cdr.markForCheck();
@@ -442,7 +431,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
     }
 
     private iniciarPollingGuiche() {
-        interval(5000) // Verifica a cada 5 segundos
+        interval(5000)
             .pipe(
                 switchMap(() => this.guicheService.getCurrentOperatorGuiche().pipe(
                     catchError(() => of(undefined))
@@ -453,12 +442,10 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                 next: (guicheSelecionado: GuicheOperador | null | undefined) => {
                     if (guicheSelecionado === undefined) return;
 
-                    // Se não tem mais guichê, volta pra seleção
                     if (guicheSelecionado === null) {
                         this.router.navigate(['/operador/escolha-guiches']);
                         return;
                     }
-                    // Atualiza a fila e resumos periodicamente
                     this.carregarFila();
                     this.carregarResumos();
                     this.carregarTicketAtual();
@@ -473,7 +460,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
 
     confirmarSair() {
         this.modalAberto = null;
-        this.destroy$.next(); // Para o polling imediatamente
+        this.destroy$.next();
         this.guicheService.releaseCurrentGuiche()
             .pipe(
                 finalize(() => {
@@ -560,7 +547,6 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
 
     chamarProximo() {
         if (this.ticketAtual && this.ticketAtual.status !== 'FINALIZADO' && this.ticketAtual.status !== 'CANCELADO') {
-            // Block if already in progress
             return;
         }
 
@@ -592,7 +578,6 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                 this.mostrarSugestoesCliente = false;
                 this.tempoAtendimento = '00:00';
 
-                // Parar ocioso
                 this.pararCronometroOcioso();
                 this.pararCronometroAtendimento();
                 this.carregarFila();
@@ -622,13 +607,12 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
         if (this.ticketAtual && this.ticketAtual.id) {
             this.api.post<any>('/fila/finalizar_atendimento', { senhaId: this.ticketAtual.id }).subscribe({
                 next: () => {
-                    this.ticketAtual = null; // Libera o guichê
+                    this.ticketAtual = null;
                     this.pararCronometroAtendimento();
                     this.tempoAtendimento = '00:00';
                     this.termoBuscaCliente = '';
                     this.mostrarSugestoesCliente = false;
 
-                    // Iniciar Ocioso novamente
                     this.iniciarCronometroOcioso();
                     this.cdr.markForCheck();
                 },
@@ -639,7 +623,6 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
 
 
 
-    // Removendo declarações duplicadas no escopo superior.
     trocarIdioma(idioma: string) {
         this.idiomaAtivo = idioma;
         if (!environment.production) console.log('Idioma alterado para:', idioma);
@@ -676,7 +659,6 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                 this.tempoAtendimento = '00:00';
                 this.modalAberto = null;
 
-                // Iniciar Ocioso novamente
                 this.iniciarCronometroOcioso();
                 this.cdr.markForCheck();
             },
@@ -751,7 +733,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
     }
 
     encerrarTransferencia() {
-        this.ticketAtual = null; // Libera o guichê atual
+        this.ticketAtual = null;
         this.pararCronometroAtendimento();
         this.tempoAtendimento = '00:00';
         this.guicheTransferenciaSelecionado = null;
@@ -759,7 +741,6 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
         this.retornarFilaGeral = false;
         this.modalAberto = null;
 
-        // Iniciar Ocioso novamente
         this.iniciarCronometroOcioso();
         this.carregarFila();
     }
@@ -828,7 +809,6 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
         this.mostrarSugestoesCliente = false;
         this.cdr.markForCheck();
 
-        // Envia para o backend para persistir
         this.api.patch<any>(`/fila/senha/${this.ticketAtual.id}/cliente`, {
             nome: cliente.nome,
             documento: cliente.documento,
@@ -878,7 +858,6 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
         }
     }
 
-    // -- Resumos de Badges (Meus Atendimentos e Agendamentos) --
     carregarResumos() {
         if (!this.filialSelecionada) return;
         const fid = parseInt(this.filialSelecionada, 10);
@@ -956,7 +935,6 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
     badgeAgendamentosCount = 0;
     badgeMeusAtendimentosCount = 0;
 
-    // Dropdown de Perfil e Edição
     showProfileMenu = false;
     operadorEmail = '';
     operadorForm = {
@@ -1179,7 +1157,6 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                 this.cdr.markForCheck();
             },
             error: () => {
-                // salva localmente mesmo sem backend para não bloquear fluxo
                 this.justificativaForm.reset();
                 this.showJustificativaModal = false;
                 this.atendimentoSelecionado = null;
@@ -1281,7 +1258,6 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
         });
     }
 
-    // -- Cronômetro Ocioso --
     private iniciarCronometroOcioso() {
         this.pararCronometroOcioso();
         this.ociosoIniciadoEm = Date.now();
@@ -1322,7 +1298,6 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
             return limpo.toUpperCase();
         }
 
-        // Se for apenas número, adiciona GUICHÊ, senão mantém o texto como veio
         if (!isNaN(Number(limpo))) {
             return `GUICHÊ ${limpo}`;
         }

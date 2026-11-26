@@ -36,7 +36,6 @@ export class TotemSetupComponent implements OnInit {
 
   ngOnInit(): void {
     this.carregarFiliais();
-    // Se já estiver configurado, podemos mostrar a opção de reconfigurar ou apenas avisar
     this.selectedFilialId = this.configService.getFilialId();
   }
 

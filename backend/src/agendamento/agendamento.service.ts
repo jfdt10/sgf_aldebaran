@@ -417,7 +417,6 @@ export class AgendamentoService {
       );
     }
 
-    // Valida se o novo horário de agendamento é válido para o cliente
     await this.clienteRegrasService.validarAgendamentoCliente({
       data: dto.data,
       hora: dto.hora,
@@ -430,7 +429,7 @@ export class AgendamentoService {
       data: {
         data: dto.data,
         hora: dto.hora,
-        status: AgendamentoStatus.CONFIRMADO, // Caso estivesse em outro status ativo (ex: PENDENTE)
+        status: AgendamentoStatus.CONFIRMADO,
       },
       include: {
         servico: {

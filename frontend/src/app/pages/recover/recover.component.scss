@@ -1,4 +1,3 @@
-/* --- Variáveis de Cor --- */
 $gradient-start: #00a0e9;
 $gradient-end: #008f78;
 $text-dark: #1a1a1a;
@@ -18,7 +17,6 @@ $input-border: #e0e0e0;
   }
 }
 
-/* --- LADO COLORIDO --- */
 .brand-section {
   background: linear-gradient(160deg, $gradient-start 0%, $gradient-end 100%);
   color: white;
@@ -52,7 +50,6 @@ $input-border: #e0e0e0;
     align-items: center;
   }
 
-  /* LOGO BRANCO PURO (Fix definitivo) */
   .logo-white {
     width: 180px;
     margin-bottom: 20px;
@@ -90,7 +87,6 @@ $input-border: #e0e0e0;
   .divider { width: 1px; background: rgba(255,255,255,0.2); height: 35px; }
 }
 
-/* --- LADO FORMULÁRIO --- */
 .form-section {
   flex: 1;
   display: flex;
@@ -134,7 +130,6 @@ h2 {
   line-height: 1.5;
 }
 
-/* Input Moderno */
 .input-group {
   margin-bottom: 25px;
   
@@ -180,7 +175,6 @@ h2 {
   }
 }
 
-/* Botão Gradiente */
 .btn-gradient {
   width: 100%;
   padding: 16px;
@@ -203,7 +197,6 @@ h2 {
   &:disabled { opacity: 0.7; cursor: wait; }
 }
 
-/* Botão Outline (Voltar) */
 .btn-outline {
   width: 100%;
   padding: 14px;
@@ -220,7 +213,6 @@ h2 {
   &:hover { background: rgba(0, 160, 233, 0.1); }
 }
 
-/* Tela de Sucesso */
 .success-view {
   text-align: center;
   display: flex;
@@ -258,7 +250,6 @@ h2 {
   font-size: 0.9rem;
 }
 
-/* Animações */
 .fade-in { animation: fadeIn 0.5s ease-out; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 

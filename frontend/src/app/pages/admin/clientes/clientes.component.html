@@ -82,7 +82,6 @@
   </div>
 </div>
 
-<!-- Modal (Edit/Create) -->
 <div class="modal-overlay" *ngIf="showModal" (click)="fecharModal()">
   <div class="modal-content animate-pop" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -93,7 +92,6 @@
       <button class="close-btn" (click)="fecharModal()"><lucide-icon [img]="icons.x"></lucide-icon></button>
     </div>
 
-    <!-- Alert for default passwords -->
     <div class="alert-info" *ngIf="!isEditing && !clienteForm.senha" style="margin: 16px 24px 0;">
       <lucide-icon [img]="icons.alertCircle" size="20"></lucide-icon>
       <div>
@@ -102,7 +100,6 @@
     </div>
 
     <div class="modal-body">
-      <!-- PF/PJ Toggle - Segmented Control matching Screenshot 3 -->
       <div class="form-row">
         <div class="form-group flex-1">
           <label>TIPO</label>
@@ -164,7 +161,6 @@
   </div>
 </div>
 
-<!-- Modal de Sucesso -->
 <div class="modal-overlay" *ngIf="showSuccessModal" (click)="fecharModal()">
   <div class="modal-content" style="max-width: 380px; padding: 2rem; border-radius: 20px;"
     (click)="$event.stopPropagation()">

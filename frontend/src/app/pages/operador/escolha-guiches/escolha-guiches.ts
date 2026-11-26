@@ -24,18 +24,14 @@ export class EscolhaGuiches implements OnInit, OnDestroy {
   operadorAvatar = 'OP';
   operadorEmail = '';
 
-  // Ícones
   icons = { user: User, logout: LogOut, lock: Lock, mail: Mail, eye: Eye, eyeOff: EyeOff, close: X, building: Building, chevronDown: ChevronDown };
 
-  // Dropdown de perfil
   showProfileMenu = false;
 
-  // Modal editar perfil
   modalAberto: string | null = null;
   operadorForm = { nome: '', email: '', login: '', senha: '', confirmarSenha: '' };
   hasRestrictedFilial = false;
 
-  // Configurações
   filialSelecionada = '';
   idiomaAtivo = 'PT';
   carregando = false;
@@ -45,7 +41,6 @@ export class EscolhaGuiches implements OnInit, OnDestroy {
   guiches: GuicheOperador[] = [];
   filiais: Filial[] = [];
 
-  // Polling de sincronização
   private destroy$ = new Subject<void>();
   private pollingAtivo = false;
 
@@ -80,7 +75,7 @@ export class EscolhaGuiches implements OnInit, OnDestroy {
   }
 
   private atualizarGuichesEmTempoReal() {
-    interval(2000) // Atualiza a cada 2 segundos
+    interval(2000)
       .pipe(
         switchMap(() => {
           const fid = this.filialSelecionada ? parseInt(this.filialSelecionada, 10) : undefined;
@@ -97,7 +92,7 @@ export class EscolhaGuiches implements OnInit, OnDestroy {
           );
         }),
         takeUntil(this.destroy$),
-        catchError(() => of(this.guiches)) // Mantém lista antiga em caso de erro
+        catchError(() => of(this.guiches))
       )
       .subscribe({
         next: (lista: GuicheOperador[] | null) => {
@@ -176,7 +171,6 @@ export class EscolhaGuiches implements OnInit, OnDestroy {
           } catch {}
         }
 
-        // Filtra para exibir apenas a filial do operador (se tiver) ou todas se for global (null)
         if (usuarioFilialId) {
           this.filiais = data.filter((f: any) => f.id === usuarioFilialId);
           this.hasRestrictedFilial = true;
@@ -185,7 +179,6 @@ export class EscolhaGuiches implements OnInit, OnDestroy {
           this.hasRestrictedFilial = false;
         }
 
-        // Inicializa com a filial salva se existir e for válida
         const savedId = this.filialService.getSelectedFilialId();
         if (savedId && this.filiais.some((f: any) => f.id === savedId)) {
           this.filialSelecionada = savedId.toString();
@@ -211,7 +204,7 @@ export class EscolhaGuiches implements OnInit, OnDestroy {
     } else {
       this.filialService.setSelectedFilial(null);
     }
-    this.carregarGuiches(); // Recarrega guichês da nova filial
+    this.carregarGuiches();
   }
 
   private carregarGuiches() {
@@ -232,7 +225,7 @@ export class EscolhaGuiches implements OnInit, OnDestroy {
         next: (lista) => {
           this.guiches = lista;
           this.cdr.markForCheck();
-          this.iniciarPolling(); // ← Inicia polling após carregar
+          this.iniciarPolling();
         },
         error: () => {
           this.mensagemErro = 'Não foi possível carregar os guichês. Tente novamente.';
@@ -272,7 +265,6 @@ export class EscolhaGuiches implements OnInit, OnDestroy {
               : 'Guichê em Uso. Selecione Outro Guichê Disponível.';
           this.cdr.markForCheck();
 
-          // Recarrega imediatamente para mostrar que guichê foi ocupado
           setTimeout(() => {
             this.atualizarListaGuichesAgora();
           }, 300);
@@ -415,7 +407,6 @@ export class EscolhaGuiches implements OnInit, OnDestroy {
     if (/^Guich[êe]/i.test(limpo)) {
       return limpo.toUpperCase();
     }
-    // Se for apenas número, adiciona GUICHÊ, senão mantém o texto como veio
     if (!isNaN(Number(limpo))) {
       return `GUICHÊ ${limpo}`;
     }

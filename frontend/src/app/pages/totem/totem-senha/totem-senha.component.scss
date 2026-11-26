@@ -1,9 +1,8 @@
-/* --- ESTILO DE TELA (Visual do usuário) --- */
 
 .totem-container {
   width: 100%;
   height: 100vh;
-  background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%); /* Fundo Verde Água */
+  background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,7 +13,7 @@
 
 .ticket-card {
   background: white;
-  width: 380px; /* Largura fixa para parecer um papel */
+  width: 380px;
   padding: 40px;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.15);
@@ -24,7 +23,7 @@
 }
 
 .brand-logo {
-  max-width: 200px; /* IMPORTANTE: Impede o logo de ficar gigante */
+  max-width: 200px;
   height: auto;
   margin-bottom: 20px;
   display: block;
@@ -38,7 +37,7 @@
 }
 
 .senha-big {
-  font-size: 4.5rem; /* Tamanho da fonte da senha */
+  font-size: 4.5rem;
   font-weight: 900;
   color: #000;
   margin: 10px 0;
@@ -101,20 +100,17 @@
 }
 
 
-/* --- MODO DE IMPRESSÃO (O que sai no papel térmico) --- */
 @media print {
-  /* Esconde tudo que não interessa */
   body * {
     visibility: hidden;
   }
   
-  /* Mostra apenas o container do totem e seu conteúdo */
   .totem-container, .totem-container * {
     visibility: visible;
   }
 
   .totem-container {
-    background: none; /* Remove o fundo colorido para economizar tinta */
+    background: none;
     position: absolute;
     left: 0;
     top: 0;
@@ -126,25 +122,24 @@
   }
 
   .ticket-card {
-    box-shadow: none; /* Remove sombra */
-    width: 100%; /* Ocupa largura total do papel (58mm/80mm) */
+    box-shadow: none;
+    width: 100%;
     max-width: none;
     padding: 0;
     margin: 0;
     border: none;
   }
 
-  /* Ajustes para economizar papel */
   .brand-logo {
     max-width: 150px; 
     margin: 0 auto 10px auto;
   }
 
   .senha-big {
-    font-size: 3.5rem; /* Um pouco menor para caber no papel estreito */
+    font-size: 3.5rem;
   }
 
   .status-print {
-    display: none; /* Não imprime a mensagem "Imprimindo..." */
+    display: none;
   }
 }

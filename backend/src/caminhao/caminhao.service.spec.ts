@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CaminhaoService } from './caminhao.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { createPrismaMock } from '../prisma/prisma.mock';
+import { NotificacaoService } from '../notificacao/notificacao.service';
 
 const prismaMock = createPrismaMock();
 
@@ -13,6 +14,7 @@ describe('CaminhaoService', () => {
       providers: [
         CaminhaoService,
         { provide: PrismaService, useValue: prismaMock },
+        { provide: NotificacaoService, useValue: {} },
       ],
     }).compile();
 

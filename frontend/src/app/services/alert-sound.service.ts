@@ -59,7 +59,6 @@ export class AlertSoundService implements OnDestroy {
         oscillator.type = 'sine';
         oscillator.frequency.setValueAtTime(frequency, startTime);
         
-        // Envelope: attack rápido, decay natural
         gainNode.gain.setValueAtTime(0, startTime);
         gainNode.gain.linearRampToValueAtTime(0.5, startTime + 0.05);
         gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
@@ -72,9 +71,7 @@ export class AlertSoundService implements OnDestroy {
       };
 
       const now = audioCtx.currentTime;
-      // "Ding" - 880Hz
       playTone(880, now, 0.4);
-      // "Dong" - 660Hz (starts after ding starts decaying)
       playTone(660, now + 0.3, 0.5);
 
     } catch (e) {

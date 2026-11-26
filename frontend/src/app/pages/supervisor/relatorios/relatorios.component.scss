@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-// Cores base do design
 $bg-page: #f3f4f6;
 $text-main: #1f2937;
 $text-sec: #6b7280;
@@ -12,7 +11,6 @@ $border: #e5e7eb;
   min-height: 100vh;
 }
 
-/* HEADER TRANSPARENTE (Alinhado com Dashboard) */
 .page-header.white-header {
   background: transparent;
   padding: 0 0 24px 0;
@@ -113,7 +111,6 @@ $border: #e5e7eb;
   margin: 0;
 }
 
-/* KPI GRID */
 .kpi-grid {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
 }
@@ -142,7 +139,6 @@ $border: #e5e7eb;
   }
 }
 
-/* CHARTS GRID */
 .mt-24 { margin-top: 24px; margin-bottom: 24px; }
 .mb-16 { margin-bottom: 16px; }
 
@@ -157,7 +153,7 @@ $border: #e5e7eb;
 .bar-chart {
   flex: 1; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; min-height: 140px;
   padding-bottom: 8px; border-bottom: 1px solid $border;
-  position: relative; /* Para posicionar os tooltips */
+  position: relative;
   .bar { 
     flex: 1; border-radius: 4px 4px 0 0; 
     transition: height 0.5s ease-out, transform 0.2s;
@@ -169,7 +165,6 @@ $border: #e5e7eb;
       filter: brightness(1.1);
     }
 
-    /* Tooltip customizado */
     &::before {
       content: attr(data-tooltip);
       position: absolute;
@@ -189,7 +184,6 @@ $border: #e5e7eb;
       z-index: 10;
     }
 
-    /* Setinha do tooltip */
     &::after {
       content: '';
       position: absolute;
@@ -223,7 +217,6 @@ $border: #e5e7eb;
   display: flex; justify-content: space-between; font-size: 0.8rem; color: $text-light; margin-top: 8px;
 }
 
-// Eixo X que distribui TODOS os rótulos de hora uniformemente
 .x-axis-full {
   display: flex;
   justify-content: space-between;
@@ -235,13 +228,11 @@ $border: #e5e7eb;
   span {
     flex: 1;
     text-align: center;
-    // Mostra apenas 1 em cada N para não sobrecarregar quando há muitas horas
     &:nth-child(odd) { visibility: hidden; }
     &:first-child, &:last-child { visibility: visible; }
   }
 }
 
-// Estado vazio quando não há dados no período
 .chart-empty-state {
   flex: 1;
   display: flex;
@@ -274,7 +265,6 @@ $border: #e5e7eb;
   }
 }
 
-/* BOTTOM LSTS */
 .bottom-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
   .chart-card { background: white; border-radius: 12px; border: 1px solid $border; padding: 20px; }
@@ -326,12 +316,10 @@ $border: #e5e7eb;
   }
 }
 
-/* BACKGROUNDS Adicionais */
 .bg-teal { background: #0d9488; }
 .bg-orange-light { background: #ffedd5; }
 .text-white { color: white; }
 
-/* --- MODAIS DE RELATÓRIOS --- */
 .modal-backdrop {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   background: rgba(31, 41, 55, 0.5); 
@@ -380,7 +368,6 @@ $border: #e5e7eb;
     padding: 24px; background: white; max-height: 70vh; overflow-y: auto;
   }
 
-  /* Detalhes Específicos */
   .ticket-header {
     display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
     .ticket-badge { padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; }
@@ -416,7 +403,6 @@ $border: #e5e7eb;
 
   .stars { display: flex; gap: 4px; .fill-yellow { fill: #fbbf24; } }
 
-  /* Justificativa Específicos */
   .alert-box {
     display: flex; gap: 12px; padding: 16px; border-radius: 12px; align-items: flex-start; border: 1px solid #fca5a5;
     p { margin: 4px 0 0 0; }
@@ -442,7 +428,6 @@ $border: #e5e7eb;
   .mt-24 { margin-top: 24px; }
   .mb-16 { margin-bottom: 16px; }
 
-  /* Footer e Botões */
   .modal-footer-gradient {
     display: flex; justify-content: flex-end; gap: 12px;
     padding: 20px 24px; background: #f9fafb; border-top: 1px solid $border;
@@ -468,7 +453,6 @@ $border: #e5e7eb;
     .w-full { width: 100%; padding: 12px; font-size: 1rem; border-radius: 8px; background: #0ea5e9; color: white; border: none; font-weight: 600; cursor: pointer;}
 }
 
-/* Utilities copiados do Dashboard */
 .bg-teal-light { background: #ccfbf1; } .text-teal { color: #0d9488; }
 .bg-blue-light { background: #e0f2fe; } .text-blue { color: #0ea5e9; }
 .bg-green-light { background: #dcfce7; } .text-green { color: #22c55e; }

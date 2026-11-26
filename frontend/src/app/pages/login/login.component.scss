@@ -1,6 +1,5 @@
-/* --- Variáveis de Cor --- */
-$gradient-start: #00a0e9; /* Azul Cyan */
-$gradient-end: #008f78;   /* Verde Teal */
+$gradient-start: #00a0e9;
+$gradient-end: #008f78;
 $text-dark: #1a1a1a;
 $text-grey: #888;
 $input-border: #e0e0e0;
@@ -10,15 +9,14 @@ $input-border: #e0e0e0;
   min-height: 100vh;
   width: 100%;
   font-family: 'Roboto', sans-serif;
-  flex-direction: column; /* Mobile: Um embaixo do outro */
+  flex-direction: column;
   background: white;
 
   @media (min-width: 900px) {
-    flex-direction: row; /* Desktop: Lado a lado */
+    flex-direction: row;
   }
 }
 
-/* --- LADO COLORIDO (BRAND) --- */
 .brand-section {
   background: linear-gradient(160deg, $gradient-start 0%, $gradient-end 100%);
   color: white;
@@ -30,13 +28,11 @@ $input-border: #e0e0e0;
   position: relative;
   overflow: hidden;
 
-  /* No Desktop, ocupa 45% da tela */
   @media (min-width: 900px) {
     width: 45%;
     padding: 0;
   }
 
-  /* Efeito de brilho no fundo */
   &::before {
     content: '';
     position: absolute;
@@ -54,16 +50,12 @@ $input-border: #e0e0e0;
     align-items: center;
   }
 
-  /* --- ALTERAÇÃO AQUI (LOGO BRANCO SIMPLES) --- */
   .logo-white {
     width: 200px;
     margin-bottom: 30px;
     
-    /* 1. brightness(0): Deixa tudo PRETO. */
-    /* 2. invert(1): Inverte o PRETO para BRANCO PURO. */
     filter: brightness(0) invert(1);
     
-    /* Se quiser levemente transparente, mantenha opacity. Se quiser sólido, remova. */
     opacity: 1; 
   }
 
@@ -83,7 +75,6 @@ $input-border: #e0e0e0;
     margin-bottom: 40px;
   }
 
-  /* Estatísticas */
   .stats-row {
     display: flex;
     justify-content: center;
@@ -120,7 +111,6 @@ $input-border: #e0e0e0;
   }
 }
 
-/* --- LADO BRANCO (FORM) --- */
 .form-section {
   flex: 1;
   display: flex;
@@ -135,7 +125,6 @@ $input-border: #e0e0e0;
   max-width: 380px;
 }
 
-/* Toggle PT/EN */
 .lang-toggle {
   position: absolute;
   top: 30px;
@@ -182,7 +171,6 @@ h2 {
   }
 }
 
-/* Inputs Modernos */
 .input-group {
   margin-bottom: 25px;
   
@@ -211,7 +199,7 @@ h2 {
 
     input {
       width: 100%;
-      padding: 16px 16px 16px 50px; /* Espaço pro ícone */
+      padding: 16px 16px 16px 50px;
       border: 1px solid $input-border;
       border-radius: 12px;
       font-size: 1rem;
@@ -233,7 +221,6 @@ h2 {
   }
 }
 
-/* Ações */
 .actions-row {
   display: flex;
   justify-content: space-between;
@@ -265,7 +252,6 @@ h2 {
   &:hover { text-decoration: underline; }
 }
 
-/* Botão Principal */
 .btn-gradient {
   width: 100%;
   padding: 16px;
@@ -289,7 +275,6 @@ h2 {
   &:disabled { opacity: 0.7; cursor: wait; }
 }
 
-/* Mensagem de Erro */
 .error-msg {
   color: #d32f2f;
   background: #ffebee;
@@ -305,7 +290,6 @@ h2 {
   gap: 8px;
 }
 
-/* Footer */
 .form-footer {
   text-align: center;
   margin-top: 40px;
@@ -331,7 +315,6 @@ h2 {
   }
 }
 
-/* Animações */
 .animate-up {
   animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   opacity: 0;

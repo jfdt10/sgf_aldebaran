@@ -30,17 +30,11 @@
       <div class="tab" [class.active]="currentTab === 'guiche'" (click)="selectTab('guiche')">
         Status dos Guichês <span class="badge blue-bg">{{ guichesAtivos }}</span>
       </div>
-      <!-- 
-      <div class="tab" [class.active]="currentTab === 'baia'" (click)="selectTab('baia')">
-        Status das Baias <span class="badge blue-bg">{{ baiasAtivas }}</span>
-      </div>
-      -->
       <div class="tab" [class.active]="currentTab === 'config'" (click)="selectTab('config')">
         Configurações
       </div>
     </div>
 
-    <!-- Fila de Espera -->
     <div class="tab-body" *ngIf="currentTab === 'espera'">
       <div class="queue-list-header">
         <span class="queue-count">{{ filteredFilaEspera.length }} senha(s) na fila</span>
@@ -82,7 +76,6 @@
 
         </div>
 
-        <!-- Empty state -->
         <div class="empty-queue-state" *ngIf="filteredFilaEspera.length === 0">
           <lucide-icon [img]="icons.check" size="40"></lucide-icon>
           <h4>Fila vazia</h4>
@@ -91,72 +84,7 @@
       </div>
     </div>
 
-    <!-- Status das Baias (Ocultado para uso futuro) -->
-    <!--
-    <div class="tab-body" *ngIf="currentTab === 'baia'">
-      <div class="baias-grid">
-        <div class="baia-card" *ngFor="let baia of baias" [ngClass]="baia.status">
-          <div class="card-header">
-            <h3>Baia {{ baia.numero }}</h3>
-            <span class="status-pill">{{ baia.statusLabel }}</span>
-          </div>
 
-          <div class="card-content" *ngIf="baia.status === 'ocupada'">
-            <div class="data-row">
-              <span class="label">Operador:</span>
-              <span class="value">{{ baia.operador }}</span>
-            </div>
-            <div class="data-row">
-              <span class="label">Atendendo:</span>
-              <span class="value font-bold">{{ baia.ticket }}</span>
-            </div>
-            <div class="data-row">
-              <span class="label">Veículo:</span>
-              <span class="value">{{ baia.placa }}</span>
-            </div>
-
-            <div class="progress-section">
-              <div class="progress-track">
-                <div class="progress-fill" [style.width]="baia.progresso + '%'" [class.bg-red-500]="baia.atrasado">
-                </div>
-              </div>
-              <span class="time-left" [class.text-red-500]="baia.atrasado">{{ baia.tempoOcupadoFormatado || '00:00' }}
-                min</span>
-            </div>
-          </div>
-
-          <div class="card-content empty-state" *ngIf="baia.status === 'livre'">
-            <div class="icon-circle green-circle">
-              <lucide-icon [img]="icons.check" size="24"></lucide-icon>
-            </div>
-            <h4>Pronta para Uso</h4>
-            <span class="op-name">Operador: {{ baia.operador }}</span>
-          </div>
-
-          <div class="card-content empty-state" *ngIf="baia.status === 'manutencao'">
-            <div class="icon-circle orange-circle">
-              <lucide-icon [img]="icons.alert" size="24"></lucide-icon>
-            </div>
-            <h4>Em Manutenção</h4>
-          </div>
-
-          <div class="card-actions">
-            <button class="btn-action-primary" (click)="chamarProximo(baia)" *ngIf="baia.status === 'livre'">
-              <lucide-icon [img]="icons.up" size="16"></lucide-icon>
-              Chamar Próximo
-            </button>
-            <button class="btn-action-secondary" (click)="encerrar(baia)" *ngIf="baia.status === 'ocupada'">
-              <lucide-icon [img]="icons.check" size="16"></lucide-icon>
-              Encerrar Atendimento
-            </button>
-          </div>
-
-        </div>
-      </div>
-    </div>
-    -->
-
-    <!-- Status dos Guichês -->
     <div class="tab-body" *ngIf="currentTab === 'guiche'">
       <div class="guiches-grid">
         <div class="guiche-card" *ngFor="let guiche of filteredGuiches" [ngClass]="guiche.status">
@@ -193,7 +121,6 @@
             </div>
           </div>
 
-          <!-- Estado VAZIO -->
           <div class="card-content empty-state" *ngIf="guiche.status === 'vazio'">
             <div class="icon-circle gray-circle">
               <lucide-icon [img]="icons.users" size="24"></lucide-icon>
@@ -201,7 +128,6 @@
             <h4 style="color: #ffffff;">Sem Operador</h4>
           </div>
 
-          <!-- Estado DISPONÍVEL -->
           <div class="card-content" *ngIf="guiche.status === 'disponivel'">
             <div class="operator-section">
               <div class="icon-circle green-circle">
@@ -212,7 +138,6 @@
             </div>
           </div>
 
-          <!-- Estado CHAMANDO (senha chamada, cliente a caminho) -->
           <div class="card-content chamando-state" *ngIf="guiche.status === 'chamando'">
             <div class="data-row">
               <span class="label">Operador:</span>
@@ -228,7 +153,6 @@
             </div>
           </div>
 
-          <!-- Estado OCUPADO -->
           <div class="card-content" *ngIf="guiche.status === 'ocupado'">
             <div class="data-row">
               <span class="label">Operador:</span>
@@ -340,7 +264,6 @@
 
   </div>
 
-  <!-- Modal: Seleção de Operador para Guichê -->
   <div class="modal-overlay" *ngIf="showOperadorModal" (click)="fecharModalOperador()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -354,14 +277,12 @@
       </div>
 
       <div class="modal-body">
-        <!-- Loading State -->
         <div class="operadores-list" *ngIf="operadorLoading">
           <div class="loading-state" style="text-align: center; padding: 2rem;">
             <p>Carregando operadores...</p>
           </div>
         </div>
 
-        <!-- Error State -->
         <div class="operadores-list" *ngIf="!operadorLoading && operadorError">
           <div class="error-state" style="text-align: center; padding: 2rem; color: #dc2626;">
             <lucide-icon [img]="icons.alert" size="24" style="margin-bottom: 0.5rem;"></lucide-icon>
@@ -369,7 +290,6 @@
           </div>
         </div>
 
-        <!-- Operadores List -->
         <div class="operadores-list" *ngIf="!operadorLoading && !operadorError && operadoresDisponiveis.length > 0">
           <div class="operador-item" *ngFor="let op of operadoresDisponiveis">
             <div class="operador-info">
@@ -400,7 +320,6 @@
     </div>
   </div>
 
-  <!-- Modal: Confirmação de Remover Operador -->
   <div class="modal-overlay" *ngIf="showRemoveOperatorConfirmModal" (click)="cancelarRemocaoOperador()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -422,7 +341,6 @@
     </div>
   </div>
 
-  <!-- Modal: Sucesso -->
   <div class="modal-backdrop" *ngIf="showSuccessModal">
     <div class="modal-c success-modal">
       <div class="s-icon">
@@ -434,7 +352,6 @@
     </div>
   </div>
 
-  <!-- Modal: Cadastrar Novo Operador -->
   <div class="modal-overlay" *ngIf="showCriarOperadorModal" (click)="fecharCriarOperadorModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -498,7 +415,6 @@
     </div>
   </div>
 
-  <!-- Modal: Confirmação de Cancelamento de Senha -->
   <div class="modal-overlay" *ngIf="showCancelModal" (click)="fecharModalCancelar()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -517,11 +433,9 @@
     </div>
   </div>
 
-  <!-- Modal: Zerar Fila -->
   <div class="modal-overlay" *ngIf="showZerarFilaModal" (click)="!zerarFilaLoading && fecharModalZerarFila()">
     <div class="modal-content modal-danger" (click)="$event.stopPropagation()">
 
-      <!-- Estado inicial: confirmação -->
       <ng-container *ngIf="!zerarFilaResultado">
         <div class="modal-header">
           <h2 class="danger-title">
@@ -552,7 +466,6 @@
         </div>
       </ng-container>
 
-      <!-- Estado resultado: sucesso -->
       <ng-container *ngIf="zerarFilaResultado?.sucesso">
         <div class="modal-body result-state">
           <div class="result-icon success-icon">
@@ -566,7 +479,6 @@
         </div>
       </ng-container>
 
-      <!-- Estado resultado: erro -->
       <ng-container *ngIf="zerarFilaResultado && !zerarFilaResultado.sucesso">
         <div class="modal-body result-state">
           <div class="result-icon error-icon">

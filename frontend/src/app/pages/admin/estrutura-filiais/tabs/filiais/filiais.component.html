@@ -24,7 +24,6 @@
         </thead>
         <tbody>
             <tr *ngFor="let f of filiais">
-                <!-- Filial Info -->
                 <td class="col-filial">
                     <div class="filial-card">
                         <div class="filial-icon" [style.background-color]="f.cor || '#0ea5e9'">
@@ -37,7 +36,6 @@
                     </div>
                 </td>
 
-                <!-- Localization -->
                 <td class="col-loc">
                     <div class="loc-wrapper">
                         <lucide-icon [img]="icons.map" size="16" class="gray-icon"></lucide-icon>
@@ -45,7 +43,6 @@
                     </div>
                 </td>
 
-                <!-- Telefone -->
                 <td class="col-phone">
                     <div class="phone-wrapper">
                         <lucide-icon [img]="icons.phone" size="16" class="gray-icon"></lucide-icon>
@@ -53,21 +50,18 @@
                     </div>
                 </td>
 
-                <!-- Guichês -->
                 <td class="col-guiches">
                     <div class="guiche-count">
                         {{ f._count?.guiches || 0 }}
                     </div>
                 </td>
 
-                <!-- Status -->
                 <td>
                     <span class="badge" [class.badge-ativo]="f.ativo" [class.badge-inativo]="!f.ativo">
                         {{ f.ativo ? 'Ativo' : 'Inativo' }}
                     </span>
                 </td>
 
-                <!-- Actions -->
                 <td class="col-actions">
                     <div class="action-buttons">
                         <button class="btn-action edit" (click)="abrirModal(f)">
@@ -89,7 +83,6 @@
     </div>
 </div>
 
-<!-- Modal: Nova/Editar Filial -->
 <div class="modal-overlay" *ngIf="showModal">
     <div class="modal-card">
         <div class="modal-header">
@@ -137,7 +130,6 @@
     </div>
 </div>
 
-<!-- Modal: Confirmação de Exclusão -->
 <div class="modal-overlay refined-overlay" *ngIf="showConfirmDelete">
     <div class="modal-card mini-modal refined-card">
         <div class="modal-body text-center">
@@ -158,7 +150,6 @@
     </div>
 </div>
 
-<!-- Modal: Sucesso -->
 <div class="modal-overlay refined-overlay" *ngIf="showSuccessModal">
     <div class="modal-card mini-modal refined-card">
         <div class="modal-body text-center">

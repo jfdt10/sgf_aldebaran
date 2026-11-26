@@ -63,7 +63,6 @@ export class EstruturaFiliaisComponent implements OnInit {
     this.updateCurrentTab(this.router.url);
     this.carregarFiliais();
     
-    // Inicializar filial selecionada a partir da URL se existir e não for restrito
     if (!this.isRestricted) {
       const urlTree = this.router.parseUrl(this.router.url);
       const fid = urlTree.queryParams['filialId'];
@@ -92,9 +91,8 @@ export class EstruturaFiliaisComponent implements OnInit {
   }
 
   onFilialChange() {
-    // Atualiza a URL com o novo filialId sem recarregar a página
     this.router.navigate([], {
-      relativeTo: this.router.routerState.root, // Use root for better stability
+      relativeTo: this.router.routerState.root,
       queryParams: { filialId: this.selectedFilialId },
       queryParamsHandling: 'merge'
     });

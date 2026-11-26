@@ -1,12 +1,10 @@
 <div class="console-operador">
-  <!-- TOP HEADER -->
   <header class="header-top">
     <div class="header-left">
       <img src="assets/logo-aldebaran.png" alt="Aldebaran" class="logo">
     </div>
     
     <div class="header-center">
-      <!-- Filial Selector (Supervisor-style) -->
       <div class="info-group">
         <span class="info-label">Filial</span>
         <div class="filial-glass-selector">
@@ -19,7 +17,6 @@
         </div>
       </div>
 
-      <!-- Language Selector -->
       <div class="info-group language-selector">
         <span class="info-label">Idioma</span>
         <div class="language-buttons">
@@ -40,21 +37,18 @@
     </div>
 
     <div class="header-right">
-      <!-- Meus Atendimentos Badge -->
       <button class="nav-btn btn-transparent text-purple" (click)="navegarPara('meus-atendimentos')">
         <lucide-icon [img]="icons.history" size="18"></lucide-icon>
         <span>Meus Atendimentos</span>
         <span class="badge-count bg-purple" *ngIf="badgeMeusAtendimentosCount > 0">{{ badgeMeusAtendimentosCount }}</span>
       </button>
 
-      <!-- Agendamentos Badge -->
       <button class="nav-btn btn-transparent text-blue" (click)="navegarPara('agendamentos')">
         <lucide-icon [img]="icons.calendar" size="18"></lucide-icon>
         <span>Agendamentos</span>
         <span class="badge-count bg-blue" *ngIf="badgeAgendamentosCount > 0">{{ badgeAgendamentosCount }}</span>
       </button>
 
-      <!-- Operator Profile -->
       <div class="profile-dropdown-container operator-profile">
         <div class="profile-trigger" (click)="toggleProfileMenu($event)" [class.active]="showProfileMenu">
           <div class="profile-info">
@@ -66,7 +60,6 @@
           </div>
         </div>
 
-        <!-- Profile Menu Dropdown -->
         <div class="profile-dropdown" *ngIf="showProfileMenu" (click)="$event.stopPropagation()">
           <div class="dropdown-header">
             <span class="m-name">{{ nomeOperador }}</span>
@@ -86,11 +79,8 @@
     </div>
   </header>
 
-  <!-- MAIN CONTAINER -->
   <div class="main-container">
-    <!-- LEFT SECTION: Operational Area -->
     <div class="left-section">
-      <!-- Call Buttons -->
       <div class="call-buttons">
         <button class="btn-call-primary" (click)="chamarProximo()" [disabled]="!numeroGuiche || (ticketAtual && ticketAtual.status !== 'FINALIZADO' && ticketAtual.status !== 'CANCELADO')" [class.disabled-btn]="ticketAtual && ticketAtual.status !== 'FINALIZADO' && ticketAtual.status !== 'CANCELADO'">
           <div class="btn-call-wrap">
@@ -103,9 +93,7 @@
         </button>
       </div>
 
-      <!-- Current Status Card -->
       <div class="status-card" [class.has-ticket]="ticketAtual">
-        <!-- Status Vazio -->
         <ng-container *ngIf="!ticketAtual">
             <div class="time-idle">
               <span class="idle-label">Tempo ocioso de atendimento:</span>
@@ -121,9 +109,7 @@
             </div>
         </ng-container>
 
-        <!-- Status Atendimento (Idêntico ao Figma) -->
         <div *ngIf="ticketAtual" class="ticket-display">
-            <!-- Top Header Ticket -->
             <div class="ticket-header">
               <div class="ticket-title-group">
                 <p class="ticket-label">Atendendo</p>
@@ -147,7 +133,6 @@
               </div>
             </div>
 
-            <!-- Dados do cliente / Pedido -->
             <div class="ticket-info-grid">
               <div class="info-card">
                 <p class="info-label">Categoria</p>
@@ -185,7 +170,6 @@
               </div>
             </div>
 
-            <!-- Botões de Ação do Ticket -->
             <div class="ticket-footer-actions">
               <p class="acoes-label">Ações</p>
               <div class="acoes-grid">
@@ -203,7 +187,6 @@
         </div>
       </div>
 
-      <!-- Search Box -->
       <div class="search-container">
         <div class="search-input-wrapper">
           <img src="assets/Icon (10).svg" class="search-icon" alt="" />
@@ -233,7 +216,6 @@
         </div>
       </div>
 
-      <!-- Quick Action Cards -->
       <div class="quick-actions">
         <button class="quick-action-card" (click)="abrirModalCadastro('caminhao')">
           <div class="card-icon caminhao">
@@ -257,7 +239,6 @@
       </div>
     </div>
 
-    <!-- RIGHT SECTION: Next Queue -->
     <aside class="right-section">
       <h3 class="sidebar-title">Próximas Senhas</h3>
       <div class="queue-counter">{{ filaProximas.length }}</div>
@@ -284,9 +265,7 @@
   </div>
 </div>
 
-<!-- MODALS OVELAYS -->
 
-<!-- Toast Rechamada -->
 <div *ngIf="mostrarToastRechamar" class="toast-container">
   <span class="toast-check">✓</span>
   <div class="toast-content">
@@ -296,7 +275,6 @@
   <button (click)="mostrarToastRechamar = false" class="toast-close">✕</button>
 </div>
 
-<!-- Modal Não Compareceu -->
 <div *ngIf="modalAberto === 'nao-compareceu'" class="modal-overlay">
   <div class="modal-content modal-nao-compareceu">
     <div class="modal-body">
@@ -311,7 +289,6 @@
   </div>
 </div>
 
-<!-- Modal Transferir -->
 <div *ngIf="modalAberto === 'transferir'" class="modal-overlay">
   <div class="modal-content modal-transferir">
     <div class="transferir-header">
@@ -376,7 +353,6 @@
   </div>
 </div>
 
-<!-- Modal Transferir Sucesso -->
 <div *ngIf="modalAberto === 'transferir-sucesso'" class="modal-overlay">
   <div class="modal-content modal-transferencia-sucesso">
     <div class="sucesso-icon-wrap" aria-hidden="true">
@@ -394,7 +370,6 @@
   </div>
 </div>
 
-<!-- Modal Cadastrar Caminhão -->
 <div *ngIf="modalAberto === 'cadastro-caminhao'" class="modal-overlay">
   <div class="modal-content modal-cadastro">
     <div class="cadastro-header">
@@ -445,7 +420,6 @@
   </div>
 </div>
 
-<!-- Modal Detalhes do Cliente -->
 <div *ngIf="modalAberto === 'detalhes-cliente'" class="modal-overlay">
   <div class="modal-content modal-cadastro">
     <div class="cadastro-header">
@@ -464,7 +438,6 @@
         <span>{{ clienteDetalhes.nota }}</span>
       </div>
 
-      <!-- Avatar e Nome do Perfil -->
       <div class="cliente-profile-section">
         <div class="avatar-large">
           {{ clienteDetalhes?.nome ? (clienteDetalhes.nome.substring(0, 2) | uppercase) : 'CL' }}
@@ -474,7 +447,6 @@
       </div>
 
       <div class="details-grid">
-        <!-- Nome Completo -->
         <div class="detail-card">
           <div class="icon-wrapper">
             <lucide-icon [img]="icons.user" style="width: 18px; height: 18px; display: flex;"></lucide-icon>
@@ -486,7 +458,6 @@
           </div>
         </div>
 
-        <!-- Documento -->
         <div class="detail-card">
           <div class="icon-wrapper">
             <lucide-icon [img]="icons.hash" style="width: 18px; height: 18px; display: flex;"></lucide-icon>
@@ -497,7 +468,6 @@
           </div>
         </div>
 
-        <!-- Telefone -->
         <div class="detail-card">
           <div class="icon-wrapper">
             <lucide-icon [img]="icons.phone" style="width: 18px; height: 18px; display: flex;"></lucide-icon>
@@ -509,7 +479,6 @@
           </div>
         </div>
 
-        <!-- E-mail -->
         <div class="detail-card">
           <div class="icon-wrapper">
             <lucide-icon [img]="icons.mail" style="width: 18px; height: 18px; display: flex;"></lucide-icon>
@@ -533,7 +502,6 @@
   </div>
 </div>
 
-<!-- Modal Cadastrar Cliente (PF/PJ) -->
 <div *ngIf="modalAberto === 'cadastro-cliente'" class="modal-overlay">
   <div class="modal-content modal-cadastro">
     <div class="cadastro-header">
@@ -596,7 +564,6 @@
   </div>
 </div>
 
-<!-- Modal Sucesso -->
 <div class="modal-overlay" *ngIf="successModal" (click)="fecharModal()">
   <div class="modal-content" style="max-width: 380px; padding: 2rem; border-radius: 20px;" (click)="$event.stopPropagation()">
     <div class="success-view">
@@ -612,7 +579,6 @@
   </div>
 </div>
 
-<!-- Modal Sair -->
 <div *ngIf="modalAberto === 'sair'" class="modal-overlay">
   <div class="modal-content logout-modal-redesign">
     <div class="modal-body-centered">
@@ -629,7 +595,6 @@
   </div>
 </div>
 
-<!-- MODAL: Meus Atendimentos -->
 <div class="modal-overlay" *ngIf="modalAberto === 'atendimentos'">
   <div class="modal-content operator-modal">
     <div class="modal-header-gradient">
@@ -644,7 +609,6 @@
       </button>
     </div>
     <div class="modal-body">
-      <!-- Local Date Filter inside Modal -->
       <div class="modal-filter-bar">
         <label for="oper-atend-date">Filtrar Data:</label>
         <input 
@@ -707,7 +671,6 @@
   </div>
 </div>
 
-<!-- MODAL: Agendamentos -->
 <div class="modal-overlay" *ngIf="modalAberto === 'agendamentos'">
   <div class="modal-content operator-modal">
     <div class="modal-header-gradient">
@@ -787,7 +750,6 @@
   </div>
 </div>
 
-<!-- MODAL: Detalhe do Atendimento -->
 <div class="modal-overlay" *ngIf="atendimentoSelecionado && !showJustificativaModal">
   <div class="modal-content operator-modal" style="max-width: 500px;">
     <div class="modal-header-gradient">
@@ -845,7 +807,6 @@
 </div>
 
 
-<!-- MODAL: Justificar Demora -->
 <div class="modal-overlay" *ngIf="showJustificativaModal">
   <div class="modal-content operator-modal">
     <div class="modal-header-gradient">
@@ -885,7 +846,6 @@
   </div>
 </div>
 
-<!-- MODAL: Editar Perfil -->
 <div class="modal-overlay" *ngIf="modalAberto === 'editar-perfil'" (click)="fecharModal()">
   <div class="modal-content redesign-modal modal-profile-edit" style="max-width: 500px;" (click)="$event.stopPropagation()">
     <div class="modal-header-gradient">
@@ -951,7 +911,6 @@
   </div>
 </div>
 
-<!-- Modal Check-in Operador -->
 <div *ngIf="agendamentoParaCheckin" class="modal-overlay">
   <div class="modal-content redesign-modal" style="max-width: 450px;">
     <div class="modal-header-gradient">
@@ -987,7 +946,6 @@
   </div>
 </div>
 
-<!-- Modal Cancelar Agendamento -->
 <div *ngIf="agendamentoParaCancelar" class="modal-overlay">
   <div class="modal-content modal-nao-compareceu" style="max-width: 400px;">
     <div class="modal-body">
@@ -1004,7 +962,6 @@
   </div>
 </div>
 
-<!-- Modal Resgatar Agendamento -->
 <div *ngIf="agendamentoParaResgatar" class="modal-overlay">
   <div class="modal-content modal-nao-compareceu" style="max-width: 400px;">
     <div class="modal-body">

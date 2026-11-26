@@ -4,54 +4,65 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import { createClient } from 'redis';
 import { INestApplicationContext } from '@nestjs/common';
 
-/**
- * Adaptador Redis para escalabilidade horizontal do Socket.io.
- * Permite que múltiplas instâncias do backend compartilhem o estado da fila.
- */
 export class RedisIoAdapter extends IoAdapter {
+  private clients: ReturnType<typeof createClient>[] = [];
   private adapterConstructor: ReturnType<typeof createAdapter>;
 
   constructor(app: INestApplicationContext) {
-    super();
+    super(app);
   }
 
-  /**
-   * Conecta ao Redis e cria os clientes de Publish/Subscribe.
-   * Retorna true se a conexão for bem sucedida, false caso contrário.
-   */
   async connectToRedis(redisUrl: string): Promise<boolean> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
     try {
       const pubClient = createClient({ url: redisUrl });
       const subClient = pubClient.duplicate();
+      this.clients = [pubClient, subClient];
+      for (const client of this.clients) {
+        client.on('error', (error: unknown) => {
+          if (client.isReady) console.warn('[RedisIoAdapter]', error);
+        });
+      }
 
-      // Timeout de conexão para não travar o boot do app
       await Promise.race([
         Promise.all([pubClient.connect(), subClient.connect()]),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Redis connection timeout')), 5000),
-        ),
+        new Promise((_, reject) => {
+          timer = setTimeout(() => reject(new Error('Redis connection timeout')), 5000);
+        }),
       ]);
 
       this.adapterConstructor = createAdapter(pubClient, subClient);
       return true;
     } catch (error) {
+      await this.dispose();
       console.warn(
         '⚠️ [RedisIoAdapter] Falha ao conectar ao Redis. Usando adaptador local (sem escalabilidade horizontal).',
       );
       console.warn('Erro:', error.message);
       return false;
+    } finally {
+      clearTimeout(timer);
     }
+  }
+
+  async dispose(): Promise<void> {
+    for (const client of this.clients) {
+      if (client.isOpen) client.destroy();
+    }
+    this.clients = [];
+    await super.dispose();
   }
 
   createIOServer(port: number, options?: ServerOptions): any {
     const server = super.createIOServer(port, {
       ...options,
       cors: {
-        origin: '*', // Em produção, restringir ao domínio do painel
+        origin: '*',
         methods: ['GET', 'POST'],
         credentials: true,
       },
-      transports: ['websocket'], // Força WS para maior performance e segurança
+      transports: ['websocket'],
     });
 
     server.adapter(this.adapterConstructor);

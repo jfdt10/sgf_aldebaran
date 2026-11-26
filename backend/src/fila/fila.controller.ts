@@ -19,7 +19,6 @@ import { FilaService } from './fila.service';
 export class FilaController {
   constructor(private readonly filaService: FilaService) { }
 
-  // Totem
   @Post('totem/senha')
   solicitarSenhaTotem(
     @Body()
@@ -130,7 +129,6 @@ export class FilaController {
     return this.filaService.excluirServico(+id);
   }
 
-  // Operação de Fila
   @Post('solicitar_senha')
   solicitarSenha(@Body() body: { servico_id: number }) {
     return this.filaService.solicitarSenha(body.servico_id);
@@ -159,7 +157,6 @@ export class FilaController {
   @UseGuards(JwtAuthGuard)
   @Get('operador/proximas')
   async listarProximas(@Request() req: any) {
-    // Busca os guiches do operador para saber a filial
     const guicheId = Number(req.headers['x-guiche-id']);
     if (!guicheId) return [];
     return this.filaService.listarProximas(guicheId);

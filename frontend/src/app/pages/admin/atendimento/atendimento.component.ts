@@ -149,7 +149,6 @@ export class AtendimentoComponent implements OnInit, OnDestroy {
     });
   }
 
-  // --- Internal Session Timer ---
   private startTimer() {
     this.stopTimer();
     this.tempoAtendimento = 0;

@@ -9,9 +9,7 @@ import { TotemService, Ticket } from '../../../services/totem.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './totem-senha.component.html',
-  // Component-specific styles
   styles: [`
-    /* General layout styles */
     :host {
       display: block;
       width: 100%;
@@ -43,7 +41,7 @@ import { TotemService, Ticket } from '../../../services/totem.service';
     }
 
     .brand-logo {
-      width: 180px;  /* Força o logo a ficar pequeno */
+      width: 180px;
       height: auto;
       margin-bottom: 20px;
       display: block;
@@ -109,7 +107,6 @@ import { TotemService, Ticket } from '../../../services/totem.service';
       0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; }
     }
 
-    /* --- MODO IMPRESSÃO (Térmica) --- */
     @media print {
       body * { visibility: hidden; }
       
@@ -141,8 +138,6 @@ import { TotemService, Ticket } from '../../../services/totem.service';
       .senha-big { font-size: 3.5rem; }
       .status-print { display: none; }
       
-      /* Oculta QR Code na impressão se quiser economizar tinta, ou deixa */
-      /* .qr-section { display: none; } */
     }
   `]
 })
@@ -171,7 +166,6 @@ export class TotemSenhaComponent implements OnInit {
 
     this.playAudio();
 
-    // Delay para garantir que o estilo carregou antes de imprimir
     setTimeout(() => {
       window.print();
     }, 300);

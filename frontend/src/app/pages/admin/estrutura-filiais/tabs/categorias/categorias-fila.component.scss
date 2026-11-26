@@ -47,7 +47,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-width: 0; // Crucial for ellipsis in nested flexbox
+    min-width: 0;
 
     .name-status {
       display: flex;
@@ -152,7 +152,6 @@
   }
 }
 
-/* Modal Styling */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -279,7 +278,6 @@
 
 .p-8 { padding: 32px !important; }
 
-/* Refined Modals */
 .refined-overlay {
   background: rgba(0, 0, 0, 0.4) !important;
   backdrop-filter: blur(8px) !important;

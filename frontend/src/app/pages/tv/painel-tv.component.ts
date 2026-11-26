@@ -28,10 +28,9 @@ export class PainelTvComponent implements OnInit, OnDestroy {
   private socket: Socket | null = null;
   private isInitialLoad = true;
 
-  // Propriedades para controle de alerta de nova chamada
   private ultimoIdChamado: string | null = null;
   exibirAlerta = false;
-  iniciado = false; // Add variable to track if user started the panel
+  iniciado = false;
 
   constructor(
     private apiService: ApiService,
@@ -48,7 +47,6 @@ export class PainelTvComponent implements OnInit, OnDestroy {
         this.atualizarDataHora();
         this.cdr.detectChanges();
       }),
-      // Fallback de resiliencia: evita painel congelado se o WS cair.
       interval(3000).subscribe(() => {
         if (this.iniciado && this.configurado) {
           this.atualizar();
@@ -74,7 +72,6 @@ export class PainelTvComponent implements OnInit, OnDestroy {
       }
     });
     this.conectarWebSocket();
-    // Do not fetch initial data until user clicks start
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -88,7 +85,6 @@ export class PainelTvComponent implements OnInit, OnDestroy {
     if (!this.configurado) return;
     this.iniciado = true;
 
-    // Play a silent sound to unlock audio context in the browser
     try {
       const AudioContextCtor = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioContextCtor) {
@@ -133,8 +129,6 @@ export class PainelTvComponent implements OnInit, OnDestroy {
 
     this.socket.on('ticket_called', (payload: any) => {
       if (this.iniciado && this.configurado) {
-        // Se houver um payload válido significa que alguém clicou em Chamar ou Rechamar.
-        // Se o payload for null/undefined foi apenas uma atualização de fila (como um Finalizar Atendimento).
         const deveForcar = !!payload;
         this.atualizar(deveForcar, payload);
       }
@@ -178,7 +172,6 @@ export class PainelTvComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Alterado para aceitar o payload do web socket que contem o ticket recém chamado (ticketId, category, guicheOrDoca)
   atualizar(forceAlert = false, payload?: any) {
     if (!this.filialId) return;
     const query = this.filialId ? `?filialId=${this.filialId}` : '';
@@ -204,11 +197,9 @@ export class PainelTvComponent implements OnInit, OnDestroy {
           }
 
           {
-            // Atualização silenciosa.
             if (!this.senhaAtual) {
               this.senhaAtual = dados.shift();
             } else {
-              // Mantém a senhaAtual no centro
               const idxEncontrado = dados.findIndex(
                 d => String(d.id) === String(this.senhaAtual.id) || String(d.numero) === String(this.senhaAtual.numero)
               );
@@ -216,21 +207,17 @@ export class PainelTvComponent implements OnInit, OnDestroy {
                 this.senhaAtual = dados[idxEncontrado];
                 dados.splice(idxEncontrado, 1);
               } else {
-                // Se a senha velha não estiver mais entre as 20 mais recentes (muito raro, mas possível)
-                // Vamos assumir a mais recente global mesmo.
                 this.senhaAtual = dados.shift();
               }
             }
             this.ultimasChamadas = dados.slice(0, 5);
 
-            // Só muda/registra o ID mais recente se de fato a tela atualizou suavemente sem tocar o sino
             const novoId = this.senhaAtual.id || this.senhaAtual.numero || this.senhaAtual.senha;
             if (!!this.ultimoIdChamado && this.ultimoIdChamado !== novoId || !this.ultimoIdChamado) {
               this.ultimoIdChamado = novoId;
             }
           }
         } else {
-          // Nao limpa imediatamente para evitar tela vazia em transicoes de status.
           if (this.isInitialLoad) {
             this.senhaAtual = null;
             this.ultimasChamadas = [];
@@ -257,8 +244,8 @@ export class PainelTvComponent implements OnInit, OnDestroy {
       gainNode.connect(audioCtx.destination);
 
       oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(660, audioCtx.currentTime); // Ding!
-      oscillator.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.3); // Dong!
+      oscillator.frequency.setValueAtTime(660, audioCtx.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.3);
 
       gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
@@ -274,16 +261,12 @@ export class PainelTvComponent implements OnInit, OnDestroy {
     this.ultimoIdChamado = this.senhaAtual.id || this.senhaAtual.numero || this.senhaAtual.senha;
     this.exibirAlerta = true;
 
-    // Tocar sinal sonoro antes de ler
     this.playAlertaSonoro();
 
-    // Delay de 800ms para aguardar o ding-dong terminar
     setTimeout(() => {
-      // Tocar API de fone para ler a senha
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        // Separa os caracteres se for "C041" para a fala ficar "C, zero, quatro, um"
         const numeroRaw = this.getSenhaNumero(this.senhaAtual);
-        const numeroBase = numeroRaw.replace(/[^A-Za-z0-9]/g, ''); // limpa espaços
+        const numeroBase = numeroRaw.replace(/[^A-Za-z0-9]/g, '');
         const numero = numeroBase.split('').join(', ');
 
         const destinoTipo = this.getGuicheDestinoTipo(this.senhaAtual).toLowerCase();
@@ -301,7 +284,6 @@ export class PainelTvComponent implements OnInit, OnDestroy {
       }
     }, 800);
 
-    // Esconde o alerta de piscar após 8 segundos
     setTimeout(() => {
       this.exibirAlerta = false;
     }, 8000);
@@ -316,11 +298,10 @@ export class PainelTvComponent implements OnInit, OnDestroy {
   }
 
   getServicoCor(item: any): string {
-    return item?.servico?.cor || '#00838f'; // Cor padrão verde-azulado
+    return item?.servico?.cor || '#00838f';
   }
 
   getGuiche(item: any): string {
-    // Agora o backend manda formatado "GUICHÊ X" ou "BAIA Y"
     return String(item?.guiche || item?.guicheNumero || '--');
   }
 
@@ -335,7 +316,6 @@ export class PainelTvComponent implements OnInit, OnDestroy {
     const g = this.getGuiche(item).trim();
     if (g === '--') return '--';
     const parts = g.split(' ');
-    // Retorna a última palavra/número como o valor (ex: "BAIA 2" -> "2", "SALA 5" -> "5")
     return parts.length > 1 ? parts[parts.length - 1] : g;
   }
 

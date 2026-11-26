@@ -30,7 +30,7 @@ export class RecoverComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private cd: ChangeDetectorRef // <--- O Segredo para atualizar a tela
+    private cd: ChangeDetectorRef
   ) { }
 
   enviar() {
@@ -47,22 +47,23 @@ export class RecoverComponent {
         if (!environment.production) console.log('Sucesso:', res);
 
         this.carregando = false;
-        this.step = 'SUCCESS'; // Troca a tela
+        this.step = 'SUCCESS';
 
-        this.cd.detectChanges(); // <--- Força a atualização visual
+        this.cd.detectChanges();
       },
       error: (err) => {
         console.error('Erro:', err);
         this.carregando = false;
 
-        // Se for 404, mostramos erro na tela. Se for outro, alert.
         if (err.status === 404) {
           this.erro = true;
+        } else if (err.status === 503) {
+          alert('Recupera??o por e-mail indispon?vel.');
         } else {
           alert('Erro ao conectar com o servidor.');
         }
 
-        this.cd.detectChanges(); // <--- Força a atualização visual
+        this.cd.detectChanges();
       }
     });
   }
