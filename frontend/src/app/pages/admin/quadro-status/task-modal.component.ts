@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -8,7 +9,7 @@ import { StatusItem, TaskItem, Priority } from '../../../models/task-management.
 @Component({
   selector: 'app-task-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
   templateUrl: './task-modal.component.html',
   styleUrls: ['./task-modal.component.scss']
 })

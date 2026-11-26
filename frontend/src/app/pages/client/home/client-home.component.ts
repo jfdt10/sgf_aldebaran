@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -79,7 +80,7 @@ interface CheckinResponseView {
 @Component({
   selector: 'app-client-home',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule, ClienteSuccessModalComponent],
+  imports: [TranslatePipe, CommonModule, RouterLink, LucideAngularModule, ClienteSuccessModalComponent],
   templateUrl: './client-home.component.html',
   styleUrls: ['./client-home.component.scss'],
 })

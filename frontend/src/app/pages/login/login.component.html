@@ -4,8 +4,8 @@
     <div class="brand-content">
       <img src="assets/logo-aldebaran.png" alt="Aldebaran" class="logo-white animate-up">
       
-      <h1 class="animate-up delay-1">Bem-vindo ao<br>Sistema de Filas Aldebaran</h1>
-      <p class="subtitle animate-up delay-2">Gestão Inteligente para Água Mineral</p>
+      <h1 class="animate-up delay-1">{{ "Bem-vindo ao" | tr }}<br>{{ "Sistema de Filas Aldebaran" | tr }}</h1>
+      <p class="subtitle animate-up delay-2">{{ "Gestão Inteligente para Água Mineral" | tr }}</p>
       
       <div class="stats-row animate-up delay-3">
         <div class="stat-item">
@@ -15,7 +15,7 @@
         <div class="divider"></div>
         <div class="stat-item">
           <span class="stat-val">{{ quantidadeFiliais }}+</span>
-          <span class="stat-label">Filiais</span>
+          <span class="stat-label">{{ "Filiais" | tr }}</span>
         </div>
         <div class="divider"></div>
         <div class="stat-item">
@@ -29,23 +29,23 @@
   <div class="form-section">
     
     <div class="lang-toggle">
-      <span class="active">PT</span>
-      <span>EN</span>
+      <button type="button" [class.active]="language.current() === 'PT'" [attr.aria-pressed]="language.current() === 'PT'" (click)="language.select('PT')">PT</button>
+      <button type="button" [class.active]="language.current() === 'EN'" [attr.aria-pressed]="language.current() === 'EN'" (click)="language.select('EN')">EN</button>
     </div>
 
     <div class="form-container">
-      <h2>Entrar</h2>
+      <h2>{{ "Entrar" | tr }}</h2>
 
       <form (ngSubmit)="fazerLogin()">
         
         <div class="input-group">
-          <label for="login-username">E-MAIL OU USUÁRIO</label>
+          <label for="login-username">{{ "E-MAIL OU USUÁRIO" | tr }}</label>
           <div class="input-wrapper">
             <lucide-icon [img]="icons.mail" size="20" class="input-icon"></lucide-icon>
             <input 
               id="login-username"
               type="text" 
-              placeholder="ex: joao.silva ou joao@empresa.com" 
+              [placeholder]='"ex: joao.silva ou joao@empresa.com" | tr'
               [(ngModel)]="credenciais.email" 
               name="email"
               autocomplete="username"
@@ -54,7 +54,7 @@
         </div>
 
         <div class="input-group">
-          <label for="login-password">SENHA DE ACESSO</label>
+          <label for="login-password">{{ "SENHA DE ACESSO" | tr }}</label>
           <div class="input-wrapper">
             <lucide-icon [img]="icons.lock" size="20" class="input-icon"></lucide-icon>
             <input 
@@ -71,24 +71,24 @@
         <div class="actions-row">
           <label class="checkbox-container">
             <input type="checkbox"> 
-            <span>Lembrar-me</span>
+            <span>{{ "Lembrar-me" | tr }}</span>
           </label>
-          <a routerLink="/recover" class="link-recover">Recuperar senha</a>
+          <a routerLink="/recover" class="link-recover">{{ "Recuperar senha" | tr }}</a>
         </div>
 
         <div class="error-msg" *ngIf="erroLogin">
           <lucide-icon name="alert-circle" size="16"></lucide-icon>
-          Usuário ou senha incorretos.
+          {{ "Usuário ou senha incorretos." | tr }}
         </div>
 
         <button type="submit" class="btn-gradient" [disabled]="carregando">
-          {{ carregando ? 'Validando Acesso...' : 'Entrar' }}
+          {{ carregando ? ("Validando Acesso..." | tr) : ("Entrar" | tr) }}
         </button>
 
       </form>
 
       <div class="form-footer">
-        <p>Ainda não possui acesso? <a routerLink="/signup">Criar conta</a></p>
+        <p>{{ "Ainda não possui acesso?" | tr }} <a routerLink="/signup">{{ "Criar conta" | tr }}</a></p>
       </div>
 
     </div>

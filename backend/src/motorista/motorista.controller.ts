@@ -45,11 +45,9 @@ export class MotoristaController {
         res.filial_id ?? undefined,
       );
       return res;
-    } catch (error: any) {
-      throw new HttpException(
-        error.message || 'Erro Interno',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      throw new HttpException('Erro interno.', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

@@ -740,3 +740,14 @@ $yellow-light-text: #ca8a04;
     font-size: 0.9rem; 
   }
 }
+
+@media (max-width: 900px) {
+  .kpi-grid, .desk-grid, .actions-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-header { flex-wrap: wrap; }
+}
+
+@media (max-width: 540px) {
+  .kpi-grid, .desk-grid, .actions-grid { grid-template-columns: minmax(0, 1fr); }
+  .dashboard-content { padding-inline: 0; min-width: 0; }
+  .dashboard-header, .alert-banner { flex-wrap: wrap; }
+}

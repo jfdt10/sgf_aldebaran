@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../../../services/translate.pipe';
 import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { finalize, forkJoin } from 'rxjs';
 @Component({
   selector: 'app-guiches',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './guiches.component.html',
   styleUrls: ['./guiches.component.scss']
 })

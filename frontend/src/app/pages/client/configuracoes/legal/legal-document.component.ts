@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../../services/translate.pipe';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -7,7 +8,7 @@ import { LegalDocumentContent } from './legal-content';
 @Component({
   selector: 'app-legal-document',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, LucideAngularModule],
   templateUrl: './legal-document.component.html',
   styleUrl: './legal-document.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

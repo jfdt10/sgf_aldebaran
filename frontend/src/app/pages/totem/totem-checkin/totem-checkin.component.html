@@ -5,8 +5,8 @@
       <img src="assets/logo-aldebaran.png" alt="Aldebaran" class="brand-logo">
     </div>
     <div class="lang-switch">
-      <div class="lang-option active">PT</div>
-      <div class="lang-option">EN</div>
+      <button type="button" class="lang-option" [class.active]="language.current() === 'PT'" [attr.aria-pressed]="language.current() === 'PT'" (click)="language.select('PT')">PT</button>
+      <button type="button" class="lang-option" [class.active]="language.current() === 'EN'" [attr.aria-pressed]="language.current() === 'EN'" (click)="language.select('EN')">EN</button>
     </div>
   </header>
 
@@ -15,7 +15,7 @@
     <div class="center-wrapper">
 
       <div class="heading-group">
-        <h1>Como você deseja realizar o check-in?</h1>
+        <h1>{{ "Como você deseja realizar o check-in?" | tr }}</h1>
       </div>
 
       <div class="split-card">
@@ -32,8 +32,8 @@
               <div class="scan-line"></div>
             </div>
           </div>
-          <h2>Via Leitor QR Code</h2>
-          <p>Aproxime seu código do leitor físico.</p>
+          <h2>{{ "Via Leitor QR Code" | tr }}</h2>
+          <p>{{ "Aproxime seu código do leitor físico." | tr }}</p>
         </div>
 
         <div class="divider-vertical">
@@ -42,16 +42,16 @@
 
         <div class="side-option code-side">
           <div class="text-group">
-            <h2>Via Código de Agendamento</h2>
-            <p>Digite o código recebido por e-mail ou SMS.</p>
+            <h2>{{ "Via Código de Agendamento" | tr }}</h2>
+            <p>{{ "Digite o código recebido por e-mail ou SMS." | tr }}</p>
           </div>
 
           <button class="btn-confirmar" (click)="abrirModalCodigo()">
-            Confirmar Check-in
+            {{ "Confirmar Check-in" | tr }}
           </button>
 
           <a class="link-ajuda" (click)="abrirAjuda()">
-            Onde encontro meu código?
+            {{ "Onde encontro meu código?" | tr }}
           </a>
         </div>
 
@@ -66,7 +66,7 @@
           <path d="M19 12H5" />
           <path d="M12 19l-7-7 7-7" />
         </svg>
-        Voltar
+        {{ "Voltar" | tr }}
       </button>
     </div>
 
@@ -76,13 +76,13 @@
     <div class="modal-card code-modal" (click)="$event.stopPropagation()">
 
       <div class="modal-header">
-        <h3>Código de Agendamento</h3>
+        <h3>{{ "Código de Agendamento" | tr }}</h3>
         <button class="btn-close" (click)="fecharModalCodigo()">✕</button>
       </div>
 
-      <p class="modal-desc">Insira o código alfanumérico recebido.</p>
+      <p class="modal-desc">{{ "Insira o código alfanumérico recebido." | tr }}</p>
 
-      <input type="text" class="code-input" placeholder="#ABC123 ou ABC123" [(ngModel)]="codigoDigitado"
+      <input type="text" class="code-input" [placeholder]='"#ABC123 ou ABC123" | tr' [(ngModel)]="codigoDigitado"
         [disabled]="loading" (keyup.enter)="confirmarCodigo()">
 
       <div class="error-box" *ngIf="erroMensagem">
@@ -98,14 +98,14 @@
       <div class="checkin-tipo-selector" [class.active]="checkinPreferencial" [class.disabled-selector]="loading"
         (click)="!loading && (checkinPreferencial = !checkinPreferencial)">
         <div class="checkbox-custom"></div>
-        <span class="selector-label">Atendimento Preferencial</span>
+        <span class="selector-label">{{ "Atendimento Preferencial" | tr }}</span>
       </div>
 
       <div class="modal-actions">
-        <button class="btn-cancel" (click)="fecharModalCodigo()" [disabled]="loading">Cancelar</button>
+        <button class="btn-cancel" (click)="fecharModalCodigo()" [disabled]="loading">{{ "Cancelar" | tr }}</button>
         <button class="btn-confirm" (click)="confirmarCodigo()" [disabled]="loading">
           <span class="spinner" *ngIf="loading"></span>
-          {{ loading ? 'Validando...' : 'Confirmar Check-in' }}
+          {{ loading ? 'Validando...' : ("Confirmar Check-in" | tr) }}
         </button>
       </div>
 
@@ -125,18 +125,18 @@
         </svg>
       </div>
 
-      <h3>Onde encontrar?</h3>
+      <h3>{{ "Onde encontrar?" | tr }}</h3>
 
       <div class="help-text">
-        <p>Seu código de agendamento foi enviado para:</p>
+        <p>{{ "Seu código de agendamento foi enviado para:" | tr }}</p>
         <ul>
-          <li><strong>E-mail:</strong> Verifique sua caixa de entrada ou spam.</li>
-          <li><strong>SMS/WhatsApp:</strong> Verifique as mensagens no seu celular.</li>
+          <li><strong>{{ "E-mail:" | tr }}</strong> {{ "Verifique sua caixa de entrada ou spam." | tr }}</li>
+          <li><strong>{{ "SMS/WhatsApp:" | tr }}</strong> {{ "Verifique as mensagens no seu celular." | tr }}</li>
         </ul>
-        <p class="small">O código pode conter letras e números.</p>
+        <p class="small">{{ "O código pode conter letras e números." | tr }}</p>
       </div>
 
-      <button class="btn-entendi" (click)="fecharAjuda()">Entendi</button>
+      <button class="btn-entendi" (click)="fecharAjuda()">{{ "Entendi" | tr }}</button>
 
     </div>
   </div>

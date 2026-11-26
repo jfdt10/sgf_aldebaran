@@ -32,7 +32,7 @@
                class="tab-btn" 
                [class.active]="currentTab === tab.id">
                 <lucide-icon [img]="tab.icon" size="18"></lucide-icon>
-                {{ tab.label }}
+                {{ tab.label | tr }}
             </a>
         </div>
 

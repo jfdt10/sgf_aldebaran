@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
@@ -35,7 +36,7 @@ export interface OperadorDesempenho {
 @Component({
   selector: 'app-supervisor-relatorios',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterLink, ReactiveFormsModule],
+  imports: [TranslatePipe, CommonModule, LucideAngularModule, RouterLink, ReactiveFormsModule],
   templateUrl: './relatorios.component.html',
   styleUrls: ['./relatorios.component.scss']
 })

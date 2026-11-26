@@ -17,7 +17,7 @@
     <div class="station-card">
       <div class="station-status" [ngClass]="statusAtendimento">
         <div class="status-indicator"></div>
-        <span>{{ statusAtendimento === 'IDLE' ? 'Disponível' : (statusAtendimento === 'EM_ATENDIMENTO' ? 'Em Atendimento' : 'Chamando...') }}</span>
+        <span>{{ statusAtendimento === 'IDLE' ? 'Disponível' : (statusAtendimento === 'EM_ATENDIMENTO' ? ("Em Atendimento" | tr) : 'Chamando...') }}</span>
       </div>
 
       <div class="station-body" *ngIf="statusAtendimento === 'IDLE' || statusAtendimento === 'CHAMANDO'">

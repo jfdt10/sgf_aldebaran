@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../services/translate.pipe';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { environment } from '../../../environments/environment';
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, FormsModule, RouterLink, LucideAngularModule],
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.scss']
 })

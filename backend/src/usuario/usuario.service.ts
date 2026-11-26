@@ -190,6 +190,21 @@ export class UsuarioService {
     });
   }
 
+  async changeMyPassword(id: number, senhaAtual: string, novaSenha: string) {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id, ativo: true, deletadoEm: null }, select: { senha: true },
+    });
+    if (!usuario || !await bcrypt.compare(senhaAtual, usuario.senha)) {
+      throw new ForbiddenException('A senha atual está incorreta.');
+    }
+    const hash = await bcrypt.hash(novaSenha, 12);
+    const result = await this.prisma.usuario.updateMany({
+      where: { id, senha: usuario.senha, ativo: true, deletadoEm: null },
+      data: { senha: hash, atualizadoEm: new Date() },
+    });
+    if (result.count !== 1) throw new ForbiddenException('A senha atual está incorreta.');
+  }
+
   async resetPassword(id: number, novaSenha: string, requestingUserFilialId?: number) {
     await this.findOne(id, requestingUserFilialId);
     const senhaHash = await bcrypt.hash(novaSenha, 12);

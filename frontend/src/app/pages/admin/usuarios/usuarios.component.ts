@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, HostListener, ChangeDetectorRef, OnDestroy, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +11,7 @@ import { AdminLayoutComponent } from '../../../layouts/admin-layout/admin-layout
 @Component({
     selector: 'app-usuarios',
     standalone: true,
-    imports: [CommonModule, FormsModule, LucideAngularModule],
+    imports: [TranslatePipe, CommonModule, FormsModule, LucideAngularModule],
     templateUrl: './usuarios.component.html',
     styleUrls: ['./usuarios.component.scss']
 })

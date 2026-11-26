@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, RouterLink, RouterOutlet } from '@angular/router';
@@ -8,7 +9,7 @@ import { ApiService } from '../../../services/api.service';
 @Component({
   selector: 'app-estrutura-filiais',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, LucideAngularModule, FormsModule],
+  imports: [TranslatePipe, CommonModule, RouterOutlet, RouterLink, LucideAngularModule, FormsModule],
   templateUrl: './estrutura-filiais.component.html',
   styleUrls: ['./estrutura-filiais.component.scss']
 })

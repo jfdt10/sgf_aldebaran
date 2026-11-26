@@ -2,11 +2,11 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
-  NotFoundException,
   BadRequestException,
-  ServiceUnavailableException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ModuleRef } from '@nestjs/core';
+import { NotificacaoGateway } from '../notificacao/notificacao.gateway';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
@@ -15,6 +15,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private readonly moduleRef: ModuleRef,
   ) {}
 
   async login(body: any) {
@@ -131,50 +132,50 @@ export class AuthService {
     return { message: 'Criado com sucesso', id: novo.id };
   }
 
-  async recover(email: string) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new ServiceUnavailableException('Recupera??o por e-mail indispon?vel.');
-    }
+  async recover(identificador: string) {
+    const lookup = identificador.trim();
+    if (!lookup) throw new BadRequestException('Informe o e-mail ou usuário.');
 
-    const staff = await this.prisma.usuario.findFirst({
-      where: { email, ativo: true, deletadoEm: null },
-      select: { id: true, email: true, nome: true },
+    const usuario = await this.prisma.usuario.findFirst({
+      where: { ativo: true, deletadoEm: null, OR: [{ login: lookup }, { email: { equals: lookup, mode: 'insensitive' } }] },
+      select: { login: true, filial_id: true },
+    });
+    const cliente = usuario ? null : await this.prisma.clientes.findFirst({
+      where: { email: { equals: lookup, mode: 'insensitive' }, deletedAt: null },
+      select: { email: true, filial_id: true },
     });
 
-    if (staff) {
-      const token = this.jwtService.sign(
-        { sub: staff.id, email: staff.email, isStaff: true },
-        { expiresIn: '15m', audience: 'password-reset' },
-      );
-
-      const frontendUrl = process.env['FRONT_URL'] || 'http://localhost:4200';
-      const link = `${frontendUrl}/reset-password?token=${token}`;
-
-      console.log(`📧 Reset link para staff ${email}: ${link}`);
-
-      return { message: 'Link de recuperação enviado.' };
+    if (usuario || cliente) {
+      const filialId = usuario?.filial_id ?? cliente?.filial_id ?? null;
+      const titulo = 'Solicitação de recuperação de senha';
+      const rota = usuario ? '/admin/cadastros/usuarios' : '/admin/cadastros/clientes';
+      const mensagem = 'Confirme a identidade antes de redefinir o acesso de ' + (usuario?.login ?? cliente?.email) + '.';
+      const registrarPedido = () => this.prisma.$transaction(async tx => {
+        const recente = await tx.notificacao.findFirst({
+          where: { titulo, rota, mensagem, criadoEm: { gte: new Date(Date.now() - 30 * 60 * 1000) } },
+          select: { id: true },
+        });
+        if (recente) return [];
+        const administradores = await tx.usuario.findMany({
+          where: { perfil: 'ADMIN', ativo: true, deletadoEm: null,
+            OR: [{ filial_id: null }, ...(filialId ? [{ filial_id: filialId }] : [])] },
+          select: { id: true },
+        });
+        if (!administradores.length) return [];
+        return tx.notificacao.createManyAndReturn({
+          data: administradores.map(admin => ({ titulo, mensagem, rota, usuario_id: admin.id })),
+        });
+      }, { isolationLevel: 'Serializable' });
+      const fluxo = await registrarPedido().catch((error: { code?: string }) => {
+        if (error.code === 'P2034') return registrarPedido();
+        throw error;
+      });
+      if (fluxo.length) {
+        const gateway = this.moduleRef.get(NotificacaoGateway, { strict: false });
+        for (const notificacao of fluxo) gateway.enviarNotificacao(notificacao);
+      }
     }
-
-    const cliente = await this.prisma.clientes.findUnique({
-      where: { email },
-      select: { id: true, email: true, nome: true },
-    });
-
-    if (!cliente) {
-      throw new NotFoundException('E-mail não encontrado.');
-    }
-
-    const token = this.jwtService.sign(
-      { sub: cliente.id, email: cliente.email, isStaff: false },
-      { expiresIn: '15m', audience: 'password-reset' },
-    );
-
-    const frontendUrl = process.env['FRONT_URL'] || 'http://localhost:4200';
-    const link = `${frontendUrl}/reset-password?token=${token}`;
-
-    console.log(`📧 Reset link para cliente ${email}: ${link}`);
-
-    return { message: 'Link de recuperação enviado.' };
+    return { accepted: true };
   }
 
   async resetPassword(token: string, novaSenha: string) {

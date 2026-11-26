@@ -3,7 +3,7 @@
   <div class="top-nav">
     <div class="logo-space">
     </div>
-    <button class="btn-voltar" routerLink="/supervisor/dashboard">Voltar</button>
+    <button class="btn-voltar" routerLink="/supervisor/dashboard">{{ "Voltar" | tr }}</button>
   </div>
 
   <div class="config-container">
@@ -14,7 +14,7 @@
         <nav class="sidebar-nav">
           <button *ngFor="let tab of tabs" class="nav-item" [class.active]="currentTab === tab.id"
             (click)="setTab(tab.id)">
-            {{ tab.label }}
+            {{ tab.label | tr }}
           </button>
         </nav>
       </div>
@@ -25,7 +25,7 @@
       <form [formGroup]="configForm" *ngIf="currentTab === 'geral'" class="tab-content config-form-container">
 
         <div class="header-section">
-          <h2>Configurações Gerais</h2>
+          <h2>{{ "Configurações Gerais" | tr }}</h2>
           <p>Gerencie as informações básicas da filial e aparência do sistema.</p>
         </div>
 
@@ -39,7 +39,7 @@
               <input type="text" formControlName="nomeFilial" [placeholder]="selectedFilialId ? 'Digite o novo nome' : 'Selecione uma filial específica para editar'">
             </div>
             <div class="form-field mix-width">
-              <label>Fuso Horário</label>
+              <label>{{ "Fuso Horário" | tr }}</label>
               <div class="select-wrapper">
                 <select formControlName="fusoHorario">
                   <option>(GMT-03:00) Brasília</option>
@@ -183,7 +183,7 @@
 
       <form [formGroup]="configForm" *ngIf="currentTab === 'notificacoes'" class="tab-content config-form-container">
         <div class="header-section">
-          <h2>Notificações</h2>
+          <h2>{{ "Notificações" | tr }}</h2>
           <p>Gerencie como a filial e os clientes recebem avisos.</p>
         </div>
         <hr class="divider">
@@ -236,10 +236,10 @@
 
           <div class="filter-box custom-select">
             <select [(ngModel)]="perfilFiltro" (change)="aplicarFiltros()">
-              <option value="">Todos os Perfis</option>
+              <option value="">{{ "Todos os Perfis" | tr }}</option>
               <option value="ADMIN">Administrador</option>
               <option value="SUPERVISOR">Supervisor</option>
-              <option value="OPERADOR">Operador</option>
+              <option value="OPERADOR">{{ "Operador" | tr }}</option>
             </select>
           </div>
         </div>
@@ -273,9 +273,9 @@
                 </td>
                 <td class="text-right">
                   <ng-container *ngIf="u.perfil !== 'ADMIN'; else adminActions">
-                    <button class="action-btn text-blue" title="Editar" (click)="abrirModalUsuario(u)"><lucide-icon [img]="icons.edit" size="16"></lucide-icon></button>
+                    <button class="action-btn text-blue" [title]='"Editar" | tr' (click)="abrirModalUsuario(u)"><lucide-icon [img]="icons.edit" size="16"></lucide-icon></button>
                     <button class="action-btn text-teal" title="Ativar/Inativar" (click)="alternarStatus(u.id, u.ativo)"><lucide-icon [img]="icons.check" size="16"></lucide-icon></button>
-                    <button class="action-btn text-red" title="Excluir" (click)="excluirUsuario(u.id, u.nome)"><lucide-icon [img]="icons.trash" size="16"></lucide-icon></button>
+                    <button class="action-btn text-red" [title]='"Excluir" | tr' (click)="excluirUsuario(u.id, u.nome)"><lucide-icon [img]="icons.trash" size="16"></lucide-icon></button>
                   </ng-container>
                   <ng-template #adminActions>
                     <button class="action-btn" style="color: #cbd5e1; cursor: not-allowed; opacity: 0.6;" title="Não é permitido alterar administradores" disabled><lucide-icon [img]="icons.edit" size="16"></lucide-icon></button>
@@ -341,12 +341,12 @@
             <form [formGroup]="novoUsuarioForm">
               <div class="settings-group">
                 <div class="form-field mb-16">
-                  <label>Nome Completo</label>
+                  <label>{{ "Nome Completo" | tr }}</label>
                   <input type="text" formControlName="nome" placeholder="Digite o nome completo">
                 </div>
 
                 <div class="form-field mb-16">
-                  <label>E-mail</label>
+                  <label>{{ "E-mail" | tr }}</label>
                   <input type="email" formControlName="email" placeholder="email@empresa.com">
                 </div>
 
@@ -357,7 +357,7 @@
                       <option value="" disabled>Selecione um perfil...</option>
                       <option *ngIf="isEditingUsuario && usuarioEmEdicao?.perfil === 'ADMIN'" value="ADMIN">Administrador</option>
                       <option value="SUPERVISOR">Supervisor</option>
-                      <option value="OPERADOR">Operador</option>
+                      <option value="OPERADOR">{{ "Operador" | tr }}</option>
                     </select>
                   </div>
                 </div>
@@ -372,8 +372,8 @@
           </div>
 
           <div class="modal-footer-gradient">
-            <button class="btn-ghost" (click)="fecharModalUsuario()">Cancelar</button>
-            <button class="btn-solid-blue" (click)="salvarUsuario()">{{ isEditingUsuario ? 'Salvar Alterações' : 'Criar Usuário' }}</button>
+            <button class="btn-ghost" (click)="fecharModalUsuario()">{{ "Cancelar" | tr }}</button>
+            <button class="btn-solid-blue" (click)="salvarUsuario()">{{ isEditingUsuario ? ("Salvar Alterações" | tr) : 'Criar Usuário' }}</button>
           </div>
         </div>
       </div>
@@ -399,9 +399,9 @@
           style="width:100%;padding:0.5rem;border:1px solid #e2e8f0;border-radius:8px;">
       </div>
       <div class="modal-footer-gradient">
-        <button class="btn-ghost" (click)="cancelarZerar()">Cancelar</button>
+        <button class="btn-ghost" (click)="cancelarZerar()">{{ "Cancelar" | tr }}</button>
         <button class="btn-danger" (click)="confirmarZerar()"
-          [disabled]="zerarInput.trim().toUpperCase() !== 'ZERAR'">Confirmar</button>
+          [disabled]="zerarInput.trim().toUpperCase() !== 'ZERAR'">{{ "Confirmar" | tr }}</button>
       </div>
     </div>
   </div>
@@ -411,9 +411,9 @@
       <div class="s-icon">
         <lucide-icon [img]="icons.check" size="48" color="#22c55e"></lucide-icon>
       </div>
-      <h2>Sucesso!</h2>
+      <h2>{{ "Sucesso!" | tr }}</h2>
       <p>{{ successMessage }}</p>
-      <button class="btn-solid-teal w-full" (click)="fecharSuccessModal()">OK, Entendi</button>
+      <button class="btn-solid-teal w-full" (click)="fecharSuccessModal()">{{ "OK, Entendi" | tr }}</button>
     </div>
   </div>
 

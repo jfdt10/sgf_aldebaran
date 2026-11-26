@@ -2,13 +2,14 @@
   <div class="profile-shell">
     <header class="profile-intro">
       <div>
-        <p class="profile-eyebrow">Portal do Cliente</p>
-        <h2 id="client-profile-title" class="profile-title">Meu Perfil</h2>
+        <p class="profile-eyebrow">{{ "Portal do Cliente" | tr }}</p>
+        <h2 id="client-profile-title" class="profile-title">{{ "Meu Perfil" | tr }}</h2>
       </div>
 
-      <div class="profile-language-chip" aria-hidden="true">
+      <div class="profile-language-chip" role="group" [attr.aria-label]="'Idioma' | tr">
         <lucide-icon [img]="icons.languages" size="18"></lucide-icon>
-        <span>PT-BR</span>
+        <button type="button" [class.active]="language.current() === 'PT'" [attr.aria-pressed]="language.current() === 'PT'" (click)="language.select('PT')">PT</button>
+        <button type="button" [class.active]="language.current() === 'EN'" [attr.aria-pressed]="language.current() === 'EN'" (click)="language.select('EN')">EN</button>
       </div>
     </header>
 
@@ -21,7 +22,7 @@
           </div>
 
           <div class="profile-summary-text">
-            <p class="profile-tag">Conta autenticada</p>
+            <p class="profile-tag">{{ "Conta autenticada" | tr }}</p>
             <h3>{{ profile.nome }}</h3>
           </div>
         </div>
@@ -30,7 +31,7 @@
           <div class="detail-item">
             <dt>
               <lucide-icon [img]="icons.email" size="16"></lucide-icon>
-              <span>E-mail</span>
+              <span>{{ "E-mail" | tr }}</span>
             </dt>
             <dd>{{ profile.email }}</dd>
           </div>
@@ -38,7 +39,7 @@
           <div class="detail-item">
             <dt>
               <lucide-icon [img]="icons.phone" size="16"></lucide-icon>
-              <span>Telefone</span>
+              <span>{{ "Telefone" | tr }}</span>
             </dt>
             <dd>{{ profile.telefone }}</dd>
           </div>
@@ -47,8 +48,8 @@
 
       <section class="profile-actions-panel" aria-labelledby="profile-actions-title">
         <div class="panel-header">
-          <p class="panel-eyebrow">Ações da conta</p>
-          <h3 id="profile-actions-title">Gerencie seu acesso</h3>
+          <p class="panel-eyebrow">{{ "Ações da conta" | tr }}</p>
+          <h3 id="profile-actions-title">{{ "Gerencie seu acesso" | tr }}</h3>
         </div>
 
         <div class="profile-actions-list">

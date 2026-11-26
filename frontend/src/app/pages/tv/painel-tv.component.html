@@ -3,9 +3,9 @@
     <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="overlay-icon">
       <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline>
     </svg>
-    <h1>Painel de TV Desconfigurado</h1>
-    <p>Para exibir as chamadas, este painel precisa estar vinculado a uma filial.</p>
-    <button class="btn-config" (click)="irParaConfiguracao()">Configurar Painel</button>
+    <h1>{{ "Painel de TV Desconfigurado" | tr }}</h1>
+    <p>{{ "Para exibir as chamadas, este painel precisa estar vinculado a uma filial." | tr }}</p>
+    <button class="btn-config" (click)="irParaConfiguracao()">{{ "Configurar Painel" | tr }}</button>
   </div>
 </div>
 
@@ -18,9 +18,9 @@
         <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
       </svg>
     </div>
-    <h1>Iniciar Exibição do Painel</h1>
-    <span class="btn-start">Clique aqui ou Pressione ENTER para ligar</span>
-    <p class="audio-notice">Esta ação manual é exigida pelos navegadores para liberar os efeitos sonoros das chamadas.</p>
+    <h1>{{ "Iniciar Exibição do Painel" | tr }}</h1>
+    <span class="btn-start">{{ "Clique aqui ou Pressione ENTER para ligar" | tr }}</span>
+    <p class="audio-notice">{{ "Esta ação manual é exigida pelos navegadores para liberar os efeitos sonoros das chamadas." | tr }}</p>
   </div>
 </div>
 
@@ -34,7 +34,8 @@
         <div class="tv-date">{{ dataAtualTexto }}</div>
       </div>
       <div class="tv-language">
-        <span *ngFor="let idioma of idiomas" [class.active]="idioma === 'PT'">{{ idioma }}</span>
+        <button type="button" [class.active]="language.current() === 'PT'" [attr.aria-pressed]="language.current() === 'PT'" (click)="language.select('PT')">PT</button>
+        <button type="button" [class.active]="language.current() === 'EN'" [attr.aria-pressed]="language.current() === 'EN'" (click)="language.select('EN')">EN</button>
       </div>
     </div>
   </header>
@@ -42,8 +43,8 @@
   <main class="tv-main">
     <section class="tv-left">
       <div class="tv-current-card" [class.alerta-piscar]="exibirAlerta">
-        <p class="tv-label-main">Atendendo Agora</p>
-        <p class="tv-label-sub">SENHA</p>
+        <p class="tv-label-main">{{ "Atendendo Agora" | tr }}</p>
+        <p class="tv-label-sub">{{ "SENHA" | tr }}</p>
         <h1 class="tv-ticket">{{ getSenhaNumero(senhaAtual) }}</h1>
 
         <div class="tv-servico-badge" [style.backgroundColor]="getServicoCor(senhaAtual)">
@@ -58,13 +59,13 @@
         <p class="tv-guiche-label">{{ getGuicheDestinoTipo(senhaAtual) }}</p>
 
         <div class="tv-guiche-box">{{ getGuicheDestinoValor(senhaAtual) }}</div>
-        <p class="tv-guiche-help">Dirija-se ao local</p>
+        <p class="tv-guiche-help">{{ "Dirija-se ao local" | tr }}</p>
       </div>
     </section>
 
     <aside class="tv-right">
       <div class="tv-panel tv-calls-panel">
-        <h3>Últimas Chamadas:</h3>
+        <h3>{{ "Últimas Chamadas:" | tr }}</h3>
         <div class="tv-call-item" *ngFor="let item of ultimasChamadas">
           <div class="tv-call-row">
             <span class="tv-call-ticket">{{ getSenhaNumero(item) }}</span>
@@ -74,7 +75,7 @@
       </div>
 
       <div class="tv-panel tv-legend-panel">
-        <h3>Categorias de Serviço</h3>
+        <h3>{{ "Categorias de Serviço" | tr }}</h3>
         <div class="tv-legend-item" *ngFor="let cat of categoriasServico">
           <span class="square" [style.backgroundColor]="cat.cor || '#00838f'"></span> {{ cat.nome }}
         </div>
@@ -83,6 +84,6 @@
   </main>
 
   <footer class="tv-footer">
-    Obrigado pela paciência - Para assistência, fale com nossa equipe
+    {{ "Obrigado pela paciência - Para assistência, fale com nossa equipe" | tr }}
   </footer>
 </div>

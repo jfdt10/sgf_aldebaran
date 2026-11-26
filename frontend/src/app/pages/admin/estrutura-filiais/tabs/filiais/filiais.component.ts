@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../../../services/translate.pipe';
 import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +8,7 @@ import { LucideAngularModule, Plus, Edit2, Trash2, Power, X, Search, Building2, 
 @Component({
   selector: 'app-filiais',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './filiais.component.html',
   styleUrls: ['./filiais.component.scss']
 })

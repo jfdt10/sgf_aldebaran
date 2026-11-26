@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, HostListener, ChangeDetectorRef, OnDestroy, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +11,7 @@ import { AdminLayoutComponent } from '../../../layouts/admin-layout/admin-layout
 @Component({
     selector: 'app-caminhoes',
     standalone: true,
-    imports: [CommonModule, FormsModule, LucideAngularModule],
+    imports: [TranslatePipe, CommonModule, FormsModule, LucideAngularModule],
     templateUrl: './caminhoes.component.html',
     styleUrls: ['./caminhoes.component.scss']
 })
@@ -166,7 +167,7 @@ export class CaminhoesComponent implements OnInit, OnDestroy {
         };
 
         if (this.isEditing) {
-            this.api.patch(`/caminhoes/${this.caminhaoForm.id}`, payload).subscribe({
+            this.api.put(`/caminhoes/${this.caminhaoForm.id}`, payload).subscribe({
                 next: () => {
                     this.showModal = false;
                     this.showSuccessModal = true;

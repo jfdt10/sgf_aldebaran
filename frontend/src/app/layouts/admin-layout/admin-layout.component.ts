@@ -1,3 +1,6 @@
+import { LanguageService } from '../../services/language.service';
+import { inject } from '@angular/core';
+import { TranslatePipe } from '../../services/translate.pipe';
 import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
@@ -17,11 +20,12 @@ import { AlertSoundService } from '../../services/alert-sound.service';
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, LucideAngularModule, FormsModule],
+  imports: [TranslatePipe, CommonModule, RouterOutlet, RouterLink, RouterLinkActive, LucideAngularModule, FormsModule],
   templateUrl: './admin-layout.component.html',
   styleUrls: ['./admin-layout.component.scss']
 })
 export class AdminLayoutComponent implements OnInit, OnDestroy {
+  readonly language = inject(LanguageService);
   sidebarOpen = true;
   usuario: any = null;
   userInitials: string = 'CA';

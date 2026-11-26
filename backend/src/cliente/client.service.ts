@@ -5,6 +5,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { NotificacaoService } from '../notificacao/notificacao.service';
 import * as bcrypt from 'bcrypt';
 
@@ -77,7 +78,7 @@ export class ClientService {
     return client;
   }
 
-  async createOperacional(data: any) {
+  async createOperacional(data: any, requestingUserFilialId?: number) {
     let whereClause: any = {};
     if (data.tipo === 'PF') {
       if (!data.cpf)
@@ -102,19 +103,19 @@ export class ClientService {
       if (emailExiste) throw new ConflictException('E-mail já cadastrado.');
     }
 
-    const senhaProvisoria = data.senha || 'Aldebaran@123';
+    const senhaProvisoria = data.senha || randomBytes(24).toString('base64url');
     const senhaHash = await bcrypt.hash(senhaProvisoria, 12);
 
     const client = await this.prisma.clientes.create({
       data: {
         nome: data.nome,
-        email: data.email || `sem-email-${Date.now()}@aldebaran.local`,
+        email: data.email || `sem-email-${randomUUID()}@aldebaran.local`,
         senha: senhaHash,
         tipo: data.tipo,
         cpf: data.cpf || null,
         cnpj: data.cnpj || null,
         telefone: data.telefone || null,
-        filial_id: null,
+        filial_id: requestingUserFilialId ?? (data.filial_id ? Number(data.filial_id) : null),
       },
       select: {
         id: true,

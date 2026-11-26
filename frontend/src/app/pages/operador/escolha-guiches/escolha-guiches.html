@@ -7,11 +7,11 @@
 
       <div class="header-center">
         <div class="info-group">
-          <span class="info-label">Filial</span>
+          <span class="info-label">{{ "Filial" | tr }}</span>
           <div class="filial-glass-selector">
             <lucide-icon [img]="icons.building" size="16"></lucide-icon>
             <select [(ngModel)]="filialSelecionada" (change)="onFilialChange()">
-              <option *ngIf="!hasRestrictedFilial" value="">Selecione uma filial...</option>
+              <option *ngIf="!hasRestrictedFilial" value="">{{ "Selecione uma filial..." | tr }}</option>
               <option *ngFor="let f of filiais" [value]="f.id">{{ f.nome }}</option>
             </select>
             <lucide-icon [img]="icons.chevronDown" size="14" class="arrow"></lucide-icon>
@@ -19,7 +19,7 @@
         </div>
 
         <div class="info-group language-selector">
-          <span class="info-label">Idioma</span>
+          <span class="info-label">{{ "Idioma" | tr }}</span>
           <div class="language-buttons">
             <button 
               class="lang-btn" 
@@ -55,12 +55,12 @@
           </div>
           <button type="button" class="dropdown-item" (click)="abrirEditarPerfil()">
             <lucide-icon [img]="icons.user" size="16"></lucide-icon>
-            <span>Meu Perfil</span>
+            <span>{{ "Meu Perfil" | tr }}</span>
           </button>
           <div class="dropdown-divider"></div>
           <button type="button" class="dropdown-item text-danger" (click)="sair()">
             <lucide-icon [img]="icons.logout" size="16"></lucide-icon>
-            <span>Sair do Sistema</span>
+            <span>{{ "Sair do Sistema" | tr }}</span>
           </button>
         </div>
       </div>
@@ -70,18 +70,18 @@
 
   <div class="content">
     <div class="header">
-      <h1>Onde você vai trabalhar hoje?</h1>
-      <p>Selecione um guichê disponível para iniciar o atendimento.</p>
+      <h1>{{ "Onde você vai trabalhar hoje?" | tr }}</h1>
+      <p>{{ "Selecione um guichê disponível para iniciar o atendimento." | tr }}</p>
     </div>
 
     <div *ngIf="mensagemErro" class="alerta alerta-erro">
       {{ mensagemErro }}
     </div>
 
-    <div *ngIf="carregando" class="estado-auxiliar">Carregando guichês...</div>
+    <div *ngIf="carregando" class="estado-auxiliar">{{ "Carregando guichês..." | tr }}</div>
 
     <div *ngIf="!carregando && guiches.length === 0" class="estado-auxiliar">
-      Nenhum guichê cadastrado no momento. Solicite ao administrador o cadastro de guichês.
+      {{ "Nenhum guichê cadastrado no momento. Solicite ao administrador o cadastro de guichês." | tr }}
     </div>
 
     <div *ngIf="!carregando && guiches.length > 0" class="guiches-grid">
@@ -109,7 +109,7 @@
             </div>
             <div class="info-texto">
               <strong>{{ guiche.operador }}</strong>
-              <small>Logado desde {{ guiche.logado }}</small>
+              <small>{{ "Logado desde" | tr }} {{ guiche.logado }}</small>
             </div>
           </div>
         </div>
@@ -121,13 +121,13 @@
               <path d="M8 21h8M12 17v4" stroke="#00838f" stroke-width="2" stroke-linecap="round"/>
             </svg>
           </div>
-          <p class="pronto-texto">Pronto para uso</p>
+          <p class="pronto-texto">{{ "Pronto para uso" | tr }}</p>
         </div>
 
         <div class="card-footer">
           <div *ngIf="guiche.ocupado" class="atendimento-info">
             <small>
-              {{ guiche.situacaoAtendimento === 'CHAMANDO' ? 'Chamando' : guiche.situacaoAtendimento === 'ATENDENDO' ? 'Atendendo' : 'Sem ticket' }}
+              {{ guiche.situacaoAtendimento === 'CHAMANDO' ? 'Chamando' : guiche.situacaoAtendimento === 'ATENDENDO' ? ("Atendendo" | tr) : 'Sem ticket' }}
             </small>
             <strong>{{ guiche.codigoAtendimento || '--' }}</strong>
           </div>
@@ -136,14 +136,14 @@
             class="btn-selecionar"
             [disabled]="selecaoEmAndamentoId !== null"
             (click)="selecionar(guiche)">
-            Selecionar Guichê
+            {{ "Selecionar Guichê" | tr }}
           </button>
         </div>
       </div>
     </div>
 
     <div class="logout">
-      <a href="#" (click)="$event.preventDefault(); sair()">Sair / Fazer Logout</a>
+      <a href="#" (click)="$event.preventDefault(); sair()">{{ "Sair / Fazer Logout" | tr }}</a>
     </div>
   </div>
 </div>
@@ -155,7 +155,7 @@
         <div class="modal-icon-container">
           <lucide-icon [img]="icons.user" size="24"></lucide-icon>
         </div>
-        <h2>Editar Perfil</h2>
+        <h2>{{ "Editar Perfil" | tr }}</h2>
       </div>
       <button class="close-btn-ghost" (click)="fecharModal()">
         <lucide-icon [img]="icons.close" size="20"></lucide-icon>
@@ -164,18 +164,18 @@
     <form (submit)="salvarPerfil($event)">
       <div class="modal-body">
         <div class="form-group full-width">
-          <label>Nome <span>*</span></label>
+          <label>{{ "Nome" | tr }} <span>*</span></label>
           <div class="input-with-icon">
             <lucide-icon [img]="icons.user" size="20" style="color: #94a3b8;"></lucide-icon>
-            <input type="text" name="nome" [(ngModel)]="operadorForm.nome" placeholder="Seu nome completo" required />
+            <input type="text" name="nome" [(ngModel)]="operadorForm.nome" [placeholder]='"Seu nome completo" | tr' required />
           </div>
         </div>
 
         <div class="form-group full-width">
-          <label>E-mail <span>*</span></label>
+          <label>{{ "E-mail" | tr }} <span>*</span></label>
           <div class="input-with-icon">
             <lucide-icon [img]="icons.mail" size="20" style="color: #94a3b8;"></lucide-icon>
-            <input type="email" name="email" [(ngModel)]="operadorForm.email" placeholder="seu.email@dominio.com" required />
+            <input type="email" name="email" [(ngModel)]="operadorForm.email" [placeholder]='"seu.email@dominio.com" | tr' required />
           </div>
         </div>
 
@@ -183,29 +183,29 @@
           <label>Login <span>*</span></label>
           <div class="input-with-icon">
             <lucide-icon [img]="icons.user" size="20" style="color: #94a3b8;"></lucide-icon>
-            <input type="text" name="login" [(ngModel)]="operadorForm.login" placeholder="Nome de usuário para login" required />
+            <input type="text" name="login" [(ngModel)]="operadorForm.login" [placeholder]='"Nome de usuário para login" | tr' required />
           </div>
         </div>
 
         <div class="form-group full-width">
-          <label>Nova Senha</label>
+          <label>{{ "Nova Senha" | tr }}</label>
           <div class="input-with-icon">
             <lucide-icon [img]="icons.lock" size="20" style="color: #94a3b8;"></lucide-icon>
-            <input type="password" name="senha" [(ngModel)]="operadorForm.senha" placeholder="Mínimo 6 caracteres" />
+            <input type="password" name="senha" [(ngModel)]="operadorForm.senha" [placeholder]='"Mínimo 6 caracteres" | tr' />
           </div>
         </div>
 
         <div class="form-group full-width">
-          <label>Confirmar Nova Senha</label>
+          <label>{{ "Confirmar Nova Senha" | tr }}</label>
           <div class="input-with-icon">
             <lucide-icon [img]="icons.lock" size="20" style="color: #94a3b8;"></lucide-icon>
-            <input type="password" name="confirmarSenha" [(ngModel)]="operadorForm.confirmarSenha" placeholder="Digite a nova senha novamente" />
+            <input type="password" name="confirmarSenha" [(ngModel)]="operadorForm.confirmarSenha" [placeholder]='"Digite a nova senha novamente" | tr' />
           </div>
         </div>
       </div>
       <div class="modal-footer-gradient">
-        <button type="button" class="btn-ghost" (click)="fecharModal()">Cancelar</button>
-        <button type="submit" class="btn-solid-blue">Salvar Alterações</button>
+        <button type="button" class="btn-ghost" (click)="fecharModal()">{{ "Cancelar" | tr }}</button>
+        <button type="submit" class="btn-solid-blue">{{ "Salvar Alterações" | tr }}</button>
       </div>
     </form>
   </div>
@@ -217,12 +217,12 @@
       <div class="logout-icon-glow">
         <img src="assets/Icon.svg" class="glow-icon">
       </div>
-      <h3 class="modal-title-bold">Finalizar Sessão?</h3>
-      <p class="modal-subtitle">Seu guichê será liberado para outros operadores e você retornará à tela de login.</p>
+      <h3 class="modal-title-bold">{{ "Finalizar Sessão?" | tr }}</h3>
+      <p class="modal-subtitle">{{ "Seu guichê será liberado para outros operadores e você retornará à tela de login." | tr }}</p>
     </div>
     <div class="modal-actions-refined">
-      <button class="btn-cancel-glass" (click)="fecharModal()">Continuar Trabalhando</button>
-      <button class="btn-danger-solid" (click)="confirmarSair()">Encerrar e Sair</button>
+      <button class="btn-cancel-glass" (click)="fecharModal()">{{ "Continuar Trabalhando" | tr }}</button>
+      <button class="btn-danger-solid" (click)="confirmarSair()">{{ "Encerrar e Sair" | tr }}</button>
     </div>
   </div>
 </div>

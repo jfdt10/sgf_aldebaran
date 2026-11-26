@@ -39,7 +39,7 @@
                         </div>
 
                         <div class="guiche-actions">
-                            <button class="btn-edit-fill" (click)="abrirModal(g)" title="Editar">
+                            <button class="btn-edit-fill" (click)="abrirModal(g)" [title]='"Editar" | tr'>
                                 <lucide-icon [img]="icons.edit" size="16"></lucide-icon>
                             </button>
                             <button class="btn-toggle-fill" (click)="toggleStatus(g)" 
@@ -47,7 +47,7 @@
                                 [title]="g.ativo ? 'Desativar' : 'Ativar'">
                                 <lucide-icon [img]="icons.power" size="16"></lucide-icon>
                             </button>
-                            <button class="btn-delete-card" (click)="excluir(g.id)" title="Excluir">
+                            <button class="btn-delete-card" (click)="excluir(g.id)" [title]='"Excluir" | tr'>
                                 <lucide-icon [img]="icons.trash" size="16"></lucide-icon>
                             </button>
                         </div>
@@ -102,10 +102,10 @@
         </div>
 
         <div class="modal-footer">
-            <button class="btn-outline" (click)="fecharModal()">Cancelar</button>
+            <button class="btn-outline" (click)="fecharModal()">{{ "Cancelar" | tr }}</button>
             <button class="btn-primary" (click)="salvar()" [disabled]="loading || saving">
                 <lucide-icon [img]="icons.check" size="18"></lucide-icon>
-                {{ editando ? 'Salvar' : 'Cadastrar' }}
+                {{ editando ? ("Salvar" | tr) : ("Cadastrar" | tr) }}
             </button>
         </div>
     </div>
@@ -129,7 +129,7 @@
             <p style="color: var(--text-secondary); margin-top: 10px;">Esta ação não pode ser desfeita.</p>
         </div>
         <div class="modal-footer" style="background: var(--bg-body);">
-            <button class="btn-outline" (click)="fecharConfirmacao()">Cancelar</button>
+            <button class="btn-outline" (click)="fecharConfirmacao()">{{ "Cancelar" | tr }}</button>
             <button class="btn-primary" style="background: #f43f5e; box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);" (click)="confirmarExclur()">
                 Sim, Excluir
             </button>
@@ -145,9 +145,9 @@
                     <lucide-icon [img]="icons.check" size="40" strokeWidth="3"></lucide-icon>
                 </div>
             </div>
-            <h2>Sucesso!</h2>
+            <h2>{{ "Sucesso!" | tr }}</h2>
             <p>Os dados foram processados corretamente.</p>
-            <button class="btn-success-ok" (click)="fecharSucesso()">OK, Entendi</button>
+            <button class="btn-success-ok" (click)="fecharSucesso()">{{ "OK, Entendi" | tr }}</button>
         </div>
     </div>
 </div>

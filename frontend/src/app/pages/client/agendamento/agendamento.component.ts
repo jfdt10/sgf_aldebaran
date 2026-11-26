@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { catchError, of } from 'rxjs';
 @Component({
   selector: 'app-agendamento',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './agendamento.component.html',
   styleUrls: ['./agendamento.component.scss']
 })
@@ -125,7 +126,7 @@ export class AgendamentoComponent implements OnInit {
   }
 
   carregarDados() {
-    this.api.get<any[]>('/filiais').pipe(
+    this.api.get<any[]>('/filiais/public/list').pipe(
       catchError(err => {
         console.error('Erro ao carregar filiais', err);
         return of([]);
@@ -143,7 +144,7 @@ export class AgendamentoComponent implements OnInit {
 
   carregarCategorias() {
     if (!this.form.filialId) return;
-    this.api.get<any[]>(`/servicos?filialId=${this.form.filialId}`).pipe(
+    this.api.get<any[]>(`/servicos/public/list?filialId=${this.form.filialId}`).pipe(
       catchError(err => {
         console.error('Erro ao carregar categorias da filial', err);
         return of([]);
@@ -167,29 +168,14 @@ export class AgendamentoComponent implements OnInit {
     if (!this.form.filialId) return;
     this.configCarregada = false;
 
-    this.api.get<any[]>(`/configuracoes/lista?filialId=${this.form.filialId}`).pipe(
+    this.api.get<number[]>(`/fila/agendamento/dias?filialId=${this.form.filialId}`).pipe(
       catchError(err => {
-        console.error('Erro ao carregar configs', err);
-        return of([]);
+        console.error('Erro ao carregar dias de atendimento', err);
+        return of([1, 2, 3, 4, 5]);
       })
-    ).subscribe(data => {
-      const configMap: any = {};
-      if (data && Array.isArray(data)) {
-        data.forEach(item => {
-          configMap[item.chave] = item.valor;
-        });
-      }
+    ).subscribe(dias => {
+      this.diasHabilitados = dias;
 
-      if (configMap.TOTEM_DIAS) {
-        try {
-          this.diasHabilitados = JSON.parse(configMap.TOTEM_DIAS);
-        } catch {
-          this.diasHabilitados = [1, 2, 3, 4, 5];
-        }
-      } else {
-        this.diasHabilitados = [1, 2, 3, 4, 5];
-      }
-      
       this.configCarregada = true;
 
       if (this.form.data && !this.isDiaHabilitado(this.form.data)) {

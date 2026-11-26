@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -14,7 +15,7 @@ import { SettingsSectionCardComponent } from '../../client/configuracoes/compone
 @Component({
   selector: 'app-supervisor-configuracoes',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ReactiveFormsModule, RouterLink, FormsModule, SettingsSectionCardComponent, SettingsLinkItemComponent],
+  imports: [TranslatePipe, CommonModule, LucideAngularModule, ReactiveFormsModule, RouterLink, FormsModule, SettingsSectionCardComponent, SettingsLinkItemComponent],
   templateUrl: './configuracoes.component.html',
   styleUrls: ['./configuracoes.component.scss']
 })

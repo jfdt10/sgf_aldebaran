@@ -1,3 +1,6 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,12 +16,13 @@ import { LucideAngularModule, User, LogOut, Lock, Mail, Eye, EyeOff, X, Building
 @Component({
   selector: 'app-escolha-guiches',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './escolha-guiches.html',
   styleUrls: ['./escolha-guiches.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EscolhaGuiches implements OnInit, OnDestroy {
+  readonly language = inject(LanguageService);
   operadorNome = 'Operador';
   operadorPerfil = 'Operador';
   operadorAvatar = 'OP';
@@ -33,7 +37,7 @@ export class EscolhaGuiches implements OnInit, OnDestroy {
   hasRestrictedFilial = false;
 
   filialSelecionada = '';
-  idiomaAtivo = 'PT';
+  get idiomaAtivo() { return this.language.current(); }
   carregando = false;
   mensagemErro = '';
   selecaoEmAndamentoId: number | null = null;
@@ -287,7 +291,7 @@ export class EscolhaGuiches implements OnInit, OnDestroy {
   }
 
   trocarIdioma(idioma: string) {
-    this.idiomaAtivo = idioma;
+    this.language.select(idioma === 'EN' ? 'EN' : 'PT');
   }
 
   toggleProfileMenu(event: Event) {

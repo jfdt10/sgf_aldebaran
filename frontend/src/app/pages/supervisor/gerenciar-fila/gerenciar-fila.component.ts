@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -11,7 +12,7 @@ import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-supervisor-gerenciar-fila',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterLink, FormsModule, ReactiveFormsModule],
+  imports: [TranslatePipe, CommonModule, LucideAngularModule, RouterLink, FormsModule, ReactiveFormsModule],
   templateUrl: './gerenciar-fila.component.html',
   styleUrls: ['./gerenciar-fila.component.scss']
 })

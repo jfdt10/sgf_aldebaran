@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../services/translate.pipe';
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +9,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, FormsModule, RouterLink, LucideAngularModule],
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.scss']
 })

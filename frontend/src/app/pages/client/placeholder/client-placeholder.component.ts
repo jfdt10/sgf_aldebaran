@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -6,7 +7,7 @@ import { LucideAngularModule, ArrowRight, Sparkles } from 'lucide-angular';
 @Component({
   selector: 'app-client-placeholder',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, RouterLink, LucideAngularModule],
   templateUrl: './client-placeholder.component.html',
   styleUrl: './client-placeholder.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

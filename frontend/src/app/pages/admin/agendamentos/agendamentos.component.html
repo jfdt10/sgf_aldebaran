@@ -2,7 +2,7 @@
   <div class="list-card">
     <div class="list-card-header">
       <div class="titles">
-        <h2>Agendamentos</h2>
+        <h2>{{ "Agendamentos" | tr }}</h2>
         <p>Gerencie as reservas e horários marcados</p>
       </div>
       <button class="btn-primary" (click)="abrirModal()">
@@ -45,11 +45,11 @@
       <table class="list-table">
         <thead>
           <tr>
-            <th>Horário</th>
-            <th>Cliente</th>
+            <th>{{ "Horário" | tr }}</th>
+            <th>{{ "Cliente" | tr }}</th>
             <th>Serviço</th>
             <th>Status</th>
-            <th>Ações</th>
+            <th>{{ "Ações" | tr }}</th>
           </tr>
         </thead>
         <tbody>
@@ -188,13 +188,13 @@
 
       <div class="summary-card" *ngIf="form.hora && form.data">
         <lucide-icon [img]="icons.alert" size="18"></lucide-icon>
-        <p>Agendamento confirmado para <strong>{{ formatarData(form.data) }}</strong> às <strong>{{ form.hora }}</strong>.</p>
+        <p>Agendamento confirmado para <strong>{{ formatarData(form.data) }}</strong> {{ "às" | tr }} <strong>{{ form.hora }}</strong>.</p>
         <div class="code-box">Código: {{ form.codigo }}</div>
       </div>
     </div>
 
     <div class="modal-footer">
-      <button class="btn-cancel" (click)="showModal = false">Cancelar</button>
+      <button class="btn-cancel" (click)="showModal = false">{{ "Cancelar" | tr }}</button>
       <button class="btn-submit" (click)="salvar()" [disabled]="!form.hora || !form.nome || !form.servico_id">
         <lucide-icon [img]="icons.check" size="18"></lucide-icon>
         Confirmar Reserva

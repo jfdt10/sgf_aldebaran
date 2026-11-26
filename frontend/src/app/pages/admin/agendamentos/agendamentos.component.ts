@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +12,7 @@ import { AdminLayoutComponent } from '../../../layouts/admin-layout/admin-layout
 @Component({
   selector: 'app-agendamentos',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './agendamentos.component.html',
   styleUrl: './agendamentos.component.scss'
 })

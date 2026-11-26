@@ -1,3 +1,6 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -22,12 +25,13 @@ interface ProfileActionItem {
 @Component({
   selector: 'app-client-perfil',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, LucideAngularModule],
   templateUrl: './perfil.component.html',
   styleUrl: './perfil.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ClientPerfilComponent implements OnInit {
+  readonly language = inject(LanguageService);
   protected readonly icons = {
     email: Mail,
     phone: Phone,

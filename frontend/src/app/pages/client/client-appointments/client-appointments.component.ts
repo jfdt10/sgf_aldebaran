@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -50,7 +51,7 @@ interface ClientAppointmentView {
 @Component({
   selector: 'app-client-appointments',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ClientMenuComponent, RouterLink, ClienteSuccessModalComponent],
+  imports: [TranslatePipe, CommonModule, LucideAngularModule, ClientMenuComponent, RouterLink, ClienteSuccessModalComponent],
   templateUrl: './client-appointments.component.html',
   styleUrls: ['./client-appointments.component.scss'],
 })

@@ -6,7 +6,7 @@
         <lucide-icon [img]="icons.arrowLeft" size="20"></lucide-icon>
       </button>
       <div class="header-titles">
-        <h1>Relatórios</h1>
+        <h1>{{ "Relatórios" | tr }}</h1>
         <span class="header-subtitle">{{ selectedFilialNome }}</span>
       </div>
     </div>
@@ -235,7 +235,7 @@
              <lucide-icon *ngIf="activeModal === 'justificativa'" [img]="icons.clock" size="24"></lucide-icon>
           </div>
           <h2 *ngIf="activeModal === 'detalhes'">Detalhes do Atendimento</h2>
-          <h2 *ngIf="activeModal === 'justificativa'">Justificar Demora</h2>
+          <h2 *ngIf="activeModal === 'justificativa'">{{ "Justificar Demora" | tr }}</h2>
         </div>
         <button class="close-btn-ghost" (click)="fecharModal()">
           <lucide-icon [img]="icons.x" size="20"></lucide-icon>
@@ -250,19 +250,19 @@
         
         <div class="info-grid mt-16">
           <div class="info-box">
-             <span class="info-label">Cliente</span>
+             <span class="info-label">{{ "Cliente" | tr }}</span>
              <strong>{{ selectedTicket?.clienteNome }}</strong>
           </div>
           <div class="info-box">
-             <span class="info-label">Transportadora</span>
+             <span class="info-label">{{ "Transportadora" | tr }}</span>
              <strong>{{ selectedTicket?.clienteSub || 'N/A' }}</strong>
           </div>
           <div class="info-box">
-             <span class="info-label">Operador</span>
+             <span class="info-label">{{ "Operador" | tr }}</span>
              <strong>{{ selectedTicket?.operador }}</strong>
           </div>
           <div class="info-box">
-             <span class="info-label">Guichê</span>
+             <span class="info-label">{{ "Guichê" | tr }}</span>
              <strong>01</strong>
           </div>
         </div>
@@ -329,7 +329,7 @@
             <label>Motivo do Atraso <span>*</span></label>
              <div class="input-with-icon select-wrapper">
                 <select formControlName="motivo">
-                  <option value="" disabled selected>Selecione um motivo...</option>
+                  <option value="" disabled selected>{{ "Selecione um motivo..." | tr }}</option>
                   <option value="Sistema Lento">Problema no Sistema / Lentidão</option>
                   <option value="Falta Documento">Falta de Documentação do Cliente</option>
                   <option value="Alta Demanda">Alta Demanda / Poucos Operadores</option>
@@ -348,13 +348,13 @@
       </div>
 
       <div class="modal-footer-gradient" *ngIf="activeModal === 'detalhes'">
-        <button class="btn-solid-red" *ngIf="selectedTicket?.esperaAlerta" (click)="abrirModal('justificativa', selectedTicket)">Justificar Demora</button>
-        <button class="btn-ghost" *ngIf="!selectedTicket?.esperaAlerta" (click)="fecharModal()">Fechar</button>
-        <button class="btn-solid-blue" *ngIf="selectedTicket?.esperaAlerta" (click)="fecharModal()">Fechar</button>
+        <button class="btn-solid-red" *ngIf="selectedTicket?.esperaAlerta" (click)="abrirModal('justificativa', selectedTicket)">{{ "Justificar Demora" | tr }}</button>
+        <button class="btn-ghost" *ngIf="!selectedTicket?.esperaAlerta" (click)="fecharModal()">{{ "Fechar" | tr }}</button>
+        <button class="btn-solid-blue" *ngIf="selectedTicket?.esperaAlerta" (click)="fecharModal()">{{ "Fechar" | tr }}</button>
       </div>
 
       <div class="modal-footer-gradient" *ngIf="activeModal === 'justificativa'">
-        <button class="btn-ghost" (click)="fecharModal()">Cancelar</button>
+        <button class="btn-ghost" (click)="fecharModal()">{{ "Cancelar" | tr }}</button>
         <button class="btn-solid-blue" (click)="salvarJustificativa()">Salvar Justificativa</button>
       </div>
     </div>

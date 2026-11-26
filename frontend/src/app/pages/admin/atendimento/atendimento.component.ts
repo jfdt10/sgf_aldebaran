@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +9,7 @@ import { LucideAngularModule, Megaphone, UserCheck, Clock, History, AlertTriangl
 @Component({
   selector: 'app-atendimento',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, FormsModule],
+  imports: [TranslatePipe, CommonModule, LucideAngularModule, FormsModule],
   templateUrl: './atendimento.component.html',
   styleUrl: './atendimento.component.scss'
 })

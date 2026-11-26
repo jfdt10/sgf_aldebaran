@@ -62,7 +62,7 @@
             </div>
             <div class="queue-summary" *ngIf="a.senha">
               <div class="queue-pill">
-                <span>Senha</span>
+                <span>{{ "Senha" | tr }}</span>
                 <strong>{{ a.senha }}</strong>
               </div>
               <div class="queue-pill" *ngIf="a.posicao">
@@ -78,7 +78,7 @@
         </div>
         <div class="card-actions" *ngIf="a.podeCancelar || a.podeReagendar">
           <button class="btn-outline" [disabled]="cancelandoId === a.id || !a.podeCancelar" (click)="cancelarAgendamento(a.id)">
-            {{ cancelandoId === a.id ? 'Cancelando...' : 'Cancelar' }}
+            {{ cancelandoId === a.id ? 'Cancelando...' : ("Cancelar" | tr) }}
           </button>
           <button class="btn-primary" [disabled]="!a.podeReagendar" [routerLink]="['/client/agendar']" [queryParams]="{ re: a.id }">Reagendar</button>
         </div>

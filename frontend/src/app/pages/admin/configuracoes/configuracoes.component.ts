@@ -1,3 +1,6 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,11 +13,12 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-configuracoes',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './configuracoes.component.html',
   styleUrls: ['./configuracoes.component.scss']
 })
 export class ConfiguracoesComponent implements OnInit, OnDestroy {
+  readonly language = inject(LanguageService);
   readonly icons = {
     settings: Settings,
     save: Save,

@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../services/translate.pipe';
 import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive, ActivatedRoute, NavigationEnd } from '@angular/router';
@@ -22,7 +23,7 @@ interface ClientMenuGroup {
 @Component({
   selector: 'app-client-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, RouterOutlet, RouterLink, RouterLinkActive, LucideAngularModule],
   templateUrl: './client-layout.html',
   styleUrls: ['./client-layout.scss']
 })

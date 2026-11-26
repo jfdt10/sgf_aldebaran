@@ -1,10 +1,10 @@
 <div class="page-container">
   <div class="page-header">
     <button class="btn-back" (click)="cancelar()">
-      <lucide-icon [img]="icons.back"></lucide-icon> Voltar
+      <lucide-icon [img]="icons.back"></lucide-icon> {{ "Voltar" | tr }}
     </button>
     <div>
-      <h1>{{ modoEdicao ? 'Editar Cliente' : 'Novo Cliente' }}</h1>
+      <h1>{{ modoEdicao ? ("Editar Cliente" | tr) : ("Novo Cliente" | tr) }}</h1>
       <p>{{ modoEdicao ? 'Atualize os dados cadastrais.' : 'Preencha as informações abaixo.' }}</p>
     </div>
   </div>
@@ -46,7 +46,7 @@
         </div>
 
         <div class="input-group">
-          <label>Telefone / Celular</label>
+          <label>{{ "Telefone / Celular" | tr }}</label>
           <div class="input-wrapper">
             <lucide-icon [img]="icons.phone" class="field-icon"></lucide-icon>
             <input [(ngModel)]="form.telefone" (input)="mascaraTelefone($event)" name="telefone" placeholder="(00) 00000-0000">
@@ -72,7 +72,7 @@
 
       <div class="form-actions">
         <button type="button" class="btn-cancel" (click)="cancelar()">
-          Cancelar
+          {{ "Cancelar" | tr }}
         </button>
         <button type="submit" class="btn-primary" [disabled]="loading">
           <lucide-icon [img]="icons.save"></lucide-icon>

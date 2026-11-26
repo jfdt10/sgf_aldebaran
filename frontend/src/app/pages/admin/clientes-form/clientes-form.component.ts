@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +9,7 @@ import { LucideAngularModule, User, FileText, Phone, Mail, MapPin, Save, X, Arro
 @Component({
   selector: 'app-clientes-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [TranslatePipe, CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './clientes-form.component.html',
   styleUrl: './clientes-form.component.scss'
 })

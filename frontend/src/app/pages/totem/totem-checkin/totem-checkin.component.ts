@@ -1,3 +1,6 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -9,11 +12,12 @@ import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-totem-checkin',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [TranslatePipe, CommonModule, RouterLink, FormsModule],
   templateUrl: './totem-checkin.component.html',
   styleUrls: ['./totem-checkin.component.scss']
 })
 export class TotemCheckinComponent {
+  readonly language = inject(LanguageService);
 
   mostrarModalCodigo: boolean = false;
   mostrarAjuda: boolean = false;

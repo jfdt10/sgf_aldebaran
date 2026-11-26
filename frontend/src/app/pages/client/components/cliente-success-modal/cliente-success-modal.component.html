@@ -12,6 +12,6 @@
     <h2 id="cliente-success-title">{{ title }}</h2>
     <p>{{ message }}</p>
 
-    <button type="button" (click)="closed.emit()">OK, Entendi</button>
+    <button type="button" (click)="closed.emit()">{{ "OK, Entendi" | tr }}</button>
   </section>
 </div>

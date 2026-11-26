@@ -4,23 +4,23 @@
     <div class="brand-content">
       <img src="assets/logo-aldebaran.png" alt="Aldebaran" class="logo-white animate-up">
       
-      <h1 class="animate-up delay-1">Crie sua Conta</h1>
-      <p class="subtitle animate-up delay-2">Junte-se a nós para agilizar seu atendimento.</p>
+      <h1 class="animate-up delay-1">{{ "Crie sua Conta" | tr }}</h1>
+      <p class="subtitle animate-up delay-2">{{ "Junte-se a nós para agilizar seu atendimento." | tr }}</p>
       
       <div class="stats-row animate-up delay-3">
         <div class="stat-item">
-          <span class="stat-val">Rápido</span>
-          <span class="stat-label">Cadastro</span>
+          <span class="stat-val">{{ "Rápido" | tr }}</span>
+          <span class="stat-label">{{ "Cadastro" | tr }}</span>
         </div>
         <div class="divider"></div>
         <div class="stat-item">
-          <span class="stat-val">Seguro</span>
-          <span class="stat-label">Dados</span>
+          <span class="stat-val">{{ "Seguro" | tr }}</span>
+          <span class="stat-label">{{ "Dados" | tr }}</span>
         </div>
         <div class="divider"></div>
         <div class="stat-item">
-          <span class="stat-val">Gratuito</span>
-          <span class="stat-label">Acesso</span>
+          <span class="stat-val">{{ "Gratuito" | tr }}</span>
+          <span class="stat-label">{{ "Acesso" | tr }}</span>
         </div>
       </div>
     </div>
@@ -32,20 +32,20 @@
       <div *ngIf="step === 'FORM'" class="fade-in">
         
         <div class="header-area">
-          <h2>Nova Conta</h2>
-          <p class="filial-text">Preencha seus dados para começar.</p>
+          <h2>{{ "Nova Conta" | tr }}</h2>
+          <p class="filial-text">{{ "Preencha seus dados para começar." | tr }}</p>
         </div>
 
         <div class="type-selector">
           <button 
             [class.active]="tipo === 'PF'" 
             (click)="tipo = 'PF'">
-            <lucide-icon [img]="icons.user" size="16"></lucide-icon> Pessoa Física
+            <lucide-icon [img]="icons.user" size="16"></lucide-icon> {{ "Pessoa Física" | tr }}
           </button>
           <button 
             [class.active]="tipo === 'PJ'" 
             (click)="tipo = 'PJ'">
-            <lucide-icon [img]="icons.building" size="16"></lucide-icon> Pessoa Jurídica
+            <lucide-icon [img]="icons.building" size="16"></lucide-icon> {{ "Pessoa Jurídica" | tr }}
           </button>
         </div>
 
@@ -53,10 +53,10 @@
 
           <ng-container *ngIf="tipo === 'PF'">
             <div class="input-group" [class.has-error]="erros['nome']">
-              <label>NOME COMPLETO</label>
+              <label>{{ "NOME COMPLETO" | tr }}</label>
               <div class="input-wrapper">
                 <lucide-icon [img]="icons.user" size="20" class="input-icon"></lucide-icon>
-                <input type="text" placeholder="João da Silva"
+                <input type="text" [placeholder]='"João da Silva" | tr'
                   [(ngModel)]="dados.nome" name="nome"
                   (blur)="validarCampo('nome')">
               </div>
@@ -83,10 +83,10 @@
 
           <ng-container *ngIf="tipo === 'PJ'">
             <div class="input-group" [class.has-error]="erros['razao']">
-              <label>RAZÃO SOCIAL</label>
+              <label>{{ "RAZÃO SOCIAL" | tr }}</label>
               <div class="input-wrapper">
                 <lucide-icon [img]="icons.building" size="20" class="input-icon"></lucide-icon>
-                <input type="text" placeholder="Empresa LTDA"
+                <input type="text" [placeholder]='"Empresa LTDA" | tr'
                   [(ngModel)]="dados.razao" name="razao"
                   (blur)="validarCampo('razao')">
               </div>
@@ -112,10 +112,10 @@
           </ng-container>
 
           <div class="input-group" [class.has-error]="erros['email']">
-            <label>E-MAIL</label>
+            <label>{{ "E-MAIL" | tr }}</label>
             <div class="input-wrapper">
               <lucide-icon [img]="icons.mail" size="20" class="input-icon"></lucide-icon>
-              <input type="email" placeholder="seu@email.com"
+              <input type="email" [placeholder]='"seu@email.com" | tr'
                 [(ngModel)]="dados.email" name="email"
                 (blur)="validarCampo('email')">
             </div>
@@ -125,7 +125,7 @@
           </div>
 
           <div class="input-group" [class.has-error]="erros['telefone']">
-            <label>TELEFONE / CELULAR <span class="optional">(opcional)</span></label>
+            <label>{{ "TELEFONE / CELULAR" | tr }} <span class="optional">{{ "(opcional)" | tr }}</span></label>
             <div class="input-wrapper">
               <lucide-icon [img]="icons.phone" size="20" class="input-icon"></lucide-icon>
               <input type="tel" placeholder="(00) 00000-0000"
@@ -140,10 +140,10 @@
           </div>
 
           <div class="input-group" [class.has-error]="erros['senha']">
-            <label>SENHA</label>
+            <label>{{ "SENHA" | tr }}</label>
             <div class="input-wrapper">
               <lucide-icon [img]="icons.lock" size="20" class="input-icon"></lucide-icon>
-              <input type="password" placeholder="Mínimo 8 caracteres"
+              <input type="password" [placeholder]='"Mínimo 8 caracteres" | tr'
                 [(ngModel)]="dados.senha" name="senha"
                 (blur)="validarCampo('senha')">
             </div>
@@ -153,10 +153,10 @@
           </div>
 
           <div class="input-group" [class.has-error]="erros['confirmarSenha']">
-            <label>CONFIRMAR SENHA</label>
+            <label>{{ "CONFIRMAR SENHA" | tr }}</label>
             <div class="input-wrapper">
               <lucide-icon [img]="icons.lock" size="20" class="input-icon"></lucide-icon>
-              <input type="password" placeholder="Digite a senha novamente"
+              <input type="password" [placeholder]='"Digite a senha novamente" | tr'
                 [(ngModel)]="dados.confirmarSenha" name="confirmar"
                 (blur)="validarCampo('confirmarSenha')">
             </div>
@@ -166,13 +166,13 @@
           </div>
 
           <button type="submit" class="btn-gradient" [disabled]="carregando">
-            {{ carregando ? 'Criando Conta...' : 'Cadastrar' }}
+            {{ carregando ? 'Criando Conta...' : ("Cadastrar" | tr) }}
           </button>
 
         </form>
 
         <div class="form-footer">
-          <p>Já tem uma conta? <a routerLink="/login">Fazer Login</a></p>
+          <p>{{ "Já tem uma conta?" | tr }} <a routerLink="/login">{{ "Fazer Login" | tr }}</a></p>
         </div>
       </div>
 
@@ -180,9 +180,9 @@
         <div class="icon-circle">
           <lucide-icon [img]="icons.check" size="60"></lucide-icon>
         </div>
-        <h2>Conta Criada!</h2>
-        <p>Seu cadastro foi realizado com sucesso.</p>
-        <button class="btn-gradient" routerLink="/login">Ir para Login</button>
+        <h2>{{ "Conta Criada!" | tr }}</h2>
+        <p>{{ "Seu cadastro foi realizado com sucesso." | tr }}</p>
+        <button class="btn-gradient" routerLink="/login">{{ "Ir para Login" | tr }}</button>
       </div>
 
     </div>

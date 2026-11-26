@@ -1,71 +1,38 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { LucideAngularModule, Mail, Check, ArrowLeft, AlertCircle } from 'lucide-angular';
+import { RouterLink } from '@angular/router';
+import { ArrowLeft, CheckCircle, LucideAngularModule, Mail } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
-import { environment } from '../../../environments/environment';
+import { LanguageService } from '../../services/language.service';
+import { TranslatePipe } from '../../services/translate.pipe';
 
 @Component({
   selector: 'app-recover',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule],
+  imports: [FormsModule, RouterLink, LucideAngularModule, TranslatePipe],
   templateUrl: './recover.component.html',
-  styleUrls: ['./recover.component.scss']
+  styleUrl: './recover.component.scss',
 })
 export class RecoverComponent {
-
-  step: 'FORM' | 'SUCCESS' = 'FORM';
-  readonly manualRecovery = environment.production;
-  email: string = '';
-  carregando: boolean = false;
-  erro: boolean = false;
-
-  readonly icons = {
-    mail: Mail,
-    check: Check,
-    arrow: ArrowLeft,
-    alert: AlertCircle
-  };
-
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private cd: ChangeDetectorRef
-  ) { }
+  private readonly auth = inject(AuthService);
+  readonly language = inject(LanguageService);
+  readonly icons = { arrow: ArrowLeft, check: CheckCircle, mail: Mail };
+  readonly status = signal<'idle' | 'sending' | 'sent' | 'failed'>('idle');
+  email = '';
 
   enviar() {
-    if (!this.email || !this.email.includes('@')) {
-      alert('Por favor, digite um e-mail válido.');
-      return;
-    }
+    const identifier = this.email.trim();
+    if (!identifier || this.status() === 'sending') return;
 
-    this.carregando = true;
-    this.erro = false;
-
-    this.authService.recover(this.email).subscribe({
-      next: (res) => {
-        if (!environment.production) console.log('Sucesso:', res);
-
-        this.carregando = false;
-        this.step = 'SUCCESS';
-
-        this.cd.detectChanges();
-      },
-      error: (err) => {
-        console.error('Erro:', err);
-        this.carregando = false;
-
-        if (err.status === 404) {
-          this.erro = true;
-        } else if (err.status === 503) {
-          alert('Recupera??o por e-mail indispon?vel.');
-        } else {
-          alert('Erro ao conectar com o servidor.');
-        }
-
-        this.cd.detectChanges();
-      }
+    this.status.set('sending');
+    this.auth.recover(identifier).subscribe({
+      next: () => this.status.set('sent'),
+      error: () => this.status.set('failed'),
     });
+  }
+
+  novoPedido() {
+    this.email = '';
+    this.status.set('idle');
   }
 }

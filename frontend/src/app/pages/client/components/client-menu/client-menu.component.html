@@ -11,7 +11,7 @@
     <nav class="menu-nav">
       <a routerLink="/client/home" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="fechar()" class="nav-item">
         <lucide-angular [img]="icons.home" size="20"></lucide-angular>
-        Início
+        {{ "Início" | tr }}
       </a>
       <a routerLink="/client/agendar" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="fechar()" class="nav-item">
         <lucide-angular [img]="icons.calendar" size="20"></lucide-angular>
@@ -19,7 +19,7 @@
       </a>
       <a routerLink="/client/meus-agendamentos" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="fechar()" class="nav-item">
         <lucide-angular [img]="icons.file" size="20"></lucide-angular>
-        Meus Agendamentos
+        {{ "Meus Agendamentos" | tr }}
       </a>
       <a routerLink="/client/perfil" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }" (click)="fechar()" class="nav-item">
         <lucide-angular [img]="icons.user" size="20"></lucide-angular>
@@ -27,7 +27,7 @@
       </a>
       <a routerLink="/client/configuracoes" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="fechar()" class="nav-item">
         <lucide-angular [img]="icons.settings" size="20"></lucide-angular>
-        Configurações
+        {{ "Configurações" | tr }}
       </a>
     </nav>
 

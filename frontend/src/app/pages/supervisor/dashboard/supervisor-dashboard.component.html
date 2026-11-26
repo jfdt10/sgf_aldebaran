@@ -14,12 +14,12 @@
     
     <header class="dashboard-header">
       <div class="header-titles">
-        <h1 class="page-title">Painel do Supervisor</h1>
+        <h1 class="page-title">{{ "Painel do Supervisor" | tr }}</h1>
         <p class="page-subtitle">Monitore a fila e agendamentos em tempo real</p>
       </div>
     </header>
     <section class="section">
-      <h2 class="section-title">Visão Geral</h2>
+      <h2 class="section-title">{{ "Visão Geral" | tr }}</h2>
       <div class="kpi-grid">
         
         <div class="kpi-card">
@@ -81,7 +81,7 @@
           
           <div class="desk-header">
             <div class="desk-info-left">
-              <span class="desk-label">Guichê</span>
+              <span class="desk-label">{{ "Guichê" | tr }}</span>
               <strong class="desk-number">{{ guiche.numero }}</strong>
               <div class="operator" *ngIf="guiche.operador && guiche.status !== 'FECHADO'">
                 <lucide-icon [img]="icons.user" size="14"></lucide-icon>
@@ -90,7 +90,7 @@
             </div>
             <div class="desk-info-right">
               <span class="status-badge">
-                {{ guiche.status === 'DISPONIVEL' ? 'Disponível' : guiche.status === 'ATENDENDO' ? 'Atendendo' : guiche.status === 'CHAMANDO' ? 'Chamando' : 'Fechado' }}
+                {{ guiche.status === 'DISPONIVEL' ? 'Disponível' : guiche.status === 'ATENDENDO' ? ("Atendendo" | tr) : guiche.status === 'CHAMANDO' ? 'Chamando' : ("Fechado" | tr) }}
               </span>
             </div>
           </div>
@@ -100,7 +100,7 @@
             <ng-container *ngIf="guiche.status === 'ATENDENDO'">
               <div class="desk-details space-between bg-gray-box">
                 <div class="detail-col">
-                  <span class="detail-label text-xs">Atendendo</span>
+                  <span class="detail-label text-xs">{{ "Atendendo" | tr }}</span>
                   <strong class="ticket-number text-lg">{{ guiche.ticket }}</strong>
                 </div>
                 <div class="time-pill inline-time" [class.time-danger]="guiche.atrasado">
@@ -148,7 +148,7 @@
           <div class="action-icon bg-teal-light text-teal">
             <lucide-icon [img]="icons.truck" size="24"></lucide-icon>
           </div>
-          <span>Cadastrar Caminhão</span>
+          <span>{{ "Cadastrar Caminhão" | tr }}</span>
         </button>
 
         <button class="action-card" (click)="abrirModal('operator')">
@@ -162,14 +162,14 @@
           <div class="action-icon bg-blue-light text-blue">
             <lucide-icon [img]="icons.user" size="24"></lucide-icon>
           </div>
-          <span>Cadastrar Cliente</span>
+          <span>{{ "Cadastrar Cliente" | tr }}</span>
         </button>
 
         <button class="action-card" routerLink="/supervisor/gerenciar-fila">
           <div class="action-icon bg-teal-light text-teal">
             <lucide-icon [img]="icons.settings" size="24"></lucide-icon>
           </div>
-          <span>Gerenciar Fila</span>
+          <span>{{ "Gerenciar Fila" | tr }}</span>
         </button>
 
         <button class="action-card" routerLink="/supervisor/relatorios">
@@ -195,10 +195,10 @@
              <lucide-icon *ngIf="activeModal === 'agendamentos'" [img]="icons.calendar" size="24"></lucide-icon>
              <lucide-icon *ngIf="activeModal === 'atendimentos'" [img]="icons.history" size="24"></lucide-icon>
           </div>
-          <h2 *ngIf="activeModal === 'truck'">Cadastrar Caminhão</h2>
+          <h2 *ngIf="activeModal === 'truck'">{{ "Cadastrar Caminhão" | tr }}</h2>
           <h2 *ngIf="activeModal === 'operator'">Cadastrar Operador</h2>
-          <h2 *ngIf="activeModal === 'client'">Cadastrar Cliente</h2>
-          <h2 *ngIf="activeModal === 'agendamentos'">Agendamentos do Dia</h2>
+          <h2 *ngIf="activeModal === 'client'">{{ "Cadastrar Cliente" | tr }}</h2>
+          <h2 *ngIf="activeModal === 'agendamentos'">{{ "Agendamentos do Dia" | tr }}</h2>
           <h2 *ngIf="activeModal === 'atendimentos'">Atendimentos do Dia</h2>
         </div>
         <button class="close-btn-ghost" (click)="fecharModal()">
@@ -210,45 +210,45 @@
         
         <form *ngIf="activeModal === 'truck'" [formGroup]="caminhaoForm">
           <div class="form-group full-width">
-            <label>Placa <span>*</span></label>
+            <label>{{ "Placa" | tr }} <span>*</span></label>
             <div class="input-with-icon">
               <lucide-icon [img]="icons.hash" size="18" class="field-icon"></lucide-icon>
               <input type="text" formControlName="placa" placeholder="ABC-1234" class="has-icon">
             </div>
           </div>
           <div class="form-group full-width">
-            <label>Modelo <span>*</span></label>
+            <label>{{ "Modelo" | tr }} <span>*</span></label>
             <div class="input-with-icon">
               <lucide-icon [img]="icons.truck" size="18" class="field-icon"></lucide-icon>
               <input type="text" formControlName="modelo" placeholder="Ex: Mercedes-Benz Atego 1719" class="has-icon">
             </div>
           </div>
           <div class="form-group full-width">
-            <label>Transportadora <span>*</span></label>
+            <label>{{ "Transportadora" | tr }} <span>*</span></label>
             <div class="input-with-icon">
                <lucide-icon [img]="icons.building" size="18" class="field-icon"></lucide-icon>
               <input type="text" formControlName="transportadora" placeholder="Ex: Transportadora ABC Ltda" class="has-icon">
             </div>
           </div>
           <div class="form-group full-width">
-            <label>Capacidade <span>*</span></label>
+            <label>{{ "Capacidade" | tr }} <span>*</span></label>
             <div class="input-with-icon">
                <lucide-icon [img]="icons.package" size="18" class="field-icon"></lucide-icon>
               <input type="text" formControlName="capacidade" placeholder="Ex: 10 toneladas" class="has-icon">
             </div>
           </div>
           <div class="form-group full-width">
-            <label>Observações</label>
+            <label>{{ "Observações" | tr }}</label>
             <div class="input-with-icon">
               <lucide-icon [img]="icons.fileText" size="18" class="field-icon align-top"></lucide-icon>
-              <textarea formControlName="observacao" placeholder="Informações adicionais sobre o veículo..." class="has-icon"></textarea>
+              <textarea formControlName="observacao" [placeholder]='"Informações adicionais sobre o veículo..." | tr' class="has-icon"></textarea>
             </div>
           </div>
         </form>
 
         <form *ngIf="activeModal === 'operator'" [formGroup]="operadorForm">
           <div class="form-group full-width">
-            <label>Nome Completo <span>*</span></label>
+            <label>{{ "Nome Completo" | tr }} <span>*</span></label>
             <div class="input-with-icon">
               <lucide-icon [img]="icons.user" size="18" class="field-icon"></lucide-icon>
               <input type="text" formControlName="nome" placeholder="Ex: João Silva" class="has-icon">
@@ -262,12 +262,12 @@
             </div>
           </div>
           <div class="form-group full-width">
-            <label>Senha <span>*</span></label>
+            <label>{{ "Senha" | tr }} <span>*</span></label>
             <div class="input-with-icon">
               <lucide-icon [img]="icons.lock" size="18" class="field-icon"></lucide-icon>
               <input type="password" formControlName="senha" placeholder="********" class="has-icon">
             </div>
-            <span style="font-size: 0.75rem; color: #6b7280; margin-top: 4px;">Mínimo 8 caracteres</span>
+            <span style="font-size: 0.75rem; color: #6b7280; margin-top: 4px;">{{ "Mínimo 8 caracteres" | tr }}</span>
           </div>
           <div class="form-group full-width">
             <label>Confirmar Senha <span>*</span></label>
@@ -277,21 +277,21 @@
             </div>
           </div>
           <div class="form-group full-width">
-            <label>Filial <span>*</span></label>
+            <label>{{ "Filial" | tr }} <span>*</span></label>
             <div class="input-with-icon">
               <lucide-icon [img]="icons.building" size="18" class="field-icon"></lucide-icon>
               <input type="text" formControlName="filial" class="has-icon">
             </div>
           </div>
           <div class="form-group full-width">
-            <label>Telefone <span>*</span></label>
+            <label>{{ "Telefone" | tr }} <span>*</span></label>
             <div class="input-with-icon">
               <lucide-icon [img]="icons.phone" size="18" class="field-icon"></lucide-icon>
               <input type="text" formControlName="telefone" placeholder="(11) 98765-4321" class="has-icon">
             </div>
           </div>
           <div class="form-group full-width">
-            <label>E-mail <span>*</span></label>
+            <label>{{ "E-mail" | tr }} <span>*</span></label>
             <div class="input-with-icon">
               <lucide-icon [img]="icons.mail" size="18" class="field-icon"></lucide-icon>
               <input type="email" formControlName="email" placeholder="exemplo@email.com" class="has-icon">
@@ -302,10 +302,10 @@
         <form *ngIf="activeModal === 'client'" [formGroup]="clienteForm">
           <div class="form-group full-width filter-tipo-redesign">
              <label class="radio-label">
-                <input type="radio" formControlName="tipoPessoa" value="Fisica"> Pessoa Física
+                <input type="radio" formControlName="tipoPessoa" value="Fisica"> {{ "Pessoa Física" | tr }}
              </label>
              <label class="radio-label">
-                <input type="radio" formControlName="tipoPessoa" value="Juridica"> Pessoa Jurídica
+                <input type="radio" formControlName="tipoPessoa" value="Juridica"> {{ "Pessoa Jurídica" | tr }}
              </label>
           </div>
           <div class="form-group full-width">
@@ -317,18 +317,18 @@
             <input type="text" formControlName="cpfCnpj" placeholder="000.000.000-00">
           </div>
           <div class="form-group full-width">
-            <label>E-mail <span>*</span></label>
+            <label>{{ "E-mail" | tr }} <span>*</span></label>
             <input type="email" formControlName="email">
           </div>
           <div class="form-group full-width">
-            <label>Telefone <span>*</span></label>
+            <label>{{ "Telefone" | tr }} <span>*</span></label>
             <input type="text" formControlName="telefone">
           </div>
         </form>
 
         <div *ngIf="activeModal === 'agendamentos'">
           <div class="modal-filter-bar">
-            <label for="agend-date">Filtrar Data:</label>
+            <label for="agend-date">{{ "Filtrar Data:" | tr }}</label>
             <input 
               type="date" 
               id="agend-date" 
@@ -342,12 +342,12 @@
             <table class="agendamentos-table">
               <thead>
                 <tr>
-                  <th>Senha</th>
-                  <th>Cliente</th>
-                  <th>Horário</th>
-                  <th>Galões</th>
+                  <th>{{ "Senha" | tr }}</th>
+                  <th>{{ "Cliente" | tr }}</th>
+                  <th>{{ "Horário" | tr }}</th>
+                  <th>{{ "Galões" | tr }}</th>
                   <th>Status</th>
-                  <th>Ações</th>
+                  <th>{{ "Ações" | tr }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -365,30 +365,28 @@
                       'nao-compareceu': agenda.status === 'NAO_COMPARECEU',
                       'cancelado': agenda.status === 'CANCELADO'
                     }">
-                      {{ 
-                        agenda.status === 'ATENDIDO' ? 'Realizado' :
+                      {{ agenda.status === 'ATENDIDO' ? 'Realizado' :
                         agenda.status === 'REALIZADO' ? 'Realizado' :
                         agenda.status === 'PENDENTE' ? 'Pendente' :
                         agenda.status === 'CONFIRMADO' ? 'Confirmado' :
                         agenda.status === 'CHECKIN_REALIZADO' ? 'Check-in Realizado' :
-                        agenda.status === 'NAO_COMPARECEU' ? 'Não Compareceu' :
+                        agenda.status === 'NAO_COMPARECEU' ? ("Não Compareceu" | tr) :
                         agenda.status === 'CANCELADO' ? 'Cancelado' :
-                        agenda.status
-                      }}
+                        agenda.status }}
                     </span>
                   </td>
                   <td>
                     <div class="actions-cell">
                       <ng-container *ngIf="agenda.status === 'PENDENTE' || agenda.status === 'CONFIRMADO'">
-                        <button class="btn-icon text-green" title="Realizar check-in" (click)="abrirModalCheckin(agenda)">
+                        <button class="btn-icon text-green" [title]='"Realizar check-in" | tr' (click)="abrirModalCheckin(agenda)">
                           <lucide-icon [img]="icons.check" size="16"></lucide-icon>
                         </button>
-                        <button class="btn-icon text-red" title="Cancelar agendamento" (click)="abrirModalCancelar(agenda)">
+                        <button class="btn-icon text-red" [title]='"Cancelar agendamento" | tr' (click)="abrirModalCancelar(agenda)">
                           <lucide-icon [img]="icons.x" size="16"></lucide-icon>
                         </button>
                       </ng-container>
                       <ng-container *ngIf="agenda.status === 'NAO_COMPARECEU'">
-                        <button class="btn-icon text-blue" title="Resgatar agendamento para fila" (click)="abrirModalResgatar(agenda)">
+                        <button class="btn-icon text-blue" [title]='"Resgatar agendamento para fila" | tr' (click)="abrirModalResgatar(agenda)">
                           <lucide-icon [img]="icons.rotateCcw" size="16"></lucide-icon>
                         </button>
                       </ng-container>
@@ -405,7 +403,7 @@
 
         <div *ngIf="activeModal === 'atendimentos'">
           <div class="modal-filter-bar">
-            <label for="atend-date">Filtrar Data:</label>
+            <label for="atend-date">{{ "Filtrar Data:" | tr }}</label>
             <input 
               type="date" 
               id="atend-date" 
@@ -419,15 +417,15 @@
             <table class="agendamentos-table">
               <thead>
                 <tr>
-                  <th>Senha</th>
-                  <th>Cliente</th>
-                  <th>Categoria</th>
-                  <th>Galões</th>
-                  <th>Operador</th>
+                  <th>{{ "Senha" | tr }}</th>
+                  <th>{{ "Cliente" | tr }}</th>
+                  <th>{{ "Categoria" | tr }}</th>
+                  <th>{{ "Galões" | tr }}</th>
+                  <th>{{ "Operador" | tr }}</th>
                   <th>Tempo Espera</th>
                   <th>Tempo Atendimento</th>
                   <th>Status</th>
-                  <th>Ações</th>
+                  <th>{{ "Ações" | tr }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -466,7 +464,7 @@
                       <button
                         *ngIf="atend.statusRaw === 'NAO_COMPARECEU'"
                         class="btn-icon text-blue"
-                        title="Resgatar para fila"
+                        [title]='"Resgatar para fila" | tr'
                         (click)="abrirModalResgatar({ id: atend.agendamentoId || atend.senhaId, cliente: atend.cliente, isAtendimento: true })">
                         <lucide-icon [img]="icons.rotateCcw" size="16"></lucide-icon>
                       </button>
@@ -474,7 +472,7 @@
                   </td>
                 </tr>
                 <tr *ngIf="atendimentosList.length === 0">
-                  <td colspan="9" style="text-align:center;padding:20px;">Nenhum atendimento registrado.</td>
+                  <td colspan="9" style="text-align:center;padding:20px;">{{ "Nenhum atendimento registrado." | tr }}</td>
                 </tr>
               </tbody>
             </table>
@@ -483,12 +481,12 @@
 
       </div>
       <div class="modal-footer-gradient" *ngIf="activeModal !== 'agendamentos' && activeModal !== 'atendimentos'">
-        <button class="btn-ghost" (click)="fecharModal()">Cancelar</button>
-        <button class="btn-solid-blue" (click)="salvarCadastro()">Salvar</button>
+        <button class="btn-ghost" (click)="fecharModal()">{{ "Cancelar" | tr }}</button>
+        <button class="btn-solid-blue" (click)="salvarCadastro()">{{ "Salvar" | tr }}</button>
       </div>
       
       <div class="modal-footer-gradient" *ngIf="activeModal === 'agendamentos' || activeModal === 'atendimentos'">
-        <button class="btn-solid-cyan w-full" (click)="fecharModal()">Fechar</button>
+        <button class="btn-solid-cyan w-full" (click)="fecharModal()">{{ "Fechar" | tr }}</button>
       </div>
     </div>
   </div>
@@ -500,7 +498,7 @@
           <div class="modal-icon-container">
             <lucide-icon [img]="icons.alertCircle" size="24"></lucide-icon>
           </div>
-          <h2>Detalhe do Atendimento</h2>
+          <h2>{{ "Detalhe do Atendimento" | tr }}</h2>
         </div>
         <button class="close-btn-ghost" (click)="fecharAtendimentoDetalhe()">
           <lucide-icon [img]="icons.x" size="20"></lucide-icon>
@@ -509,23 +507,23 @@
       <div class="modal-body">
         <div class="detalhe-atend">
           <div class="detalhe-row">
-            <span class="detalhe-label">Senha</span>
+            <span class="detalhe-label">{{ "Senha" | tr }}</span>
             <strong>{{ atendimentoSelecionado?.ticket }}</strong>
           </div>
           <div class="detalhe-row">
-            <span class="detalhe-label">Cliente</span>
+            <span class="detalhe-label">{{ "Cliente" | tr }}</span>
             <span>{{ atendimentoSelecionado?.cliente }}</span>
           </div>
           <div class="detalhe-row">
-            <span class="detalhe-label">Categoria</span>
+            <span class="detalhe-label">{{ "Categoria" | tr }}</span>
             <span>{{ atendimentoSelecionado?.categoria }}</span>
           </div>
           <div class="detalhe-row">
-            <span class="detalhe-label">Operador</span>
+            <span class="detalhe-label">{{ "Operador" | tr }}</span>
             <span>{{ atendimentoSelecionado?.operador }}</span>
           </div>
           <div class="detalhe-row">
-            <span class="detalhe-label">Tempo de Espera</span>
+            <span class="detalhe-label">{{ "Tempo de Espera" | tr }}</span>
             <span>{{ atendimentoSelecionado?.tempoEspera }}</span>
           </div>
           <div class="detalhe-row" *ngIf="atendimentoSelecionado?.tempoAtendimento">
@@ -539,8 +537,8 @@
         </div>
       </div>
       <div class="modal-footer-gradient">
-        <button class="btn-ghost" (click)="fecharAtendimentoDetalhe()">Fechar</button>
-        <button class="btn-solid-blue" (click)="abrirJustificativa()">Justificar Demora</button>
+        <button class="btn-ghost" (click)="fecharAtendimentoDetalhe()">{{ "Fechar" | tr }}</button>
+        <button class="btn-solid-blue" (click)="abrirJustificativa()">{{ "Justificar Demora" | tr }}</button>
       </div>
     </div>
   </div>
@@ -552,7 +550,7 @@
           <div class="modal-icon-container">
             <lucide-icon [img]="icons.fileText" size="24"></lucide-icon>
           </div>
-          <h2>Justificar Demora</h2>
+          <h2>{{ "Justificar Demora" | tr }}</h2>
         </div>
         <button class="close-btn-ghost" (click)="fecharAtendimentoDetalhe()">
           <lucide-icon [img]="icons.x" size="20"></lucide-icon>
@@ -561,14 +559,14 @@
       <div class="modal-body">
         <form [formGroup]="justificativaForm">
           <div class="form-group full-width">
-            <label>Motivo <span>*</span></label>
+            <label>{{ "Motivo" | tr }} <span>*</span></label>
             <select formControlName="motivo">
-              <option value="">Selecione um motivo...</option>
-              <option value="alto_volume">Alto volume de atendimentos</option>
+              <option value="">{{ "Selecione um motivo..." | tr }}</option>
+              <option value="alto_volume">{{ "Alto volume de atendimentos" | tr }}</option>
               <option value="problema_tecnico">Problema técnico</option>
-              <option value="cliente_dificultando">Cliente dificultando atendimento</option>
-              <option value="falta_operador">Falta de operador</option>
-              <option value="outro">Outro</option>
+              <option value="cliente_dificultando">{{ "Cliente dificultando atendimento" | tr }}</option>
+              <option value="falta_operador">{{ "Falta de operador" | tr }}</option>
+              <option value="outro">{{ "Outro" | tr }}</option>
             </select>
           </div>
           <div class="form-group full-width">
@@ -578,8 +576,8 @@
         </form>
       </div>
       <div class="modal-footer-gradient">
-        <button class="btn-ghost" (click)="fecharAtendimentoDetalhe()">Cancelar</button>
-        <button class="btn-solid-blue" (click)="salvarJustificativa()">Salvar</button>
+        <button class="btn-ghost" (click)="fecharAtendimentoDetalhe()">{{ "Cancelar" | tr }}</button>
+        <button class="btn-solid-blue" (click)="salvarJustificativa()">{{ "Salvar" | tr }}</button>
       </div>
     </div>
   </div>
@@ -589,15 +587,15 @@
       <div class="s-icon">
         <lucide-icon [img]="icons.check" size="48" color="#22c55e"></lucide-icon>
       </div>
-      <h2 *ngIf="successModal === 'truck'">Sucesso!</h2>
-      <h2 *ngIf="successModal === 'operator'">Sucesso!</h2>
-      <h2 *ngIf="successModal === 'client'">Sucesso!</h2>
+      <h2 *ngIf="successModal === 'truck'">{{ "Sucesso!" | tr }}</h2>
+      <h2 *ngIf="successModal === 'operator'">{{ "Sucesso!" | tr }}</h2>
+      <h2 *ngIf="successModal === 'client'">{{ "Sucesso!" | tr }}</h2>
       
       <p *ngIf="successModal === 'truck'">Caminhão cadastrado corretamente.</p>
       <p *ngIf="successModal === 'operator'">Operador cadastrado corretamente.</p>
       <p *ngIf="successModal === 'client'">Cliente registrado corretamente.</p>
       
-      <button class="btn-solid-teal w-full" (click)="fecharModal()">OK, Entendi</button>
+      <button class="btn-solid-teal w-full" (click)="fecharModal()">{{ "OK, Entendi" | tr }}</button>
     </div>
   </div>
 
@@ -608,7 +606,7 @@
           <div class="modal-icon-container">
             <lucide-icon [img]="icons.check" size="24"></lucide-icon>
           </div>
-          <h2>Realizar Check-in</h2>
+          <h2>{{ "Realizar Check-in" | tr }}</h2>
         </div>
         <button class="close-btn-ghost" (click)="fecharModalCheckin()">
           <lucide-icon [img]="icons.x" size="20"></lucide-icon>
@@ -616,22 +614,22 @@
       </div>
       <div class="modal-body text-center" style="padding: 24px;">
         <p class="modal-subtitle" style="margin-bottom: 24px; color: #374151; font-size: 15px; font-weight: 500;">
-          Selecione o tipo de atendimento para o check-in do agendamento de <br>
+          {{ "Selecione o tipo de atendimento para o check-in do agendamento de" | tr }} <br>
           <strong style="color: #1d4ed8; font-size: 16px; font-weight: 700;">{{ agendamentoParaCheckin.cliente }}</strong>:
         </p>
         <div class="tipo-atendimento-options" style="display: flex; gap: 16px; justify-content: center; margin-bottom: 8px;">
           <button type="button" class="btn-tipo-atendimento convencional" (click)="confirmarCheckinOperador('Convencional')">
             <lucide-icon [img]="icons.user" size="24" style="margin-bottom: 8px; color: #10b981;"></lucide-icon>
-            <span style="font-weight: 600; font-size: 14px;">Convencional</span>
+            <span style="font-weight: 600; font-size: 14px;">{{ "Convencional" | tr }}</span>
           </button>
           <button type="button" class="btn-tipo-atendimento preferencial" (click)="confirmarCheckinOperador('Preferencial')">
             <lucide-icon [img]="icons.check" size="24" style="margin-bottom: 8px; color: #f59e0b;"></lucide-icon>
-            <span style="font-weight: 600; font-size: 14px;">Preferencial</span>
+            <span style="font-weight: 600; font-size: 14px;">{{ "Preferencial" | tr }}</span>
           </button>
         </div>
       </div>
       <div class="modal-footer-gradient">
-        <button type="button" class="btn-ghost w-full" (click)="fecharModalCheckin()">Cancelar</button>
+        <button type="button" class="btn-ghost w-full" (click)="fecharModalCheckin()">{{ "Cancelar" | tr }}</button>
       </div>
     </div>
   </div>
@@ -642,12 +640,12 @@
         <div>
           <lucide-icon [img]="icons.x" size="48" style="color: #ef4444; filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.4)); margin-bottom: 16px; display: inline-block;"></lucide-icon>
         </div>
-        <h3>Cancelar Agendamento?</h3>
-        <p>O agendamento de <span>{{ agendamentoParaCancelar.cliente }}</span> às <span>{{ agendamentoParaCancelar.horario }}</span> será cancelado permanentemente.<br>Essa ação não pode ser desfeita.</p>
+        <h3>{{ "Cancelar Agendamento?" | tr }}</h3>
+        <p>{{ "O agendamento de" | tr }} <span>{{ agendamentoParaCancelar.cliente }}</span> {{ "às" | tr }} <span>{{ agendamentoParaCancelar.horario }}</span> {{ "será cancelado permanentemente." | tr }}<br>{{ "Essa ação não pode ser desfeita." | tr }}</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-cancel" (click)="fecharModalCancelar()">Voltar</button>
-        <button type="button" class="btn-danger" (click)="confirmarCancelarAgendamento()">Confirmar Cancelamento</button>
+        <button type="button" class="btn-cancel" (click)="fecharModalCancelar()">{{ "Voltar" | tr }}</button>
+        <button type="button" class="btn-danger" (click)="confirmarCancelarAgendamento()">{{ "Confirmar Cancelamento" | tr }}</button>
       </div>
     </div>
   </div>
@@ -658,12 +656,12 @@
         <div>
           <lucide-icon [img]="icons.rotateCcw" size="48" style="color: #3b82f6; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4)); margin-bottom: 16px; display: inline-block;"></lucide-icon>
         </div>
-        <h3>Resgatar Agendamento?</h3>
-        <p>O agendamento de <span>{{ agendamentoParaResgatar.cliente }}</span> será retornado para a fila de espera como <strong style="color: #3b82f6;">AGUARDANDO</strong>.</p>
+        <h3>{{ "Resgatar Agendamento?" | tr }}</h3>
+        <p>{{ "O agendamento de" | tr }} <span>{{ agendamentoParaResgatar.cliente }}</span> {{ "será retornado para a fila de espera como" | tr }} <strong style="color: #3b82f6;">{{ "AGUARDANDO" | tr }}</strong>.</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-cancel" (click)="fecharModalResgatar()">Voltar</button>
-        <button type="button" class="btn-danger" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white;" (click)="confirmarResgatarAgendamento()">Confirmar Resgate</button>
+        <button type="button" class="btn-cancel" (click)="fecharModalResgatar()">{{ "Voltar" | tr }}</button>
+        <button type="button" class="btn-danger" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white;" (click)="confirmarResgatarAgendamento()">{{ "Confirmar Resgate" | tr }}</button>
       </div>
     </div>
   </div>

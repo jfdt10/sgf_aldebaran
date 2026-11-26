@@ -43,7 +43,7 @@ export class ClienteController {
     @Body() createClienteDto: any,
     @Request() req: any,
   ) {
-    const res = await this.clienteService.createOperacional(createClienteDto);
+    const res = await this.clienteService.createOperacional(createClienteDto, req.user.filial_id);
     const userId = req.user?.userId ?? req.user?.id;
     await this.logService.logAction(
       'Criação',

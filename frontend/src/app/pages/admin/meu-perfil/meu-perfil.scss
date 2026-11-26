@@ -160,3 +160,16 @@
         transform: translateY(0);
     }
 }
+
+.profile-forms { flex: 1; min-width: 0; }
+.form-section h2 { margin: 0; font-size: 1.125rem; color: var(--text-primary); }
+.password-form { margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
+.form-message { margin: 0; color: var(--text-primary); }
+.form-section .btn-primary:disabled { opacity: 0.55; cursor: default; }
+
+@media (max-width: 768px) {
+  .page-container { padding: 0; }
+  .content-card { padding: 1rem; }
+  .avatar-section { flex-direction: row; width: auto; }
+  .avatar-section .avatar-circle { width: 56px; height: 56px; font-size: 1.4rem; }
+}

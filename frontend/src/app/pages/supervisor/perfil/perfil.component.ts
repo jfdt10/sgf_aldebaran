@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -9,7 +10,7 @@ import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-supervisor-perfil',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ReactiveFormsModule, RouterLink],
+  imports: [TranslatePipe, CommonModule, LucideAngularModule, ReactiveFormsModule, RouterLink],
   templateUrl: './perfil.component.html',
   styleUrls: ['./perfil.component.scss']
 })

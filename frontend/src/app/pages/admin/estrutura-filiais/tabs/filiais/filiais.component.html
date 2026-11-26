@@ -110,7 +110,7 @@
 
             <div class="form-grid">
                 <div class="form-row">
-                    <label>Telefone</label>
+                    <label>{{ "Telefone" | tr }}</label>
                     <input type="text" [(ngModel)]="form.telefone" placeholder="(11) 3000-0000">
                 </div>
                 <div class="form-row">
@@ -124,8 +124,8 @@
         </div>
 
         <div class="modal-footer">
-            <button class="btn-cancel" (click)="fecharModal()">Cancelar</button>
-            <button class="btn-submit" (click)="salvarFilial()" [disabled]="loading">Salvar</button>
+            <button class="btn-cancel" (click)="fecharModal()">{{ "Cancelar" | tr }}</button>
+            <button class="btn-submit" (click)="salvarFilial()" [disabled]="loading">{{ "Salvar" | tr }}</button>
         </div>
     </div>
 </div>
@@ -143,7 +143,7 @@
             </p>
 
             <div class="refined-actions">
-                <button class="btn-refined-outline" (click)="fecharConfirmacao()">Cancelar</button>
+                <button class="btn-refined-outline" (click)="fecharConfirmacao()">{{ "Cancelar" | tr }}</button>
                 <button class="btn-refined-danger" (click)="confirmarExclur()">Sim, Excluir</button>
             </div>
         </div>
@@ -156,11 +156,11 @@
             <div class="refined-icon-box success-circle">
                 <lucide-icon [img]="icons.check" size="32" color="#22c55e"></lucide-icon>
             </div>
-            <h2 class="refined-title">Sucesso!</h2>
+            <h2 class="refined-title">{{ "Sucesso!" | tr }}</h2>
             <p class="refined-desc">Os dados foram salvos corretamente.</p>
 
             <div class="refined-actions mt-4">
-                <button class="btn-refined-teal" (click)="fecharSucesso()">OK, Entendi</button>
+                <button class="btn-refined-teal" (click)="fecharSucesso()">{{ "OK, Entendi" | tr }}</button>
             </div>
         </div>
     </div>

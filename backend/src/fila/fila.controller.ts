@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -55,6 +56,11 @@ export class FilaController {
   @Get('dashboard-stats')
   getDashboardStats() {
     return this.filaService.getDashboardData();
+  }
+
+  @Get('agendamento/dias')
+  getDiasAgendamento(@Query('filialId', ParseIntPipe) filialId: number) {
+    return this.filaService.diasAgendamento(filialId);
   }
 
   @Get('agendamento/horarios')

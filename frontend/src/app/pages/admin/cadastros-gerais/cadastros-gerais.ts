@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, RouterLink, ActivatedRoute } from '@angular/router';
@@ -9,7 +10,7 @@ import { ApiService } from '../../../services/api.service';
 @Component({
   selector: 'app-cadastros-gerais',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, LucideAngularModule, FormsModule],
+  imports: [TranslatePipe, CommonModule, RouterOutlet, RouterLink, LucideAngularModule, FormsModule],
   templateUrl: './cadastros-gerais.html',
   styleUrls: ['./cadastros-gerais.scss']
 })

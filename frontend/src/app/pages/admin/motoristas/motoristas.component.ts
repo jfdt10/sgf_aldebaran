@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, HostListener, ChangeDetectorRef, OnDestroy, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +11,7 @@ import { AdminLayoutComponent } from '../../../layouts/admin-layout/admin-layout
 @Component({
     selector: 'app-motoristas',
     standalone: true,
-    imports: [CommonModule, FormsModule, LucideAngularModule],
+    imports: [TranslatePipe, CommonModule, FormsModule, LucideAngularModule],
     templateUrl: './motoristas.component.html',
     styleUrls: ['./motoristas.component.scss']
 })
@@ -158,7 +159,7 @@ export class MotoristasComponent implements OnInit, OnDestroy {
         };
 
         if (this.isEditing) {
-            this.api.patch(`/motoristas/${this.motoristaForm.id}`, payload).subscribe({
+            this.api.put(`/motoristas/${this.motoristaForm.id}`, payload).subscribe({
                 next: () => {
                     this.showModal = false;
                     this.showSuccessModal = true;
