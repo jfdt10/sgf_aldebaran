@@ -14,6 +14,7 @@ interface Categoria {
   nome: string;
   icone: any;
   descricao: string;
+  sigla?: string;
 }
 
 @Component({
@@ -69,8 +70,6 @@ export class TotemCategoriaComponent implements OnInit {
             } else if (s.nome.toLowerCase().includes('cliente rápido') || s.nome.toLowerCase().includes('cliente rapido')) {
               if (!s.icone) icone = 'zap';
               descricao = 'Atendimento expresso e dúvidas rápidas';
-            } else {
-              descricao = s.sigla ? `Fila: ${s.sigla}` : descricao;
             }
 
             let iconeObjeto = this.icons.Zap;
@@ -87,7 +86,8 @@ export class TotemCategoriaComponent implements OnInit {
               id: s.id,
               nome: s.nome || 'Sem Nome',
               icone: iconeObjeto,
-              descricao: descricao
+              descricao,
+              sigla: descricao === 'Atendimento geral' ? s.sigla : undefined
             };
           });
         this.cdr.detectChanges();
