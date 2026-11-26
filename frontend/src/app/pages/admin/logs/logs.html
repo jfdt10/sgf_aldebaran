@@ -1,17 +1,17 @@
 <div class="page-container animate-up">
-    
+
     <div class="filial-selector-wrapper">
         <div class="filial-selector-glass">
             <div class="selector-content">
                 <div class="selector-info">
                     <div class="selector-text">
-                        <span class="selector-label">Filial atual</span>
-                        <span class="selector-value">{{ selectedFilialName || 'Todas as Unidades' }}</span>
+                        <span class="selector-label">{{ "Filial atual" | tr }}</span>
+                        <span class="selector-value">{{ selectedFilialName || ("Todas as Unidades" | tr) }}</span>
                     </div>
                 </div>
                 <div class="selector-action">
                     <select [(ngModel)]="selectedFilialId" (change)="onFilialChange()" class="filial-select-modern" [disabled]="isRestricted">
-                        <option *ngIf="!isRestricted" [ngValue]="null">🌍 Todas as Unidades (Global)</option>
+                        <option *ngIf="!isRestricted" [ngValue]="null">{{ "🌍 Todas as Unidades (Global)" | tr }}</option>
                         <option *ngFor="let f of filiais" [ngValue]="f.id">
                             🏢 {{ f.nome }}
                         </option>
@@ -28,42 +28,42 @@
     <div class="list-card">
         <div class="alert-banner">
             <lucide-icon [img]="icons.lock" size="18"></lucide-icon>
-            <span>Acesso restrito a Administradores - Todos os logs são monitorados</span>
+            <span>{{ "Acesso restrito a Administradores - Todos os logs são monitorados" | tr }}</span>
         </div>
 
         <div class="list-card-header mb-4">
             <div class="search-box">
                 <lucide-icon [img]="icons.search" size="18"></lucide-icon>
-                <input type="text" [ngModel]="filters.search" (input)="onSearchChange($any($event.target).value)" 
-                    placeholder="Buscar logs por ação, descrição, usuário...">
+                <input type="text" [ngModel]="filters.search" (input)="onSearchChange($any($event.target).value)"
+                    [placeholder]='"Buscar logs por ação, descrição, usuário..." | tr'>
             </div>
             <button class="btn-primary" (click)="exportPDF()" [disabled]="loading">
                 <lucide-icon [img]="icons.download" size="18"></lucide-icon>
-                Exportar PDF
+                {{ "Exportar PDF" | tr }}
             </button>
         </div>
 
         <div class="filters-grid">
             <div class="filter-item">
-                <label>Ação:</label>
+                <label>{{ "Ação:" | tr }}</label>
                 <select [(ngModel)]="filters.acao" (change)="carregar()">
-                    <option value="">Todas as Ações</option>
-                    <option value="Criação">Criação / Cadastro</option>
-                    <option value="Atualização">Atualização</option>
-                    <option value="Exclusão">Exclusão</option>
-                    <option value="TRANSICAO_STATUS">Transição de Fila / Status</option>
-                    <option value="TRANSFERENCIA_ATENDIMENTO">Transferência de Guichê</option>
-                    <option value="CALIBRACAO_SLA">Calibração de SLA</option>
-                    <option value="Login">Login / Autenticação</option>
-                    <option value="Configuração">Configuração</option>
+                    <option value="">{{ "Todas as Ações" | tr }}</option>
+                    <option value="Criação">{{ "Criação / Cadastro" | tr }}</option>
+                    <option value="Atualização">{{ "Atualização" | tr }}</option>
+                    <option value="Exclusão">{{ "Exclusão" | tr }}</option>
+                    <option value="TRANSICAO_STATUS">{{ "Transição de Fila / Status" | tr }}</option>
+                    <option value="TRANSFERENCIA_ATENDIMENTO">{{ "Transferência de Guichê" | tr }}</option>
+                    <option value="CALIBRACAO_SLA">{{ "Calibração de SLA" | tr }}</option>
+                    <option value="Login">{{ "Login / Autenticação" | tr }}</option>
+                    <option value="Configuração">{{ "Configuração" | tr }}</option>
                 </select>
             </div>
             <div class="filter-item">
-                <label>Data De:</label>
+                <label>{{ "Data De:" | tr }}</label>
                 <input type="date" [(ngModel)]="filters.de" (change)="carregar()">
             </div>
             <div class="filter-item">
-                <label>Data Até:</label>
+                <label>{{ "Data Até:" | tr }}</label>
                 <input type="date" [(ngModel)]="filters.ate" (change)="carregar()">
             </div>
         </div>
@@ -72,11 +72,11 @@
             <table class="premium-table">
                 <thead>
                     <tr>
-                        <th style="width: 180px;">DATA/HORA</th>
-                        <th style="width: 140px;">AÇÃO</th>
-                        <th style="width: 200px;">USUÁRIO</th>
-                        <th style="width: 150px;">ENTIDADE</th>
-                        <th>DESCRIÇÃO</th>
+                        <th style="width: 180px;">{{ "DATA/HORA" | tr }}</th>
+                        <th style="width: 140px;">{{ "AÇÃO" | tr }}</th>
+                        <th style="width: 200px;">{{ "USUÁRIO" | tr }}</th>
+                        <th style="width: 150px;">{{ "ENTIDADE" | tr }}</th>
+                        <th>{{ "DESCRIÇÃO" | tr }}</th>
                         <th style="width: 120px;">STATUS</th>
                     </tr>
                 </thead>
@@ -85,20 +85,20 @@
                         <td class="time-cell">{{ log.criadoEm | date:'yyyy-MM-dd HH:mm:ss' }}</td>
                         <td>
                             <span class="action-badge" [ngClass]="getActionClass(log.acao)">
-                                {{ log.acao }}
+                                {{ (log.acao) | tr }}
                             </span>
                         </td>
                         <td>
                             <div class="user-info">
-                                <span class="user-name">{{ log.usuario?.nome || 'Sistema' }}</span>
-                                <span class="user-login">{{ log.usuario?.login || 'auto' }}</span>
+                                <span class="user-name">{{ log.usuario?.nome || ("Sistema" | tr) }}</span>
+                                <span class="user-login">{{ log.usuario?.login || ("auto" | tr) }}</span>
                             </div>
                         </td>
                         <td><span class="entity-tag">{{ log.entidade || '-' }}</span></td>
                         <td><p class="desc-text" [innerHTML]="formatDescription(log.descricao, log.acao)"></p></td>
                         <td>
                             <span class="status-badge" [ngClass]="log.status?.toLowerCase() === 'erro' ? 'erro' : 'sucesso'">
-                                {{ log.status || 'Sucesso' }}
+                                {{ log.status || ("Sucesso" | tr) }}
                             </span>
                         </td>
                     </tr>
@@ -109,19 +109,19 @@
                 <div class="icon-halo">
                     <lucide-icon [img]="icons.fileText" size="32"></lucide-icon>
                 </div>
-                <h3>Nenhum log encontrado</h3>
-                <p>Tente ajustar os filtros ou a busca por texto.</p>
+                <h3>{{ "Nenhum log encontrado" | tr }}</h3>
+                <p>{{ "Tente ajustar os filtros ou a busca por texto." | tr }}</p>
             </div>
 
             <div *ngIf="loading" class="empty-state">
                 <div class="spinner"></div>
-                <p>Carregando registros...</p>
+                <p>{{ "Carregando registros..." | tr }}</p>
             </div>
         </div>
 
         <div class="table-footer" *ngIf="total > 0">
             <div class="page-info">
-                Mostrando {{ (page - 1) * limit + 1 }} a {{ Math.min(page * limit, total) }} de {{ total }} registros
+                {{ "Mostrando" | tr }} {{ (page - 1) * limit + 1 }} a {{ Math.min(page * limit, total) }} {{ "de" | tr }} {{ total }} {{ "registros" | tr }}
             </div>
             <div class="page-controls">
                 <button class="btn-page" [disabled]="page === 1" (click)="changePage(page - 1)">

@@ -63,7 +63,7 @@
         <div class="profile-dropdown" *ngIf="showProfileMenu" (click)="$event.stopPropagation()">
           <div class="dropdown-header">
             <span class="m-name">{{ nomeOperador }}</span>
-            <span class="m-email">{{ operadorEmail || 'Sem email' }}</span>
+            <span class="m-email">{{ operadorEmail || ("Sem email" | tr) }}</span>
           </div>
           <button type="button" class="dropdown-item" (click)="abrirEditarPerfil()">
             <lucide-icon [img]="icons.user" size="16" style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;"></lucide-icon>
@@ -141,8 +141,8 @@
               <div class="info-card">
                 <p class="info-label">{{ "Cliente" | tr }}</p>
                 <div class="info-value info-value-client" [class.ghost]="!ticketAtual.clienteSelecionado">
-                  <span>{{ ticketAtual.clienteSelecionado ? ticketAtual.cliente : 'Sem Cadastro' }}</span>
-                  <img *ngIf="ticketAtual.clienteSelecionado" src="assets/Icon (15).svg" class="client-eye-icon" alt="Visualizar cadastro" (click)="abrirDetalhesCliente()" style="cursor: pointer;" />
+                  <span>{{ ticketAtual.clienteSelecionado ? ticketAtual.cliente : ("Sem Cadastro" | tr) }}</span>
+                  <img *ngIf="ticketAtual.clienteSelecionado" src="assets/Icon (15).svg" class="client-eye-icon" [alt]='"Visualizar cadastro" | tr' (click)="abrirDetalhesCliente()" style="cursor: pointer;" />
                 </div>
               </div>
               <div class="info-card">
@@ -321,7 +321,7 @@
             <ng-container *ngIf="g.status !== 'FECHADO'">
               <div class="guiche-header">
                 <span>{{ formatarTituloGuiche(g.guiche) }}</span>
-                <span class="badge-status" [class.disponivel]="g.status === 'DISPONÍVEL'">{{ g.status }}</span>
+                <span class="badge-status" [class.disponivel]="g.status === 'DISPONÍVEL'">{{ (g.status) | tr }}</span>
               </div>
               <div class="guiche-operador">
                 <img src="assets/Icon (7).svg" class="guiche-avatar" />
@@ -362,7 +362,7 @@
     <div class="success-flux">
       <span class="senha">{{ ticketAtual?.senha }}</span>
       <span class="seta">⟶</span>
-      <span class="guiche-destino">{{ formatarTituloGuiche(guicheTransferenciaDestino?.guiche || 'Fila Geral') }} <span>({{ guicheTransferenciaDestino?.nome || 'Sem operador' }})</span></span>
+      <span class="guiche-destino">{{ formatarTituloGuiche(guicheTransferenciaDestino?.guiche || ("Fila Geral" | tr)) }} <span>({{ guicheTransferenciaDestino?.nome || ("Sem operador" | tr) }})</span></span>
     </div>
     <button class="btn-voltar-console" (click)="encerrarTransferencia()">
       {{ "Voltar ao Console" | tr }}
@@ -388,21 +388,21 @@
         <label>{{ "Modelo" | tr }} <span>*</span></label>
         <div class="input-with-icon">
           <lucide-icon [name]="icons.truck"></lucide-icon>
-          <input type="text" [(ngModel)]="formCaminhao.modelo" placeholder="Ex: Mercedes-Benz Atego 1719" />
+          <input type="text" [(ngModel)]="formCaminhao.modelo" [placeholder]='"Ex: Mercedes-Benz Atego 1719" | tr' />
         </div>
       </div>
       <div class="form-group">
         <label>{{ "Transportadora" | tr }} <span>*</span></label>
         <div class="input-with-icon">
           <lucide-icon [name]="icons.building"></lucide-icon>
-          <input type="text" [(ngModel)]="formCaminhao.transportadora" placeholder="Ex: Transportadora ABC Ltda" />
+          <input type="text" [(ngModel)]="formCaminhao.transportadora" [placeholder]='"Ex: Transportadora ABC Ltda" | tr' />
         </div>
       </div>
       <div class="form-group">
         <label>{{ "Capacidade" | tr }} <span>*</span></label>
         <div class="input-with-icon">
           <lucide-icon [name]="icons.package"></lucide-icon>
-          <input type="text" [(ngModel)]="formCaminhao.capacidade" placeholder="Ex: 10 toneladas" />
+          <input type="text" [(ngModel)]="formCaminhao.capacidade" [placeholder]='"Ex: 10 toneladas" | tr' />
         </div>
       </div>
       <div class="form-group">
@@ -442,7 +442,7 @@
         <div class="avatar-large">
           {{ clienteDetalhes?.nome ? (clienteDetalhes.nome.substring(0, 2) | uppercase) : 'CL' }}
         </div>
-        <h4 class="client-name-title">{{ clienteDetalhes?.nome || 'Cliente sem nome' }}</h4>
+        <h4 class="client-name-title">{{ clienteDetalhes?.nome || ("Cliente sem nome" | tr) }}</h4>
         <span class="client-role-badge">{{ "Cliente Cadastrado" | tr }}</span>
       </div>
 
@@ -521,7 +521,7 @@
         <label>{{ "Razão Social" | tr }} <span>*</span></label>
         <div class="input-with-icon">
           <lucide-icon [name]="icons.building"></lucide-icon>
-          <input type="text" [(ngModel)]="formCliente.nomeEmpresa" placeholder="Ex: Empresa LTDA" />
+          <input type="text" [(ngModel)]="formCliente.nomeEmpresa" [placeholder]='"Ex: Empresa LTDA" | tr' />
         </div>
       </div>
 
@@ -529,7 +529,7 @@
         <label>{{ "Nome Completo" | tr }} <span>*</span></label>
         <div class="input-with-icon">
           <lucide-icon [name]="icons.user"></lucide-icon>
-          <input type="text" [(ngModel)]="formCliente.nome" placeholder="Ex: João da Silva" />
+          <input type="text" [(ngModel)]="formCliente.nome" [placeholder]='"Ex: João da Silva" | tr' />
         </div>
       </div>
 
@@ -573,7 +573,7 @@
         </div>
       </div>
       <h2>{{ "Sucesso!" | tr }}</h2>
-      <p>{{ successModal === 'truck' ? 'Caminhão cadastrado corretamente.' : 'Cliente cadastrado corretamente.' }}</p>
+      <p>{{ successModal === 'truck' ? ("Caminhão cadastrado corretamente." | tr) : ("Cliente cadastrado corretamente." | tr) }}</p>
       <button class="btn-success-ok" (click)="fecharModal()">{{ "OK, Entendi" | tr }}</button>
     </div>
   </div>
@@ -641,7 +641,7 @@
                   'finalizado': atend.statusRaw === 'FINALIZADO',
                   'cancelado': atend.statusRaw === 'CANCELADO',
                   'nao-compareceu': atend.statusRaw === 'NAO_COMPARECEU'
-                }">{{ atend.status || '-' }}</span>
+                }">{{ (atend.status || '-') | tr }}</span>
               </td>
               <td>
                 <div class="actions-cell">
@@ -793,7 +793,7 @@
         </div>
         <div class="detalhe-row">
           <span class="detalhe-label">Status</span>
-          <span class="status-pill" [ngClass]="atendimentoSelecionado?.status?.toLowerCase().replace(' ', '-')">{{ atendimentoSelecionado?.status }}</span>
+          <span class="status-pill" [ngClass]="atendimentoSelecionado?.status?.toLowerCase().replace(' ', '-')">{{ (atendimentoSelecionado?.status) | tr }}</span>
         </div>
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -15,6 +17,7 @@ import { catchError, of } from 'rxjs';
   styleUrls: ['./agendamento.component.scss']
 })
 export class AgendamentoComponent implements OnInit {
+  readonly language = inject(LanguageService);
   selectedLang: 'PT' | 'EN' = 'PT';
   showSuccessModal = false;
   hoje = new Date();
@@ -319,11 +322,13 @@ export class AgendamentoComponent implements OnInit {
     this.selectedLang = lang;
   }
 
+  readonly diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
   getFormattedDate(): string {
     if (!this.form.data) return '';
     const data = new Date(this.anoAtual, this.mesAtual, this.form.data);
     const options: any = { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' };
-    return data.toLocaleDateString('pt-BR', options);
+    return data.toLocaleDateString(this.language.locale(), options);
   }
 
   getFilialNome(): string {

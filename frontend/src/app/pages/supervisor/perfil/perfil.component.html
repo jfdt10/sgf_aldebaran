@@ -13,25 +13,25 @@
     <div class="perfil-card">
       <div class="card-left photo-section">
         <label class="photo-container">
-           <img *ngIf="fotoUrl" [src]="fotoUrl" alt="Foto de Perfil" class="profile-img">
+           <img *ngIf="fotoUrl" [src]="fotoUrl" [alt]='"Foto de Perfil" | tr' class="profile-img">
            <div class="photo-placeholder" *ngIf="!fotoUrl">
               <lucide-icon [img]="icons.user" size="64" color="#cbd5e1"></lucide-icon>
            </div>
            
            <input type="file" #fileInput hidden accept="image/*" (change)="onFileSelected($event)">
         </label>
-        <span class="change-photo-link" (click)="fileInput.click()">Mudar Foto</span>
+        <span class="change-photo-link" (click)="fileInput.click()">{{ "Mudar Foto" | tr }}</span>
       </div>
 
       <div class="card-right form-section">
         <form [formGroup]="perfilForm">
           
           <div class="form-block">
-            <h3>Informações Pessoais</h3>
+            <h3>{{ "Informações Pessoais" | tr }}</h3>
             <div class="form-grid">
               <div class="form-group full-width">
                 <label>{{ "Nome Completo" | tr }}</label>
-                <input type="text" formControlName="nome" placeholder="Digite seu nome">
+                <input type="text" formControlName="nome" [placeholder]='"Digite seu nome" | tr'>
               </div>
               <div class="form-group">
                 <label>{{ "E-mail" | tr }}</label>
@@ -42,8 +42,8 @@
                 <input type="text" formControlName="telefone" placeholder="(00) 00000-0000">
               </div>
               <div class="form-group full-width">
-                <label>Departamento</label>
-                <input type="text" formControlName="departamento" placeholder="Ex: Logística">
+                <label>{{ "Departamento" | tr }}</label>
+                <input type="text" formControlName="departamento" [placeholder]='"Ex: Logística" | tr'>
               </div>
             </div>
           </div>
@@ -54,7 +54,7 @@
             <h3>{{ "Segurança" | tr }}</h3>
             <div class="form-grid">
               <div class="form-group">
-                <label>Senha Atual</label>
+                <label>{{ "Senha Atual" | tr }}</label>
                 <div class="input-with-icon">
                   <input [type]="showSenhaAtual ? 'text' : 'password'" formControlName="senhaAtual" placeholder="••••••••">
                   <lucide-icon [img]="icons.lock" size="16" class="field-icon-left"></lucide-icon>
@@ -93,9 +93,9 @@
         <lucide-icon [img]="icons.check" size="48" color="#22c55e"></lucide-icon>
       </div>
       <h2>{{ "Sucesso!" | tr }}</h2>
-      <p>Perfil atualizado com sucesso.</p>
+      <p>{{ "Perfil atualizado com sucesso." | tr }}</p>
       
-      <button class="btn-solid-blue w-full" (click)="fecharModal()">Continuar</button>
+      <button class="btn-solid-blue w-full" (click)="fecharModal()">{{ "Continuar" | tr }}</button>
     </div>
   </div>
 </div>

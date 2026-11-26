@@ -3,10 +3,10 @@
   <div class="alert-banner" *ngIf="showAlertBanner">
     <div class="alert-content">
       <lucide-icon [img]="icons.alert" class="alert-icon" size="20"></lucide-icon>
-      <span>Alertas: Alta demanda detectada no atendimento</span>
+      <span>{{ "Alertas: Alta demanda detectada no atendimento" | tr }}</span>
     </div>
     <a class="alert-link" routerLink="/supervisor/relatorios">
-      Ver Relatórios &gt;
+      {{ "Ver Relatórios >" | tr }}
     </a>
   </div>
 
@@ -15,7 +15,7 @@
     <header class="dashboard-header">
       <div class="header-titles">
         <h1 class="page-title">{{ "Painel do Supervisor" | tr }}</h1>
-        <p class="page-subtitle">Monitore a fila e agendamentos em tempo real</p>
+        <p class="page-subtitle">{{ "Monitore a fila e agendamentos em tempo real" | tr }}</p>
       </div>
     </header>
     <section class="section">
@@ -28,7 +28,7 @@
               <lucide-icon [img]="icons.trendingUp" size="24"></lucide-icon>
             </div>
             <div class="kpi-info-flex">
-              <span class="kpi-label">Total Hoje</span>
+              <span class="kpi-label">{{ "Total Hoje" | tr }}</span>
               <strong class="kpi-value">{{ visaoGeral[0].valor }}</strong>
             </div>
           </div>
@@ -40,7 +40,7 @@
               <lucide-icon [img]="icons.clock" size="24"></lucide-icon>
             </div>
             <div class="kpi-info-flex">
-              <span class="kpi-label">Tempo Médio Diário</span>
+              <span class="kpi-label">{{ "Tempo Médio Diário" | tr }}</span>
               <strong class="kpi-value">{{ tempoMedio }}</strong>
             </div>
           </div>
@@ -52,7 +52,7 @@
               <lucide-icon [img]="icons.activity" size="24"></lucide-icon>
             </div>
             <div class="kpi-info-flex">
-              <span class="kpi-label">Guichês Ativos</span>
+              <span class="kpi-label">{{ "Guichês Ativos" | tr }}</span>
               <strong class="kpi-value">{{ getGuichesAtivosInfo().valor }}</strong>
             </div>
           </div>
@@ -64,7 +64,7 @@
               <lucide-icon [img]="icons.users" size="24"></lucide-icon>
             </div>
             <div class="kpi-info-flex">
-              <span class="kpi-label">Fila Atual</span>
+              <span class="kpi-label">{{ "Fila Atual" | tr }}</span>
               <strong class="kpi-value">{{ visaoGeral[3].valor }}</strong>
             </div>
           </div>
@@ -74,7 +74,7 @@
     </section>
 
     <section class="section">
-      <h2 class="section-title">Status dos Guichês</h2>
+      <h2 class="section-title">{{ "Status dos Guichês" | tr }}</h2>
       <div class="desk-grid">
         
         <div class="desk-card" *ngFor="let guiche of getGuichesFormatted()" [ngClass]="guiche.status.toLowerCase()">
@@ -90,7 +90,7 @@
             </div>
             <div class="desk-info-right">
               <span class="status-badge">
-                {{ guiche.status === 'DISPONIVEL' ? 'Disponível' : guiche.status === 'ATENDENDO' ? ("Atendendo" | tr) : guiche.status === 'CHAMANDO' ? 'Chamando' : ("Fechado" | tr) }}
+                {{ (guiche.status === 'DISPONIVEL' ? 'Disponível' : guiche.status === 'ATENDENDO' ? 'Atendendo' : guiche.status === 'CHAMANDO' ? 'Chamando' : 'Fechado') | tr }}
               </span>
             </div>
           </div>
@@ -113,7 +113,7 @@
             <ng-container *ngIf="guiche.status === 'CHAMANDO'">
               <div class="desk-details space-between bg-gray-box">
                 <div class="detail-col">
-                  <span class="detail-label text-xs">Chamando</span>
+                  <span class="detail-label text-xs">{{ "Chamando" | tr }}</span>
                   <strong class="ticket-number text-lg">{{ guiche.ticket }}</strong>
                 </div>
                 <div class="time-pill inline-time" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2);">
@@ -129,7 +129,7 @@
                   <lucide-icon [img]="icons.clock" size="14"></lucide-icon>
                   {{ guiche.tempo }}
                 </div>
-                <h3 class="waiting-text">Aguardando Chamar</h3>
+                <h3 class="waiting-text">{{ "Aguardando Chamar" | tr }}</h3>
               </div>
             </ng-container>
 
@@ -141,7 +141,7 @@
     </section>
 
     <section class="section actions-section">
-      <h2 class="section-title">Ações de Gerenciamento</h2>
+      <h2 class="section-title">{{ "Ações de Gerenciamento" | tr }}</h2>
       <div class="actions-grid">
         
         <button class="action-card" (click)="abrirModal('truck')">
@@ -155,7 +155,7 @@
           <div class="action-icon bg-purple-light text-purple">
             <lucide-icon [img]="icons.userPlus" size="24"></lucide-icon>
           </div>
-          <span>Cadastrar Operador</span>
+          <span>{{ "Cadastrar Operador" | tr }}</span>
         </button>
 
         <button class="action-card" (click)="abrirModal('client')">
@@ -176,7 +176,7 @@
           <div class="action-icon bg-blue-light text-blue">
             <lucide-icon [img]="icons.barChart" size="24"></lucide-icon>
           </div>
-          <span>Relatórios Gerenciais</span>
+          <span>{{ "Relatórios Gerenciais" | tr }}</span>
         </button>
 
       </div>
@@ -196,10 +196,10 @@
              <lucide-icon *ngIf="activeModal === 'atendimentos'" [img]="icons.history" size="24"></lucide-icon>
           </div>
           <h2 *ngIf="activeModal === 'truck'">{{ "Cadastrar Caminhão" | tr }}</h2>
-          <h2 *ngIf="activeModal === 'operator'">Cadastrar Operador</h2>
+          <h2 *ngIf="activeModal === 'operator'">{{ "Cadastrar Operador" | tr }}</h2>
           <h2 *ngIf="activeModal === 'client'">{{ "Cadastrar Cliente" | tr }}</h2>
           <h2 *ngIf="activeModal === 'agendamentos'">{{ "Agendamentos do Dia" | tr }}</h2>
-          <h2 *ngIf="activeModal === 'atendimentos'">Atendimentos do Dia</h2>
+          <h2 *ngIf="activeModal === 'atendimentos'">{{ "Atendimentos do Dia" | tr }}</h2>
         </div>
         <button class="close-btn-ghost" (click)="fecharModal()">
           <lucide-icon [img]="icons.x" size="20"></lucide-icon>
@@ -220,21 +220,21 @@
             <label>{{ "Modelo" | tr }} <span>*</span></label>
             <div class="input-with-icon">
               <lucide-icon [img]="icons.truck" size="18" class="field-icon"></lucide-icon>
-              <input type="text" formControlName="modelo" placeholder="Ex: Mercedes-Benz Atego 1719" class="has-icon">
+              <input type="text" formControlName="modelo" [placeholder]='"Ex: Mercedes-Benz Atego 1719" | tr' class="has-icon">
             </div>
           </div>
           <div class="form-group full-width">
             <label>{{ "Transportadora" | tr }} <span>*</span></label>
             <div class="input-with-icon">
                <lucide-icon [img]="icons.building" size="18" class="field-icon"></lucide-icon>
-              <input type="text" formControlName="transportadora" placeholder="Ex: Transportadora ABC Ltda" class="has-icon">
+              <input type="text" formControlName="transportadora" [placeholder]='"Ex: Transportadora ABC Ltda" | tr' class="has-icon">
             </div>
           </div>
           <div class="form-group full-width">
             <label>{{ "Capacidade" | tr }} <span>*</span></label>
             <div class="input-with-icon">
                <lucide-icon [img]="icons.package" size="18" class="field-icon"></lucide-icon>
-              <input type="text" formControlName="capacidade" placeholder="Ex: 10 toneladas" class="has-icon">
+              <input type="text" formControlName="capacidade" [placeholder]='"Ex: 10 toneladas" | tr' class="has-icon">
             </div>
           </div>
           <div class="form-group full-width">
@@ -251,14 +251,14 @@
             <label>{{ "Nome Completo" | tr }} <span>*</span></label>
             <div class="input-with-icon">
               <lucide-icon [img]="icons.user" size="18" class="field-icon"></lucide-icon>
-              <input type="text" formControlName="nome" placeholder="Ex: João Silva" class="has-icon">
+              <input type="text" formControlName="nome" [placeholder]='"Ex: João Silva" | tr' class="has-icon">
             </div>
           </div>
           <div class="form-group full-width">
-            <label>Nome de Usuário <span>*</span></label>
+            <label>{{ "Nome de Usuário" | tr }} <span>*</span></label>
             <div class="input-with-icon">
               <lucide-icon [img]="icons.key" size="18" class="field-icon"></lucide-icon>
-              <input type="text" formControlName="nomeUsuario" placeholder="Ex: joao.silva" class="has-icon">
+              <input type="text" formControlName="nomeUsuario" [placeholder]='"Ex: joao.silva" | tr' class="has-icon">
             </div>
           </div>
           <div class="form-group full-width">
@@ -270,7 +270,7 @@
             <span style="font-size: 0.75rem; color: #6b7280; margin-top: 4px;">{{ "Mínimo 8 caracteres" | tr }}</span>
           </div>
           <div class="form-group full-width">
-            <label>Confirmar Senha <span>*</span></label>
+            <label>{{ "Confirmar Senha" | tr }} <span>*</span></label>
             <div class="input-with-icon">
               <lucide-icon [img]="icons.lock" size="18" class="field-icon"></lucide-icon>
               <input type="password" formControlName="confirmarSenha" placeholder="********" class="has-icon">
@@ -309,8 +309,8 @@
              </label>
           </div>
           <div class="form-group full-width">
-            <label>Nome Completo (ou Razão Social) <span>*</span></label>
-            <input type="text" formControlName="nome" placeholder="Ex: Nome do Cliente">
+            <label>{{ "Nome Completo (ou Razão Social)" | tr }} <span>*</span></label>
+            <input type="text" formControlName="nome" [placeholder]='"Ex: Nome do Cliente" | tr'>
           </div>
           <div class="form-group full-width">
             <label>{{ clienteForm.get('tipoPessoa')?.value === 'Fisica' ? 'CPF' : 'CNPJ' }} <span>*</span></label>
@@ -394,7 +394,7 @@
                   </td>
                 </tr>
                 <tr *ngIf="agendamentos.length === 0">
-                  <td colspan="5" style="text-align:center;padding:20px;">Nenhum agendamento registrado.</td>
+                  <td colspan="5" style="text-align:center;padding:20px;">{{ "Nenhum agendamento registrado." | tr }}</td>
                 </tr>
               </tbody>
             </table>
@@ -422,8 +422,8 @@
                   <th>{{ "Categoria" | tr }}</th>
                   <th>{{ "Galões" | tr }}</th>
                   <th>{{ "Operador" | tr }}</th>
-                  <th>Tempo Espera</th>
-                  <th>Tempo Atendimento</th>
+                  <th>{{ "Tempo Espera" | tr }}</th>
+                  <th>{{ "Tempo Atendimento" | tr }}</th>
                   <th>Status</th>
                   <th>{{ "Ações" | tr }}</th>
                 </tr>
@@ -454,11 +454,11 @@
                       'finalizado': atend.statusRaw === 'FINALIZADO',
                       'cancelado': atend.statusRaw === 'CANCELADO',
                       'nao-compareceu': atend.statusRaw === 'NAO_COMPARECEU'
-                    }">{{ atend.status || '-' }}</span>
+                    }">{{ (atend.status || '-') | tr }}</span>
                   </td>
                   <td>
                     <div class="actions-cell">
-                      <button class="btn-icon text-blue" title="Ver detalhes" (click)="verAtendimento(atend)">
+                      <button class="btn-icon text-blue" [title]='"Ver detalhes" | tr' (click)="verAtendimento(atend)">
                         <lucide-icon [img]="icons.eye" size="16"></lucide-icon>
                       </button>
                       <button
@@ -527,12 +527,12 @@
             <span>{{ atendimentoSelecionado?.tempoEspera }}</span>
           </div>
           <div class="detalhe-row" *ngIf="atendimentoSelecionado?.tempoAtendimento">
-            <span class="detalhe-label">Tempo de Atendimento</span>
+            <span class="detalhe-label">{{ "Tempo de Atendimento" | tr }}</span>
             <span>{{ atendimentoSelecionado?.tempoAtendimento }}</span>
           </div>
           <div class="detalhe-row">
             <span class="detalhe-label">Status</span>
-            <span class="status-pill" [ngClass]="atendimentoSelecionado?.status?.toLowerCase().replace(' ', '-')">{{ atendimentoSelecionado?.status }}</span>
+            <span class="status-pill" [ngClass]="atendimentoSelecionado?.status?.toLowerCase().replace(' ', '-')">{{ (atendimentoSelecionado?.status) | tr }}</span>
           </div>
         </div>
       </div>
@@ -563,15 +563,15 @@
             <select formControlName="motivo">
               <option value="">{{ "Selecione um motivo..." | tr }}</option>
               <option value="alto_volume">{{ "Alto volume de atendimentos" | tr }}</option>
-              <option value="problema_tecnico">Problema técnico</option>
+              <option value="problema_tecnico">{{ "Problema técnico" | tr }}</option>
               <option value="cliente_dificultando">{{ "Cliente dificultando atendimento" | tr }}</option>
               <option value="falta_operador">{{ "Falta de operador" | tr }}</option>
               <option value="outro">{{ "Outro" | tr }}</option>
             </select>
           </div>
           <div class="form-group full-width">
-            <label>Observações Adicionais</label>
-            <textarea formControlName="observacoes" placeholder="Descreva mais detalhes sobre a situação..."></textarea>
+            <label>{{ "Observações Adicionais" | tr }}</label>
+            <textarea formControlName="observacoes" [placeholder]='"Descreva mais detalhes sobre a situação..." | tr'></textarea>
           </div>
         </form>
       </div>
@@ -591,9 +591,9 @@
       <h2 *ngIf="successModal === 'operator'">{{ "Sucesso!" | tr }}</h2>
       <h2 *ngIf="successModal === 'client'">{{ "Sucesso!" | tr }}</h2>
       
-      <p *ngIf="successModal === 'truck'">Caminhão cadastrado corretamente.</p>
-      <p *ngIf="successModal === 'operator'">Operador cadastrado corretamente.</p>
-      <p *ngIf="successModal === 'client'">Cliente registrado corretamente.</p>
+      <p *ngIf="successModal === 'truck'">{{ "Caminhão cadastrado corretamente." | tr }}</p>
+      <p *ngIf="successModal === 'operator'">{{ "Operador cadastrado corretamente." | tr }}</p>
+      <p *ngIf="successModal === 'client'">{{ "Cliente registrado corretamente." | tr }}</p>
       
       <button class="btn-solid-teal w-full" (click)="fecharModal()">{{ "OK, Entendi" | tr }}</button>
     </div>

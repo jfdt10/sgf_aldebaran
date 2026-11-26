@@ -1,3 +1,5 @@
+import { LanguageSwitchComponent } from '../../../components/language-switch.component';
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +13,7 @@ import { LucideAngularModule, Building2, Check, ArrowRight } from 'lucide-angula
 @Component({
   selector: 'app-totem-setup',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [LanguageSwitchComponent, TranslatePipe, CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './totem-setup.component.html',
   styleUrls: ['./totem-setup.component.scss']
 })

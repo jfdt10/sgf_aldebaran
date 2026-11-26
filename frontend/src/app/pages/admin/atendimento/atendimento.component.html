@@ -1,14 +1,14 @@
 <div class="crud-page animate-up">
   <div class="list-card-header cockpit-header">
     <div class="titles">
-      <h2>Painel de Atendimento</h2>
-      <p>Gerencie a fila de senhas e realize atendimentos</p>
+      <h2>{{ "Painel de Atendimento" | tr }}</h2>
+      <p>{{ "Gerencie a fila de senhas e realize atendimentos" | tr }}</p>
     </div>
     
     <div class="guiche-selector">
       <lucide-icon [img]="icons.monitor" size="18"></lucide-icon>
       <select [(ngModel)]="selectedGuicheId" (change)="salvarGuiche()" class="guiche-select">
-        <option *ngFor="let g of guiches" [value]="g.id">{{ formatarTituloGuiche(g.numero) }} - {{ g.nome || 'Padrão' }}</option>
+        <option *ngFor="let g of guiches" [value]="g.id">{{ formatarTituloGuiche(g.numero) }} - {{ g.nome || ("Padrão" | tr) }}</option>
       </select>
     </div>
   </div>
@@ -25,40 +25,40 @@
           <div class="icon-halo larger">
             <lucide-icon [img]="icons.megaphone" size="64" strokeWidth="1.5"></lucide-icon>
           </div>
-          <h3>Próximo na fila</h3>
-          <p>Clique no botão abaixo para chamar a próxima senha disponível.</p>
+          <h3>{{ "Próximo na fila" | tr }}</h3>
+          <p>{{ "Clique no botão abaixo para chamar a próxima senha disponível." | tr }}</p>
           <button class="btn-primary-lg" (click)="chamarProximo()" [disabled]="loading || !selectedGuicheId">
             <lucide-icon [img]="loading ? icons.clock : icons.megaphone" size="24"></lucide-icon>
-            {{ loading ? 'CHAMANDO...' : 'CHAMAR PRÓXIMO' }}
+            {{ loading ? ("CHAMANDO..." | tr) : ("CHAMAR PRÓXIMO" | tr) }}
           </button>
         </div>
       </div>
 
       <div class="station-body active-atend" *ngIf="statusAtendimento === 'EM_ATENDIMENTO' && senhaAtual">
         <div class="ticket-display">
-          <span class="ticket-label">SENHA ATUAL</span>
+          <span class="ticket-label">{{ "SENHA ATUAL" | tr }}</span>
           <h1 class="ticket-number">{{ senhaAtual.numeroDisplay }}</h1>
           <div class="ticket-type">
             <lucide-icon [img]="icons.check" size="16"></lucide-icon>
-            {{ senhaAtual.tipo || 'Convencional' }} • {{ senhaAtual.servico?.nome || 'Serviço Geral' }}
+            {{ senhaAtual.tipo || ("Convencional" | tr) }} • {{ senhaAtual.servico?.nome || ("Serviço Geral" | tr) }}
           </div>
         </div>
 
         <div class="timer-box">
           <lucide-icon [img]="icons.clock" size="20"></lucide-icon>
           <span class="timer-val">{{ formatTime(tempoAtendimento) }}</span>
-          <span class="timer-label">TEMPO EM ATENDIMENTO</span>
+          <span class="timer-label">{{ "TEMPO EM ATENDIMENTO" | tr }}</span>
         </div>
 
         <div class="station-actions">
           <button class="btn-outline" (click)="chamarNovamente()">
             <lucide-icon [img]="icons.retry" size="18"></lucide-icon>
-            RE-CHAMAR
+            {{ "RE-CHAMAR" | tr }}
           </button>
           
           <button class="btn-success-ok" (click)="finalizarAtendimento()">
             <lucide-icon [img]="icons.success" size="18"></lucide-icon>
-            FINALIZAR ATENDIMENTO
+            {{ "FINALIZAR ATENDIMENTO" | tr }}
           </button>
         </div>
       </div>
@@ -68,7 +68,7 @@
       <div class="info-card">
         <div class="card-title">
           <lucide-icon [img]="icons.history" size="18"></lucide-icon>
-          Histórico da Sessão
+          {{ "Histórico da Sessão" | tr }}
         </div>
         <div class="history-list">
           <div class="history-item" *ngFor="let h of historicoSessao">
@@ -80,7 +80,7 @@
             <lucide-icon [img]="icons.success" size="14" class="text-success"></lucide-icon>
           </div>
           <div class="empty-mini" *ngIf="historicoSessao.length === 0">
-            Nenhum atendimento realizado nesta sessão.
+            {{ "Nenhum atendimento realizado nesta sessão." | tr }}
           </div>
         </div>
       </div>
@@ -88,14 +88,14 @@
       <div class="info-card alert-card">
         <div class="card-title">
           <lucide-icon [img]="icons.alert" size="18"></lucide-icon>
-          Status da Fila
+          {{ "Status da Fila" | tr }}
         </div>
         <div class="alert-content">
           <div class="queue-stat">
-            <span class="q-label">Aguardando no total</span>
+            <span class="q-label">{{ "Aguardando no total" | tr }}</span>
             <span class="q-val">--</span>
           </div>
-          <p class="sugestao">Mantenha o fluxo constante para evitar alertas de SLA (> 20min).</p>
+          <p class="sugestao">{{ "Mantenha o fluxo constante para evitar alertas de SLA (> 20min)." | tr }}</p>
         </div>
       </div>
     </div>

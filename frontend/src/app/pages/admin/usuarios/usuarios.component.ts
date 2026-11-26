@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, HostListener, ChangeDetectorRef, OnDestroy, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -16,6 +18,7 @@ import { AdminLayoutComponent } from '../../../layouts/admin-layout/admin-layout
     styleUrls: ['./usuarios.component.scss']
 })
 export class UsuariosComponent implements OnInit, OnDestroy {
+  private readonly language = inject(LanguageService);
     icons = {
         search: Search, plus: Plus, edit2: Edit2,
         trash2: Trash2, x: X, users: Users,
@@ -129,7 +132,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
             error: (err) => {
                 console.error('Erro ao carregar usuários', err);
                 if (err.status === 401) {
-                    alert('Sessão expirada ou usuário não autenticado.');
+                    alert(this.language.text("Sessão expirada ou usuário não autenticado."));
                 }
                 this.loading = false;
             }
@@ -192,12 +195,12 @@ export class UsuariosComponent implements OnInit, OnDestroy {
 
     salvar() {
         if (!this.usuarioForm.nome || !this.usuarioForm.login || !this.usuarioForm.perfil) {
-            alert('Nome, Login e Perfil são obrigatórios!');
+            alert(this.language.text("Nome, Login e Perfil são obrigatórios!"));
             return;
         }
 
         if (!this.isEditing && !this.usuarioForm.senha) {
-            alert('Senha é obrigatória para novos usuários!');
+            alert(this.language.text("Senha é obrigatória para novos usuários!"));
             return;
         }
 
@@ -217,7 +220,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
                     this.carregarUsuarios();
                     this.cdr.detectChanges();
                 },
-                error: (err) => alert('Erro ao atualizar: ' + (err.error?.message || 'Erro desconhecido'))
+                error: (err) => alert(this.language.text("Erro ao atualizar:") + " " + (err.error?.message || this.language.text("Erro desconhecido")))
             });
         } else {
             this.api.post('/usuarios', this.usuarioForm).subscribe({
@@ -227,14 +230,14 @@ export class UsuariosComponent implements OnInit, OnDestroy {
                     this.showSuccessModal = true;
                     this.carregarUsuarios();
                 },
-                error: (err) => alert('Erro ao salvar: ' + (err.error?.message || 'Erro desconhecido'))
+                error: (err) => alert(this.language.text("Erro ao salvar:") + " " + (err.error?.message || this.language.text("Erro desconhecido")))
             });
         }
     }
 
     salvarNovaSenha() {
         if (!this.novaSenhaForm.senha || this.novaSenhaForm.senha.length < 8) {
-            alert('A nova senha deve ter no mínimo 8 caracteres.');
+            alert(this.language.text("A nova senha deve ter no mínimo 8 caracteres."));
             return;
         }
 
@@ -246,7 +249,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
                     this.showSuccessModal = true;
                     this.cdr.detectChanges();
                 },
-                error: (err) => alert('Erro ao redefinir senha: ' + (err.error?.message || 'Erro desconhecido'))
+                error: (err) => alert(this.language.text("Erro ao redefinir senha:") + " " + (err.error?.message || this.language.text("Erro desconhecido")))
             });
     }
 
@@ -272,7 +275,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
                     this.showSuccessModal = true;
                     this.cdr.detectChanges();
                 },
-                error: (err) => alert('Erro ao excluir usuário: ' + (err.error?.message || 'Erro desconhecido'))
+                error: (err) => alert(this.language.text("Erro ao excluir usuário:") + " " + (err.error?.message || this.language.text("Erro desconhecido")))
             });
         }
     }

@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -56,6 +58,7 @@ interface ClientAppointmentView {
   styleUrls: ['./client-appointments.component.scss'],
 })
 export class ClientAppointmentsComponent implements OnInit {
+  private readonly language = inject(LanguageService);
   menuAberto = false;
   activeTab: 'proximos' | 'historico' = 'proximos';
   loading = false;
@@ -178,7 +181,7 @@ export class ClientAppointmentsComponent implements OnInit {
   }
 
   cancelarAgendamento(id: number) {
-    if (!confirm('Tem certeza que deseja cancelar este agendamento?')) {
+    if (!confirm(this.language.text("Tem certeza que deseja cancelar este agendamento?"))) {
       return;
     }
 

@@ -5,7 +5,7 @@
     </button>
     <div>
       <h1>{{ modoEdicao ? ("Editar Cliente" | tr) : ("Novo Cliente" | tr) }}</h1>
-      <p>{{ modoEdicao ? 'Atualize os dados cadastrais.' : 'Preencha as informações abaixo.' }}</p>
+      <p>{{ modoEdicao ? ("Atualize os dados cadastrais." | tr) : ("Preencha as informações abaixo." | tr) }}</p>
     </div>
   </div>
 
@@ -14,10 +14,10 @@
       
       <div class="form-grid">
         <div class="input-group span-2">
-          <label>Nome Completo / Razão Social *</label>
+          <label>{{ "Nome Completo / Razão Social *" | tr }}</label>
           <div class="input-wrapper">
             <lucide-icon [img]="icons.user" class="field-icon"></lucide-icon>
-            <input [(ngModel)]="form.nome" name="nome" placeholder="Ex: Empresa LTDA ou João Silva" required>
+            <input [(ngModel)]="form.nome" name="nome" [placeholder]='"Ex: Empresa LTDA ou João Silva" | tr' required>
           </div>
         </div>
 
@@ -31,14 +31,14 @@
               name="documento" 
               placeholder="000.000.000-00" 
               [disabled]="modoEdicao" 
-              title="O documento não pode ser alterado após cadastro."
+              [title]='"O documento não pode ser alterado após cadastro." | tr'
               required>
           </div>
-          <small *ngIf="modoEdicao" class="hint">Documento fixo.</small>
+          <small *ngIf="modoEdicao" class="hint">{{ "Documento fixo." | tr }}</small>
         </div>
 
         <div class="input-group">
-          <label>E-mail *</label>
+          <label>{{ "E-mail *" | tr }}</label>
           <div class="input-wrapper">
             <lucide-icon [img]="icons.mail" class="field-icon"></lucide-icon>
             <input [(ngModel)]="form.email" name="email" type="email" placeholder="contato@email.com" required>
@@ -54,18 +54,18 @@
         </div>
 
         <div class="input-group span-2">
-          <label>Endereço</label>
+          <label>{{ "Endereço" | tr }}</label>
           <div class="input-wrapper">
             <lucide-icon [img]="icons.map" class="field-icon"></lucide-icon>
-            <input [(ngModel)]="form.endereco" name="endereco" placeholder="Rua, Número, Bairro...">
+            <input [(ngModel)]="form.endereco" name="endereco" [placeholder]='"Rua, Número, Bairro..." | tr'>
           </div>
         </div>
 
         <div class="input-group">
           <label>Status</label>
           <select [(ngModel)]="form.ativo" name="ativo">
-            <option [ngValue]="true">Ativo</option>
-            <option [ngValue]="false">Inativo</option>
+            <option [ngValue]="true">{{ "Ativo" | tr }}</option>
+            <option [ngValue]="false">{{ "Inativo" | tr }}</option>
           </select>
         </div>
       </div>
@@ -76,7 +76,7 @@
         </button>
         <button type="submit" class="btn-primary" [disabled]="loading">
           <lucide-icon [img]="icons.save"></lucide-icon>
-          {{ loading ? 'Salvando...' : 'Salvar Dados' }}
+          {{ loading ? ("Salvando..." | tr) : ("Salvar Dados" | tr) }}
         </button>
       </div>
 

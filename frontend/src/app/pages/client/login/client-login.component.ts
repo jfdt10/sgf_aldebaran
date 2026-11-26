@@ -30,7 +30,7 @@ export class ClientLoginComponent {
 
   fazerLogin() {
     if (!this.email || !this.senha) {
-      alert('Preencha e-mail e senha.');
+      alert(this.language.text("Preencha e-mail e senha."));
       return;
     }
 
@@ -60,7 +60,7 @@ export class ClientLoginComponent {
       error: (err: any) => {
         console.error('Erro no Login:', err);
         this.carregando = false;
-        alert(err.error?.message || 'Erro ao entrar. Verifique seus dados.');
+        alert(err.error?.message || this.language.text("Erro ao entrar. Verifique seus dados."));
         this.cd.detectChanges();
       }
     });

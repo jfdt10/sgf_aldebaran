@@ -1,7 +1,7 @@
 <button type="button" class="settings-link-item" (click)="itemClick.emit()">
   <span class="item-copy">
-    <span class="item-title">{{ title }}</span>
-    <span class="item-description" *ngIf="description">{{ description }}</span>
+    <span class="item-title">{{ title | tr }}</span>
+    <span class="item-description" *ngIf="description">{{ description | tr }}</span>
   </span>
 
   <span class="item-chevron" aria-hidden="true">

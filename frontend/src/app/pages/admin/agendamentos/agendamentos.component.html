@@ -3,11 +3,11 @@
     <div class="list-card-header">
       <div class="titles">
         <h2>{{ "Agendamentos" | tr }}</h2>
-        <p>Gerencie as reservas e horários marcados</p>
+        <p>{{ "Gerencie as reservas e horários marcados" | tr }}</p>
       </div>
       <button class="btn-primary" (click)="abrirModal()">
         <lucide-icon [img]="icons.plus" size="18"></lucide-icon>
-        Novo Agendamento
+        {{ "Novo Agendamento" | tr }}
       </button>
     </div>
 
@@ -15,7 +15,7 @@
       <div class="search-row">
         <div class="search-input-wrapper flex-2">
           <lucide-icon [img]="icons.search" size="18" class="search-icon"></lucide-icon>
-          <input type="text" placeholder="Buscar por cliente ou documento..." [(ngModel)]="filtroBusca" (input)="aplicarFiltros()">
+          <input type="text" [placeholder]='"Buscar por cliente ou documento..." | tr' [(ngModel)]="filtroBusca" (input)="aplicarFiltros()">
         </div>
         
         <div class="filter-group">
@@ -26,11 +26,11 @@
         <div class="filter-group">
           <lucide-icon [img]="icons.filter" size="16"></lucide-icon>
           <select [(ngModel)]="filtroStatus" (change)="aplicarFiltros()">
-            <option value="TODOS">Todos os Status</option>
-            <option value="PENDENTE">Pendentes</option>
-            <option value="CONFIRMADO">Confirmados</option>
-            <option value="REALIZADO">Realizados</option>
-            <option value="CANCELADO">Cancelados</option>
+            <option value="TODOS">{{ "Todos os Status" | tr }}</option>
+            <option value="PENDENTE">{{ "Pendentes" | tr }}</option>
+            <option value="CONFIRMADO">{{ "Confirmados" | tr }}</option>
+            <option value="REALIZADO">{{ "Realizados" | tr }}</option>
+            <option value="CANCELADO">{{ "Cancelados" | tr }}</option>
           </select>
         </div>
       </div>
@@ -38,7 +38,7 @@
 
     <div class="skeleton-loader" *ngIf="loading" style="padding: 2rem;">
       <div class="spinner"></div>
-      <p>Carregando agendamentos...</p>
+      <p>{{ "Carregando agendamentos..." | tr }}</p>
     </div>
 
     <div class="table-responsive" *ngIf="!loading && agendamentosFiltrados.length > 0">
@@ -47,7 +47,7 @@
           <tr>
             <th>{{ "Horário" | tr }}</th>
             <th>{{ "Cliente" | tr }}</th>
-            <th>Serviço</th>
+            <th>{{ "Serviço" | tr }}</th>
             <th>Status</th>
             <th>{{ "Ações" | tr }}</th>
           </tr>
@@ -62,14 +62,14 @@
                 </div>
                 <div class="time-info">
                   <strong><lucide-icon [img]="icons.clock" size="12"></lucide-icon> {{ ag.hora }}</strong>
-                  <span>Código: {{ ag.codigo }}</span>
+                  <span>{{ "Código:" | tr }} {{ ag.codigo }}</span>
                 </div>
               </div>
             </td>
             <td>
               <div class="client-info">
                 <strong>{{ ag.nomeCliente }}</strong>
-                <span>{{ ag.documento || 'Sem documento' }}</span>
+                <span>{{ ag.documento || ("Sem documento" | tr) }}</span>
               </div>
             </td>
             <td>
@@ -80,15 +80,15 @@
             <td>
               <div class="status-badge" [ngClass]="getStatusClass(ag.status)">
                 <lucide-icon [img]="ag.status === 'REALIZADO' ? icons.check : (ag.status === 'CANCELADO' ? icons.x : icons.clock)" size="14"></lucide-icon>
-                {{ ag.status }}
+                {{ (ag.status) | tr }}
               </div>
             </td>
             <td>
               <div class="action-btns">
-                <button class="btn-cancel" *ngIf="ag.status === 'PENDENTE' || ag.status === 'CONFIRMADO'" (click)="cancelar(ag.id)" title="Cancelar Agendamento">
+                <button class="btn-cancel" *ngIf="ag.status === 'PENDENTE' || ag.status === 'CONFIRMADO'" (click)="cancelar(ag.id)" [title]='"Cancelar Agendamento" | tr'>
                   <lucide-icon [img]="icons.trash" size="14"></lucide-icon>
                 </button>
-                <button class="btn-view" title="Ver Detalhes">
+                <button class="btn-view" [title]='"Ver Detalhes" | tr'>
                   <lucide-icon [img]="icons.file" size="14"></lucide-icon>
                 </button>
               </div>
@@ -102,12 +102,12 @@
       <div class="icon-circle empty">
         <lucide-icon [img]="icons.calendar" size="40"></lucide-icon>
       </div>
-      <h3>Nenhum agendamento encontrado</h3>
-      <p>Tente ajustar os filtros ou crie um novo agendamento.</p>
+      <h3>{{ "Nenhum agendamento encontrado" | tr }}</h3>
+      <p>{{ "Tente ajustar os filtros ou crie um novo agendamento." | tr }}</p>
     </div>
 
     <div class="list-card-footer" *ngIf="!loading && agendamentosFiltrados.length > 0">
-      <span>Exibindo {{ agendamentosFiltrados.length }} agendamento(s)</span>
+      <span>{{ "Exibindo" | tr }} {{ agendamentosFiltrados.length }} {{ "agendamento(s)" | tr }}</span>
     </div>
   </div>
 </div>
@@ -117,7 +117,7 @@
     <div class="modal-header">
       <h2>
         <lucide-icon [img]="icons.plus" size="20"></lucide-icon>
-        Novo Agendamento
+        {{ "Novo Agendamento" | tr }}
       </h2>
       <button class="close-btn" (click)="showModal = false">
         <lucide-icon [img]="icons.x"></lucide-icon>
@@ -128,15 +128,15 @@
       <div class="form-grid">
         <div class="form-column">
           <div class="form-group">
-            <label>CLIENTE *</label>
+            <label>{{ "CLIENTE *" | tr }}</label>
             <div class="input-with-icon">
               <lucide-icon [img]="icons.user" size="16"></lucide-icon>
-              <input type="text" [(ngModel)]="form.nome" placeholder="Nome completo do cliente">
+              <input type="text" [(ngModel)]="form.nome" [placeholder]='"Nome completo do cliente" | tr'>
             </div>
           </div>
 
           <div class="form-group">
-            <label>DOCUMENTO (CPF/CNPJ)</label>
+            <label>{{ "DOCUMENTO (CPF/CNPJ)" | tr }}</label>
             <div class="input-with-icon">
               <lucide-icon [img]="icons.file" size="16"></lucide-icon>
               <input type="text" [(ngModel)]="form.documento" placeholder="000.000.000-00">
@@ -144,15 +144,15 @@
           </div>
 
           <div class="form-group">
-            <label>SERVIÇO *</label>
+            <label>{{ "SERVIÇO *" | tr }}</label>
             <select [(ngModel)]="form.servico_id" class="custom-select">
-              <option value="">Selecione um serviço...</option>
+              <option value="">{{ "Selecione um serviço..." | tr }}</option>
               <option *ngFor="let s of servicos" [value]="s.id">{{ s.nome }}</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label>DATA DO AGENDAMENTO *</label>
+            <label>{{ "DATA DO AGENDAMENTO *" | tr }}</label>
             <div class="input-with-icon">
               <lucide-icon [img]="icons.calendar" size="16"></lucide-icon>
               <input type="date" [(ngModel)]="form.data" (change)="buscarHorarios()" [min]="form.data">
@@ -161,11 +161,11 @@
         </div>
 
         <div class="form-column slots-column">
-          <label>HORÁRIOS DISPONÍVEIS *</label>
+          <label>{{ "HORÁRIOS DISPONÍVEIS *" | tr }}</label>
           
           <div class="slots-loader" *ngIf="loadingHorarios">
             <div class="mini-spinner"></div>
-            <span>Buscando horários...</span>
+            <span>{{ "Buscando horários..." | tr }}</span>
           </div>
 
           <div class="slots-grid" *ngIf="!loadingHorarios">
@@ -180,7 +180,7 @@
               {{ slot.hora }}
             </button>
             <div *ngIf="horariosDisponiveis.length === 0 && !loadingHorarios" class="no-slots">
-              Nenhum horário disponível para esta data.
+              {{ "Nenhum horário disponível para esta data." | tr }}
             </div>
           </div>
         </div>
@@ -188,8 +188,8 @@
 
       <div class="summary-card" *ngIf="form.hora && form.data">
         <lucide-icon [img]="icons.alert" size="18"></lucide-icon>
-        <p>Agendamento confirmado para <strong>{{ formatarData(form.data) }}</strong> {{ "às" | tr }} <strong>{{ form.hora }}</strong>.</p>
-        <div class="code-box">Código: {{ form.codigo }}</div>
+        <p>{{ "Agendamento confirmado para" | tr }} <strong>{{ formatarData(form.data) }}</strong> {{ "às" | tr }} <strong>{{ form.hora }}</strong>.</p>
+        <div class="code-box">{{ "Código:" | tr }} {{ form.codigo }}</div>
       </div>
     </div>
 
@@ -197,7 +197,7 @@
       <button class="btn-cancel" (click)="showModal = false">{{ "Cancelar" | tr }}</button>
       <button class="btn-submit" (click)="salvar()" [disabled]="!form.hora || !form.nome || !form.servico_id">
         <lucide-icon [img]="icons.check" size="18"></lucide-icon>
-        Confirmar Reserva
+        {{ "Confirmar Reserva" | tr }}
       </button>
     </div>
   </div>

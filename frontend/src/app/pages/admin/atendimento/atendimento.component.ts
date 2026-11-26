@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -14,6 +16,7 @@ import { LucideAngularModule, Megaphone, UserCheck, Clock, History, AlertTriangl
   styleUrl: './atendimento.component.scss'
 })
 export class AtendimentoComponent implements OnInit, OnDestroy {
+  private readonly language = inject(LanguageService);
   guiches: any[] = [];
   selectedGuicheId: number | null = null;
   
@@ -114,9 +117,9 @@ export class AtendimentoComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         if (err.status === 404) {
-          alert("A fila está vazia no momento! ☕");
+          alert(this.language.text("A fila está vazia no momento! ☕"));
         } else {
-          alert("Erro ao chamar próximo ticket.");
+          alert(this.language.text("Erro ao chamar próximo ticket."));
         }
         this.statusAtendimento = 'IDLE';
         this.loading = false;
@@ -143,7 +146,7 @@ export class AtendimentoComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        alert(err.error?.message || 'Erro ao finalizar atendimento.');
+        alert(err.error?.message || this.language.text("Erro ao finalizar atendimento."));
         this.loading = false;
         this.cdr.detectChanges();
       }

@@ -1,3 +1,4 @@
+import { LanguageSwitchComponent } from '../../components/language-switch.component';
 import { LanguageService } from '../../services/language.service';
 import { inject } from '@angular/core';
 import { TranslatePipe } from '../../services/translate.pipe';
@@ -13,14 +14,18 @@ import { PainelConfigService } from '../../services/painel-config.service';
 @Component({
   selector: 'app-painel-tv',
   standalone: true,
-  imports: [TranslatePipe, CommonModule, DatePipe],
+  imports: [LanguageSwitchComponent, TranslatePipe, CommonModule, DatePipe],
   templateUrl: './painel-tv.component.html',
   styleUrls: ['./painel-tv.component.scss']
 })
 export class PainelTvComponent implements OnInit, OnDestroy {
   readonly language = inject(LanguageService);
   dataAtual = new Date();
-  dataAtualTexto = '';
+  get dataAtualTexto(): string {
+    return this.dataAtual.toLocaleDateString(this.language.locale(), {
+      day: 'numeric', month: 'long', year: 'numeric',
+    });
+  }
   senhaAtual: any = null;
   ultimasChamadas: any[] = [];
   readonly idiomas = ['PT', 'EN'];
@@ -159,11 +164,6 @@ export class PainelTvComponent implements OnInit, OnDestroy {
 
   private atualizarDataHora() {
     this.dataAtual = new Date();
-    this.dataAtualTexto = this.dataAtual.toLocaleDateString('pt-BR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
   }
 
   ngOnDestroy() {
@@ -273,14 +273,16 @@ export class PainelTvComponent implements OnInit, OnDestroy {
         const numeroBase = numeroRaw.replace(/[^A-Za-z0-9]/g, '');
         const numero = numeroBase.split('').join(', ');
 
-        const destinoTipo = this.getGuicheDestinoTipo(this.senhaAtual).toLowerCase();
+        const destinoTipo = this.language.text(this.getGuicheDestinoTipo(this.senhaAtual)).toLowerCase();
         const destinoValor = this.getGuicheDestinoValor(this.senhaAtual);
         const destino = destinoValor && destinoValor !== '--'
           ? `${destinoTipo} ${destinoValor}`
           : destinoTipo;
 
-        const mensagem = new SpeechSynthesisUtterance(`Senha. ${numero}, Dirija-se ao, ${destino}.`);
-        mensagem.lang = this.language.current() === 'EN' ? 'en' : 'pt-BR';
+        const mensagem = new SpeechSynthesisUtterance(
+          this.language.text('Senha {ticket}. Dirija-se ao {counter}.', { ticket: numero, counter: destino }),
+        );
+        mensagem.lang = this.language.locale();
         mensagem.rate = 0.85;
 
         window.speechSynthesis.cancel();

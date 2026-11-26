@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
@@ -9,14 +10,14 @@ import { TaskModalComponent } from './task-modal.component';
 @Component({
   selector: 'app-quadro-status',
   standalone: true,
-  imports: [CommonModule, DragDropModule, LucideAngularModule, TaskModalComponent],
+  imports: [TranslatePipe, CommonModule, DragDropModule, LucideAngularModule, TaskModalComponent],
   templateUrl: './quadro-status.component.html',
   styleUrls: ['./quadro-status.component.scss']
 })
 export class QuadroStatusComponent implements OnInit {
   statusList: StatusItem[] = [];
   loading = true;
-  
+
   showModal = false;
   currentTask?: TaskItem;
   currentStatusId?: number;
@@ -60,7 +61,7 @@ export class QuadroStatusComponent implements OnInit {
         event.previousIndex,
         event.currentIndex
       );
-      
+
       this.taskService.moveTask(task.id, statusId, event.currentIndex).subscribe();
     }
   }

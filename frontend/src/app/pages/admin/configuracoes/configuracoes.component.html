@@ -59,17 +59,17 @@
           <div class="card-body">
             <div class="form-group">
               <label>{{ "Nome da Unidade" | tr }}</label>
-              <input type="text" [(ngModel)]="form.UNIDADE_NOME" placeholder="Ex: Filial Centro - São Paulo">
+              <input type="text" [(ngModel)]="form.UNIDADE_NOME" [placeholder]='"Ex: Filial Centro - São Paulo" | tr'>
             </div>
             <div class="form-group">
               <label>{{ "Fuso Horário" | tr }}</label>
               <input type="text" [(ngModel)]="form.FUSO_HORARIO" [placeholder]='"Escolha o fuso" | tr'>
             </div>
             <div class="form-group">
-              <label>{{ "Idioma do Sistema" | tr }}</label>
+              <label>{{ "Idioma da interface" | tr }}</label>
               <div class="toggle-group-btns">
-                <button class="lang-btn" [class.active]="form.IDIOMA_SISTEMA === 'PT'" (click)="form.IDIOMA_SISTEMA = 'PT'; language.select('PT')" type="button">PT</button>
-                <button class="lang-btn" [class.active]="form.IDIOMA_SISTEMA === 'EN'" (click)="form.IDIOMA_SISTEMA = 'EN'; language.select('EN')" type="button">EN</button>
+                <button class="lang-btn" [class.active]="language.current() === 'PT'" [attr.aria-pressed]="language.current() === 'PT'" (click)="language.select('PT')" type="button">PT</button>
+                <button class="lang-btn" [class.active]="language.current() === 'EN'" [attr.aria-pressed]="language.current() === 'EN'" (click)="language.select('EN')" type="button">EN</button>
               </div>
             </div>
           </div>
@@ -85,9 +85,9 @@
               <div class="upload-area" (click)="logoInput.click()">
                 <input type="file" #logoInput (change)="onLogoSelected($event)" accept="image/*" style="display: none">
                 <lucide-icon [img]="icons.upload" size="32" class="upload-icon"></lucide-icon>
-                <p>{{ form.LOGO_SISTEMA ? 'Trocar Logo' : 'Arraste seu Logo aqui' }}</p>
+                <p>{{ form.LOGO_SISTEMA ? ("Trocar Logo" | tr) : ("Arraste seu Logo aqui" | tr) }}</p>
                 <span>{{ "ou clique para selecionar" | tr }}</span>
-                <small>PNG, JPG (Max 2MB)</small>
+                <small>{{ "PNG, JPG (Max 2MB)" | tr }}</small>
               </div>
               <div class="preview-area">
                 <span>{{ "Preview Atual:" | tr }}</span>
@@ -128,8 +128,8 @@
                 <button *ngFor="let dia of diasDaSemanaLabels" 
                         [class.active]="isDiaSelected(dia.id)"
                         (click)="toggleDia(dia.id); $event.stopPropagation()"
-                        [title]="dia.full"
-                        type="button">{{ dia.label }}</button>
+                        [title]="dia.full | tr"
+                        type="button">{{ dia.short | tr }}</button>
               </div>
               <p class="small-hint">{{ "Clique nos dias para ativar/desativar" | tr }}</p>
             </div>

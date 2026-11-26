@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -17,6 +19,7 @@ import { AdminLayoutComponent } from '../../../layouts/admin-layout/admin-layout
   styleUrl: './agendamentos.component.scss'
 })
 export class AgendamentosComponent implements OnInit, OnDestroy {
+  private readonly language = inject(LanguageService);
   agendamentos: any[] = [];
   agendamentosFiltrados: any[] = [];
   servicos: any[] = [];
@@ -176,7 +179,7 @@ export class AgendamentosComponent implements OnInit, OnDestroy {
 
   salvar() {
     if (!this.form.nome || !this.form.servico_id || !this.form.data || !this.form.hora) {
-      return alert("Preencha todos os campos obrigatórios!");
+      return alert(this.language.text("Preencha todos os campos obrigatórios!"));
     }
 
     this.api.post('/fila/agendamento', this.form).subscribe({
@@ -184,12 +187,12 @@ export class AgendamentosComponent implements OnInit, OnDestroy {
         this.showModal = false;
         this.carregar();
       },
-      error: (err) => alert(err.error?.message || "Erro ao salvar agendamento.")
+      error: (err) => alert(err.error?.message || this.language.text("Erro ao salvar agendamento."))
     });
   }
 
   cancelar(id: number) {
-    if (confirm("Deseja realmente cancelar este agendamento?")) {
+    if (confirm(this.language.text("Deseja realmente cancelar este agendamento?"))) {
       this.api.delete(`/fila/agendamento/${id}`).subscribe(() => {
         this.carregar();
       });

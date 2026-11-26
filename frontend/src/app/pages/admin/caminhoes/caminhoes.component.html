@@ -3,7 +3,7 @@
         <div class="list-card-header">
             <div class="titles">
                 <h2>{{ "Caminhões" | tr }}</h2>
-                <p>Gerencie a frota de veículos registrados no pátio</p>
+                <p>{{ "Gerencie a frota de veículos registrados no pátio" | tr }}</p>
             </div>
             <button class="btn-primary" (click)="abrirModalNovo()">
                 <lucide-icon [img]="icons.plus" size="18"></lucide-icon>
@@ -14,13 +14,13 @@
         <div class="list-card-search" *ngIf="caminhoes.length > 0 || filtro">
             <div class="search-input-wrapper">
                 <lucide-icon [img]="icons.search" size="18" class="search-icon"></lucide-icon>
-                <input type="text" placeholder="Buscar por placa, veículo ou proprietário..." [(ngModel)]="filtro"
+                <input type="text" [placeholder]='"Buscar por placa, veículo ou proprietário..." | tr' [(ngModel)]="filtro"
                     (keyup.enter)="buscar()">
             </div>
         </div>
 
         <div class="skeleton-loader" *ngIf="loading" style="padding: 2rem;">
-            Aguarde, carregando...
+            {{ "Aguarde, carregando..." | tr }}
         </div>
 
         <div class="table-responsive" *ngIf="!loading && caminhoes.length > 0">
@@ -28,9 +28,9 @@
                 <thead>
                     <tr>
                         <th>{{ "Placa" | tr }}</th>
-                        <th>Veículo</th>
-                        <th>Ano</th>
-                        <th>Proprietário</th>
+                        <th>{{ "Veículo" | tr }}</th>
+                        <th>{{ "Ano" | tr }}</th>
+                        <th>{{ "Proprietário" | tr }}</th>
                         <th>Status</th>
                         <th>{{ "Ações" | tr }}</th>
                     </tr>
@@ -49,12 +49,12 @@
                             </div>
                         </td>
                         <td>
-                            <span class="tb-title">{{ c.modelo || 'Não registrado' }}</span>
-                            <span class="tb-subtitle">Cap: {{ c.capacidade }}</span>
+                            <span class="tb-title">{{ c.modelo || ("Não registrado" | tr) }}</span>
+                            <span class="tb-subtitle">{{ "Cap:" | tr }} {{ c.capacidade }}</span>
                         </td>
                         <td>2022</td>
                         <td>
-                            <span class="tb-title">{{ c.transportadora || 'Frota Própria' }}</span>
+                            <span class="tb-title">{{ c.transportadora || ("Frota Própria" | tr) }}</span>
                         </td>
                         <td>
                             <div class="status-badge" [ngClass]="{
@@ -63,7 +63,7 @@
                                 'maintenance': c.status === 'MANUTENCAO'
                             }">
                                 <lucide-icon [img]="c.status === 'ATIVO' ? icons.checkCircle : (c.status === 'INATIVO' ? icons.x : icons.truck)" size="14"></lucide-icon>
-                                {{ c.status === 'ATIVO' ? 'Ativo' : (c.status === 'INATIVO' ? 'Inativo' : ("Manutenção" | tr)) }}
+                                {{ (c.status === 'ATIVO' ? 'Ativo' : c.status === 'INATIVO' ? 'Inativo' : 'Manutenção') | tr }}
                             </div>
                         </td>
                         <td>
@@ -73,7 +73,7 @@
                                 </button>
                                 <button class="btn-toggle" [ngClass]="c.status === 'ATIVO' ? 'deactivate' : 'activate'" 
                                     (click)="alternarStatus(c.id)"
-                                    [title]="c.status === 'ATIVO' ? 'Inativar' : 'Ativar'">
+                                    [title]='c.status === &#39;ATIVO&#39; ? ("Inativar" | tr) : ("Ativar" | tr)'>
                                     <lucide-icon [img]="c.status === 'ATIVO' ? icons.trash2 : icons.checkCircle" size="14"></lucide-icon>
                                 </button>
                             </div>
@@ -87,12 +87,12 @@
             <div class="icon-circle empty">
                 <lucide-icon [img]="icons.truck" size="40"></lucide-icon>
             </div>
-            <h3>Nenhum caminhão encontrado</h3>
-            <p>O banco está vazio ou a busca não retornou resultados.</p>
+            <h3>{{ "Nenhum caminhão encontrado" | tr }}</h3>
+            <p>{{ "O banco está vazio ou a busca não retornou resultados." | tr }}</p>
         </div>
 
         <div class="list-card-footer" *ngIf="!loading && caminhoes.length > 0">
-            <span>Total de {{ caminhoes.length }} caminhões</span>
+            <span>{{ "Total de" | tr }} {{ caminhoes.length }} {{ "caminhões" | tr }}</span>
         </div>
     </div>
 
@@ -111,51 +111,50 @@
             <div class="modal-body">
                 <div class="form-row">
                     <div class="form-group flex-1">
-                        <label>Placa *</label>
+                        <label>{{ "Placa *" | tr }}</label>
                         <input type="text" [(ngModel)]="caminhaoForm.placa" [disabled]="isEditing"
                             (blur)="checkPlaca()"
                             placeholder="ABC-1234" style="text-transform: uppercase;">
                         <span *ngIf="isEditing"
-                            style="font-size: 0.75rem; color: #ef4444; margin-top: 4px; display: block;">A placa não
-                            pode ser alterada.</span>
+                            style="font-size: 0.75rem; color: #ef4444; margin-top: 4px; display: block;">{{ "A placa não pode ser alterada." | tr }}</span>
                     </div>
                     <div class="form-group flex-1">
-                        <label>Modelo *</label>
-                        <input type="text" [(ngModel)]="caminhaoForm.modelo" placeholder="Ex: Scania R450">
+                        <label>{{ "Modelo *" | tr }}</label>
+                        <input type="text" [(ngModel)]="caminhaoForm.modelo" [placeholder]='"Ex: Scania R450" | tr'>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Transportadora *</label>
+                    <label>{{ "Transportadora *" | tr }}</label>
                     <input type="text" [(ngModel)]="caminhaoForm.transportadora"
-                        placeholder="Nome da empresa ou 'Autônomo'">
+                        [placeholder]='"Nome da empresa ou \u0027Autônomo\u0027" | tr'>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group flex-1">
-                        <label>Capacidade Carga *</label>
-                        <input type="text" [(ngModel)]="caminhaoForm.capacidade" placeholder="Ex: 30 Toneladas">
+                        <label>{{ "Capacidade Carga *" | tr }}</label>
+                        <input type="text" [(ngModel)]="caminhaoForm.capacidade" [placeholder]='"Ex: 30 Toneladas" | tr'>
                     </div>
                     <div class="form-group flex-1">
                         <label>Status</label>
                         <select [(ngModel)]="caminhaoForm.status">
-                            <option value="ATIVO">Ativo</option>
-                            <option value="INATIVO">Inativo</option>
+                            <option value="ATIVO">{{ "Ativo" | tr }}</option>
+                            <option value="INATIVO">{{ "Inativo" | tr }}</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Motorista Designado (Opção Admin)</label>
+                    <label>{{ "Motorista Designado (Opção Admin)" | tr }}</label>
                     <select [(ngModel)]="caminhaoForm.motorista_id">
-                        <option [ngValue]="null">--- Selecione (ou Sem Vínculo) ---</option>
+                        <option [ngValue]="null">{{ "--- Selecione (ou Sem Vínculo) ---" | tr }}</option>
                         <option *ngFor="let m of motoristas" [value]="m.id">{{ m.nome }} ({{ m.cpf }})</option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label>{{ "Observações" | tr }}</label>
-                    <textarea [(ngModel)]="caminhaoForm.observacoes" placeholder="Comentários adicionais..." rows="3"
+                    <textarea [(ngModel)]="caminhaoForm.observacoes" [placeholder]='"Comentários adicionais..." | tr' rows="3"
                         style="width: 100%; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-family: 'Inter', sans-serif; resize: vertical;"></textarea>
                 </div>
 
@@ -181,7 +180,7 @@
                     </div>
                 </div>
                 <h2>{{ "Sucesso!" | tr }}</h2>
-                <p>Caminhão {{ isEditing ? 'atualizado' : 'cadastrado' }} corretamente.</p>
+                <p>{{ "Caminhão" | tr }} {{ isEditing ? ("atualizado" | tr) : ("cadastrado" | tr) }} {{ "corretamente." | tr }}</p>
                 <button class="btn-success-ok" (click)="fecharModal()">{{ "OK, Entendi" | tr }}</button>
             </div>
         </div>

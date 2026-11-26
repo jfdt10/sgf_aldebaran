@@ -634,6 +634,11 @@
 @media (max-width: 768px) {
   .settings-grid, .notif-grid { grid-template-columns: minmax(0, 1fr); }
   .settings-header-actions, .time-range, .upload-row { flex-wrap: wrap; }
-  .settings-header-actions .filial-glass-selector { min-width: 0; }
+  .page-container { padding: 0; }
+  .settings-header-actions { gap: 0.75rem; padding: 0.875rem; }
+  .settings-header-actions .filial-selector-wrapper { width: 100%; flex-wrap: wrap; gap: 0.5rem; }
+  .settings-header-actions .filial-selector-wrapper .filial-select { width: 100%; min-width: 0; }
+  .settings-card input, .settings-card select { box-sizing: border-box; }
+  .settings-card .time-range .form-group { min-width: 0; }
   .settings-card .toggle-item-wrapper { min-width: 0; }
 }

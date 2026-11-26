@@ -84,7 +84,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
         const nome = this.tipoClienteCadastro === 'PJ' ? this.formCliente.nomeEmpresa : this.formCliente.nome;
 
         if (!nome || !this.formCliente.documento) {
-            alert('Preencha os campos obrigatórios (Nome/Razão Social e Documento).');
+            alert(this.language.text("Preencha os campos obrigatórios (Nome/Razão Social e Documento)."));
             return;
         }
 
@@ -118,13 +118,13 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                 this.atualizarBuscaCliente();
                 this.cdr.markForCheck();
             },
-            error: err => alert(err?.error?.message || 'Erro ao cadastrar cliente.')
+            error: err => alert(err?.error?.message || this.language.text("Erro ao cadastrar cliente."))
         });
     }
 
     salvarCadastroCaminhao() {
         if (!this.formCaminhao.placa || !this.formCaminhao.modelo || !this.formCaminhao.transportadora || !this.formCaminhao.capacidade) {
-            alert('Preencha todos os campos obrigatórios.');
+            alert(this.language.text("Preencha todos os campos obrigatórios."));
             return;
         }
         const filialIdNum = parseInt(this.filialSelecionada || '0', 10);
@@ -149,7 +149,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                 this.successModal = 'truck';
                 this.cdr.markForCheck();
             },
-            error: err => alert(err?.error?.message || 'Erro ao cadastrar caminhão.')
+            error: err => alert(err?.error?.message || this.language.text("Erro ao cadastrar caminhão."))
         });
     }
 
@@ -226,7 +226,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
 
     abrirDetalhesCliente() {
         if (!this.ticketAtual?.documento) {
-            alert('Cliente sem documento cadastrado.');
+            alert(this.language.text("Cliente sem documento cadastrado."));
             return;
         }
 
@@ -258,7 +258,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                 }
                 this.cdr.markForCheck();
             },
-            error: () => alert('Ocorreu um erro ao buscar o cliente.')
+            error: () => alert(this.language.text("Ocorreu um erro ao buscar o cliente."))
         });
     }
 
@@ -271,7 +271,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                 this.isEditingClient = false;
                 this.cdr.markForCheck();
             },
-            error: (err) => alert(err?.error?.message || 'Erro ao atualizar cliente.')
+            error: (err) => alert(err?.error?.message || this.language.text("Erro ao atualizar cliente."))
         });
     }
 
@@ -602,7 +602,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                     this.iniciarCronometroAtendimento();
                     this.cdr.markForCheck();
                 },
-                error: () => alert('Erro ao iniciar atendimento.')
+                error: () => alert(this.language.text("Erro ao iniciar atendimento."))
             });
         }
     }
@@ -620,7 +620,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                     this.iniciarCronometroOcioso();
                     this.cdr.markForCheck();
                 },
-                error: () => alert('Erro ao finalizar atendimento.')
+                error: () => alert(this.language.text("Erro ao finalizar atendimento."))
             });
         }
     }
@@ -635,7 +635,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
     abrirModalTransferir() {
         if (!this.ticketAtual) return;
         if (this.ticketAtual.status !== 'CHAMADO') {
-            alert('Transferencia permitida apenas antes de iniciar o atendimento.');
+            alert(this.language.text("Transferencia permitida apenas antes de iniciar o atendimento."));
             return;
         }
         this.guicheTransferenciaSelecionado = null;
@@ -667,7 +667,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                 this.cdr.markForCheck();
             },
             error: () => {
-                alert('Erro ao marcar não comparecimento.');
+                alert(this.language.text("Erro ao marcar não comparecimento."));
                 this.modalAberto = null;
             }
         });
@@ -731,7 +731,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                 this.modalAberto = "transferir-sucesso";
             },
             error: (err) => {
-                alert(err?.error?.message || 'Erro ao transferir atendimento.');
+                alert(err?.error?.message || this.language.text("Erro ao transferir atendimento."));
             }
         });
     }
@@ -788,7 +788,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
         this.api.patch<any>(`/fila/senha/${this.ticketAtual.id}/garrafoes`, {
             qtdeGarrafoes: this.quantidadeGarrafoes
         }).subscribe({
-            error: () => alert('Erro ao salvar quantidade de garrafões.')
+            error: () => alert(this.language.text("Erro ao salvar quantidade de garrafões."))
         });
     }
 
@@ -818,7 +818,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
             documento: cliente.documento,
             clienteId: cliente.id
         }).subscribe({
-            error: () => alert('Erro ao vincular cliente ao atendimento.')
+            error: () => alert(this.language.text("Erro ao vincular cliente ao atendimento."))
         });
     }
 
@@ -989,24 +989,24 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
         if (event) event.preventDefault();
 
         if (!this.operadorForm.nome || !this.operadorForm.email || !this.operadorForm.login) {
-            alert('Por favor, preencha os campos obrigatórios (Nome, E-mail e Login).');
+            alert(this.language.text("Por favor, preencha os campos obrigatórios (Nome, E-mail e Login)."));
             return;
         }
 
         if (this.operadorForm.senha) {
             if (this.operadorForm.senha.length < 8) {
-                alert('A nova senha deve ter no mínimo 8 caracteres.');
+                alert(this.language.text("A nova senha deve ter no mínimo 8 caracteres."));
                 return;
             }
             if (this.operadorForm.senha !== this.operadorForm.confirmarSenha) {
-                alert('A nova senha e a confirmação não conferem.');
+                alert(this.language.text("A nova senha e a confirmação não conferem."));
                 return;
             }
         }
 
         const salvo = localStorage.getItem('usuario_sgf');
         if (!salvo) {
-            alert('Erro: operador não encontrado.');
+            alert(this.language.text("Erro: operador não encontrado."));
             return;
         }
 
@@ -1014,7 +1014,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
         try {
             user = JSON.parse(salvo);
         } catch {
-            alert('Erro ao processar dados da sessão.');
+            alert(this.language.text("Erro ao processar dados da sessão."));
             return;
         }
 
@@ -1041,21 +1041,21 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                     this.api.patch<any>(`/usuarios/${user.id}/senha`, { senha: this.operadorForm.senha }).subscribe({
                         next: () => {
                             this.fecharModal();
-                            alert('Perfil e senha atualizados com sucesso!');
+                            alert(this.language.text("Perfil e senha atualizados com sucesso!"));
                             this.cdr.markForCheck();
                         },
                         error: (err) => {
-                            alert('Perfil atualizado, mas houve erro ao salvar nova senha: ' + (err.error?.message || 'Erro desconhecido'));
+                            alert(this.language.text("Perfil atualizado, mas houve erro ao salvar nova senha:") + " " + (err.error?.message || this.language.text("Erro desconhecido")));
                         }
                     });
                 } else {
                     this.fecharModal();
-                    alert('Perfil atualizado com sucesso!');
+                    alert(this.language.text("Perfil atualizado com sucesso!"));
                     this.cdr.markForCheck();
                 }
             },
             error: (err) => {
-                alert('Erro ao atualizar perfil: ' + (err.error?.message || 'Erro desconhecido'));
+                alert(this.language.text("Erro ao atualizar perfil:") + " " + (err.error?.message || this.language.text("Erro desconhecido")));
             }
         });
     }
@@ -1202,7 +1202,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                 this.cdr.markForCheck();
             },
             error: (err) => {
-                alert(err?.error?.message || 'Erro ao realizar check-in.');
+                alert(err?.error?.message || this.language.text("Erro ao realizar check-in."));
             }
         });
     }
@@ -1227,7 +1227,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                 this.cdr.markForCheck();
             },
             error: (err) => {
-                alert(err?.error?.message || 'Erro ao cancelar agendamento.');
+                alert(err?.error?.message || this.language.text("Erro ao cancelar agendamento."));
             }
         });
     }
@@ -1257,7 +1257,7 @@ export class PainelOperadorComponent implements OnInit, OnDestroy {
                 this.cdr.markForCheck();
             },
             error: (err) => {
-                alert(err?.error?.message || 'Erro ao resgatar.');
+                alert(err?.error?.message || this.language.text("Erro ao resgatar."));
             }
         });
     }

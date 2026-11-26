@@ -12,7 +12,7 @@
       </div>
 
       <div class="date-feedback error" *ngIf="erroAgendamento">
-        <span>{{ erroAgendamento }}</span>
+        <span>{{ erroAgendamento | tr }}</span>
       </div>
     </div>
 
@@ -53,7 +53,7 @@
 
     <div class="calendar-section">
       <div class="cal-header">
-        <h3>{{ mesesLabels[mesAtual] }} {{ anoAtual }}</h3>
+        <h3>{{ mesesLabels[mesAtual] | tr }} {{ anoAtual }}</h3>
         <div class="nav-arrows">
           <button type="button" class="calendar-nav-btn" (click)="mesAnterior()" [attr.aria-label]='"Mês anterior" | tr'>
             <lucide-icon [img]="icons.left" size="20"></lucide-icon>
@@ -65,10 +65,7 @@
       </div>
 
       <div class="cal-grid">
-        <span class="week-day">D</span><span class="week-day">S</span>
-        <span class="week-day">T</span><span class="week-day">Q</span>
-        <span class="week-day">Q</span><span class="week-day">S</span>
-        <span class="week-day">S</span>
+        <span class="week-day" *ngFor="let dia of diasSemana">{{ dia | tr }}</span>
 
         <button 
           *ngFor="let dia of diasCalendario" 
@@ -83,7 +80,7 @@
 
       <div class="date-feedback" [class.error]="erroData" *ngIf="form.data || erroData">
         <span *ngIf="!erroData">{{ "Data selecionada:" | tr }} {{ getFormattedDate() }}</span>
-        <span *ngIf="erroData">{{ erroData }}</span>
+        <span *ngIf="erroData">{{ erroData | tr }}</span>
       </div>    </div>
 
     <div class="time-section">
@@ -145,7 +142,7 @@
             <lucide-icon [img]="icons.calendar" size="18"></lucide-icon>
           </div>
           <div class="item-text">
-            {{ agendamentoConfirmado?.data }} de {{ mesesLabels[agendamentoConfirmado?.mes || 0] }},
+            {{ '{day} de {month}' | tr: {day: agendamentoConfirmado?.data ?? 0, month: (mesesLabels[agendamentoConfirmado?.mes || 0] | tr)} }},
             {{ agendamentoConfirmado?.ano }} {{ "às" | tr }} {{ agendamentoConfirmado?.hora }}
           </div>
         </div>

@@ -1,15 +1,15 @@
 <div class="kanban-container">
   <div class="header">
-    <h1>Quadro de Tarefas</h1>
+    <h1>{{ "Quadro de Tarefas" | tr }}</h1>
     <button class="btn-primary" (click)="openNewTaskModal(0)">
       <lucide-icon [name]="icons.plus" size="20"></lucide-icon>
-      Nova Tarefa
+      {{ "Nova Tarefa" | tr }}
     </button>
   </div>
 
   <div *ngIf="loading" class="loader-container">
     <div class="spinner"></div>
-    <p>Carregando tarefas...</p>
+    <p>{{ "Carregando tarefas..." | tr }}</p>
   </div>
 
   <div *ngIf="!loading" class="kanban-board" cdkDropListGroup>
@@ -27,13 +27,13 @@
         [cdkDropListData]="status.tasks || []"
         class="task-list"
         (cdkDropListDropped)="onTaskDrop($event, status.id)">
-        
+
         <div *ngFor="let task of status.tasks" class="task-card" cdkDrag (click)="openTaskDetail(task)">
           <div class="card-priority" [ngClass]="getPriorityClass(task.prioridade)"></div>
-          
+
           <h3>{{ task.titulo }}</h3>
           <p class="description">{{ task.descricao }}</p>
-          
+
           <div class="card-footer">
             <div class="user-info" *ngIf="task.responsavel">
                 <img *ngIf="task.responsavel.fotoPerfil" [src]="task.responsavel.fotoPerfil" alt="">
@@ -48,13 +48,13 @@
         </div>
 
         <div *ngIf="!status.tasks || status.tasks.length === 0" class="empty-placeholder">
-          Nenhuma tarefa aqui
+          {{ "Nenhuma tarefa aqui" | tr }}
         </div>
       </div>
 
       <button class="add-task-inline" (click)="openNewTaskModal(status.id)">
         <lucide-icon [name]="icons.plus" size="16"></lucide-icon>
-        Adicionar
+        {{ "Adicionar" | tr }}
       </button>
     </div>
   </div>

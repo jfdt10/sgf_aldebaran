@@ -12,7 +12,7 @@
         <div class="avatar-circle" aria-hidden="true">{{ nome.slice(0, 2).toUpperCase() }}</div>
         <div class="role-badge">
           <lucide-icon [img]="icons.shield" size="14"></lucide-icon>
-          {{ usuario?.perfil }}
+          {{ (usuario?.perfil) | tr }}
         </div>
       </div>
 

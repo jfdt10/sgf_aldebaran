@@ -6,20 +6,20 @@
         class="tab-btn" 
         [class.active]="activeTab === 'proximos'"
         (click)="toggleTab('proximos')">
-        Próximos
+        {{ "Próximos" | tr }}
       </button>
       <button 
         class="tab-btn" 
         [class.active]="activeTab === 'historico'"
         (click)="toggleTab('historico')">
-        Histórico
+        {{ "Histórico" | tr }}
       </button>
     </div>
   </header>
 
   <main class="main-content">
     <div class="feedback-error" *ngIf="errorMessage">
-      {{ errorMessage }}
+      {{ errorMessage | tr }}
     </div>
 
     <div class="appointments-list skeleton-list" *ngIf="loading">
@@ -43,13 +43,13 @@
         <div class="card-body">
           <div class="date-badge">
             <span class="day">{{ a.dia }}</span>
-            <span class="mes">{{ a.mes }}</span>
+            <span class="mes">{{ a.mes | tr }}</span>
           </div>
           <div class="info">
             <div class="title-row">
               <h3>{{ a.categoriaNome }}</h3>
               <div class="status-badge" [ngClass]="a.statusColorClass">
-                {{ a.statusLabel }}
+                {{ a.statusLabel | tr }}
               </div>
             </div>
             <div class="detail">
@@ -66,11 +66,11 @@
                 <strong>{{ a.senha }}</strong>
               </div>
               <div class="queue-pill" *ngIf="a.posicao">
-                <span>Posição</span>
+                <span>{{ "Posição" | tr }}</span>
                 <strong>{{ a.posicao }}</strong>
               </div>
               <div class="queue-pill" *ngIf="a.estimativa">
-                <span>Estimativa</span>
+                <span>{{ "Estimativa" | tr }}</span>
                 <strong>{{ a.estimativa }} min</strong>
               </div>
             </div>
@@ -80,15 +80,15 @@
           <button class="btn-outline" [disabled]="cancelandoId === a.id || !a.podeCancelar" (click)="cancelarAgendamento(a.id)">
             {{ cancelandoId === a.id ? 'Cancelando...' : ("Cancelar" | tr) }}
           </button>
-          <button class="btn-primary" [disabled]="!a.podeReagendar" [routerLink]="['/client/agendar']" [queryParams]="{ re: a.id }">Reagendar</button>
+          <button class="btn-primary" [disabled]="!a.podeReagendar" [routerLink]="['/client/agendar']" [queryParams]="{ re: a.id }">{{ "Reagendar" | tr }}</button>
         </div>
       </div>
 
       <div class="empty-state" *ngIf="proximos.length === 0">
-        <img src="assets/empty_calendar.png" alt="Sem agendamentos" class="empty-illustration animate-float">
-        <h3>Nada por aqui...</h3>
-        <p>Você ainda não possui agendamentos para os próximos dias.</p>
-        <button class="btn-new" routerLink="/client/agendar">Agendar Agora</button>
+        <img src="assets/empty_calendar.png" [alt]='"Sem agendamentos" | tr' class="empty-illustration animate-float">
+        <h3>{{ "Nada por aqui..." | tr }}</h3>
+        <p>{{ "Você ainda não possui agendamentos para os próximos dias." | tr }}</p>
+        <button class="btn-new" routerLink="/client/agendar">{{ "Agendar Agora" | tr }}</button>
       </div>
     </div>
 
@@ -97,13 +97,13 @@
         <div class="card-body">
           <div class="date-badge">
             <span class="day">{{ a.dia }}</span>
-            <span class="mes">{{ a.mes }}</span>
+            <span class="mes">{{ a.mes | tr }}</span>
           </div>
           <div class="info">
             <div class="title-row">
               <h3>{{ a.categoriaNome }}</h3>
               <div class="status-badge" [ngClass]="a.statusColorClass">
-                {{ a.statusLabel }}
+                {{ a.statusLabel | tr }}
               </div>
             </div>
             <div class="detail">
@@ -117,21 +117,21 @@
             
             <button class="btn-evaluate" *ngIf="a.statusKey === 'CONCLUIDO'">
               <lucide-angular [img]="icons.star" size="14"></lucide-angular>
-              Avaliar Atendimento
+              {{ "Avaliar Atendimento" | tr }}
             </button>
           </div>
         </div>
       </div>
 
       <div class="empty-state" *ngIf="historico.length === 0">
-        <p>Nenhum histórico encontrado.</p>
+        <p>{{ "Nenhum histórico encontrado." | tr }}</p>
       </div>
     </div>
 
 
   </main>
 
-  <button class="fab-btn animate-pop" routerLink="/client/agendar" title="Novo Agendamento" *ngIf="activeTab === 'proximos'">
+  <button class="fab-btn animate-pop" routerLink="/client/agendar" [title]='"Novo Agendamento" | tr' *ngIf="activeTab === 'proximos'">
     <lucide-angular [img]="icons.plus" size="28"></lucide-angular>
   </button>
 

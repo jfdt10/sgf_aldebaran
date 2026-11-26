@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../../../services/translate.pipe';
 import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -15,6 +17,7 @@ import { finalize, forkJoin } from 'rxjs';
   styleUrls: ['./guiches.component.scss']
 })
 export class GuichesComponent implements OnInit {
+  private readonly language = inject(LanguageService);
   filiais: any[] = [];
   guichesRaw: any[] = [];
   filiaisAgrupadas: any[] = [];
@@ -152,7 +155,7 @@ export class GuichesComponent implements OnInit {
 
   salvar() {
     if (!this.form.nome || !this.form.filial_id) {
-      return alert('Todos os campos obrigatorios (*) devem ser preenchidos.');
+      return alert(this.language.text("Todos os campos obrigatorios (*) devem ser preenchidos."));
     }
 
     this.saving = true;
@@ -184,7 +187,7 @@ export class GuichesComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        alert('Erro: ' + (err.error?.message || 'Erro desconhecido'));
+        alert(this.language.text("Erro:") + " " + (err.error?.message || this.language.text("Erro desconhecido")));
         this.cdr.detectChanges();
       }
     });
@@ -201,7 +204,7 @@ export class GuichesComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        alert('Erro: ' + (err.error?.message || 'Erro desconhecido'));
+        alert(this.language.text("Erro:") + " " + (err.error?.message || this.language.text("Erro desconhecido")));
       }
     });
   }
@@ -220,7 +223,7 @@ export class GuichesComponent implements OnInit {
           this.cdr.detectChanges();
         },
         error: (err) => {
-          alert('Erro: ' + (err.error?.message || 'Erro desconhecido'));
+          alert(this.language.text("Erro:") + " " + (err.error?.message || this.language.text("Erro desconhecido")));
         }
       });
     }

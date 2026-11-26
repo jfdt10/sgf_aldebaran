@@ -1,3 +1,5 @@
+import { LanguageSwitchComponent } from '../../../components/language-switch.component';
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +12,7 @@ import { LucideAngularModule, Monitor, Check, ArrowRight } from 'lucide-angular'
 @Component({
   selector: 'app-painel-setup',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [LanguageSwitchComponent, TranslatePipe, CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './painel-setup.component.html',
   styleUrls: ['./painel-setup.component.scss']
 })

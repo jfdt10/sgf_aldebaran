@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -41,6 +43,7 @@ export interface OperadorDesempenho {
   styleUrls: ['./relatorios.component.scss']
 })
 export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
+  private readonly language = inject(LanguageService);
 
   icons = {
     x: X,
@@ -157,7 +160,7 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
     const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
     if (/^\d{4}-\d{2}$/.test(periodo)) {
       const [ano, mes] = periodo.split('-');
-      return `${meses[parseInt(mes, 10) - 1]} ${ano}`;
+      return `${this.language.text(meses[parseInt(mes, 10) - 1])} ${ano}`;
     }
     return periodo;
   }
@@ -414,7 +417,7 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
 
   salvarJustificativa() {
     if (this.justificativaForm.invalid) {
-      alert('Selecione um motivo!');
+      alert(this.language.text("Selecione um motivo!"));
       return;
     }
     this.activeModal = null;
@@ -428,7 +431,7 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
     const doc = new jsPDF();
     
     const today = new Date();
-    const dataGeracao = today.toLocaleDateString('pt-BR');
+    const dataGeracao = today.toLocaleDateString(this.language.locale());
     const horaGeracao = today.toLocaleTimeString('pt-BR');
     
     let tituloStr = '';
@@ -440,7 +443,7 @@ export class SupervisorRelatoriosComponent implements OnInit, OnDestroy {
     } else if (this.periodoAtivo === 'semana') {
       const umaSemanaAtras = new Date();
       umaSemanaAtras.setDate(today.getDate() - 7);
-      tituloStr = `Relatorio de Atendimentos - Semana ${umaSemanaAtras.toLocaleDateString('pt-BR')} a ${dataGeracao}`;
+      tituloStr = `Relatorio de Atendimentos - Semana ${umaSemanaAtras.toLocaleDateString(this.language.locale())} a ${dataGeracao}`;
       nomeArquivo += `semana_${dataGeracao.replace(/\//g, '-')}.pdf`;
     } else if (this.periodoAtivo === 'mes') {
       const meses = ['Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];

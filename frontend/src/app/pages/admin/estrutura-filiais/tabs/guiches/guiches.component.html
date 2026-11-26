@@ -1,23 +1,23 @@
 <div class="list-card animate-up">
     <div class="list-card-header">
         <div class="titles">
-            <h2>Guichês/Baias</h2>
-            <p>Configure os pontos de atendimento físico</p>
+            <h2>{{ "Guichês/Baias" | tr }}</h2>
+            <p>{{ "Configure os pontos de atendimento físico" | tr }}</p>
         </div>
         <button class="btn-primary" (click)="abrirModal()">
             <lucide-icon [img]="icons.plus" size="18"></lucide-icon>
-            Novo Guichê
+            {{ "Novo Guichê" | tr }}
         </button>
     </div>
 
     <div class="card-content-padding">
         <div class="loading-overlay" *ngIf="loading && filiaisAgrupadas.length === 0">
-            Aguarde, carregando...
+            {{ "Aguarde, carregando..." | tr }}
         </div>
 
         <div class="empty-state" *ngIf="!loading && errorMessage">
-            <h3>Erro ao carregar</h3>
-            <p>{{ errorMessage }}</p>
+            <h3>{{ "Erro ao carregar" | tr }}</h3>
+            <p>{{ errorMessage | tr }}</p>
         </div>
 
         <div *ngFor="let f of filiaisAgrupadas" class="filial-section mb-8">
@@ -33,7 +33,7 @@
                             <div class="name-status">
                                 <h3>{{ g.nome }}</h3>
                                 <span class="badge" [class.badge-ativo]="g.ativo" [class.badge-inativo]="!g.ativo">
-                                    {{ g.ativo ? 'Ativo' : 'Inativo' }}
+                                    {{ g.ativo ? ("Ativo" | tr) : ("Inativo" | tr) }}
                                 </span>
                             </div>
                         </div>
@@ -44,7 +44,7 @@
                             </button>
                             <button class="btn-toggle-fill" (click)="toggleStatus(g)" 
                                 [class.btn-activate]="!g.ativo" [class.btn-deactivate]="g.ativo"
-                                [title]="g.ativo ? 'Desativar' : 'Ativar'">
+                                [title]='g.ativo ? ("Desativar" | tr) : ("Ativar" | tr)'>
                                 <lucide-icon [img]="icons.power" size="16"></lucide-icon>
                             </button>
                             <button class="btn-delete-card" (click)="excluir(g.id)" [title]='"Excluir" | tr'>
@@ -55,13 +55,13 @@
                 </div>
             </div>
             <div *ngIf="f.guiches.length === 0" class="empty-section">
-                Nenhum guichê cadastrado nesta filial.
+                {{ "Nenhum guichê cadastrado nesta filial." | tr }}
             </div>
         </div>
 
         <div class="empty-state" *ngIf="!loading && !errorMessage && filiaisAgrupadas.length === 0">
-            <h3>Nenhuma filial encontrada</h3>
-            <p>Cadastre filiais primeiro para gerenciar guichês.</p>
+            <h3>{{ "Nenhuma filial encontrada" | tr }}</h3>
+            <p>{{ "Cadastre filiais primeiro para gerenciar guichês." | tr }}</p>
         </div>
     </div>
 </div>
@@ -71,7 +71,7 @@
         <div class="modal-header">
             <h2>
                 <lucide-icon [img]="icons.layout" size="20"></lucide-icon>
-                {{ editando ? 'Editar Guichê' : 'Novo Guichê' }}
+                {{ editando ? ("Editar Guichê" | tr) : ("Novo Guichê" | tr) }}
             </h2>
             <button class="close-btn" (click)="fecharModal()">
                 <lucide-icon [img]="icons.x" size="20"></lucide-icon>
@@ -80,14 +80,14 @@
 
         <div class="modal-body">
             <div class="form-group">
-                <label>Número do Guichê (sem prefixo) *</label>
-                <input type="text" [(ngModel)]="form.nome" placeholder="Ex: 1, 2, A">
+                <label>{{ "Número do Guichê (sem prefixo) *" | tr }}</label>
+                <input type="text" [(ngModel)]="form.nome" [placeholder]='"Ex: 1, 2, A" | tr'>
             </div>
 
             <div class="form-group">
-                <label>Filial *</label>
+                <label>{{ "Filial *" | tr }}</label>
                 <select [(ngModel)]="form.filial_id" [disabled]="isRestricted">
-                    <option *ngIf="!isRestricted" [ngValue]="null" disabled selected>Selecione a Filial</option>
+                    <option *ngIf="!isRestricted" [ngValue]="null" disabled selected>{{ "Selecione a Filial" | tr }}</option>
                     <option *ngFor="let fil of filiais" [ngValue]="fil.id">{{ fil.nome }}</option>
                 </select>
             </div>
@@ -95,8 +95,8 @@
             <div class="form-group">
                 <label>Status *</label>
                 <select [(ngModel)]="form.status">
-                    <option value="Ativo">Ativo</option>
-                    <option value="Inativo">Inativo</option>
+                    <option value="Ativo">{{ "Ativo" | tr }}</option>
+                    <option value="Inativo">{{ "Inativo" | tr }}</option>
                 </select>
             </div>
         </div>
@@ -116,7 +116,7 @@
         <div class="modal-header" style="background: #f43f5e;">
             <h2>
                 <lucide-icon [img]="icons.trash" size="20" color="white"></lucide-icon>
-                Excluir Guichê
+                {{ "Excluir Guichê" | tr }}
             </h2>
             <button class="close-btn" (click)="fecharConfirmacao()">
                 <lucide-icon [img]="icons.x" size="20" color="white"></lucide-icon>
@@ -124,14 +124,14 @@
         </div>
         <div class="modal-body text-center" style="padding: 2rem;">
             <p style="font-size: 1.1rem; color: var(--text-primary);">
-                Tem certeza que deseja excluir o guichê <strong>{{ guicheParaExcluir?.nome }}</strong>?
+                {{ "Tem certeza que deseja excluir o guichê" | tr }} <strong>{{ guicheParaExcluir?.nome }}</strong>?
             </p>
-            <p style="color: var(--text-secondary); margin-top: 10px;">Esta ação não pode ser desfeita.</p>
+            <p style="color: var(--text-secondary); margin-top: 10px;">{{ "Esta ação não pode ser desfeita." | tr }}</p>
         </div>
         <div class="modal-footer" style="background: var(--bg-body);">
             <button class="btn-outline" (click)="fecharConfirmacao()">{{ "Cancelar" | tr }}</button>
             <button class="btn-primary" style="background: #f43f5e; box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);" (click)="confirmarExclur()">
-                Sim, Excluir
+                {{ "Sim, Excluir" | tr }}
             </button>
         </div>
     </div>
@@ -146,7 +146,7 @@
                 </div>
             </div>
             <h2>{{ "Sucesso!" | tr }}</h2>
-            <p>Os dados foram processados corretamente.</p>
+            <p>{{ "Os dados foram processados corretamente." | tr }}</p>
             <button class="btn-success-ok" (click)="fecharSucesso()">{{ "OK, Entendi" | tr }}</button>
         </div>
     </div>

@@ -1,12 +1,12 @@
 <div class="list-card animate-up">
     <div class="list-card-header">
         <div class="titles">
-            <h2>Categorias de Fila</h2>
-            <p>Configure os tipos de atendimento e prioridades</p>
+            <h2>{{ "Categorias de Fila" | tr }}</h2>
+            <p>{{ "Configure os tipos de atendimento e prioridades" | tr }}</p>
         </div>
         <button class="btn-primary" (click)="abrirModalCategoria()">
             <lucide-icon [img]="icons.plus" size="18"></lucide-icon>
-            Nova Categoria
+            {{ "Nova Categoria" | tr }}
         </button>
     </div>
 
@@ -24,7 +24,7 @@
                     <div class="name-status">
                         <h3>{{ c.nome }}</h3>
                         <span class="badge" [class.badge-ativo-soft]="c.ativo" [class.badge-inativo-soft]="!c.ativo">
-                            {{ c.ativo ? 'Ativo' : 'Inativo' }}
+                            {{ c.ativo ? ("Ativo" | tr) : ("Inativo" | tr) }}
                         </span>
                     </div>
                     <span class="prefix">{{ c.prefixo || 'No prefix' }}</span>
@@ -35,9 +35,9 @@
                 <p class="tipo" *ngIf="c.tipo">
                     {{ "Tipo:" | tr }}
                     <strong>
-                        {{ c.tipo === 'CLIENTE_RAPIDO' ? 'Cliente Rápido' : 
-                           c.tipo === 'CAMINHAO' ? 'Caminhão' : 
-                           c.tipo === 'RETIRADA_PESADA' ? 'Retirada Pesada' : c.tipo }}
+                        {{ c.tipo === 'CLIENTE_RAPIDO' ? ("Cliente Rápido" | tr) :
+                           c.tipo === 'CAMINHAO' ? ("Caminhão" | tr) :
+                           c.tipo === 'RETIRADA_PESADA' ? ("Retirada Pesada" | tr) : c.tipo }}
                     </strong>
                 </p>
             </div>
@@ -65,7 +65,7 @@
 <div class="modal-overlay" *ngIf="showCategoriaModal">
     <div class="modal-card category-modal">
         <div class="modal-header category-gradient-header">
-            <h3>{{ editandoCategoria ? 'Editar Categoria' : 'Nova Categoria' }}</h3>
+            <h3>{{ editandoCategoria ? ("Editar Categoria" | tr) : ("Nova Categoria" | tr) }}</h3>
             <button class="btn-close" (click)="fecharModalCategoria()">
                 <lucide-icon [img]="icons.x" size="20" color="white"></lucide-icon>
             </button>
@@ -73,27 +73,27 @@
 
         <div class="modal-body p-8">
             <div class="form-row-premium">
-                <label>Nome da Categoria</label>
-                <input type="text" [(ngModel)]="formCategoria.nome" placeholder="Ex: Caminhão">
+                <label>{{ "Nome da Categoria" | tr }}</label>
+                <input type="text" [(ngModel)]="formCategoria.nome" [placeholder]='"Ex: Caminhão" | tr'>
             </div>
 
             <div class="form-row-premium">
-                <label>Prefixo (Nome em Inglês)</label>
-                <input type="text" [(ngModel)]="formCategoria.prefixo" placeholder="Ex: Truck">
+                <label>{{ "Prefixo (Nome em Inglês)" | tr }}</label>
+                <input type="text" [(ngModel)]="formCategoria.prefixo" [placeholder]='"Ex: Truck" | tr'>
             </div>
 
             <div class="form-row-premium">
-                <label>Tipo de Fila (Motor de Prioridade)</label>
+                <label>{{ "Tipo de Fila (Motor de Prioridade)" | tr }}</label>
                 <select [(ngModel)]="formCategoria.tipo">
-                    <option value="">Geral / Padrão (Sem Bônus)</option>
-                    <option value="CLIENTE_RAPIDO">Cliente Rápido (Fast-Track +1.000)</option>
-                    <option value="CAMINHAO">Caminhão / Logística</option>
-                    <option value="RETIRADA_PESADA">Retirada Pesada</option>
+                    <option value="">{{ "Geral / Padrão (Sem Bônus)" | tr }}</option>
+                    <option value="CLIENTE_RAPIDO">{{ "Cliente Rápido (Fast-Track +1.000)" | tr }}</option>
+                    <option value="CAMINHAO">{{ "Caminhão / Logística" | tr }}</option>
+                    <option value="RETIRADA_PESADA">{{ "Retirada Pesada" | tr }}</option>
                 </select>
             </div>
 
             <div class="form-row-premium">
-                <label>Cor</label>
+                <label>{{ "Cor" | tr }}</label>
                 <div class="input-with-icon">
                     <input type="text" [(ngModel)]="formCategoria.cor" placeholder="#00b8d4">
                     <input type="color" [(ngModel)]="formCategoria.cor" class="hidden-picker">
@@ -103,15 +103,15 @@
             <div class="form-row-premium">
                 <label>Status</label>
                 <select [(ngModel)]="formCategoria.ativo">
-                    <option [ngValue]="true">Ativo</option>
-                    <option [ngValue]="false">Inativo</option>
+                    <option [ngValue]="true">{{ "Ativo" | tr }}</option>
+                    <option [ngValue]="false">{{ "Inativo" | tr }}</option>
                 </select>
             </div>
 
             <div class="form-row-premium mt-4">
-                <label>Filial Vinculada <span class="required-mark">*</span></label>
+                <label>{{ "Filial Vinculada" | tr }} <span class="required-mark">*</span></label>
                 <select [(ngModel)]="formCategoria.filial_id" [disabled]="isRestricted">
-                   <option *ngIf="!isRestricted" [ngValue]="null">Todas as Unidades (Global)</option>
+                   <option *ngIf="!isRestricted" [ngValue]="null">{{ "Todas as Unidades (Global)" | tr }}</option>
                    <option *ngFor="let f of filiais" [ngValue]="f.id">
                         {{ f.nome }}
                    </option>
@@ -132,15 +132,15 @@
             <div class="refined-icon-box alert-circle">
                 <lucide-icon [img]="icons.power" size="32" color="#ef4444"></lucide-icon>
             </div>
-            <h2 class="refined-title">Deseja excluir?</h2>
+            <h2 class="refined-title">{{ "Deseja excluir?" | tr }}</h2>
             <p class="refined-desc">
-                A categoria <strong>{{ categoriaParaExcluir?.nome }}</strong>
-                será removida permanentemente do sistema.
+                {{ "A categoria" | tr }} <strong>{{ categoriaParaExcluir?.nome }}</strong>
+                {{ "será removida permanentemente do sistema." | tr }}
             </p>
 
             <div class="refined-actions">
                 <button class="btn-refined-outline" (click)="fecharConfirmacao()">{{ "Cancelar" | tr }}</button>
-                <button class="btn-refined-danger" (click)="confirmarExclur()">Sim, Excluir</button>
+                <button class="btn-refined-danger" (click)="confirmarExclur()">{{ "Sim, Excluir" | tr }}</button>
             </div>
         </div>
     </div>
@@ -153,7 +153,7 @@
                 <lucide-icon [img]="icons.check" size="32" color="#22c55e"></lucide-icon>
             </div>
             <h2 class="refined-title">{{ "Sucesso!" | tr }}</h2>
-            <p class="refined-desc">Os dados foram salvos corretamente.</p>
+            <p class="refined-desc">{{ "Os dados foram salvos corretamente." | tr }}</p>
 
             <div class="refined-actions mt-4">
                 <button class="btn-refined-teal" (click)="fecharSucesso()">{{ "OK, Entendi" | tr }}</button>

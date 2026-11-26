@@ -9,8 +9,8 @@
       <lucide-icon [img]="icon" size="38"></lucide-icon>
     </div>
 
-    <h2 id="cliente-success-title">{{ title }}</h2>
-    <p>{{ message }}</p>
+    <h2 id="cliente-success-title">{{ title | tr }}</h2>
+    <p>{{ message | tr }}</p>
 
     <button type="button" (click)="closed.emit()">{{ "OK, Entendi" | tr }}</button>
   </section>

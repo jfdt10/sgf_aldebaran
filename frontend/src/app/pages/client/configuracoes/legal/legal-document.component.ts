@@ -1,5 +1,6 @@
+import { LanguageService } from '../../../../services/language.service';
 import { TranslatePipe } from '../../../../services/translate.pipe';
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ArrowLeft, FileText, LucideAngularModule } from 'lucide-angular';
@@ -15,6 +16,13 @@ import { LegalDocumentContent } from './legal-content';
 })
 export class LegalDocumentComponent {
   @Input({ required: true }) content!: LegalDocumentContent;
+  @Input({ required: true }) englishContent!: LegalDocumentContent;
+
+  private readonly language = inject(LanguageService);
+
+  get activeContent(): LegalDocumentContent {
+    return this.language.current() === 'EN' ? this.englishContent : this.content;
+  }
 
   protected readonly icons = {
     back: ArrowLeft,

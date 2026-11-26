@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, HostListener, ChangeDetectorRef, OnDestroy, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -16,6 +18,7 @@ import { AdminLayoutComponent } from '../../../layouts/admin-layout/admin-layout
     styleUrls: ['./caminhoes.component.scss']
 })
 export class CaminhoesComponent implements OnInit, OnDestroy {
+  private readonly language = inject(LanguageService);
     icons = { search: Search, plus: Plus, edit2: Edit2, trash2: Trash2, x: X, truck: Truck, userCircle: UserCircle, hash: Hash, briefcase: Briefcase, users: Users, user: User, checkCircle: CheckCircle, check: Check };
 
     caminhoes: any[] = [];
@@ -104,7 +107,7 @@ export class CaminhoesComponent implements OnInit, OnDestroy {
                 placa
             }).subscribe(res => {
                 if (res.exists) {
-                    alert('Placa já cadastrada no sistema!');
+                    alert(this.language.text("Placa já cadastrada no sistema!"));
                 }
             });
         }
@@ -154,7 +157,7 @@ export class CaminhoesComponent implements OnInit, OnDestroy {
 
     salvar() {
         if (!this.caminhaoForm.placa || !this.caminhaoForm.modelo || !this.caminhaoForm.transportadora || !this.caminhaoForm.capacidade) {
-            alert('Placa, Modelo, Transportadora e Capacidade são obrigatórios!');
+            alert(this.language.text("Placa, Modelo, Transportadora e Capacidade são obrigatórios!"));
             return;
         }
 
@@ -174,7 +177,7 @@ export class CaminhoesComponent implements OnInit, OnDestroy {
                     this.carregarDados();
                     this.cdr.detectChanges();
                 },
-                error: (err) => alert('Erro ao atualizar: ' + (err.error?.message || 'Erro desconhecido'))
+                error: (err) => alert(this.language.text("Erro ao atualizar:") + " " + (err.error?.message || this.language.text("Erro desconhecido")))
             });
         } else {
             this.api.post('/caminhoes', payload).subscribe({
@@ -184,7 +187,7 @@ export class CaminhoesComponent implements OnInit, OnDestroy {
                     this.carregarDados();
                     this.cdr.detectChanges();
                 },
-                error: (err) => alert('Erro ao salvar: ' + (err.error?.message || 'Erro desconhecido'))
+                error: (err) => alert(this.language.text("Erro ao salvar:") + " " + (err.error?.message || this.language.text("Erro desconhecido")))
             });
         }
     }
@@ -195,7 +198,7 @@ export class CaminhoesComponent implements OnInit, OnDestroy {
                 this.carregarDados();
                 this.cdr.detectChanges();
             },
-            error: (err) => alert('Erro ao alterar status')
+            error: (err) => alert(this.language.text("Erro ao alterar status"))
         });
     }
 }

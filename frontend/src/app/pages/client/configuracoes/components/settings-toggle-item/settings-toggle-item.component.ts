@@ -1,10 +1,11 @@
+import { TranslatePipe } from '../../../../../services/translate.pipe';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-settings-toggle-item',
   standalone: true,
-  imports: [CommonModule],
+  imports: [TranslatePipe, CommonModule],
   templateUrl: './settings-toggle-item.component.html',
   styleUrl: './settings-toggle-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, HostListener, ChangeDetectorRef, OnDestroy, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -16,6 +18,7 @@ import { AdminLayoutComponent } from '../../../layouts/admin-layout/admin-layout
     styleUrls: ['./motoristas.component.scss']
 })
 export class MotoristasComponent implements OnInit, OnDestroy {
+  private readonly language = inject(LanguageService);
     icons = { search: Search, plus: Plus, edit2: Edit2, trash2: Trash2, x: X, users: Users, briefcase: Briefcase, hash: Hash, user: User, checkCircle: CheckCircle, truck: Truck, check: Check };
 
     motoristas: any[] = [];
@@ -105,7 +108,7 @@ export class MotoristasComponent implements OnInit, OnDestroy {
                 cpf: cpf || '', cnh: cnh || ''
             }).subscribe(res => {
                 if (res.exists) {
-                    alert('CPF ou CNH já cadastrado para outro motorista!');
+                    alert(this.language.text("CPF ou CNH já cadastrado para outro motorista!"));
                 }
             });
         }
@@ -146,7 +149,7 @@ export class MotoristasComponent implements OnInit, OnDestroy {
 
     salvar() {
         if (!this.motoristaForm.nome || !this.motoristaForm.cpf || !this.motoristaForm.cnh) {
-            alert('Nome, CPF e CNH são obrigatórios!');
+            alert(this.language.text("Nome, CPF e CNH são obrigatórios!"));
             return;
         }
         const { id, ...payloadData } = this.motoristaForm;
@@ -166,7 +169,7 @@ export class MotoristasComponent implements OnInit, OnDestroy {
                     this.carregarMotoristas();
                     this.cdr.detectChanges();
                 },
-                error: (err) => alert('Erro ao atualizar: ' + (err.error?.message || 'Erro desconhecido'))
+                error: (err) => alert(this.language.text("Erro ao atualizar:") + " " + (err.error?.message || this.language.text("Erro desconhecido")))
             });
         } else {
             this.api.post('/motoristas', payload).subscribe({
@@ -176,7 +179,7 @@ export class MotoristasComponent implements OnInit, OnDestroy {
                     this.carregarMotoristas();
                     this.cdr.detectChanges();
                 },
-                error: (err) => alert('Erro ao salvar: ' + (err.error?.message || 'Erro desconhecido'))
+                error: (err) => alert(this.language.text("Erro ao salvar:") + " " + (err.error?.message || this.language.text("Erro desconhecido")))
             });
         }
     }
@@ -187,7 +190,7 @@ export class MotoristasComponent implements OnInit, OnDestroy {
                 this.carregarMotoristas();
                 this.cdr.detectChanges();
             },
-            error: (err) => alert('Erro ao alterar status')
+            error: (err) => alert(this.language.text("Erro ao alterar status"))
         });
     }
 }

@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../../../services/translate.pipe';
 import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -13,6 +15,7 @@ import { LucideAngularModule, Plus, Edit2, Trash2, Power, X, Search, Building2, 
   styleUrls: ['./filiais.component.scss']
 })
 export class FiliaisComponent implements OnInit {
+  private readonly language = inject(LanguageService);
   filiais: any[] = [];
   loading = false;
   isRestricted = false;
@@ -111,7 +114,7 @@ export class FiliaisComponent implements OnInit {
 
     const nome = normalize(this.form.nome);
     if (!nome) {
-      alert('Nome da filial e obrigatorio.');
+      alert(this.language.text("Nome da filial e obrigatorio."));
       return;
     }
 
@@ -139,7 +142,7 @@ export class FiliaisComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        alert("Erro: " + (err.error?.message || "Erro desconhecido"));
+        alert(this.language.text("Erro:") + " " + (err.error?.message || this.language.text("Erro desconhecido")));
         this.loading = false;
         this.cdr.detectChanges();
       }

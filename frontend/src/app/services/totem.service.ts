@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { LanguageService } from './language.service';
+import { Injectable, inject } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -21,6 +22,7 @@ export interface Ticket {
   providedIn: 'root'
 })
 export class TotemService {
+  private readonly language = inject(LanguageService);
   private apiUrl = `${environment.apiUrl}/fila`;
 
   private tipoSelecionado: string = '';
@@ -39,7 +41,7 @@ export class TotemService {
 
   solicitarSenha(categoria: string, categoriaId?: number, qtdeGarrafoes: number = 0) {
     if (!this.tipoSelecionado) {
-      alert('Erro: Fluxo incorreto. Voltando ao inÃcio.');
+      alert(this.language.text('Fluxo incorreto. Voltando ao início.'));
       this.router.navigate(['/totem']);
       return;
     }
@@ -62,14 +64,14 @@ export class TotemService {
         console.error('Erro:', erro);
         const mensagem = erro?.error?.message;
         if (Array.isArray(mensagem) && mensagem.length) {
-          alert(mensagem.join('\n'));
+          alert(mensagem.map(item => this.language.text(String(item))).join('\n'));
           return;
         }
         if (typeof mensagem === 'string' && mensagem.trim() !== '') {
-          alert(mensagem);
+          alert(this.language.text(mensagem));
           return;
         }
-        alert('Erro ao conectar com o servidor.');
+        alert(this.language.text("Erro ao conectar com o servidor."));
       }
     });
   }

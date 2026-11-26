@@ -1,3 +1,5 @@
+import { LanguageSwitchComponent } from '../../../components/language-switch.component';
+import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -9,37 +11,38 @@ import { ApiService } from '../../../services/api.service';
 @Component({
   selector: 'app-totem-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [LanguageSwitchComponent, TranslatePipe, CommonModule, FormsModule, LucideAngularModule],
   template: `
     <div class="login-container">
       <div class="login-card animate-pop">
+        <app-language-switch class="page-language" />
         <div class="login-header">
           <div class="icon-circle">
             <lucide-icon [img]="icons.lock" size="32" color="white"></lucide-icon>
           </div>
-          <h2>Acesso Restrito</h2>
-          <p>Identifique-se para configurar o Totem</p>
+          <h2>{{ "Acesso Restrito" | tr }}</h2>
+          <p>{{ "Identifique-se para configurar o Totem" | tr }}</p>
         </div>
 
         <form (ngSubmit)="login()" class="login-body">
           <div class="input-group">
-            <label>Login Admin</label>
-            <input type="text" [(ngModel)]="credentials.login" name="login" placeholder="Ex: admin" required>
+            <label>{{ "Login Admin" | tr }}</label>
+            <input type="text" [(ngModel)]="credentials.login" name="login" [placeholder]="'Ex: admin' | tr" required>
           </div>
 
           <div class="input-group">
-            <label>Senha</label>
+            <label>{{ "Senha" | tr }}</label>
             <input type="password" [(ngModel)]="credentials.password" name="password" placeholder="••••••" required>
           </div>
 
           <div *ngIf="error" class="error-msg">
-            {{ error }}
+            {{ error | tr }}
           </div>
 
           <div class="login-footer">
-            <button type="button" class="btn-cancel" (click)="voltar()">Cancelar</button>
+            <button type="button" class="btn-cancel" (click)="voltar()">{{ "Cancelar" | tr }}</button>
             <button type="submit" class="btn-confirm" [disabled]="loading">
-              {{ loading ? 'Autenticando...' : 'Entrar' }}
+              {{ (loading ? 'Autenticando...' : 'Entrar') | tr }}
               <lucide-icon [img]="icons.arrow" size="18"></lucide-icon>
             </button>
           </div>

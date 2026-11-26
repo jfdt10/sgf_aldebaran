@@ -51,7 +51,7 @@
         <div class="profile-menu profile-dropdown" *ngIf="showProfileMenu" (click)="$event.stopPropagation()">
           <div class="dropdown-header">
             <span class="m-name">{{ operadorNome }}</span>
-            <span class="m-email">{{ operadorEmail || 'Sem e-mail' }}</span>
+            <span class="m-email">{{ operadorEmail || ("Sem e-mail" | tr) }}</span>
           </div>
           <button type="button" class="dropdown-item" (click)="abrirEditarPerfil()">
             <lucide-icon [img]="icons.user" size="16"></lucide-icon>
@@ -95,7 +95,7 @@
           <span class="status-badge" 
                 [class.badge-ocupado]="guiche.ocupado"
                 [class.badge-disponivel]="!guiche.ocupado">
-            {{ guiche.ocupado ? 'OCUPADO' : 'DISPONÍVEL' }}
+            {{ guiche.ocupado ? ("OCUPADO" | tr) : ("DISPONÍVEL" | tr) }}
           </span>
         </div>
 

@@ -1,7 +1,7 @@
-<section class="settings-section-card" [attr.aria-label]="title">
+<section class="settings-section-card" [attr.aria-label]="title | tr">
   <header class="section-card-header">
-    <p *ngIf="eyebrow">{{ eyebrow }}</p>
-    <h3>{{ title }}</h3>
+    <p *ngIf="eyebrow">{{ eyebrow | tr }}</p>
+    <h3>{{ title | tr }}</h3>
   </header>
 
   <div class="section-card-body">

@@ -39,7 +39,7 @@
           <tr *ngFor="let c of clientes" [class.inactive]="!isAtivo(c)">
             <td>
               <span class="tb-title">{{ c.nome }}</span>
-              <span class="tb-subtitle" *ngIf="c.tipo === 'PJ'">{{ c.nomeFantasia || 'Nome Fantasia N/A' }}</span>
+              <span class="tb-subtitle" *ngIf="c.tipo === 'PJ'">{{ c.nomeFantasia || ("Nome Fantasia N/A" | tr) }}</span>
             </td>
             <td>{{ getDocument(c) }}</td>
             <td>
@@ -49,7 +49,7 @@
             <td>
               <div class="status-badge" [ngClass]="isAtivo(c) ? 'active' : 'inactive'">
                 <lucide-icon [img]="isAtivo(c) ? icons.checkCircle : icons.shieldAlert" size="14"></lucide-icon>
-                {{ isAtivo(c) ? 'Ativo' : 'Inativo' }}
+                {{ isAtivo(c) ? ("Ativo" | tr) : ("Inativo" | tr) }}
               </div>
             </td>
             <td>
@@ -62,7 +62,7 @@
                 </button>
                 <button class="btn-toggle" [ngClass]="isAtivo(c) ? 'deactivate' : 'activate'" 
                   (click)="alternarStatus(c.id)"
-                  [title]="isAtivo(c) ? 'Inativar' : 'Ativar'">
+                  [title]='isAtivo(c) ? ("Inativar" | tr) : ("Ativar" | tr)'>
                   <lucide-icon [img]="isAtivo(c) ? icons.trash2 : icons.checkCircle" size="14"></lucide-icon>
                 </button>
               </div>
@@ -81,7 +81,7 @@
     </div>
 
     <div class="list-card-footer" *ngIf="!loading && clientes.length > 0">
-      <span>Total de {{ clientes.length }} cliente(s)</span>
+      <span>{{ "Total de" | tr }} {{ clientes.length }} {{ "cliente(s)" | tr }}</span>
     </div>
   </div>
 </div>
@@ -99,7 +99,7 @@
     <div class="alert-info" *ngIf="!isEditing && !clienteForm.senha" style="margin: 16px 24px 0;">
       <lucide-icon [img]="icons.alertCircle" size="20"></lucide-icon>
       <div>
-        <strong>Acesso ao portal:</strong> Para liberar o primeiro acesso, informe uma senha temporária ou solicite a redefinição pelo administrador.
+        <strong>{{ "Acesso ao portal:" | tr }}</strong> {{ "Para liberar o primeiro acesso, informe uma senha temporária ou solicite a redefinição pelo administrador." | tr }}
       </div>
     </div>
 
@@ -116,7 +116,7 @@
 
       <div class="form-group">
         <label>{{ clienteForm.tipo === 'PF' ? ("Nome Completo" | tr) : ("Razão Social" | tr) }} *</label>
-        <input type="text" [(ngModel)]="clienteForm.nome" [placeholder]="clienteForm.tipo === 'PF' ? 'Ex: João Silva' : 'Ex: Minha Empresa LTDA'" />
+        <input type="text" [(ngModel)]="clienteForm.nome" [placeholder]='clienteForm.tipo === &#39;PF&#39; ? ("Ex: João Silva" | tr) : ("Ex: Minha Empresa LTDA" | tr)' />
       </div>
 
       <div class="form-row">
@@ -136,20 +136,20 @@
       </div>
 
       <div class="form-group">
-        <label>E-mail *</label>
+        <label>{{ "E-mail *" | tr }}</label>
         <input type="email" [(ngModel)]="clienteForm.email" placeholder="usuario@empresa.com.br" />
       </div>
 
       <div class="form-group">
-        <label>Endereço</label>
-        <input type="text" [(ngModel)]="clienteForm.endereco" placeholder="Rua, Número, Bairro, Cidade" />
+        <label>{{ "Endereço" | tr }}</label>
+        <input type="text" [(ngModel)]="clienteForm.endereco" [placeholder]='"Rua, Número, Bairro, Cidade" | tr' />
       </div>
 
       <div class="form-row mt-4">
         <div class="form-group flex-1">
           <div class="toggle-wrapper">
              <input type="checkbox" [(ngModel)]="clienteForm.ativo" id="chkAtivo" />
-             <label for="chkAtivo">Cliente ativo</label>
+             <label for="chkAtivo">{{ "Cliente ativo" | tr }}</label>
           </div>
         </div>
       </div>
@@ -175,7 +175,7 @@
         </div>
       </div>
       <h2>{{ "Sucesso!" | tr }}</h2>
-      <p>{{ "Cliente" | tr }} {{ isEditing ? 'atualizado' : 'cadastrado' }} corretamente.</p>
+      <p>{{ "Cliente" | tr }} {{ isEditing ? ("atualizado" | tr) : ("cadastrado" | tr) }} {{ "corretamente." | tr }}</p>
       <button class="btn-success-ok" (click)="fecharModal()">{{ "OK, Entendi" | tr }}</button>
     </div>
   </div>

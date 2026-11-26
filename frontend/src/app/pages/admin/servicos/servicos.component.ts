@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../services/language.service';
+import { inject } from '@angular/core';
 import { TranslatePipe } from '../../../services/translate.pipe';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -13,6 +15,7 @@ import { LucideAngularModule, Plus, Edit2, Trash2, Power, Save, X, Settings } fr
   styleUrls: ['./servicos.component.scss']
 })
 export class ServicosComponent implements OnInit {
+  private readonly language = inject(LanguageService);
   servicos: any[] = [];
   form = { id: null as number | null, nome: '', sigla: '' };
   loading = false;
@@ -45,7 +48,7 @@ export class ServicosComponent implements OnInit {
   }
 
   salvar() {
-    if (!this.form.nome || !this.form.sigla) return alert("Preencha Nome e Sigla obrigatoriamente!");
+    if (!this.form.nome || !this.form.sigla) return alert(this.language.text("Preencha Nome e Sigla obrigatoriamente!"));
 
     this.loading = true;
     const request = this.editando && this.form.id
@@ -58,7 +61,7 @@ export class ServicosComponent implements OnInit {
         this.carregar();
       },
       error: (err: any) => {
-        alert(err.error?.message || "Erro ao salvar.");
+        alert(err.error?.message || this.language.text("Erro ao salvar."));
         this.loading = false;
       }
     });
@@ -77,13 +80,13 @@ export class ServicosComponent implements OnInit {
   }
 
   excluir(id: number) {
-    if (confirm("Tem certeza que deseja inativar/excluir este serviço?")) {
+    if (confirm(this.language.text("Tem certeza que deseja inativar/excluir este serviço?"))) {
       this.api.delete(`/servicos/${id}`).subscribe({
         next: () => {
           this.carregar();
         },
         error: (err) => {
-          alert(err.error?.message || "Erro ao excluir serviço.");
+          alert(err.error?.message || this.language.text("Erro ao excluir serviço."));
         }
       });
     }

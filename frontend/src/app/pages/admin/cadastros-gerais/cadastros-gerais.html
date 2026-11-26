@@ -6,13 +6,13 @@
                 <div class="selector-info">
                     <lucide-icon [img]="icons.buildingSelect" size="18" class="selector-icon"></lucide-icon>
                     <div class="selector-text">
-                        <span class="selector-label">Filial atual</span>
-                        <span class="selector-value">{{ selectedFilialName || 'Todas as Unidades' }}</span>
+                        <span class="selector-label">{{ "Filial atual" | tr }}</span>
+                        <span class="selector-value">{{ (selectedFilialName || "Todas as Unidades") | tr }}</span>
                     </div>
                 </div>
                 <div class="selector-action">
                     <select [(ngModel)]="selectedFilialId" (change)="onFilialChange()" class="filial-select-modern" [disabled]="isRestricted">
-                        <option *ngIf="!isRestricted" [ngValue]="null">🌍 Todas as Unidades (Global)</option>
+                        <option *ngIf="!isRestricted" [ngValue]="null">{{ "🌍 Todas as Unidades (Global)" | tr }}</option>
                         <option *ngFor="let f of filiais" [ngValue]="f.id">
                             🏢 {{ f.nome }}
                         </option>
