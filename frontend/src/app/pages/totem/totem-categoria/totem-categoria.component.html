@@ -21,7 +21,7 @@
             <lucide-icon [img]="cat.icone" [size]="56" class="totem-icon"></lucide-icon>
           </div>
           <h2>{{ cat.nome }}</h2>
-          <p>{{ cat.descricao }}</p>
+          <p>{{ cat.sigla ? ('Fila: {code}' | tr: { code: cat.sigla }) : (cat.descricao | tr) }}</p>
         </div>
       </div>
 

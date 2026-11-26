@@ -1267,5 +1267,10 @@ export const english: Readonly<Record<string, string>> = {
   "FECHADO": "Closed",
   "PRINCIPAL": "MAIN",
   "Lei 10.048": "Brazilian Law 10,048",
-  "No prefix": "No prefix"
+  "No prefix": "No prefix",
+  "Atendimento geral": "General service",
+  "Carga pesada e grandes volumes": "Heavy cargo and bulk orders",
+  "Garrafões e vasilhames em quantidade": "Bulk water jugs and containers",
+  "Atendimento expresso e dúvidas rápidas": "Express service and quick questions",
+  "Fila: {code}": "Queue: {code}"
 };
